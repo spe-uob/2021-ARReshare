@@ -48,6 +48,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        // TODO: Get permissions and locate the user
+
         List<Product> products = createDummyProducts();
         populateMap(mMap, products);
 
@@ -56,6 +58,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLng(mvb));
     }
 
+    // TODO: Create a method which sends a request to the backend and receives the list of products nearby
+    // Creates a list of dummy products for testing and development
     private List<Product> createDummyProducts () {
         List<Product> products = new ArrayList<>();
         products.add(new Product("Fancy Cup", "John", 51.45120306024447, -2.5869936269149303));
@@ -67,6 +71,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return products;
     }
 
+    // Populates the map with markers given a list of products
     private void populateMap(GoogleMap mMap, List<Product> products) {
         for (Product product : products) {
             LatLng coordinates = new LatLng(product.lat, product.lng);
@@ -74,6 +79,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // TODO: Add appropriate access modifiers
+    // TODO: Create getter and setter methods
+    // TODO: Consult with the rest of the team to create a common product, user/contributor objects
+    // Temporary class for development and testing
     private class Product {
         public String name;
         public String contributor;
