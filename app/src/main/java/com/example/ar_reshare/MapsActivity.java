@@ -12,6 +12,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.ar_reshare.databinding.ActivityMapsBinding;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -43,9 +48,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        List<Product> products = createDummyProducts();
+        populateMap(mMap, products);
+
+        LatLng mvb = new LatLng(51.456070226943865, -2.602992299931959);
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(13));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(mvb));
+    }
+
+    private List<Product> createDummyProducts () {
+        List<Product> products = new ArrayList<>();
+        products.add(new Product("Fancy Cup", "John", 51.45120306024447, -2.5869936269149303));
+        products.add(new Product("Magic Pen", "Artur", 51.45599668866024, -2.6030781306216135));
+        products.add(new Product("Pink Umbrella", "Lingtao", 51.45416805430673, -2.591828561043675));
+        products.add(new Product("Apple Pencil", "Hellin", 51.45864853294286, -2.5853638594577193));
+        products.add(new Product("Meat", "Ziqian", 51.45692540090406, -2.6081114869801714));
+        products.add(new Product("Pink Headphones", "Arafat", 51.459040571152514, -2.6022736036387366));
+        return products;
+    }
+
+    private void populateMap(GoogleMap mMap, List<Product> products) {
+        for (Product product : products) {
+            LatLng coordinates = new LatLng(product.lat, product.lng);
+            mMap.addMarker(new MarkerOptions().position(coordinates).title(product.name).snippet("by " + product.contributor));
+        }
+    }
+
+    private class Product {
+        public String name;
+        public String contributor;
+        public double lat;
+        public double lng;
+
+        Product(String name, String contributor, double lat, double lng) {
+            this.name = name;
+            this.contributor = contributor;
+            this.lat = lat;
+            this.lng = lng;
+        }
     }
 }
