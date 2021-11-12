@@ -1,9 +1,17 @@
 package com.example.ar_reshare;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -11,16 +19,35 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.ar_reshare.databinding.ActivityMapsBinding;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements
+        OnMapReadyCallback,
+        GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMyLocationClickListener
+        {
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
+
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private boolean locationPermissionGranted;
+
+    private FusedLocationProviderClient fusedLocationClient;
+    public Location lastKnownLocation;
+
+    // TODO: Clean up code
+    // TODO: Remove any unnecessary functions, variables and constants
+    // TODO: Change access modifiers for some attributes and functions
+    // TODO: Add more comments explaining logic and functionality
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,14 +55,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        //lastKnownLocation = new LatLng(0, 0);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        getLocationPermission();
     }
 
-    /**
+    /*
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
      * This is where we can add markers or lines, add listeners or move the camera. In this case,
@@ -48,7 +77,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // TODO: Get permissions and locate the user
+        if (locationPermissionGranted) {
+            getDeviceLocation();
+            // TODO: Consider moving the two lines below into the enableMyLocation()
+            mMap.setOnMyLocationButtonClickListener(this);
+            mMap.setOnMyLocationClickListener(this);
+            enableMyLocation();
+        }
 
         List<Product> products = createDummyProducts();
         populateMap(mMap, products);
@@ -56,7 +91,112 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng mvb = new LatLng(51.456070226943865, -2.602992299931959);
         mMap.moveCamera(CameraUpdateFactory.zoomTo(13));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(mvb));
+
+        // Debugging
+        System.out.println("onMapReady: " + lastKnownLocation);
+        System.out.println("This class = " + this);
     }
+
+    // TODO: May not need to check for permissions if only called after checking locationPermissionGranted
+    private void enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (mMap != null) {
+                mMap.setMyLocationEnabled(true);
+            }
+        }
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        getDeviceLocation();
+        return false;
+    }
+
+    @Override
+    public void onMyLocationClick(@NonNull Location location) {
+        // Debugging
+        System.out.println("Saved location = " + lastKnownLocation);
+        System.out.println("From click = " + location);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission is granted. Continue the action or workflow
+                    // in your app.
+                    locationPermissionGranted = true;
+                    System.out.println("Location has been granted");
+                } else {
+                    // TODO:
+                    // Explain to the user that the feature is unavailable because
+                    // the features requires a permission that the user has denied.
+                    // At the same time, respect the user's decision. Don't link to
+                    // system settings in an effort to convince the user to change
+                    // their decision.
+                }
+                return;
+        }
+        // Other 'case' lines to check for other
+        // permissions this app might request.
+    }
+
+    private void getLocationPermission() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationPermissionGranted = true;
+            System.out.println("Location already granted");
+            enableMyLocation();
+        } else if (shouldShowRequestPermissionRationale("FINE_LOCATION")) {
+
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+
+    private void getDeviceLocation() {
+        /*
+         * Get the best and most recent location of the device, which may be null in rare
+         * cases when a location is not available.
+         */
+        try {
+            if (locationPermissionGranted) {
+                fusedLocationClient.getLastLocation()
+                        .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+                                // Got last known location. In some rare situations this can be null.
+                                if (location != null) {
+                                    // Logic to handle location object
+                                    lastKnownLocation = location;
+                                    System.out.println("onSuccess : " + lastKnownLocation);
+                                }
+                            }
+                        });
+            }
+        } catch (SecurityException e)  {
+            System.out.println("Security Error");
+        }
+        System.out.println("getLocation: " + lastKnownLocation);
+    }
+
+
+    /* ---------------------------------------------
+            TEMPORARY CLASS AND HARDCODED DATA
+       --------------------------------------------- */
+
 
     // TODO: Create a method which sends a request to the backend and receives the list of products nearby
     // Creates a list of dummy products for testing and development
