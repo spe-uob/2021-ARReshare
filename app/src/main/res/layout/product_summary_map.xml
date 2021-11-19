@@ -10,17 +10,15 @@
 
     <LinearLayout
         android:layout_width="300dp"
-        android:layout_height="150dp"
+        android:layout_height="160dp"
         android:background="#FFFFFF"
         android:orientation="horizontal">
 
-        <ImageButton
+        <ImageView
             android:id="@+id/infoWindowButton"
             style="@style/Widget.AppCompat.ImageButton"
-            android:layout_width="100dp"
+            android:layout_width="120dp"
             android:layout_height="match_parent"
-            android:alpha="0.9"
-            android:backgroundTint="#858585"
             android:clickable="true"
             android:elevation="30dp"
             android:src="@android:drawable/btn_star_big_on" />
@@ -37,29 +35,34 @@
                 android:layout_gravity="left"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:padding="0dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginVertical="10dp"
                 android:textColor="#000"
-                android:textSize="11sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/contributor"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:maxLines="10"
+                android:maxLines="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginBottom="5dp"
                 android:textColor="#000"
-                android:textSize="11sp"
+                android:textSize="14sp"
                 android:textStyle="bold"/>
 
             <TextView
                 android:id="@+id/snippet"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="10"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
                 android:textColor="#000"
-                android:textSize="11sp"
+                android:textSize="13sp"
                 />
         </LinearLayout>
 

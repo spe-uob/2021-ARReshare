@@ -36,7 +36,8 @@ public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
-        GoogleMap.OnMarkerClickListener
+        GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnInfoWindowClickListener
         {
 
     private GoogleMap mMap;
@@ -90,8 +91,9 @@ public class MapsActivity extends FragmentActivity implements
         }
 
         // Listen for on marker click events
-        //mMap.setOnMarkerClickListener(this);
-        //mMap.setInfoWindowAdapter(new ProductSummary());
+        mMap.setOnMarkerClickListener(this);
+        mMap.setInfoWindowAdapter(new ProductSummary());
+        mMap.setOnInfoWindowClickListener(this);
 
         List<Product> products = createDummyProducts();
         populateMap(mMap, products);
@@ -208,6 +210,11 @@ public class MapsActivity extends FragmentActivity implements
         return false;
     }
 
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        System.out.println("Go to product page");
+    }
+
 
     /* ---------------------------------------------
             TEMPORARY CLASS AND HARDCODED DATA
@@ -230,9 +237,14 @@ public class MapsActivity extends FragmentActivity implements
     private void populateMap(GoogleMap mMap, List<Product> products) {
         for (Product product : products) {
             LatLng coordinates = new LatLng(product.lat, product.lng);
-            mMap.addMarker(new MarkerOptions().position(coordinates).title(product.name).snippet("by " + product.contributor));
+            Marker marker = mMap.addMarker(new MarkerOptions()
+                    .position(coordinates)
+                    .title(product.name)
+                    .snippet("by " + product.contributor));
+            marker.setTag(product);
         }
     }
+
 
 
     private class ProductSummary implements GoogleMap.InfoWindowAdapter {
@@ -245,13 +257,14 @@ public class MapsActivity extends FragmentActivity implements
         }
 
         private void renderInfoWindow(Marker marker) {
-            System.out.println("rendering");
+            Product product = (Product) marker.getTag();
             TextView title = (TextView) mWindow.findViewById(R.id.title);
-            title.setText("TEST");
+            title.setText(product.name);
             TextView contributor = (TextView) mWindow.findViewById(R.id.contributor);
-            contributor.setText("USER");
+            contributor.setText(product.contributor);
             TextView snipped = (TextView) mWindow.findViewById(R.id.snippet);
-            snipped.setText("CONTENT");
+            snipped.setText("This is a description of my product. " +
+                    "It is really a great product. Feel free to message me to arrange a pickup. ");
 
             //((ImageView) view.findViewById(R.id.badge)).setImageResource(badge);
         }
