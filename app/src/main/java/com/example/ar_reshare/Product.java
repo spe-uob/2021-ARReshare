@@ -1,11 +1,7 @@
 package com.example.ar_reshare;
-
-import android.graphics.drawable.Drawable;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
-
 import com.google.android.gms.maps.model.LatLng;
 
 public class Product {
