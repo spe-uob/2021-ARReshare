@@ -124,7 +124,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public static class Message {
+    public class Message {
         String message;
         User sender;
         String createdTime;
@@ -148,7 +148,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public static class User {
+    public class User {
         String nickname;
         String profileUrl;
 
