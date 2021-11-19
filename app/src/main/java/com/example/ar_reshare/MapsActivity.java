@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -262,9 +263,11 @@ public class MapsActivity extends FragmentActivity implements
             title.setText(product.name);
             TextView contributor = (TextView) mWindow.findViewById(R.id.contributor);
             contributor.setText(product.contributor);
-            TextView snipped = (TextView) mWindow.findViewById(R.id.snippet);
-            snipped.setText("This is a description of my product. " +
+            TextView description = (TextView) mWindow.findViewById(R.id.description);
+            description.setText("This is a description of my product. " +
                     "It is really a great product. Feel free to message me to arrange a pickup. ");
+            ImageView photo = (ImageView) mWindow.findViewById(R.id.productimage);
+            photo.setImageDrawable(getDrawable(R.drawable.example_cup));
 
             //((ImageView) view.findViewById(R.id.badge)).setImageResource(badge);
         }
