@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
@@ -267,7 +268,7 @@ public class MapsActivity extends FragmentActivity implements
             description.setText("This is a description of my product. " +
                     "It is really a great product. Feel free to message me to arrange a pickup. ");
             ImageView photo = (ImageView) mWindow.findViewById(R.id.productimage);
-            photo.setImageDrawable(getDrawable(R.drawable.example_cup));
+            photo.setImageResource(R.drawable.example_cup);
 
             //((ImageView) view.findViewById(R.id.badge)).setImageResource(badge);
         }
