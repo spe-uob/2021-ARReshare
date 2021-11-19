@@ -6,12 +6,12 @@
     android:layout_height="match_parent">
 
 
-
     <ImageView
         android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
+        android:visibility="visible"
         tools:srcCompat="@tools:sample/avatars" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

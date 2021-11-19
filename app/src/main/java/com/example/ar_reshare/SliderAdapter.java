@@ -29,7 +29,6 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.MyViewHold
 
     @Override
     public void onBindViewHolder(@NonNull SliderAdapter.MyViewHolder holder, int position) {
-        //holder.view.setBackgroundColor(list[position]);
         holder.view.setImageResource(list[position]);
     }
 
