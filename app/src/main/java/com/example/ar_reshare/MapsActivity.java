@@ -9,6 +9,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -17,6 +19,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.ar_reshare.databinding.ActivityMapsBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -32,7 +35,8 @@ import java.util.concurrent.TimeUnit;
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
         GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener
+        GoogleMap.OnMyLocationClickListener,
+        GoogleMap.OnMarkerClickListener
         {
 
     private GoogleMap mMap;
@@ -84,6 +88,10 @@ public class MapsActivity extends FragmentActivity implements
             mMap.setOnMyLocationClickListener(this);
             enableMyLocation();
         }
+
+        // Listen for on marker click events
+        //mMap.setOnMarkerClickListener(this);
+        //mMap.setInfoWindowAdapter(new ProductSummary());
 
         List<Product> products = createDummyProducts();
         populateMap(mMap, products);
@@ -192,11 +200,18 @@ public class MapsActivity extends FragmentActivity implements
         System.out.println("getLocation: " + lastKnownLocation);
     }
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        marker.setSnippet("Clicked");
+        marker.showInfoWindow();
+        System.out.println("clicked on marker");
+        return false;
+    }
+
 
     /* ---------------------------------------------
             TEMPORARY CLASS AND HARDCODED DATA
        --------------------------------------------- */
-
 
     // TODO: Create a method which sends a request to the backend and receives the list of products nearby
     // Creates a list of dummy products for testing and development
@@ -216,6 +231,41 @@ public class MapsActivity extends FragmentActivity implements
         for (Product product : products) {
             LatLng coordinates = new LatLng(product.lat, product.lng);
             mMap.addMarker(new MarkerOptions().position(coordinates).title(product.name).snippet("by " + product.contributor));
+        }
+    }
+
+
+    private class ProductSummary implements GoogleMap.InfoWindowAdapter {
+
+        private final View mWindow;
+        //private final View mContents;
+
+        ProductSummary() {
+            mWindow = getLayoutInflater().inflate(R.layout.product_summary_map, null);
+        }
+
+        private void renderInfoWindow(Marker marker) {
+            System.out.println("rendering");
+            TextView title = (TextView) mWindow.findViewById(R.id.title);
+            title.setText("TEST");
+            TextView contributor = (TextView) mWindow.findViewById(R.id.contributor);
+            contributor.setText("USER");
+            TextView snipped = (TextView) mWindow.findViewById(R.id.snippet);
+            snipped.setText("CONTENT");
+
+            //((ImageView) view.findViewById(R.id.badge)).setImageResource(badge);
+        }
+
+        @Override
+        public View getInfoWindow(Marker marker) {
+            renderInfoWindow(marker);
+            return mWindow;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+            renderInfoWindow(marker);
+            return mWindow;
         }
     }
 
