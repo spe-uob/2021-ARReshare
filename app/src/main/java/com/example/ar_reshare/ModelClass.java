@@ -3,12 +3,14 @@ package com.example.ar_reshare;
 public class ModelClass {
 
     private int profileIcon;
+    private String contributor;
     private int productImage;
     private String productTitle;
     private String productDescription;
 
-    public ModelClass(int profileIcon, int productImage, String productTitle, String productDescription) {
+    public ModelClass(int profileIcon, String contributor, int productImage, String productTitle, String productDescription) {
         this.profileIcon = profileIcon;
+        this.contributor = contributor;
         this.productImage = productImage;
         this.productTitle = productTitle;
         this.productDescription = productDescription;
@@ -20,6 +22,14 @@ public class ModelClass {
 
     public void setProfileIcon(int profileIcon) {
         this.profileIcon = profileIcon;
+    }
+
+    public String getContributor() {
+        return contributor;
+    }
+
+    public void setContributor(String contributor) {
+        this.contributor = contributor;
     }
 
     public int getProductImage() {

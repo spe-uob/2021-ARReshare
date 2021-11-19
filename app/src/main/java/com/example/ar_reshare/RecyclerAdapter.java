@@ -31,6 +31,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ModelClass modelClass = arrayList.get(position);
         holder.profileIcon.setImageResource(modelClass.getProfileIcon());
+        holder.contributor.setText(modelClass.getContributor());
         holder.productImage.setImageResource(modelClass.getProductImage());
         holder.productTitle.setText(modelClass.getProductTitle());
         holder.productDescription.setText(modelClass.getProductDescription());
@@ -44,6 +45,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView profileIcon;
+        TextView contributor;
         ImageView productImage;
         TextView productTitle;
         TextView productDescription;
@@ -52,6 +54,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             super(itemView);
 
             profileIcon = itemView.findViewById(R.id.profileIcon);
+            contributor = itemView.findViewById(R.id.contributor);
             productImage = itemView.findViewById(R.id.productImage);
             productTitle = itemView.findViewById(R.id.productTitle);
             productDescription = itemView.findViewById(R.id.productDescription);

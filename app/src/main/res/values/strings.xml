@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">AR-Reshare</string>
-    <string name="profile_icon">Profile icon</string>
+    <string name="profile_icon">Profile Icon</string>
     <string name="product_title">Product Title</string>
     <string name="product_description">Product Description</string>
-    <string name="product_image">Product image</string>
+    <string name="product_image">Product Image</string>
+    <string name="contributor">Contributor</string>
 </resources>

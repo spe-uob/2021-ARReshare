@@ -16,10 +16,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         ArrayList<ModelClass> arrayList = new ArrayList<>();
-        arrayList.add(new ModelClass(R.drawable.ic_launcher_background, R.drawable.ic_launcher_background,
+        arrayList.add(new ModelClass(R.drawable.ic_launcher_background, "Artur", R.drawable.ic_launcher_background,
                 "Festive Coffee Cup", "Get your hands on this beautiful coffee cup now!"));
-        arrayList.add(new ModelClass(R.drawable.ic_launcher_background, R.drawable.ic_launcher_background,
-                "Magic Pen", "Get your hands on this stylish magic pen now!"));
+        arrayList.add(new ModelClass(R.drawable.ic_launcher_background, "Arafat", R.drawable.ic_launcher_background,
+                "Magic Pen", "Take amazing notes with this stylish magic pen."));
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         RecyclerAdapter recyclerAdapter = new RecyclerAdapter(arrayList);
         recyclerView.setAdapter(recyclerAdapter);
