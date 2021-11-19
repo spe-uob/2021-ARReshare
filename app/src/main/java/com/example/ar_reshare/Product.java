@@ -2,18 +2,21 @@ package com.example.ar_reshare;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import com.google.android.gms.maps.model.LatLng;
 
 public class Product {
     private String name;
     private String description;
     private String contributor;
     private String date;
+    private LatLng location;
 
-    public Product(String name, String description, String contributor) {
+    Product(String name, String description, String contributor, double lat, double lng) {
         this.name = name;
         this.description = description;
         this.contributor = contributor;
         this.date = new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Calendar.getInstance().getTime());
+        this.location = new LatLng(lat,lng);
     }
 
     public String getName() {
@@ -46,5 +49,13 @@ public class Product {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public LatLng getLocation() {
+        return location;
+    }
+
+    public void setLocation(LatLng location) {
+        this.location = location;
     }
 }
