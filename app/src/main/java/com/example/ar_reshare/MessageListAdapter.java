@@ -1,9 +1,11 @@
 package com.example.ar_reshare;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -90,39 +92,37 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
         void bind(Message message) {
             messageText.setText(message.getMessage());
-
-            // Format the stored timestamp into a readable String using method.
-//            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
-//            timeText.setText(simpleDateFormat.format(new Date()));
             timeText.setText(message.getCreatedTime());
         }
     }
 
-//    private class ReceivedMessageHolder extends RecyclerView.ViewHolder {
-//        TextView messageText, timeText, nameText;
-//        ImageView profileImage;
-//
-//        ReceivedMessageHolder(View itemView) {
-//            super(itemView);
-//
-//            messageText = (TextView) itemView.findViewById(R.id.message_body);
-//            timeText = (TextView) itemView.findViewById(R.id.message_time);
-//            nameText = (TextView) itemView.findViewById(R.id.message_name);
-//            profileImage = (ImageView) itemView.findViewById(R.id.message_profile);
-//        }
-//
-//        void bind(Message message) {
-//            messageText.setText(message.getMessage());
-//
-//            // Format the stored timestamp into a readable String using method.
-//            timeText.setText(Utils.formatDateTime(message.getCreatedAt()));
-//
-//            nameText.setText(message.getSender().getNickname());
-//
-//            // Insert the profile image from the URL into the ImageView.
+    private class ReceivedMessageHolder extends RecyclerView.ViewHolder {
+        TextView messageText, timeText, nameText;
+        ImageView profileImage;
+
+        ReceivedMessageHolder(View itemView) {
+            super(itemView);
+
+            messageText = (TextView) itemView.findViewById(R.id.message_body);
+            timeText = (TextView) itemView.findViewById(R.id.message_time);
+            nameText = (TextView) itemView.findViewById(R.id.message_name);
+            profileImage = (ImageView) itemView.findViewById(R.id.image_profile);
+        }
+
+        void bind(Message message) {
+            messageText.setText(message.getMessage());
+
+            // Format the stored timestamp into a readable String using method.
+            timeText.setText(message.getMessage());
+
+            nameText.setText(message.getSender().getNickname());
+
+            // Insert the profile image from the URL into the ImageView.
 //            Utils.displayRoundImageFromUrl(mContext, message.getSender().getProfileUrl(), profileImage);
-//        }
-//    }
+           Drawable drawable = mContext.getResources().getDrawable(R.drawable.messages_rectangle);
+           profileImage.setImageDrawable(mContext.getDrawable(R.drawable.ic_launcher_background));
+        }
+    }
 
     public static class Message {
         String message;
