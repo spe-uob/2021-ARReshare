@@ -16,9 +16,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         ArrayList<ModelClass> arrayList = new ArrayList<>();
-        arrayList.add(new ModelClass(R.drawable.ic_launcher_background, "Artur", R.drawable.ic_launcher_background,
+        arrayList.add(new ModelClass(R.drawable.artur_profile_icon, "Artur", R.drawable.coffee_cup,
                 "Festive Coffee Cup", "Get your hands on this beautiful coffee cup now!"));
-        arrayList.add(new ModelClass(R.drawable.ic_launcher_background, "Arafat", R.drawable.ic_launcher_background,
+        arrayList.add(new ModelClass(R.drawable.arfi_profile_icon, "Arafat", R.drawable.pen,
                 "Magic Pen", "Take amazing notes with this stylish magic pen."));
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         RecyclerAdapter recyclerAdapter = new RecyclerAdapter(arrayList);
