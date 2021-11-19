@@ -1,7 +1,11 @@
 package com.example.ar_reshare;
 
+import android.graphics.drawable.Drawable;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
+
 import com.google.android.gms.maps.model.LatLng;
 
 public class Product {
@@ -10,6 +14,7 @@ public class Product {
     private String contributor;
     private String date;
     private LatLng location;
+    private List<Integer> images;
 
     Product(String name, String description, String contributor, double lat, double lng) {
         this.name = name;
@@ -57,5 +62,13 @@ public class Product {
 
     public void setLocation(LatLng location) {
         this.location = location;
+    }
+
+    public List<Integer> getImages() {
+        return images;
+    }
+
+    public void addImages(Integer image) {
+        this.images.add(image);
     }
 }
