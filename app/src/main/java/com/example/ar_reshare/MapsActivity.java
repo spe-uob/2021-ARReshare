@@ -226,23 +226,23 @@ public class MapsActivity extends FragmentActivity implements
     // Creates a list of dummy products for testing and development
     private List<Product> createDummyProducts () {
         List<Product> products = new ArrayList<>();
-        products.add(new Product("Fancy Cup", "John", 51.45120306024447, -2.5869936269149303));
-        products.add(new Product("Magic Pen", "Artur", 51.45599668866024, -2.6030781306216135));
-        products.add(new Product("Pink Umbrella", "Lingtao", 51.45416805430673, -2.591828561043675));
-        products.add(new Product("Apple Pencil", "Hellin", 51.45864853294286, -2.5853638594577193));
-        products.add(new Product("Meat", "Ziqian", 51.45692540090406, -2.6081114869801714));
-        products.add(new Product("Pink Headphones", "Arafat", 51.459040571152514, -2.6022736036387366));
+        products.add(new Product("Fancy Cup", "This is a product.", "John", 51.45120306024447, -2.5869936269149303));
+        products.add(new Product("Magic Pen", "This is a product.", "Artur", 51.45599668866024, -2.6030781306216135));
+        products.add(new Product("Pink Umbrella", "This is a product.", "Lingtao", 51.45416805430673, -2.591828561043675));
+        products.add(new Product("Apple Pencil", "This is a product.", "Hellin", 51.45864853294286, -2.5853638594577193));
+        products.add(new Product("Meat", "This is a product.", "Ziqian", 51.45692540090406, -2.6081114869801714));
+        products.add(new Product("Pink Headphones", "This is a product.", "Arafat", 51.459040571152514, -2.6022736036387366));
         return products;
     }
 
     // Populates the map with markers given a list of products
     private void populateMap(GoogleMap mMap, List<Product> products) {
         for (Product product : products) {
-            LatLng coordinates = new LatLng(product.lat, product.lng);
+            LatLng coordinates = product.getLocation();
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(coordinates)
-                    .title(product.name)
-                    .snippet("by " + product.contributor));
+                    .title(product.getName())
+                    .snippet("by " + product.getContributor()));
             marker.setTag(product);
         }
     }
@@ -261,9 +261,9 @@ public class MapsActivity extends FragmentActivity implements
         private void renderInfoWindow(Marker marker) {
             Product product = (Product) marker.getTag();
             TextView title = (TextView) mWindow.findViewById(R.id.title);
-            title.setText(product.name);
+            title.setText(product.getName());
             TextView contributor = (TextView) mWindow.findViewById(R.id.contributor);
-            contributor.setText(product.contributor);
+            contributor.setText(product.getContributor());
             TextView description = (TextView) mWindow.findViewById(R.id.description);
             description.setText("This is a description of my product. " +
                     "It is really a great product. Feel free to message me to arrange a pickup. ");
@@ -283,24 +283,6 @@ public class MapsActivity extends FragmentActivity implements
         public View getInfoContents(Marker marker) {
             renderInfoWindow(marker);
             return mWindow;
-        }
-    }
-
-    // TODO: Add appropriate access modifiers
-    // TODO: Create getter and setter methods
-    // TODO: Consult with the rest of the team to create a common product, user/contributor objects
-    // Temporary class for development and testing
-    private class Product {
-        public String name;
-        public String contributor;
-        public double lat;
-        public double lng;
-
-        Product(String name, String contributor, double lat, double lng) {
-            this.name = name;
-            this.contributor = contributor;
-            this.lat = lat;
-            this.lng = lng;
         }
     }
 }

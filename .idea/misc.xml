@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="../../../../layout/custom_preview.xml" value="0.25833333333333336" />
+        <entry key="app/src/main/res/drawable/tab_indicator_default.xml" value="0.2453125" />
+        <entry key="app/src/main/res/drawable/tab_indicator_selected.xml" value="0.1390625" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.2100570338179557" />
+        <entry key="app/src/main/res/layout/activity_product.xml" value="9.920560198652916" />
+        <entry key="app/src/main/res/layout/activity_product_page.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/slide_item_container.xml" value="0.25" />
+      </map>
+    </option>
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
