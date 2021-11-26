@@ -14,7 +14,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profileIcon"
             android:layout_width="90dp"
             android:layout_height="120dp"
@@ -29,14 +29,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
             android:layout_marginTop="10dp"
             android:padding="10dp"
             android:text="@string/product_title"
             android:textAlignment="center"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/bookmark"
             app:layout_constraintStart_toEndOf="@id/profileIcon"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -54,6 +53,19 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/profileIcon"
             app:layout_constraintTop_toBottomOf="@+id/productTitle" />
+
+        <ImageView
+            android:id="@+id/bookmark"
+            android:layout_width="35dp"
+            android:layout_height="47dp"
+            android:clickable="true"
+            android:onClick="changeBookmark"
+            app:layout_constraintEnd_toEndOf="@id/contributor"
+            app:layout_constraintStart_toEndOf="@id/productTitle"
+            app:layout_constraintTop_toTopOf="@+id/productTitle"
+            app:layout_constraintBottom_toBottomOf="@id/productTitle"
+            app:srcCompat="@drawable/ic_baseline_bookmark_border_24"
+            android:contentDescription="@string/bookmark" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
