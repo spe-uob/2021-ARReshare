@@ -5,5 +5,6 @@
     <string name="product_description">Product Description</string>
     <string name="product_image">Product Image</string>
     <string name="contributor">Contributor</string>
-    <string name="bookmark">Bookmark</string>
+    <string name="bookmark_button">Bookmark Button</string>
+    <string name="message_button">Message Button</string>
 </resources>

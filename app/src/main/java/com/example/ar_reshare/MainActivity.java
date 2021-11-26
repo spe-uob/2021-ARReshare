@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void changeBookmark(View view) {
-        ImageView bookmark = findViewById(R.id.bookmark);
+        ImageView bookmark = findViewById(R.id.bookmarkButton);
         bookmark.setTag(0);
         bookmark.setOnClickListener(v -> {
             if(bookmark.getTag().equals(0)) {
