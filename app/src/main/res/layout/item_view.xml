@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="10dp"
-    android:background="@drawable/custom_border"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="@drawable/custom_border">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/c1Top"
@@ -16,9 +16,9 @@
 
         <ImageView
             android:id="@+id/profileIcon"
-            android:layout_width="80dp"
-            android:layout_height="95dp"
-            android:layout_margin="10dp"
+            android:layout_width="90dp"
+            android:layout_height="120dp"
+            android:layout_marginStart="10dp"
             android:contentDescription="@string/profile_icon"
             android:src="@mipmap/ic_launcher_round"
             app:layout_constraintStart_toStartOf="parent"
@@ -28,7 +28,9 @@
             android:id="@+id/productTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp"
             android:padding="10dp"
             android:text="@string/product_title"
             android:textAlignment="center"
@@ -42,8 +44,8 @@
             android:id="@+id/contributor"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:padding="10dp"
             android:text="@string/contributor"
             android:textAlignment="center"
@@ -55,20 +57,34 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ImageView
-        android:id="@+id/productImage"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/image"
         android:layout_width="match_parent"
-        android:layout_height="375dp"
-        android:src="@mipmap/ic_launcher"
-        app:layout_constraintTop_toBottomOf="@+id/c1Top"
-        android:contentDescription="@string/product_image" />
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/c1Top">
+
+        <ImageView
+            android:id="@+id/productImage"
+            android:layout_width="match_parent"
+            android:layout_height="510dp"
+            android:background="#000000"
+            android:contentDescription="@string/product_image"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_launcher"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/c2Bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/productImage">
+        app:layout_constraintTop_toBottomOf="@id/image">
 
         <TextView
             android:id="@+id/productDescription"
@@ -84,6 +100,5 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
