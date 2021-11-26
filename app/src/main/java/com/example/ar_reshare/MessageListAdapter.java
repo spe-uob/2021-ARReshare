@@ -32,52 +32,50 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     }
 
     // Determines the appropriate ViewType according to the sender of the message.
-//    @Override
-//    public int getItemViewType(int position) {
-//        Message message = (Message) mMessageList.get(position);
-//
-//        if (message.getSender().getUserId().equals(SendBird.getCurrentUser().getUserId())) {
-//            // If the current user is the sender of the message
-//            return VIEW_TYPE_MESSAGE_SENT;
-//        } else {
-//            // If some other user sent the message
-//            return VIEW_TYPE_MESSAGE_RECEIVED;
-//        }
-//    }
+    @Override
+    public int getItemViewType(int position) {
+        Message message = (Message) mMessageList.get(position);
+
+        if (message.getSender().getType() == 0) {
+            // If the current user is the sender of the message
+            return VIEW_TYPE_MESSAGE_SENT;
+        } else {
+            // If some other user sent the message
+            return VIEW_TYPE_MESSAGE_RECEIVED;
+        }
+    }
 
     // Inflates the appropriate layout according to the ViewType.
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view;
 
-//        if (viewType == VIEW_TYPE_MESSAGE_SENT) {
-//            view = LayoutInflater.from(parent.getContext())
-//                    .inflate(R.layout.message_send_layout, parent, false);
-//            return new SentMessageHolder(view);
-//        } else if (viewType == VIEW_TYPE_MESSAGE_RECEIVED) {
-//            view = LayoutInflater.from(parent.getContext())
-//                    .inflate(R.layout.messages_receive_layout, parent, false);
-//            return new ReceivedMessageHolder(view);
-//        }
-//
-//        return null;
-        view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.message_send_layout, parent, false);
-        return new SentMessageHolder(view);
+        if (viewType == VIEW_TYPE_MESSAGE_SENT) {
+            view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.message_send_layout, parent, false);
+            return new SentMessageHolder(view);
+        } else if (viewType == VIEW_TYPE_MESSAGE_RECEIVED) {
+            view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.messages_receive_layout, parent, false);
+            return new ReceivedMessageHolder(view);
+        }
+
+        return null;
+
     }
 
     // Passes the message object to a ViewHolder so that the contents can be bound to UI.
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         Message message = (Message) mMessageList.get(position);
-        ((SentMessageHolder) holder).bind(message);
-//        switch (holder.getItemViewType()) {
-//            case VIEW_TYPE_MESSAGE_SENT:
-//                ((SentMessageHolder) holder).bind(message);
-//                break;
-//            case VIEW_TYPE_MESSAGE_RECEIVED:
-//                ((ReceivedMessageHolder) holder).bind(message);
-//        }
+//        ((SentMessageHolder) holder).bind(message);
+        switch (holder.getItemViewType()) {
+            case VIEW_TYPE_MESSAGE_SENT:
+                ((SentMessageHolder) holder).bind(message);
+                break;
+            case VIEW_TYPE_MESSAGE_RECEIVED:
+                ((ReceivedMessageHolder) holder).bind(message);
+        }
     }
 
     private class SentMessageHolder extends RecyclerView.ViewHolder {
@@ -113,14 +111,14 @@ public class MessageListAdapter extends RecyclerView.Adapter {
             messageText.setText(message.getMessage());
 
             // Format the stored timestamp into a readable String using method.
-            timeText.setText(message.getMessage());
+            timeText.setText(message.getCreatedTime());
 
             nameText.setText(message.getSender().getNickname());
 
             // Insert the profile image from the URL into the ImageView.
 //            Utils.displayRoundImageFromUrl(mContext, message.getSender().getProfileUrl(), profileImage);
-           Drawable drawable = mContext.getResources().getDrawable(R.drawable.messages_rectangle);
-           profileImage.setImageDrawable(mContext.getDrawable(R.drawable.ic_launcher_background));
+          // Drawable drawable = mContext.getResources().getDrawable(R.drawable.messages_rectangle);
+           profileImage.setImageDrawable(mContext.getDrawable(R.drawable.image_circle));
         }
     }
 
@@ -151,10 +149,13 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     public class User {
         String nickname;
         String profileUrl;
+        //0 for sender, 1 for receiver
+        int type;
 
-        public User(String nickname, String profileUrl) {
+        public User(String nickname, String profileUrl, int type) {
             this.nickname = nickname;
             this.profileUrl = profileUrl;
+            this.type = type;
         }
 
         public String getNickname() {
@@ -163,6 +164,10 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
         public String getProfileUrl() {
             return profileUrl;
+        }
+
+        public int getType() {
+            return type;
         }
     }
 }
