@@ -16,13 +16,14 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profileIcon"
-            android:layout_width="90dp"
-            android:layout_height="120dp"
+            android:layout_width="60dp"
+            android:layout_height="80dp"
             android:layout_marginStart="10dp"
             android:contentDescription="@string/profile_icon"
             android:src="@mipmap/ic_launcher_round"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/contributor"/>
 
         <TextView
             android:id="@+id/productTitle"
@@ -37,8 +38,7 @@
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/bookmarkButton"
-            app:layout_constraintStart_toEndOf="@id/profileIcon"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toEndOf="@id/profileIcon" />
 
         <TextView
             android:id="@+id/contributor"
@@ -50,7 +50,7 @@
             android:textSize="15sp"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="2dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/messageButton"
             app:layout_constraintStart_toEndOf="@id/profileIcon"
@@ -59,7 +59,7 @@
         <ImageView
             android:id="@+id/bookmarkButton"
             android:layout_width="35dp"
-            android:layout_height="47dp"
+            android:layout_height="45dp"
             android:layout_marginEnd="5dp"
             android:clickable="true"
             android:onClick="changeBookmark"
@@ -73,7 +73,7 @@
         <ImageView
             android:id="@+id/messageButton"
             android:layout_width="35dp"
-            android:layout_height="47dp"
+            android:layout_height="45dp"
             android:layout_marginEnd="5dp"
             android:clickable="true"
             android:onClick="goToMessages"
