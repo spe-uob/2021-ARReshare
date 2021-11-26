@@ -6,7 +6,13 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
@@ -19,6 +25,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -179,6 +187,7 @@ public class MapsActivity extends FragmentActivity implements
     // Show the Product Summary when a marker is clicked
     @Override
     public boolean onMarkerClick(Marker marker) {
+        System.out.println("MARKER CLICKED");
         marker.showInfoWindow();
         return false;
     }
@@ -196,12 +205,12 @@ public class MapsActivity extends FragmentActivity implements
     // Creates a list of dummy products for testing and development
     private List<Product> createDummyProducts () {
         List<Product> products = new ArrayList<>();
-        products.add(new Product("Fancy Cup", "This is a product.", "John", 51.45120306024447, -2.5869936269149303));
-        products.add(new Product("Magic Pen", "This is a product.", "Artur", 51.45599668866024, -2.6030781306216135));
-        products.add(new Product("Pink Umbrella", "This is a product.", "Lingtao", 51.45416805430673, -2.591828561043675));
-        products.add(new Product("Apple Pencil", "This is a product.", "Hellin", 51.45864853294286, -2.5853638594577193));
-        products.add(new Product("Meat", "This is a product.", "Ziqian", 51.45692540090406, -2.6081114869801714));
-        products.add(new Product("Pink Headphones", "This is a product.", "Arafat", 51.459040571152514, -2.6022736036387366));
+        products.add(new Product("Fancy Cup", "This is a product.", "John", Category.OTHER,51.45120306024447, -2.5869936269149303));
+        products.add(new Product("Java for Beginners Book", "This is a product.", "Artur", Category.BOOKS, 51.45599668866024, -2.6030781306216135));
+        products.add(new Product("Pink Umbrella", "This is a product.", "Lingtao", Category.CLOTHING, 51.45416805430673, -2.591828561043675));
+        products.add(new Product("Apple Pencil", "This is a product.", "Hellin", Category.ELECTRONICS,51.45864853294286, -2.5853638594577193));
+        products.add(new Product("Meat", "This is a product.", "Ziqian", Category.FOOD, 51.45692540090406, -2.6081114869801714));
+        products.add(new Product("Pink Headphones", "This is a product.", "Arafat", Category.ELECTRONICS, 51.459040571152514, -2.6022736036387366));
         return products;
     }
 
@@ -212,12 +221,13 @@ public class MapsActivity extends FragmentActivity implements
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(coordinates)
                     .title(product.getName())
-                    .snippet("by " + product.getContributor()));
+                    .snippet("by " + product.getContributor())
+                    .icon(BitmapDescriptorFactory.defaultMarker(product.getCategory().getCategoryColour())));
             marker.setTag(product);
         }
     }
 
-    // Prodct Summary class
+    // Product Summary class
     private class ProductSummary implements GoogleMap.InfoWindowAdapter {
 
         private final View mWindow;
