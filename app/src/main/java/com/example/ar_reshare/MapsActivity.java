@@ -7,7 +7,6 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
@@ -24,15 +23,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.ar_reshare.databinding.ActivityMapsBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
@@ -48,13 +42,10 @@ public class MapsActivity extends FragmentActivity implements
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
 
+    // Google Maps built-in class which provider current location
     private FusedLocationProviderClient fusedLocationClient;
-    public Location lastKnownLocation;
-
-    // TODO: Clean up code
-    // TODO: Remove any unnecessary functions, variables and constants
-    // TODO: Change access modifiers for some attributes and functions
-    // TODO: Add more comments explaining logic and functionality
+    // The users last known location
+    private Location lastKnownLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,58 +53,51 @@ public class MapsActivity extends FragmentActivity implements
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //lastKnownLocation = new LatLng(0, 0);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getLocationPermission();
     }
 
-    /*
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
+    // When map is loaded, checks for location permissions and configures the initial
+    // state of the map
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
         if (locationPermissionGranted) {
             getDeviceLocation();
-            // TODO: Consider moving the two lines below into the enableMyLocation()
-            mMap.setOnMyLocationButtonClickListener(this);
-            mMap.setOnMyLocationClickListener(this);
             enableMyLocation();
         }
 
         // Listen for on marker click events
         mMap.setOnMarkerClickListener(this);
+        // Configure the Product Summary View
         mMap.setInfoWindowAdapter(new ProductSummary());
         mMap.setOnInfoWindowClickListener(this);
 
+        // Create dummy products and display them on the map
         List<Product> products = createDummyProducts();
         populateMap(mMap, products);
 
+        // Default map starting location
         LatLng mvb = new LatLng(51.456070226943865, -2.602992299931959);
         mMap.moveCamera(CameraUpdateFactory.zoomTo(13));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(mvb));
 
-        // Debugging
-        System.out.println("onMapReady: " + lastKnownLocation);
-        System.out.println("This class = " + this);
     }
 
-    // TODO: May not need to check for permissions if only called after checking locationPermissionGranted
+    // May not need to check for permissions if only called after checking locationPermissionGranted
     private void enableMyLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (mMap != null) {
                 mMap.setMyLocationEnabled(true);
+                mMap.setOnMyLocationButtonClickListener(this);
+                mMap.setOnMyLocationClickListener(this);
+            } else {
+                // Raise an error
             }
         }
     }
@@ -137,52 +121,41 @@ public class MapsActivity extends FragmentActivity implements
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
-                // If request is cancelled, the result arrays are empty.
+                // If request is cancelled, the grantResults array will be empty
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission is granted. Continue the action or workflow
-                    // in your app.
+                    // Location permission has been granted
                     locationPermissionGranted = true;
                     System.out.println("Location has been granted");
                 } else {
-                    // TODO:
-                    // Explain to the user that the feature is unavailable because
-                    // the features requires a permission that the user has denied.
-                    // At the same time, respect the user's decision. Don't link to
-                    // system settings in an effort to convince the user to change
-                    // their decision.
+                    // TODO: Explain to user that the feature is unavailable because
+                    //  the permissions have not been granted
                 }
                 return;
         }
-        // Other 'case' lines to check for other
-        // permissions this app might request.
     }
 
+    // Request location permissions from the device. We will receive a callback
+    // to onRequestPermissionsResult with the results.
     private void getLocationPermission() {
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
+            // Location has already been granted previously
             locationPermissionGranted = true;
-            System.out.println("Location already granted");
             enableMyLocation();
         } else if (shouldShowRequestPermissionRationale("FINE_LOCATION")) {
-
+            // TODO: Explain to the user why the location permission is needed
         } else {
+            // If the location permission has not been granted already,
+            // open a window requesting this permission
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
 
+    // Get the most recent location of the device
     private void getDeviceLocation() {
-        /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
-         */
         try {
             if (locationPermissionGranted) {
                 fusedLocationClient.getLastLocation()
@@ -199,22 +172,20 @@ public class MapsActivity extends FragmentActivity implements
                         });
             }
         } catch (SecurityException e)  {
-            System.out.println("Security Error");
+            // TODO: Implement appropriate error catching
         }
-        System.out.println("getLocation: " + lastKnownLocation);
     }
 
+    // Show the Product Summary when a marker is clicked
     @Override
     public boolean onMarkerClick(Marker marker) {
-        marker.setSnippet("Clicked");
         marker.showInfoWindow();
-        System.out.println("clicked on marker");
         return false;
     }
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        System.out.println("Go to product page");
+        // Link to the product page
     }
 
 
@@ -222,7 +193,6 @@ public class MapsActivity extends FragmentActivity implements
             TEMPORARY CLASS AND HARDCODED DATA
        --------------------------------------------- */
 
-    // TODO: Create a method which sends a request to the backend and receives the list of products nearby
     // Creates a list of dummy products for testing and development
     private List<Product> createDummyProducts () {
         List<Product> products = new ArrayList<>();
@@ -247,12 +217,10 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-
-
+    // Prodct Summary class
     private class ProductSummary implements GoogleMap.InfoWindowAdapter {
 
         private final View mWindow;
-        //private final View mContents;
 
         ProductSummary() {
             mWindow = getLayoutInflater().inflate(R.layout.product_summary_map, null);
@@ -269,8 +237,6 @@ public class MapsActivity extends FragmentActivity implements
                     "It is really a great product. Feel free to message me to arrange a pickup. ");
             ImageView photo = (ImageView) mWindow.findViewById(R.id.productimage);
             photo.setImageResource(R.drawable.example_cup);
-
-            //((ImageView) view.findViewById(R.id.badge)).setImageResource(badge);
         }
 
         @Override
