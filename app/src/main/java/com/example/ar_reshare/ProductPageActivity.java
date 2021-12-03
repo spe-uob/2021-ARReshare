@@ -14,7 +14,7 @@ import com.bumptech.glide.Glide;
 import java.io.InputStream;
 import java.net.URL;
 
-public class ProductPage extends AppCompatActivity {
+public class ProductPageActivity extends AppCompatActivity {
 
 
     public static Drawable loadMapImage(String url){
@@ -32,7 +32,10 @@ public class ProductPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_page);
         // hardcoded a product
-        Product cup = new Product("Fancy Cup","This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup aaaaaaaaaaaaaaaaa This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup This is a fancy cup   ", "Me",0,0);
+
+        User user = new User("Me", "", 1);
+        Product cup = new Product("Fancy Cup","This is a fancy cup ", user, Category.OTHER,0,0);
+
 
         //display product name
         TextView productName = findViewById(R.id.productName);
