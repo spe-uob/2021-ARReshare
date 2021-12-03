@@ -4,12 +4,12 @@ public class User {
     String name;
     String profileUrl;
     //0 for sender, 1 for receiver
-    int type;
+    int messengerType;
 
-    public User(String name, String profileUrl, int type) {
+    public User(String name, String profileUrl, int messengerType) {
         this.name = name;
         this.profileUrl = profileUrl;
-        this.type = type;
+        this.messengerType = messengerType;
     }
 
     public String getName() {
@@ -20,7 +20,7 @@ public class User {
         return profileUrl;
     }
 
-    public int getType() {
-        return type;
+    public int getMessengerType() {
+        return messengerType;
     }
 }

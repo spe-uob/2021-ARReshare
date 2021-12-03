@@ -17,7 +17,8 @@ public class ProductPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_page);
         // hardcoded a product
-        Product cup = new Product("Cup","This is a fancy cup", "Me", Category.OTHER,0,0);
+        User user = new User("Me", "", 1);
+        Product cup = new Product("Cup","This is a fancy cup", user, Category.OTHER,0,0);
 
         //display product name
         TextView productName = findViewById(R.id.productName);

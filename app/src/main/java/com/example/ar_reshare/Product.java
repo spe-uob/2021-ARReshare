@@ -7,13 +7,13 @@ import com.google.android.gms.maps.model.LatLng;
 public class Product {
     private String name;
     private String description;
-    private String contributor;
+    private User contributor;
     private Category category;
     private String date;
     private LatLng location;
     private List<Integer> images;
 
-    Product(String name, String description, String contributor, Category category, double lat, double lng) {
+    Product(String name, String description, User contributor, Category category, double lat, double lng) {
         this.name = name;
         this.description = description;
         this.contributor = contributor;
@@ -38,11 +38,11 @@ public class Product {
         this.description = description;
     }
 
-    public String getContributor() {
+    public User getContributor() {
         return contributor;
     }
 
-    public void setContributor(String contributor) {
+    public void setContributor(User contributor) {
         this.contributor = contributor;
     }
 
