@@ -55,7 +55,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ProductPage"
+            android:name=".ProductPageActivity"
             android:exported="true"></activity>
 
         <meta-data
