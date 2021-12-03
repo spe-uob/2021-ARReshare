@@ -93,15 +93,5 @@ public class MessagingActivity extends AppCompatActivity{
     }
 
 
-
-
-//    @Override
-//    public void onClick(View v) {
-//        String text = chatTextView.getText().toString();
-//        MessageListAdapter.Message message1 = new MessageListAdapter.Message(text, new MessageListAdapter.User("david", ""),
-//                simpleDateFormat.format(new Date()));
-//        mMessageList.add(message1);
-//        recyclerView.setAdapter(messageListAdapter);
-//    }
 }
 
