@@ -1,7 +1,6 @@
 package com.example.ar_reshare;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -122,54 +121,6 @@ public class MessageListAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public class Message {
-        String message;
-        User sender;
-        String createdTime;
-
-        public Message(String message, User sender, String createdTime) {
-            this.message = message;
-            this.sender = sender;
-            this.createdTime = createdTime;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public User getSender() {
-            return sender;
-        }
-
-        public String getCreatedTime() {
-            return createdTime;
-        }
-    }
-
-    public class User {
-        String nickname;
-        String profileUrl;
-        //0 for sender, 1 for receiver
-        int type;
-
-        public User(String nickname, String profileUrl, int type) {
-            this.nickname = nickname;
-            this.profileUrl = profileUrl;
-            this.type = type;
-        }
-
-        public String getNickname() {
-            return nickname;
-        }
-
-        public String getProfileUrl() {
-            return profileUrl;
-        }
-
-        public int getType() {
-            return type;
-        }
-    }
 }
 
 

@@ -4,15 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.text.InputType;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,7 +23,7 @@ public class MessagingActivity extends AppCompatActivity{
     RecyclerView recyclerView;
     Button sendButton;
     EditText chatTextView;
-    List<MessageListAdapter.Message> mMessageList = new ArrayList<>();
+    List<Message> mMessageList = new ArrayList<>();
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
 
 
@@ -33,24 +31,24 @@ public class MessagingActivity extends AppCompatActivity{
         sendButton = findViewById(R.id.button_send);
         chatTextView = findViewById(R.id.text_chatbox);
         String text = chatTextView.getText().toString();
-        MessageListAdapter.User user1 = messageListAdapter.new User("david", "", 1);
-        MessageListAdapter.Message message1 = messageListAdapter.new Message(text, messageListAdapter.new User("david", "", 0),
+        User user1 = new User("david", "", 1);
+        Message message1 = new Message(text, new User("david", "", 0),
                 simpleDateFormat.format(new Date()));
         mMessageList.add(message1);
         if (mMessageList.size() == 1) {
-            MessageListAdapter.Message message2 = messageListAdapter.new Message("hi", user1, simpleDateFormat.format(new Date()));
+            Message message2 = new Message("hi", user1, simpleDateFormat.format(new Date()));
             mMessageList.add(message2);
         }else if (mMessageList.size() == 3){
-            MessageListAdapter.Message message3 = messageListAdapter.new Message("how are you  ", user1, simpleDateFormat.format(new Date()));
+            Message message3 = new Message("how are you  ", user1, simpleDateFormat.format(new Date()));
             mMessageList.add(message3);
         }else if(mMessageList.size() == 5) {
-            MessageListAdapter.Message message4 = messageListAdapter.new Message("do you want to share anything?  ", user1, simpleDateFormat.format(new Date()));
+            Message message4 = new Message("do you want to share anything?  ", user1, simpleDateFormat.format(new Date()));
             mMessageList.add(message4);
         }else if (mMessageList.size() == 7) {
-            MessageListAdapter.Message message5 = messageListAdapter.new Message("thank you! bye bye 🤭 ", user1, simpleDateFormat.format(new Date()));
+            Message message5 = new Message("thank you! bye bye 🤭 ", user1, simpleDateFormat.format(new Date()));
             mMessageList.add(message5);
         }else {
-            MessageListAdapter.Message message6 = messageListAdapter.new Message("I cannot come up with more words 😟", user1, simpleDateFormat.format(new Date()));
+            Message message6 = new Message("I cannot come up with more words 😟", user1, simpleDateFormat.format(new Date()));
             mMessageList.add(message6);
         }
 
@@ -62,7 +60,7 @@ public class MessagingActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sendButton = findViewById(R.id.button_send);
-        chatTextView = findViewById(R.id.text_chatbox);
+        chatTextView = (EditText)findViewById(R.id.text_chatbox);
         setContentView(R.layout.message_list_layout);
 
 
@@ -75,6 +73,16 @@ public class MessagingActivity extends AppCompatActivity{
             }
         });
 
+        recyclerView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                chatTextView = (EditText)findViewById(R.id.text_chatbox);
+                chatTextView.clearFocus();
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                return false;
+            }
+        });
 
         messageListAdapter = new MessageListAdapter(this,mMessageList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);

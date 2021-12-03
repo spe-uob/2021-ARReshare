@@ -14,7 +14,9 @@
         android:scrollbarAlwaysDrawHorizontalTrack="false"
         app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
         tools:layout_editor_absoluteX="16dp"
-        android:paddingBottom="50dp">
+        android:paddingBottom="50dp"
+        android:clickable="true"
+        android:focusableInTouchMode="true">
 
     </androidx.recyclerview.widget.RecyclerView>
 
@@ -40,7 +42,8 @@
             android:background="@android:color/transparent"
             android:hint="Enter message"
             android:maxLines="6"
-            android:minHeight="48dp" />
+            android:minHeight="48dp"
+            android:focusableInTouchMode="true"/>
 
         <Button
             android:id="@+id/button_send"
