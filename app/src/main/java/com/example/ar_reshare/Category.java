@@ -6,7 +6,7 @@ public enum Category {
     ELECTRONICS(180),   // CYAN BLUE
     BOOKS(240),         // NAVY
     FOOD(120),          // GREEN
-    OTHER(60);          // YELLOW
+    OTHER(35);          // ORANGE
 
     private float hueColour;
 
