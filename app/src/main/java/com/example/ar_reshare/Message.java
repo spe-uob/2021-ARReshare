@@ -4,6 +4,7 @@ public class Message {
     String message;
     User sender;
     String createdTime;
+    String imageUrl;
 
     public Message(String message, User sender, String createdTime) {
         this.message = message;
