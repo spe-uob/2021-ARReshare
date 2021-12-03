@@ -39,6 +39,17 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/yellowbg" />
 
+            <View
+                android:id="@+id/divider"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:background="#D8D6D6"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/addedtime" />
+
             <TextView
                 android:id="@+id/productName"
                 android:layout_width="wrap_content"
@@ -60,7 +71,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 android:layout_marginEnd="8dp"
                 android:fontFamily="@font/montserrat"
                 android:paddingLeft="8dp"
@@ -68,9 +79,9 @@
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageView" />
+                app:layout_constraintTop_toBottomOf="@+id/divider" />
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/viewPager"
@@ -106,11 +117,11 @@
                 android:paddingRight="4dp"
                 android:text="ADDEDTIME"
                 android:textSize="10sp"
-                app:layout_constraintStart_toEndOf="@+id/imageView"
+                app:layout_constraintStart_toEndOf="@+id/circle"
                 app:layout_constraintTop_toBottomOf="@+id/contributorName" />
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/imageView"
+                android:id="@+id/circle"
                 android:layout_width="36dp"
                 android:layout_height="37dp"
                 android:layout_marginStart="16dp"
@@ -121,14 +132,38 @@
                 tools:srcCompat="@tools:sample/avatars" />
 
             <ImageView
-                android:id="@+id/favorite"
-                android:layout_width="37dp"
-                android:layout_height="36dp"
+                android:id="@+id/bookmark"
+                android:layout_width="34dp"
+                android:layout_height="32dp"
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/viewPager"
-                app:srcCompat="@drawable/ic_baseline_favorite_border_24" />
+                app:srcCompat="@drawable/ic_baseline_bookmark_border_24" />
+
+            <ImageView
+                android:id="@+id/map"
+                android:layout_width="0dp"
+                android:layout_height="280dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="8dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider2" />
+
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:background="#D8D6D6"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/description" />
 
             <TextView
                 android:id="@+id/contributorName"
@@ -139,7 +174,7 @@
                 android:paddingLeft="8dp"
                 android:text="Kollen"
                 android:textSize="12sp"
-                app:layout_constraintStart_toEndOf="@+id/imageView"
+                app:layout_constraintStart_toEndOf="@+id/circle"
                 app:layout_constraintTop_toBottomOf="@+id/productName" />
 
 
