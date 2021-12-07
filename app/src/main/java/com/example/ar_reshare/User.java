@@ -11,7 +11,6 @@ public class User {
     public User(String name, String profileUrl, int messengerType) {
         this.name = name;
         this.profileUrl = profileUrl;
-        this.profileIcon = profileIcon;
         this.messengerType = messengerType;
     }
 
