@@ -4,6 +4,7 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import com.google.android.gms.maps.model.LatLng;
@@ -24,6 +25,7 @@ public class Product implements Parcelable {
         this.category = category;
         this.date = new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Calendar.getInstance().getTime());
         this.location = new LatLng(lat,lng);
+        this.images = new ArrayList<>();
     }
 
     protected Product(Parcel in) {
