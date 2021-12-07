@@ -28,8 +28,8 @@ public class MainActivity extends AppCompatActivity {
     PreviewView previewView;
     boolean cameraPermissionGranted;
 
-    float x1, x2, y1, y2;
-    private static final int OFFSET = 50;
+    private float x1, x2, y1, y2;
+    private final int OFFSET = 50;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
