@@ -17,16 +17,6 @@ import java.net.URL;
 public class ProductPageActivity extends AppCompatActivity {
 
 
-    public static Drawable loadMapImage(String url){
-        try{
-            InputStream mapPic = (InputStream) new URL(url).getContent();
-            Drawable map = Drawable.createFromStream(mapPic,"trial");
-            return map;
-        }catch(Exception e){
-            return null;
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,17 +28,37 @@ public class ProductPageActivity extends AppCompatActivity {
 
 
         //display product name
-        TextView productName = findViewById(R.id.productName);
-        productName.setText(cup.getName());
+        displayProductName(cup);
 
         //display product description
-        TextView description = findViewById(R.id.description);
-        description.setText(cup.getDescription());
+        displayProductDescription(cup);
+
         // display product added time
         TextView addedTime = findViewById(R.id.addedtime);
         addedTime.setText(cup.getDate() + "  added  ");
 
         //add a bookmark button
+        bookmarkButton();
+
+        //display product pics using slider
+        displayProductPics();
+
+        //display a static map to show product's location
+        displayMapPic();
+    }
+
+    public void displayProductName(Product product){
+        TextView productName = findViewById(R.id.productName);
+        productName.setText(product.getName());
+    }
+
+    public void displayProductDescription(Product product){
+        TextView description = findViewById(R.id.description);
+        description.setText(product.getDescription());
+    }
+
+
+    public void bookmarkButton(){
         ImageView bookmark = (ImageView) findViewById(R.id.bookmark);
         bookmark.setTag(0);
         bookmark.setOnClickListener(new View.OnClickListener(){
@@ -64,13 +74,6 @@ public class ProductPageActivity extends AppCompatActivity {
 
             }
         });
-
-        //display product pics using slider
-        displayProductPics();
-
-        //display a static map to show product's location
-        ImageView mapView = findViewById(R.id.map);
-        displayMapPic(mapView);
     }
 
     public void displayProductPics(){
@@ -84,7 +87,8 @@ public class ProductPageActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
     }
 
-    public void displayMapPic(ImageView mapView){
-        Glide.with(this).load("https://maps.googleapis.com/maps/api/staticmap?center=Berkeley,CA&zoom=14&size=400x400&key=AIzaSyBsn8QLFwcsXnxHf2ESE3HrXbch6lux3Ak").into(mapView);
+    public void displayMapPic(){
+        ImageView mapView = findViewById(R.id.map);
+        Glide.with(this).load("https://maps.googleapis.com/maps/api/staticmap?center=Bristol,CA&zoom=14&size=400x400&key=AIzaSyBsn8QLFwcsXnxHf2ESE3HrXbch6lux3Ak").into(mapView);
     }
 }
