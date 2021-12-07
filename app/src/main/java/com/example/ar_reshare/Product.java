@@ -1,8 +1,9 @@
 package com.example.ar_reshare;
+import com.google.android.gms.maps.model.LatLng;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
-import com.google.android.gms.maps.model.LatLng;
 
 public class Product {
     private String name;
