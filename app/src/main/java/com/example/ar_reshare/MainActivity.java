@@ -1,6 +1,8 @@
 package com.example.ar_reshare;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,6 +10,7 @@ import androidx.camera.core.CameraSelector;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
@@ -27,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        getCameraPermission();
+
         previewView = findViewById(R.id.previewView);
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -39,6 +44,23 @@ public class MainActivity extends AppCompatActivity {
             }
         }, getExecutor());
 
+    }
+
+    // Request camera permissions from the device. We will receive a callback
+    // to onRequestPermissionsResult with the results.
+    private void getCameraPermission() {
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            // Permission has already been granted previously
+            cameraPermissionGranted = true;
+        } else {
+            // If the location permission has not been granted already,
+            // open a window requesting this permission
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA},
+                    1);
+        }
     }
 
     Executor getExecutor() {
