@@ -3,13 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="../../../../layout/custom_preview.xml" value="0.25833333333333336" />
-        <entry key="app/src/main/res/drawable/tab_indicator_default.xml" value="0.2453125" />
-        <entry key="app/src/main/res/drawable/tab_indicator_selected.xml" value="0.1390625" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.2100570338179557" />
-        <entry key="app/src/main/res/layout/activity_product.xml" value="9.920560198652916" />
-        <entry key="app/src/main/res/layout/activity_product_page.xml" value="0.335" />
-        <entry key="app/src/main/res/layout/slide_item_container.xml" value="0.25" />
+        <entry key="..\:/Users/arafa/Desktop/University Documents/Software Engineering Project/2021-ARReshare/app/src/main/res/layout/activity_main.xml" value="0.176" />
       </map>
     </option>
   </component>

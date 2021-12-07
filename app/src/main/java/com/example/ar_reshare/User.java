@@ -3,6 +3,7 @@ package com.example.ar_reshare;
 public class User {
     String name;
     String profileUrl;
+    int profileIcon;
     //0 for sender, 1 for receiver
     int messengerType;
     String bio;
@@ -25,8 +26,20 @@ public class User {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getProfileUrl() {
         return profileUrl;
+    }
+
+    public int getProfileIcon() {
+        return profileIcon;
+    }
+
+    public void setProfileIcon(int profileIcon) {
+        this.profileIcon = profileIcon;
     }
 
     public int getMessengerType() {
