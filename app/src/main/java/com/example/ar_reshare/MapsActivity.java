@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -187,7 +188,9 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        // Link to the product page
+        Intent intent = new Intent(this,ProductPageActivity.class);
+        intent.putExtra("product", (Product) marker.getTag());
+        startActivity(intent);
     }
 
 

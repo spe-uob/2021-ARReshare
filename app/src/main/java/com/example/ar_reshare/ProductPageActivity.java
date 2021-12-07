@@ -3,6 +3,7 @@ package com.example.ar_reshare;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
@@ -24,14 +25,16 @@ public class ProductPageActivity extends AppCompatActivity {
         // hardcoded a product
 
         User user = new User("Me", "", 1);
+        Intent i = getIntent();
+        Product product = (i.getParcelableExtra("product"));
         Product cup = new Product("Fancy Cup","This is a fancy cup ", user, Category.OTHER,0,0);
 
 
         //display product name
-        displayProductName(cup);
+        displayProductName(product);
 
         //display product description
-        displayProductDescription(cup);
+        displayProductDescription(product);
 
         // display product added time
         TextView addedTime = findViewById(R.id.addedtime);
@@ -45,7 +48,23 @@ public class ProductPageActivity extends AppCompatActivity {
 
         //display a static map to show product's location
         displayMapPic();
+
+        //top left return arrow
+        returnToMapListener();
     }
+
+    // implement a top left return arrow that returns to previous page when clicked
+    public void returnToMapListener(){
+        ImageView returnArrow = findViewById(R.id.returnArrow);
+        returnArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProductPageActivity.this,MapsActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
 
     public void displayProductName(Product product){
         TextView productName = findViewById(R.id.productName);
