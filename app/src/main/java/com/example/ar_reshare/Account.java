@@ -11,10 +11,12 @@ public class Account {
     private LatLng lastKnownLocation;
     private User user;
 
-    public Account(String id, String email, String password, User user) {
+    public Account(String id, String email, String dateOfBirth, String password, String address, User user) {
         this.id = id;
         this.email = email;
+        this.dateOfBirth = dateOfBirth;
         this.password = password;
+        this.address = address;
         this.user = user;
     }
 
