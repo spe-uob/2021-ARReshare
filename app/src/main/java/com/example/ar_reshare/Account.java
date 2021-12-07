@@ -1,12 +1,14 @@
 package com.example.ar_reshare;
 
+import com.google.android.gms.maps.model.LatLng;
+
 public class Account {
     private String id;
     private String email;
     private String dateOfBirth;
     private String password;
     private String address;
-    private String liveLocation;
+    private LatLng lastKnownLocation;
     private User user;
 
     public Account(String id, String email, String password, User user) {
@@ -52,11 +54,19 @@ public class Account {
         this.address = address;
     }
 
-    public String getLiveLocation() {
-        return liveLocation;
+    public LatLng getLiveLocation() {
+        return lastKnownLocation;
     }
 
-    public void setLiveLocation(String liveLocation) {
-        this.liveLocation = liveLocation;
+    public void setLiveLocation(LatLng lastKnownLocation) {
+        this.lastKnownLocation = lastKnownLocation;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
