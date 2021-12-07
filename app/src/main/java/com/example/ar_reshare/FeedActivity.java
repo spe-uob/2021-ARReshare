@@ -18,11 +18,19 @@ public class FeedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
 
-        ArrayList<ModelClass> arrayList = new ArrayList<>();
-        arrayList.add(new ModelClass(R.drawable.artur_profile_icon, "Artur", R.drawable.coffee_cup,
-                "Festive Coffee Cup", "Get your hands on this beautiful coffee cup now!"));
-        arrayList.add(new ModelClass(R.drawable.arfi_profile_icon, "Arafat", R.drawable.pen,
-                "Magic Pen", "Take amazing notes with this stylish magic pen."));
+        ArrayList<Product> arrayList = new ArrayList<>();
+
+        User Artur = new User("Artur","",1);
+        Artur.setProfileIcon(R.drawable.artur_profile_icon);
+        arrayList.add(new Product("Festive Coffee Cup", "Get your hands on this beautiful coffee cup now!",
+                Artur, Category.OTHER, 51.45120306024447, -2.5869936269149303));
+        arrayList.get(0).addImages(R.drawable.coffee_cup);
+
+        User Arafat = new User("Arafat","",1);
+        Arafat.setProfileIcon(R.drawable.arfi_profile_icon);
+        arrayList.add(new Product("Magic Pen", "Take amazing notes with this stylish magic pen.",
+                Arafat, Category.OTHER, 51.459040571152514, -2.6022736036387366));
+        arrayList.get(1).addImages(R.drawable.pen);
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         RecyclerAdapter recyclerAdapter = new RecyclerAdapter(arrayList);

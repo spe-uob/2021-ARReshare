@@ -13,9 +13,9 @@ import java.util.ArrayList;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
 
-    private final ArrayList<ModelClass> arrayList;
+    private final ArrayList<Product> arrayList;
 
-    public RecyclerAdapter(ArrayList<ModelClass> arrayList){
+    public RecyclerAdapter(ArrayList<Product> arrayList){
         this.arrayList = arrayList;
     }
 
@@ -29,12 +29,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ModelClass modelClass = arrayList.get(position);
-        holder.profileIcon.setImageResource(modelClass.getProfileIcon());
-        holder.contributor.setText(modelClass.getContributor());
-        holder.productImage.setImageResource(modelClass.getProductImage());
-        holder.productTitle.setText(modelClass.getProductTitle());
-        holder.productDescription.setText(modelClass.getProductDescription());
+        Product product = arrayList.get(position);
+        holder.profileIcon.setImageResource(product.getContributor().getProfileIcon());
+        holder.contributor.setText(product.getContributor().getName());
+        holder.productImage.setImageResource(product.getImages().get(0));
+        holder.productTitle.setText(product.getName());
+        holder.productDescription.setText(product.getDescription());
     }
 
     @Override
