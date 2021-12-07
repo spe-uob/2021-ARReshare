@@ -7,4 +7,5 @@
     <string name="contributor">Contributor</string>
     <string name="bookmark_button">Bookmark Button</string>
     <string name="message_button">Message Button</string>
+    <string name="title_activity_maps">MapsActivity</string>
 </resources>
