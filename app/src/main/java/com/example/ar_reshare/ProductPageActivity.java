@@ -24,9 +24,13 @@ public class ProductPageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_product_page);
         // hardcoded a product
 
-        User user = new User("Me", "", 1);
+
+
         Intent i = getIntent();
         Product product = (i.getParcelableExtra("product"));
+
+
+        User user = product.getContributor();
         Product cup = new Product("Fancy Cup","This is a fancy cup ", user, Category.OTHER,0,0);
 
 
@@ -75,7 +79,6 @@ public class ProductPageActivity extends AppCompatActivity {
         TextView description = findViewById(R.id.description);
         description.setText(product.getDescription());
     }
-
 
     public void bookmarkButton(){
         ImageView bookmark = (ImageView) findViewById(R.id.bookmark);
