@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.ar_reshare.databinding.ActivityMapsBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -23,8 +24,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.example.ar_reshare.databinding.ActivityMapsBinding;
 import com.google.android.gms.tasks.OnSuccessListener;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -197,12 +198,18 @@ public class MapsActivity extends FragmentActivity implements
     // Creates a list of dummy products for testing and development
     private List<Product> createDummyProducts () {
         List<Product> products = new ArrayList<>();
-        products.add(new Product("Fancy Cup", "This is a product.", "John", Category.OTHER,51.45120306024447, -2.5869936269149303));
-        products.add(new Product("Java for Beginners Book", "This is a product.", "Artur", Category.BOOKS, 51.45599668866024, -2.6030781306216135));
-        products.add(new Product("Pink Umbrella", "This is a product.", "Lingtao", Category.CLOTHING, 51.45416805430673, -2.591828561043675));
-        products.add(new Product("Apple Pencil", "This is a product.", "Hellin", Category.ELECTRONICS,51.45864853294286, -2.5853638594577193));
-        products.add(new Product("Meat", "This is a product.", "Ziqian", Category.FOOD, 51.45692540090406, -2.6081114869801714));
-        products.add(new Product("Pink Headphones", "This is a product.", "Arafat", Category.ELECTRONICS, 51.459040571152514, -2.6022736036387366));
+        User user = new User("John","",1);
+        products.add(new Product("Fancy Cup", "This is a product.", user, Category.OTHER,51.45120306024447, -2.5869936269149303));
+        user = new User("Artur","",1);
+        products.add(new Product("Java for Beginners Book", "This is a product.", user, Category.BOOKS, 51.45599668866024, -2.6030781306216135));
+        user = new User("Lingtao","",1);
+        products.add(new Product("Pink Umbrella", "This is a product.", user, Category.CLOTHING, 51.45416805430673, -2.591828561043675));
+        user = new User("Hellin","",1);
+        products.add(new Product("Apple Pencil", "This is a product.", user, Category.ELECTRONICS,51.45864853294286, -2.5853638594577193));
+        user = new User("Ziqian","",1);
+        products.add(new Product("Meat", "This is a product.", user, Category.FOOD, 51.45692540090406, -2.6081114869801714));
+        user = new User("Arafat","",1);
+        products.add(new Product("Pink Headphones", "This is a product.", user, Category.ELECTRONICS, 51.459040571152514, -2.6022736036387366));
         return products;
     }
 
@@ -233,7 +240,7 @@ public class MapsActivity extends FragmentActivity implements
             TextView title = (TextView) mWindow.findViewById(R.id.title);
             title.setText(product.getName());
             TextView contributor = (TextView) mWindow.findViewById(R.id.contributor);
-            contributor.setText(product.getContributor());
+            contributor.setText(product.getContributor().getName());
             TextView description = (TextView) mWindow.findViewById(R.id.description);
             description.setText("This is a description of my product. " +
                     "It is really a great product. Feel free to message me to arrange a pickup. ");
