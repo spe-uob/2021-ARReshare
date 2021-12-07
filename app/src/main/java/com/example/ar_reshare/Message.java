@@ -1,10 +1,10 @@
 package com.example.ar_reshare;
 
 public class Message {
-    String message;
-    User sender;
-    String createdTime;
-    String imageUrl;
+    private String message;
+    private User sender;
+    private String createdTime;
+    private String imageUrl;
 
     public Message(String message, User sender, String createdTime) {
         this.message = message;
