@@ -1,5 +1,6 @@
 package com.example.ar_reshare;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import com.google.android.gms.maps.model.LatLng;
@@ -20,6 +21,7 @@ public class Product {
         this.category = category;
         this.date = new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Calendar.getInstance().getTime());
         this.location = new LatLng(lat,lng);
+        this.images = new ArrayList<>();
     }
 
     public String getName() {
