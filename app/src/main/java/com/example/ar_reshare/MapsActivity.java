@@ -223,10 +223,16 @@ public class MapsActivity extends FragmentActivity implements
             TextView contributor = (TextView) mWindow.findViewById(R.id.contributor);
             contributor.setText(product.getContributor().getName());
             TextView description = (TextView) mWindow.findViewById(R.id.description);
-            description.setText("This is a description of my product. " +
-                    "It is really a great product. Feel free to message me to arrange a pickup. ");
+            description.setText(product.getDescription());
             ImageView photo = (ImageView) mWindow.findViewById(R.id.productimage);
-            photo.setImageResource(R.drawable.example_cup);
+            List<Integer> productPhotos = product.getImages();
+            if (productPhotos.size() >= 1) {
+                photo.setImageResource(productPhotos.get(0));
+            } else {
+                // use default
+                photo.setImageResource(R.drawable.example_cup);
+            }
+
         }
 
         @Override
