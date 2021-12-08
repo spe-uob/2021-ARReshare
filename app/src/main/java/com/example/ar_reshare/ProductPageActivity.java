@@ -36,10 +36,10 @@ public class ProductPageActivity extends AppCompatActivity {
         Product product = extras.getParcelable("product");
         User contributor = extras.getParcelable("contributor"); // the contributor of the current product
         User user = ExampleData.getUsers().get(0); // this is John
-        Integer profileId = extras.getInt("id");
+        Integer profilePicId = extras.getInt("profilePicId");
 
-        ArrayList<Integer> picList = (ArrayList<Integer>) extras.getIntegerArrayList("picId");
-
+        //ArrayList<Integer> productPicIdList = (ArrayList<Integer>) extras.getIntegerArrayList("productPicId");
+        //System.out.println(productPicIdList);
         //display product name
         displayProductName(product);
 
@@ -47,7 +47,7 @@ public class ProductPageActivity extends AppCompatActivity {
         displayProductDescription(product);
 
         //display contributor's information
-        displayProductContributor(contributor,profileId);
+        displayProductContributor(contributor,profilePicId);
 
         // display product added time
         TextView addedTime = findViewById(R.id.addedtime);
@@ -134,7 +134,7 @@ public class ProductPageActivity extends AppCompatActivity {
         });
     }
 
-    public void displayProductPics(List<Integer> picList){
+    public void displayProductPics(){
         ViewPager2 viewPager = findViewById(R.id.viewPager);
         SliderAdapter adapter;
         int list[] = new int[3];
