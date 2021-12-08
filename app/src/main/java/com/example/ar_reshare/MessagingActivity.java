@@ -28,7 +28,7 @@ public class MessagingActivity extends AppCompatActivity{
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
     User user;
     User contributor;
-    Integer id;
+    int profilePicId;
     Product product;
 
 
@@ -67,11 +67,14 @@ public class MessagingActivity extends AppCompatActivity{
         setContentView(R.layout.message_list_layout);
         Intent i = getIntent();
 //        Bundle extras = i.getExtras();
-        product = i.getParcelableExtra("product");
+//        product = extras.getParcelable("product");
+//        user = extras.getParcelable("user");
+//        contributor = extras.getParcelable("contributor");
+//        profilePicId = extras.getInt("profilePicId");
         user = i.getParcelableExtra("user");
         contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
-        id = i.getIntExtra("id",0);
-        contributor.setProfileIcon(id);
+        profilePicId = i.getIntExtra("profilePicId",0);
+        contributor.setProfileIcon(profilePicId);
 
         recyclerView = findViewById(R.id.reyclerview_message_list);
         recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {

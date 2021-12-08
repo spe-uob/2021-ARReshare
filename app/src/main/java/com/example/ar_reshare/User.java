@@ -6,7 +6,7 @@ import android.os.Parcelable;
 public class User implements Parcelable {
     private String name;
     private String profileUrl;
-    private Integer profileIcon;
+    private int profileIcon;
     //0 for sender, 1 for receiver
     private int messengerType;
     private String bio;
