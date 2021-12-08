@@ -6,7 +6,7 @@ import android.os.Parcelable;
 public class User implements Parcelable {
     private String name;
     private String profileUrl;
-    private int profileIcon;
+    private Integer profileIcon;
     //0 for sender, 1 for receiver
     private int messengerType;
     private String bio;
@@ -20,6 +20,7 @@ public class User implements Parcelable {
     protected User(Parcel in) {
         name = in.readString();
         profileUrl = in.readString();
+        profileIcon = in.readInt();
         messengerType = in.readInt();
         bio = in.readString();
     }
@@ -76,6 +77,7 @@ public class User implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
+        dest.writeInt(profileIcon);
         dest.writeString(profileUrl);
         dest.writeInt(messengerType);
         dest.writeString(bio);

@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -192,7 +193,9 @@ public class MapsActivity extends FragmentActivity implements
         Intent intent = new Intent(this,ProductPageActivity.class);
         intent.putExtra("product", (Product) marker.getTag());
         intent.putExtra("contributor", ((Product) marker.getTag()).getContributor());
-        intent.putExtra("id", ((Product) marker.getTag()).getContributor().getProfileIcon());
+        intent.putExtra("profilePicId",((Product) marker.getTag()).getContributor().getProfileIcon());
+        //intent.putExtra("picId", (Parcelable) ((Product) marker.getTag()).getImages());
+
         startActivity(intent);
     }
 
