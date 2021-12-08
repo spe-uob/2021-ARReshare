@@ -76,6 +76,9 @@ public class MapsActivity extends FragmentActivity implements
             enableMyLocation();
         }
 
+        // Listen for go back to main arrow click events
+        View returnArrow = findViewById(R.id.returnToMainArrow);
+
         // Listen for on marker click events
         mMap.setOnMarkerClickListener(this);
         // Configure the Product Summary View
@@ -136,6 +139,11 @@ public class MapsActivity extends FragmentActivity implements
                 }
                 return;
         }
+    }
+
+    public void onReturnArrowClick(View view) {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 
     // Request location permissions from the device. We will receive a callback
