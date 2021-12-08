@@ -31,6 +31,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Product product = arrayList.get(position);
         holder.profileIcon.setImageResource(product.getContributor().getProfileIcon());
+
+        System.out.println(product.getContributor().getProfileIcon());
+
         holder.contributor.setText(product.getContributor().getName());
         holder.productImage.setImageResource(product.getImages().get(0));
         holder.productTitle.setText(product.getName());

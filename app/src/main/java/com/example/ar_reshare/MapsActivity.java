@@ -6,9 +6,11 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -81,7 +83,7 @@ public class MapsActivity extends FragmentActivity implements
         mMap.setOnInfoWindowClickListener(this);
 
         // Create dummy products and display them on the map
-        List<Product> products = createDummyProducts();
+        List<Product> products = ExampleData.getProducts();
         populateMap(mMap, products);
 
         // Default map starting location
@@ -185,33 +187,18 @@ public class MapsActivity extends FragmentActivity implements
         return false;
     }
 
+    // Start the product page when clicked
     @Override
     public void onInfoWindowClick(Marker marker) {
-        // Link to the product page
+        Intent intent = new Intent(this,ProductPageActivity.class);
+        intent.putExtra("product", (Product) marker.getTag());
+        intent.putExtra("contributor", ((Product) marker.getTag()).getContributor());
+        intent.putExtra("profilePicId",((Product) marker.getTag()).getContributor().getProfileIcon());
+        //intent.putExtra("picId", (Parcelable) ((Product) marker.getTag()).getImages());
+
+        startActivity(intent);
     }
 
-
-    /* ---------------------------------------------
-            TEMPORARY CLASS AND HARDCODED DATA
-       --------------------------------------------- */
-
-    // Creates a list of dummy products for testing and development
-    private List<Product> createDummyProducts () {
-        List<Product> products = new ArrayList<>();
-        User user = new User("John","",1);
-        products.add(new Product("Fancy Cup", "This is a product.", user, Category.OTHER,51.45120306024447, -2.5869936269149303));
-        user = new User("Artur","",1);
-        products.add(new Product("Java for Beginners Book", "This is a product.", user, Category.BOOKS, 51.45599668866024, -2.6030781306216135));
-        user = new User("Lingtao","",1);
-        products.add(new Product("Pink Umbrella", "This is a product.", user, Category.CLOTHING, 51.45416805430673, -2.591828561043675));
-        user = new User("Hellin","",1);
-        products.add(new Product("Apple Pencil", "This is a product.", user, Category.ELECTRONICS,51.45864853294286, -2.5853638594577193));
-        user = new User("Ziqian","",1);
-        products.add(new Product("Meat", "This is a product.", user, Category.FOOD, 51.45692540090406, -2.6081114869801714));
-        user = new User("Arafat","",1);
-        products.add(new Product("Pink Headphones", "This is a product.", user, Category.ELECTRONICS, 51.459040571152514, -2.6022736036387366));
-        return products;
-    }
 
     // Populates the map with markers given a list of products
     private void populateMap(GoogleMap mMap, List<Product> products) {
@@ -242,10 +229,16 @@ public class MapsActivity extends FragmentActivity implements
             TextView contributor = (TextView) mWindow.findViewById(R.id.contributor);
             contributor.setText(product.getContributor().getName());
             TextView description = (TextView) mWindow.findViewById(R.id.description);
-            description.setText("This is a description of my product. " +
-                    "It is really a great product. Feel free to message me to arrange a pickup. ");
+            description.setText(product.getDescription());
             ImageView photo = (ImageView) mWindow.findViewById(R.id.productimage);
-            photo.setImageResource(R.drawable.example_cup);
+            List<Integer> productPhotos = product.getImages();
+            if (productPhotos.size() >= 1) {
+                photo.setImageResource(productPhotos.get(0));
+            } else {
+                // use default
+                photo.setImageResource(R.drawable.example_cup);
+            }
+
         }
 
         @Override
