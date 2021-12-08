@@ -59,6 +59,9 @@ public class ProductPageActivity extends AppCompatActivity {
 
         //top left return arrow
         returnToMapListener();
+
+        //links to messaging page
+        messageButton(product,contributor,user);
     }
 
     // implement a top left return arrow that returns to previous page when clicked
