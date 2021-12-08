@@ -9,14 +9,16 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.List;
 
 
 public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.MyViewHolder>  {
 
     int list[];
 
-    public SliderAdapter(int[] list) {
-        this.list = list;
+    public SliderAdapter(int[] productPicList) {
+
+        this.list = productPicList;
     }
 
     @NonNull

@@ -16,6 +16,9 @@ public class ExampleData {
         User user0 = new User("John","",0);
         users.add(user0);
         products.add(new Product("Fancy Cup", "This is a really nice fancy cup. Feel free to message me to arrange a pickup.", user0, Category.OTHER,51.45120306024447, -2.5869936269149303));
+        user0.setProfileIcon(R.drawable.jon);
+        products.get(0).addImages(R.drawable.cup);
+        products.get(0).addImages(R.drawable.cup2);
 
         User user1 = new User("Artur","",1);
         user1.setProfileIcon(R.drawable.artur_profile_icon);
@@ -27,6 +30,8 @@ public class ExampleData {
         users.add(user2);
         products.add(new Product("Pink Umbrella", "This is a very pink umb.", user2, Category.CLOTHING, 51.45416805430673, -2.591828561043675));
         user2.setProfileIcon(R.drawable.lingtao_profile_icon);
+        products.get(2).addImages(R.drawable.umbrella1);
+        products.get(2).addImages(R.drawable.umbrella2);
 
         User user3 = new User("Hellin","",1);
         users.add(user3);
@@ -38,12 +43,16 @@ public class ExampleData {
         User user4 = new User("Ziqian","",1);
         users.add(user4);
         products.add(new Product("Meat", "This is a product.", user4, Category.FOOD, 51.45692540090406, -2.6081114869801714));
+        user4.setProfileIcon(R.drawable.ziqian);
+        products.get(4).addImages(R.drawable.meal1);
+        products.get(4).addImages(R.drawable.meal2);
 
         User user5 = new User("Arafat","",1);
         user5.setProfileIcon(R.drawable.arfi_profile_icon);
         users.add(user5);
         products.add(new Product("Magic Pen", "Take amazing notes with this stylish magic pen.", user5, Category.OTHER, 51.459040571152514, -2.6022736036387366));
         products.get(5).addImages(R.drawable.pen);
+        products.get(5).addImages(R.drawable.pen2);
     }
 
     public static List<User> getUsers() {
