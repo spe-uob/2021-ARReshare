@@ -66,7 +66,7 @@ public class ProductPageActivity extends AppCompatActivity {
         returnListener();
 
         //links to messaging page
-        messageButton(product,contributor,user);
+        messageButton(product,contributor,user, profilePicId);
     }
 
     // implement a top left return arrow that returns to previous page when clicked
