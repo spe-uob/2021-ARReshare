@@ -29,17 +29,13 @@ public class ProductPageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_page);
-        // hardcoded a product
 
         Intent i = getIntent();
-        Bundle extras = i.getExtras();
-        Product product = extras.getParcelable("product");
-        User contributor = extras.getParcelable("contributor"); // the contributor of the current product
+        Product product = i.getParcelableExtra("product");
+        User contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
         User user = ExampleData.getUsers().get(0); // this is John
-        Integer profilePicId = extras.getInt("profilePicId");
+        int profilePicId = i.getIntExtra("profilePicId",R.drawable.image_circle);
 
-        //ArrayList<Integer> productPicIdList = (ArrayList<Integer>) extras.getIntegerArrayList("productPicId");
-        //System.out.println(productPicIdList);
         //display product name
         displayProductName(product);
 
@@ -66,7 +62,7 @@ public class ProductPageActivity extends AppCompatActivity {
         returnToMapListener();
 
         //links to messaging page
-        messageButton(product,contributor,user);
+        messageButton(product,contributor,user,profilePicId);
     }
 
     // implement a top left return arrow that returns to previous page when clicked
@@ -87,8 +83,6 @@ public class ProductPageActivity extends AppCompatActivity {
 
         contributorName.setText(contributor.getName());
         contributorIcon.setImageResource(id);
-
-
     }
 
 
@@ -120,7 +114,7 @@ public class ProductPageActivity extends AppCompatActivity {
         });
     }
 
-    public void messageButton(Product product, User contributor, User user){
+    public void messageButton(Product product, User contributor, User user,Integer profilePicId){
         Button message = findViewById(R.id.messageButton);
         message.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,6 +123,7 @@ public class ProductPageActivity extends AppCompatActivity {
                 intent.putExtra("product", product);
                 intent.putExtra("contributor", contributor);
                 intent.putExtra("user",user);
+                intent.putExtra("profilePicId", profilePicId);
                 startActivity(intent);
             }
         });
