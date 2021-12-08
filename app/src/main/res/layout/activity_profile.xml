@@ -116,8 +116,7 @@
                                 android:layout_height="120dp"
                                 android:layout_weight="1"
                                 android:background="@color/white"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/coffee_cup">
+                                android:scaleType="centerCrop">
                             </ImageButton>
 
                             <ImageButton
@@ -128,8 +127,8 @@
                                 android:layout_marginRight="5dp"
                                 android:layout_weight="1"
                                 android:background="@color/white"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/coffee_cup"></ImageButton>
+                                android:scaleType="centerCrop">
+                            </ImageButton>
 
                             <ImageButton
                                 android:id="@+id/gain3"
@@ -137,9 +136,7 @@
                                 android:layout_height="120dp"
                                 android:layout_weight="1"
                                 android:scaleType="centerCrop"
-                                android:background="@color/white"
-                                android:src="@drawable/coffee_cup">
-
+                                android:background="@color/white">
                             </ImageButton>
                         </LinearLayout>
 
@@ -164,6 +161,7 @@
                                 android:layout_width="40dp"
                                 android:layout_height="120dp"
                                 android:layout_weight="1"
+                                android:background="@color/white"
                                 android:scaleType="centerCrop">
                             </ImageButton>
 
@@ -172,6 +170,7 @@
                                 android:layout_width="40dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
+                                android:background="@color/white"
                                 android:scaleType="centerCrop">
                             </ImageButton>
 
@@ -180,6 +179,7 @@
                                 android:layout_width="40dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
+                                android:background="@color/white"
                                 android:scaleType="centerCrop">
                             </ImageButton>
                         </LinearLayout>
@@ -205,6 +205,7 @@
                                 android:layout_width="40dp"
                                 android:layout_height="120dp"
                                 android:layout_weight="1"
+                                android:background="@color/white"
                                 android:scaleType="centerCrop">
                             </ImageButton>
 
@@ -213,6 +214,7 @@
                                 android:layout_width="40dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
+                                android:background="@color/white"
                                 android:scaleType="centerCrop">
                             </ImageButton>
 
@@ -221,6 +223,7 @@
                                 android:layout_width="40dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
+                                android:background="@color/white"
                                 android:scaleType="centerCrop">
                             </ImageButton>
                         </LinearLayout>
