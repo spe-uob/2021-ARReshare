@@ -29,17 +29,16 @@ public class ProductPageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_page);
-        // hardcoded a product
 
+        // getting the stuff we need from previous page
         Intent i = getIntent();
-        Bundle extras = i.getExtras();
-        Product product = extras.getParcelable("product");
-        User contributor = extras.getParcelable("contributor"); // the contributor of the current product
+        Product product = i.getParcelableExtra("product");
+        User contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
         User user = ExampleData.getUsers().get(0); // this is John
-        Integer profilePicId = extras.getInt("profilePicId");
+        Integer profilePicId = i.getIntExtra("profilePicId",R.drawable.arfi_profile_icon);
+        List<Integer> productPicId = i.getIntegerArrayListExtra("productPicId");
 
-        //ArrayList<Integer> productPicIdList = (ArrayList<Integer>) extras.getIntegerArrayList("productPicId");
-        //System.out.println(productPicIdList);
+
         //display product name
         displayProductName(product);
 
@@ -57,26 +56,27 @@ public class ProductPageActivity extends AppCompatActivity {
         bookmarkButton();
 
         //display product pics using slider
-        displayProductPics();
+        int[] picList = productPicId.stream().mapToInt(m -> m).toArray();
+        displayProductPics(picList);
 
         //display a static map to show product's location
-        displayMapPic();
+        displayMapPic(product.getLocation().latitude, product.getLocation().longitude);
 
         //top left return arrow
-        returnToMapListener();
+        returnListener();
 
         //links to messaging page
-        messageButton(product,contributor,user);
+        messageButton(product,contributor,user, profilePicId);
     }
 
     // implement a top left return arrow that returns to previous page when clicked
-    public void returnToMapListener(){
+    public void returnListener(){
+
         ImageView returnArrow = findViewById(R.id.returnArrow);
         returnArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ProductPageActivity.this,MapsActivity.class);
-                startActivity(intent);
+                onBackPressed();
             }
         });
     }
@@ -87,7 +87,6 @@ public class ProductPageActivity extends AppCompatActivity {
 
         contributorName.setText(contributor.getName());
         contributorIcon.setImageResource(id);
-
 
     }
 
@@ -120,7 +119,8 @@ public class ProductPageActivity extends AppCompatActivity {
         });
     }
 
-    public void messageButton(Product product, User contributor, User user){
+    public void messageButton(Product product, User contributor, User user,Integer profilePicId){
+
         Button message = findViewById(R.id.messageButton);
         message.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,24 +129,23 @@ public class ProductPageActivity extends AppCompatActivity {
                 intent.putExtra("product", product);
                 intent.putExtra("contributor", contributor);
                 intent.putExtra("user",user);
+                intent.putExtra("profilePicId", profilePicId);
+
                 startActivity(intent);
             }
         });
     }
 
-    public void displayProductPics(){
+    public void displayProductPics(int[] productPicId){
         ViewPager2 viewPager = findViewById(R.id.viewPager);
         SliderAdapter adapter;
-        int list[] = new int[3];
-        list[0] = getResources().getIdentifier("@drawable/cup",null,this.getPackageName());
-        list[1] = getResources().getIdentifier("@drawable/cup2",null,this.getPackageName());
-        list[2] = getResources().getIdentifier("@drawa ble/chaoba2",null,this.getPackageName());
-        adapter = new SliderAdapter(list);
+        adapter = new SliderAdapter(productPicId);
         viewPager.setAdapter(adapter);
     }
 
-    public void displayMapPic(){
+    public void displayMapPic(double lat, double lng){
         ImageView mapView = findViewById(R.id.map);
-        Glide.with(this).load("https://maps.googleapis.com/maps/api/staticmap?center=Bristol,CA&zoom=14&size=400x400&key=AIzaSyBsn8QLFwcsXnxHf2ESE3HrXbch6lux3Ak").into(mapView);
+        Glide.with(this).load("https://maps.googleapis.com/maps/api/staticmap?center=51.45864853,-2.5853638,CA&zoom=10&size=400x400&key=AIzaSyBsn8QLFwcsXnxHf2ESE3HrXbch6lux3Ak").into(mapView);
+
     }
 }

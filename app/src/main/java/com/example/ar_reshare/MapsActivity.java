@@ -76,6 +76,9 @@ public class MapsActivity extends FragmentActivity implements
             enableMyLocation();
         }
 
+        // Listen for go back to main arrow click events
+        View returnArrow = findViewById(R.id.returnToMainArrow);
+
         // Listen for on marker click events
         mMap.setOnMarkerClickListener(this);
         // Configure the Product Summary View
@@ -138,6 +141,11 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
+    public void onReturnArrowClick(View view) {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+    }
+
     // Request location permissions from the device. We will receive a callback
     // to onRequestPermissionsResult with the results.
     private void getLocationPermission() {
@@ -191,10 +199,12 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onInfoWindowClick(Marker marker) {
         Intent intent = new Intent(this,ProductPageActivity.class);
+
         intent.putExtra("product", (Product) marker.getTag());
         intent.putExtra("contributor", ((Product) marker.getTag()).getContributor());
         intent.putExtra("profilePicId",((Product) marker.getTag()).getContributor().getProfileIcon());
-        //intent.putExtra("picId", (Parcelable) ((Product) marker.getTag()).getImages());
+        intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) ((Product) marker.getTag()).getImages());
+
 
         startActivity(intent);
     }
