@@ -17,6 +17,8 @@ import com.google.android.gms.maps.model.Circle;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -34,9 +36,9 @@ public class ProductPageActivity extends AppCompatActivity {
         Product product = extras.getParcelable("product");
         User contributor = extras.getParcelable("contributor"); // the contributor of the current product
         User user = ExampleData.getUsers().get(0); // this is John
-        Integer id = extras.getInt("id");
-        System.out.println(contributor);
-        System.out.println(id);
+        Integer profileId = extras.getInt("id");
+
+        ArrayList<Integer> picList = (ArrayList<Integer>) extras.getIntegerArrayList("picId");
 
         //display product name
         displayProductName(product);
@@ -45,7 +47,7 @@ public class ProductPageActivity extends AppCompatActivity {
         displayProductDescription(product);
 
         //display contributor's information
-        displayProductContributor(contributor,id);
+        displayProductContributor(contributor,profileId);
 
         // display product added time
         TextView addedTime = findViewById(R.id.addedtime);
@@ -132,7 +134,7 @@ public class ProductPageActivity extends AppCompatActivity {
         });
     }
 
-    public void displayProductPics(){
+    public void displayProductPics(List<Integer> picList){
         ViewPager2 viewPager = findViewById(R.id.viewPager);
         SliderAdapter adapter;
         int list[] = new int[3];
