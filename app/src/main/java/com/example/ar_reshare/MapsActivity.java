@@ -193,8 +193,8 @@ public class MapsActivity extends FragmentActivity implements
         Intent intent = new Intent(this,ProductPageActivity.class);
         intent.putExtra("product", (Product) marker.getTag());
         intent.putExtra("contributor", ((Product) marker.getTag()).getContributor());
-        intent.putExtra("profileId",((Product) marker.getTag()).getContributor().getProfileIcon());
-        intent.putExtra("picId", (Parcelable) ((Product) marker.getTag()).getImages());
+        intent.putExtra("profilePicId",((Product) marker.getTag()).getContributor().getProfileIcon());
+        //intent.putExtra("picId", (Parcelable) ((Product) marker.getTag()).getImages());
 
         startActivity(intent);
     }
