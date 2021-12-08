@@ -1,6 +1,8 @@
 package com.example.ar_reshare;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable{
     String name;
     String profileUrl;
     int profileIcon;
