@@ -30,10 +30,13 @@ public class ProductPageActivity extends AppCompatActivity {
         // hardcoded a product
 
         Intent i = getIntent();
-        Product product = (i.getParcelableExtra("product"));
-        User contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
+        Bundle extras = i.getExtras();
+        Product product = extras.getParcelable("product");
+        User contributor = extras.getParcelable("contributor"); // the contributor of the current product
         User user = ExampleData.getUsers().get(0); // this is John
-
+        Integer id = extras.getInt("id");
+        System.out.println(contributor);
+        System.out.println(id);
 
         //display product name
         displayProductName(product);
@@ -42,7 +45,7 @@ public class ProductPageActivity extends AppCompatActivity {
         displayProductDescription(product);
 
         //display contributor's information
-        displayProductContributor(contributor);
+        displayProductContributor(contributor,id);
 
         // display product added time
         TextView addedTime = findViewById(R.id.addedtime);
@@ -76,12 +79,12 @@ public class ProductPageActivity extends AppCompatActivity {
         });
     }
 
-    public void displayProductContributor(User contributor){
+    public void displayProductContributor(User contributor, int id){
         TextView contributorName = findViewById(R.id.contributorName);
         CircleImageView contributorIcon = findViewById(R.id.circle);
 
         contributorName.setText(contributor.getName());
-        contributorIcon.setImageResource(contributor.getProfileIcon());
+        contributorIcon.setImageResource(id);
 
 
     }

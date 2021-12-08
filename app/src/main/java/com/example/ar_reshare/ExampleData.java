@@ -26,7 +26,7 @@ public class ExampleData {
         User user2 = new User("Lingtao","",1);
         users.add(user2);
         products.add(new Product("Pink Umbrella", "This is a very pink umb.", user2, Category.CLOTHING, 51.45416805430673, -2.591828561043675));
-
+        user2.setProfileIcon(R.drawable.user);
 
         User user3 = new User("Hellin","",1);
         users.add(user3);
