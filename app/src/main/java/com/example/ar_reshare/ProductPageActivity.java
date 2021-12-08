@@ -8,13 +8,17 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.maps.model.Circle;
 
 import java.io.InputStream;
 import java.net.URL;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProductPageActivity extends AppCompatActivity {
 
@@ -27,10 +31,8 @@ public class ProductPageActivity extends AppCompatActivity {
 
         Intent i = getIntent();
         Product product = (i.getParcelableExtra("product"));
-
-
-        User user = product.getContributor();
-        Product cup = new Product("Fancy Cup","This is a fancy cup ", user, Category.OTHER,0,0);
+        User contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
+        User user = ExampleData.getUsers().get(0); // this is John
 
 
         //display product name
@@ -39,9 +41,12 @@ public class ProductPageActivity extends AppCompatActivity {
         //display product description
         displayProductDescription(product);
 
+        //display contributor's information
+        displayProductContributor(contributor);
+
         // display product added time
         TextView addedTime = findViewById(R.id.addedtime);
-        addedTime.setText(cup.getDate() + "  added  ");
+        addedTime.setText(product.getDate() + "  added  ");
 
         //add a bookmark button
         bookmarkButton();
@@ -66,6 +71,16 @@ public class ProductPageActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    public void displayProductContributor(User contributor){
+        TextView contributorName = findViewById(R.id.contributorName);
+        CircleImageView contributorIcon = findViewById(R.id.circle);
+
+        contributorName.setText(contributor.getName());
+        contributorIcon.setImageResource(contributor.getProfileIcon());
+
+
     }
 
 
@@ -93,6 +108,20 @@ public class ProductPageActivity extends AppCompatActivity {
                     bookmark.setTag(0);
                 }
 
+            }
+        });
+    }
+
+    public void messageButton(Product product, User contributor, User user){
+        Button message = findViewById(R.id.messageButton);
+        message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProductPageActivity.this ,MessagingActivity.class);
+                intent.putExtra("product", product);
+                intent.putExtra("contributor", contributor);
+                intent.putExtra("user",user);
+                startActivity(intent);
             }
         });
     }

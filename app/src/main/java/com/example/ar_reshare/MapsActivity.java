@@ -186,10 +186,12 @@ public class MapsActivity extends FragmentActivity implements
         return false;
     }
 
+    // Start the product page when clicked
     @Override
     public void onInfoWindowClick(Marker marker) {
         Intent intent = new Intent(this,ProductPageActivity.class);
         intent.putExtra("product", (Product) marker.getTag());
+        intent.putExtra("contributor", ((Product) marker.getTag()).getContributor());
         startActivity(intent);
     }
 

@@ -126,7 +126,7 @@
                 android:layout_height="37dp"
                 android:layout_marginStart="16dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/user"
+
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/productName"
                 tools:srcCompat="@tools:sample/avatars" />
@@ -146,7 +146,7 @@
                 android:layout_width="0dp"
                 android:layout_height="280dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:scaleType="centerCrop"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -172,7 +172,7 @@
                 android:layout_marginTop="2dp"
                 android:fontFamily="@font/montserrat"
                 android:paddingLeft="8dp"
-                android:text="Kollen"
+                android:text="name"
                 android:textSize="12sp"
                 app:layout_constraintStart_toEndOf="@+id/circle"
                 app:layout_constraintTop_toBottomOf="@+id/productName" />

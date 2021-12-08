@@ -4,12 +4,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class User implements Parcelable {
-    String name;
-    String profileUrl;
-    int profileIcon;
+    private String name;
+    private String profileUrl;
+    private int profileIcon;
     //0 for sender, 1 for receiver
-    int messengerType;
-    String bio;
+    private int messengerType;
+    private String bio;
 
     public User(String name, String profileUrl, int messengerType) {
         this.name = name;

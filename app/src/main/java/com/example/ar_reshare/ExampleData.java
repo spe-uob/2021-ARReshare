@@ -13,7 +13,7 @@ public class ExampleData {
         users = new ArrayList<>();
         products = new ArrayList<>();
 
-        User user0 = new User("John","",1);
+        User user0 = new User("John","",0);
         users.add(user0);
         products.add(new Product("Fancy Cup", "This is a really nice fancy cup. Feel free to message me to arrange a pickup.", user0, Category.OTHER,51.45120306024447, -2.5869936269149303));
 
@@ -26,6 +26,7 @@ public class ExampleData {
         User user2 = new User("Lingtao","",1);
         users.add(user2);
         products.add(new Product("Pink Umbrella", "This is a very pink umb.", user2, Category.CLOTHING, 51.45416805430673, -2.591828561043675));
+
 
         User user3 = new User("Hellin","",1);
         users.add(user3);
