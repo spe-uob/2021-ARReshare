@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -17,22 +19,9 @@
         android:background="#A6FFFFFF"
         android:padding="8dp"
         android:text="FILTER"
-        android:textColor="#000000" />
+        android:textColor="#000000"
+        android:visibility="invisible" />
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="123dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="9dp"
-        android:layout_marginEnd="141dp"
-        android:layout_marginBottom="5dp"
-        android:background="#A6FFFFFF"
-        android:padding="8dp"
-        android:text="AR View"
-        android:textColor="#000000" />
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"
@@ -44,6 +33,16 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         tools:context=".MapsActivity" />
+
+    <ImageButton
+        android:id="@+id/returnToMainArrow"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerHorizontal="true"
+        android:background="@null"
+        android:src="@drawable/ic_baseline_keyboard_arrow_up_24"
+        android:onClick="onReturnArrowClick"
+        />
 
 
 </RelativeLayout>
