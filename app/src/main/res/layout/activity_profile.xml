@@ -117,7 +117,8 @@
                                 android:layout_weight="1"
                                 android:background="@color/white"
                                 android:scaleType="centerCrop"
-                                android:src="@drawable/coffee_cup"></ImageButton>
+                                android:src="@drawable/coffee_cup">
+                            </ImageButton>
 
                             <ImageButton
                                 android:id="@+id/gain2"
