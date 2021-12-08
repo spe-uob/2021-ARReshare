@@ -30,8 +30,10 @@ public class ProductPageActivity extends AppCompatActivity {
         // hardcoded a product
 
         Intent i = getIntent();
-        Product product = (i.getParcelableExtra("product"));
-        User contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
+        Bundle extras = i.getExtras();
+        Product product = extras.getParcelable("product");
+        User contributor = extras.getParcelable("contributor"); // the contributor of the current product
+        Integer id = extras.getInt("id");
         User user = ExampleData.getUsers().get(0); // this is John
 
 
@@ -61,7 +63,7 @@ public class ProductPageActivity extends AppCompatActivity {
         returnToMapListener();
 
         //links to messaging page
-        messageButton(product,contributor,user);
+        messageButton(product,contributor,user,id);
     }
 
     // implement a top left return arrow that returns to previous page when clicked
@@ -115,7 +117,7 @@ public class ProductPageActivity extends AppCompatActivity {
         });
     }
 
-    public void messageButton(Product product, User contributor, User user){
+    public void messageButton(Product product, User contributor, User user,Integer id){
         Button message = findViewById(R.id.messageButton);
         message.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,6 +126,7 @@ public class ProductPageActivity extends AppCompatActivity {
                 intent.putExtra("product", product);
                 intent.putExtra("contributor", contributor);
                 intent.putExtra("user",user);
+                intent.putExtra("id",id);
                 startActivity(intent);
             }
         });

@@ -7,14 +7,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:paddingTop="8dp">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/image_profile"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:background="@drawable/image_circle"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        android:layout_width="60dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="10dp"
+        android:contentDescription="@string/profile_icon"
+        android:src="@mipmap/ic_launcher_round"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/message_name"
