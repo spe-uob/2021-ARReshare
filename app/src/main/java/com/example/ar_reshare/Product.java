@@ -1,11 +1,15 @@
 package com.example.ar_reshare;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import com.google.android.gms.maps.model.LatLng;
 
-public class Product {
+public class Product implements Parcelable {
     private String name;
     private String description;
     private User contributor;
@@ -23,6 +27,25 @@ public class Product {
         this.location = new LatLng(lat,lng);
         this.images = new ArrayList<>();
     }
+
+    protected Product(Parcel in) {
+        name = in.readString();
+        description = in.readString();
+        date = in.readString();
+        location = in.readParcelable(LatLng.class.getClassLoader());
+    }
+    //CREATOR for Parcelable items
+    public static final Creator<Product> CREATOR = new Creator<Product>() {
+        @Override
+        public Product createFromParcel(Parcel in) {
+            return new Product(in);
+        }
+
+        @Override
+        public Product[] newArray(int size) {
+            return new Product[size];
+        }
+    };
 
     public String getName() {
         return name;
@@ -74,5 +97,20 @@ public class Product {
 
     public void addImages(Integer image) {
         this.images.add(image);
+    }
+
+    //implementation of Parcelable
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
+        dest.writeString(name);
+        dest.writeString(description);
+        dest.writeString(date);
+        dest.writeParcelable(location, flags);
     }
 }

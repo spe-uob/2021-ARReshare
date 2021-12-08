@@ -3,52 +3,100 @@ package com.example.ar_reshare;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.Intent;
+
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.maps.model.Circle;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProductPageActivity extends AppCompatActivity {
 
-
-    public static Drawable loadMapImage(String url){
-        try{
-            InputStream mapPic = (InputStream) new URL(url).getContent();
-            Drawable map = Drawable.createFromStream(mapPic,"trial");
-            return map;
-        }catch(Exception e){
-            return null;
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_page);
-        // hardcoded a product
 
-        User user = new User("Me", "", 1);
-        Product cup = new Product("Fancy Cup","This is a fancy cup ", user, Category.OTHER,0,0);
-
+        Intent i = getIntent();
+        Product product = i.getParcelableExtra("product");
+        User contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
+        User user = ExampleData.getUsers().get(0); // this is John
+        int profilePicId = i.getIntExtra("profilePicId",R.drawable.image_circle);
 
         //display product name
-        TextView productName = findViewById(R.id.productName);
-        productName.setText(cup.getName());
+        displayProductName(product);
 
         //display product description
-        TextView description = findViewById(R.id.description);
-        description.setText(cup.getDescription());
+        displayProductDescription(product);
+
+        //display contributor's information
+        displayProductContributor(contributor,profilePicId);
+
         // display product added time
         TextView addedTime = findViewById(R.id.addedtime);
-        addedTime.setText(cup.getDate() + "  added  ");
+        addedTime.setText(product.getDate() + "  added  ");
 
         //add a bookmark button
+        bookmarkButton();
+
+        //display product pics using slider
+        displayProductPics();
+
+        //display a static map to show product's location
+        displayMapPic();
+
+        //top left return arrow
+        returnToMapListener();
+
+        //links to messaging page
+        messageButton(product,contributor,user,profilePicId);
+    }
+
+    // implement a top left return arrow that returns to previous page when clicked
+    public void returnToMapListener(){
+        ImageView returnArrow = findViewById(R.id.returnArrow);
+        returnArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProductPageActivity.this,MapsActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
+    public void displayProductContributor(User contributor, int id){
+        TextView contributorName = findViewById(R.id.contributorName);
+        CircleImageView contributorIcon = findViewById(R.id.circle);
+
+        contributorName.setText(contributor.getName());
+        contributorIcon.setImageResource(id);
+    }
+
+
+    public void displayProductName(Product product){
+        TextView productName = findViewById(R.id.productName);
+        productName.setText(product.getName());
+    }
+
+    public void displayProductDescription(Product product){
+        TextView description = findViewById(R.id.description);
+        description.setText(product.getDescription());
+    }
+
+    public void bookmarkButton(){
         ImageView bookmark = (ImageView) findViewById(R.id.bookmark);
         bookmark.setTag(0);
         bookmark.setOnClickListener(new View.OnClickListener(){
@@ -64,13 +112,21 @@ public class ProductPageActivity extends AppCompatActivity {
 
             }
         });
+    }
 
-        //display product pics using slider
-        displayProductPics();
-
-        //display a static map to show product's location
-        ImageView mapView = findViewById(R.id.map);
-        displayMapPic(mapView);
+    public void messageButton(Product product, User contributor, User user,Integer profilePicId){
+        Button message = findViewById(R.id.messageButton);
+        message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProductPageActivity.this ,MessagingActivity.class);
+                intent.putExtra("product", product);
+                intent.putExtra("contributor", contributor);
+                intent.putExtra("user",user);
+                intent.putExtra("profilePicId", profilePicId);
+                startActivity(intent);
+            }
+        });
     }
 
     public void displayProductPics(){
@@ -84,7 +140,8 @@ public class ProductPageActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
     }
 
-    public void displayMapPic(ImageView mapView){
-        Glide.with(this).load("https://maps.googleapis.com/maps/api/staticmap?center=Berkeley,CA&zoom=14&size=400x400&key=AIzaSyBsn8QLFwcsXnxHf2ESE3HrXbch6lux3Ak").into(mapView);
+    public void displayMapPic(){
+        ImageView mapView = findViewById(R.id.map);
+        Glide.with(this).load("https://maps.googleapis.com/maps/api/staticmap?center=Bristol,CA&zoom=14&size=400x400&key=AIzaSyBsn8QLFwcsXnxHf2ESE3HrXbch6lux3Ak").into(mapView);
     }
 }

@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,30 +26,32 @@ public class MessagingActivity extends AppCompatActivity{
     EditText chatTextView;
     List<Message> mMessageList = new ArrayList<>();
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
+    User user;
+    User contributor;
+    int profilePicId;
+    Product product;
 
 
     public void sendMessage(View view){
         sendButton = findViewById(R.id.button_send);
         chatTextView = findViewById(R.id.text_chatbox);
         String text = chatTextView.getText().toString();
-        User user1 = new User("david", "", 1);
-        Message message1 = new Message(text, new User("david", "", 0),
-                simpleDateFormat.format(new Date()));
+        Message message1 = new Message(text, user, simpleDateFormat.format(new Date()));
         mMessageList.add(message1);
         if (mMessageList.size() == 1) {
-            Message message2 = new Message("hi", user1, simpleDateFormat.format(new Date()));
+            Message message2 = new Message("hi", contributor, simpleDateFormat.format(new Date()));
             mMessageList.add(message2);
         }else if (mMessageList.size() == 3){
-            Message message3 = new Message("how are you  ", user1, simpleDateFormat.format(new Date()));
+            Message message3 = new Message("how are you  ", contributor, simpleDateFormat.format(new Date()));
             mMessageList.add(message3);
         }else if(mMessageList.size() == 5) {
-            Message message4 = new Message("do you want to share anything?  ", user1, simpleDateFormat.format(new Date()));
+            Message message4 = new Message("do you want to share anything?  ", contributor, simpleDateFormat.format(new Date()));
             mMessageList.add(message4);
         }else if (mMessageList.size() == 7) {
-            Message message5 = new Message("thank you! bye bye 🤭 ", user1, simpleDateFormat.format(new Date()));
+            Message message5 = new Message("thank you! bye bye 🤭 ", contributor, simpleDateFormat.format(new Date()));
             mMessageList.add(message5);
         }else {
-            Message message6 = new Message("I cannot come up with more words 😟", user1, simpleDateFormat.format(new Date()));
+            Message message6 = new Message("I cannot come up with more words 😟", contributor, simpleDateFormat.format(new Date()));
             mMessageList.add(message6);
         }
 
@@ -62,7 +65,16 @@ public class MessagingActivity extends AppCompatActivity{
         sendButton = findViewById(R.id.button_send);
         chatTextView = (EditText)findViewById(R.id.text_chatbox);
         setContentView(R.layout.message_list_layout);
-
+        Intent i = getIntent();
+//        Bundle extras = i.getExtras();
+//        product = extras.getParcelable("product");
+//        user = extras.getParcelable("user");
+//        contributor = extras.getParcelable("contributor");
+//        profilePicId = extras.getInt("profilePicId");
+        user = i.getParcelableExtra("user");
+        contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
+        profilePicId = i.getIntExtra("profilePicId",0);
+        contributor.setProfileIcon(profilePicId);
 
         recyclerView = findViewById(R.id.reyclerview_message_list);
         recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
