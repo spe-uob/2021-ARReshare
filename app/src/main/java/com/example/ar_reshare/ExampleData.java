@@ -33,6 +33,7 @@ public class ExampleData {
         products.get(2).addImages(R.drawable.umbrella1);
         products.get(2).addImages(R.drawable.umbrella2);
 
+
         User user3 = new User("Hellin","",1);
         users.add(user3);
         products.add(new Product("Apple Pencil", "This is a product.", user3, Category.ELECTRONICS,51.45864853294286, -2.5853638594577193));

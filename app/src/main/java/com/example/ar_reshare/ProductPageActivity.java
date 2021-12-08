@@ -30,7 +30,6 @@ public class ProductPageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_page);
 
-
         // getting the stuff we need from previous page
         Intent i = getIntent();
         Product product = i.getParcelableExtra("product");
@@ -38,6 +37,7 @@ public class ProductPageActivity extends AppCompatActivity {
         User user = ExampleData.getUsers().get(0); // this is John
         Integer profilePicId = i.getIntExtra("profilePicId",R.drawable.arfi_profile_icon);
         List<Integer> productPicId = i.getIntegerArrayListExtra("productPicId");
+
 
         //display product name
         displayProductName(product);
@@ -71,6 +71,7 @@ public class ProductPageActivity extends AppCompatActivity {
 
     // implement a top left return arrow that returns to previous page when clicked
     public void returnListener(){
+
         ImageView returnArrow = findViewById(R.id.returnArrow);
         returnArrow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,7 +87,6 @@ public class ProductPageActivity extends AppCompatActivity {
 
         contributorName.setText(contributor.getName());
         contributorIcon.setImageResource(id);
-
 
     }
 
@@ -119,7 +119,8 @@ public class ProductPageActivity extends AppCompatActivity {
         });
     }
 
-    public void messageButton(Product product, User contributor, User user){
+    public void messageButton(Product product, User contributor, User user,Integer profilePicId){
+
         Button message = findViewById(R.id.messageButton);
         message.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,6 +129,8 @@ public class ProductPageActivity extends AppCompatActivity {
                 intent.putExtra("product", product);
                 intent.putExtra("contributor", contributor);
                 intent.putExtra("user",user);
+                intent.putExtra("profilePicId", profilePicId);
+
                 startActivity(intent);
             }
         });
@@ -143,5 +146,6 @@ public class ProductPageActivity extends AppCompatActivity {
     public void displayMapPic(double lat, double lng){
         ImageView mapView = findViewById(R.id.map);
         Glide.with(this).load("https://maps.googleapis.com/maps/api/staticmap?center=51.45864853,-2.5853638,CA&zoom=10&size=400x400&key=AIzaSyBsn8QLFwcsXnxHf2ESE3HrXbch6lux3Ak").into(mapView);
+
     }
 }
