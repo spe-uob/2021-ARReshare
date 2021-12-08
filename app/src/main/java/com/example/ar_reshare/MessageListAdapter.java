@@ -115,10 +115,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
             nameText.setText(message.getSender().getName());
 
             // Insert the profile image from the URL into the ImageView.
-//            Utils.displayRoundImageFromUrl(mContext, message.getSender().getProfileUrl(), profileImage);
             profileImage.setImageResource(message.getSender().getProfileIcon());
-//            profileImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
-           //profileImage.setImageResource();
         }
     }
 

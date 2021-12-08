@@ -29,21 +29,13 @@ public class ProductPageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_page);
-        // hardcoded a product
 
         Intent i = getIntent();
-      //  Bundle extras = i.getExtras();
-//        Product product = extras.getParcelable("product");
-//        User contributor = extras.getParcelable("contributor"); // the contributor of the current product
-//        User user = ExampleData.getUsers().get(0); // this is John
-//        Integer profilePicId = extras.getInt("profilePicId");
         Product product = i.getParcelableExtra("product");
         User contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
         User user = ExampleData.getUsers().get(0); // this is John
         int profilePicId = i.getIntExtra("profilePicId",R.drawable.image_circle);
 
-        //ArrayList<Integer> productPicIdList = (ArrayList<Integer>) extras.getIntegerArrayList("productPicId");
-        //System.out.println(productPicIdList);
         //display product name
         displayProductName(product);
 
