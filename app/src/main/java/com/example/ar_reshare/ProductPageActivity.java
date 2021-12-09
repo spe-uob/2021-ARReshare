@@ -145,7 +145,7 @@ public class ProductPageActivity extends AppCompatActivity {
 
     public void displayMapPic(double lat, double lng){
         ImageView mapView = findViewById(R.id.map);
-        Glide.with(this).load("https://maps.googleapis.com/maps/api/staticmap?center=51.45864853,-2.5853638,CA&zoom=10&size=400x400&key=AIzaSyBsn8QLFwcsXnxHf2ESE3HrXbch6lux3Ak").into(mapView);
+        Glide.with(this).load("https://maps.googleapis.com/maps/api/staticmap?center=%2051.454513,-2.58791&zoom=10&size=400x400&key=AIzaSyAFWHH-yjENxp6a7kQUeFfLjWcbGBuuM6Y").into(mapView);
 
     }
 }
