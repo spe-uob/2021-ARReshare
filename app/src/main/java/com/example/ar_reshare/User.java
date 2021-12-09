@@ -1,5 +1,4 @@
 package com.example.ar_reshare;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
