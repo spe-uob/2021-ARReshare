@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MessagingActivity extends AppCompatActivity{
 
@@ -42,16 +43,16 @@ public class MessagingActivity extends AppCompatActivity{
             Message message2 = new Message("hi", contributor, simpleDateFormat.format(new Date()));
             mMessageList.add(message2);
         }else if (mMessageList.size() == 3){
-            Message message3 = new Message("how are you  ", contributor, simpleDateFormat.format(new Date()));
+            Message message3 = new Message("yep, it is still available!", contributor, simpleDateFormat.format(new Date()));
             mMessageList.add(message3);
         }else if(mMessageList.size() == 5) {
-            Message message4 = new Message("do you want to share anything?  ", contributor, simpleDateFormat.format(new Date()));
+            Message message4 = new Message("sure, that would work great!", contributor, simpleDateFormat.format(new Date()));
             mMessageList.add(message4);
         }else if (mMessageList.size() == 7) {
-            Message message5 = new Message("thank you! bye bye 🤭 ", contributor, simpleDateFormat.format(new Date()));
+            Message message5 = new Message("stay safe and have a good one 🤭", contributor, simpleDateFormat.format(new Date()));
             mMessageList.add(message5);
         }else {
-            Message message6 = new Message("I cannot come up with more words 😟", contributor, simpleDateFormat.format(new Date()));
+            Message message6 = new Message("okay", contributor, simpleDateFormat.format(new Date()));
             mMessageList.add(message6);
         }
 
@@ -73,6 +74,11 @@ public class MessagingActivity extends AppCompatActivity{
 //        profilePicId = extras.getInt("profilePicId");
         user = i.getParcelableExtra("user");
         contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
+        for (User user : ExampleData.getUsers()) {
+            if (contributor.getName().equals(user.getName())) {
+                contributor = user;
+            }
+        }
         profilePicId = i.getIntExtra("profilePicId",0);
         contributor.setProfileIcon(profilePicId);
 
