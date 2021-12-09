@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
             // Permission has already been granted previously
             cameraPermissionGranted = true;
         } else {
-            // If the location permission has not been granted already,
+            // If the camera permission has not been granted already,
             // open a window requesting this permission
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA},
