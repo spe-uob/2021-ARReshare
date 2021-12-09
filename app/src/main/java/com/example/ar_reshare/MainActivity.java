@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent i = new Intent(MainActivity.this, FeedActivity.class);
                     startActivity(i);
                 } else if((Math.abs(x1) > Math.abs(x2)+OFFSET)) {
-                    Intent i = new Intent(MainActivity.this, ProductPageActivity.class);
+                    Intent i = new Intent(MainActivity.this, ProfileActivity.class);
                     startActivity(i);
                 } else {
                     Intent i = new Intent(MainActivity.this, MapsActivity.class);
