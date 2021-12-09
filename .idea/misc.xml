@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/arafa/Desktop/University Documents/Software Engineering Project/2021-ARReshare/app/src/main/res/layout/activity_main.xml" value="0.176" />
-        <entry key="..\:/Users/arafa/Desktop/University Documents/Software Engineering Project/2021-ARReshare/app/src/main/res/layout/item_view.xml" value="0.264" />
+        <entry key="..\:/Users/wzq/AndroidStudioProjects/2021-ARReshare/app/src/main/res/drawable/button_circle.xml" value="0.26979166666666665" />
+        <entry key="..\:/Users/wzq/AndroidStudioProjects/2021-ARReshare/app/src/main/res/drawable/image_circle.xml" value="0.26979166666666665" />
+        <entry key="..\:/Users/wzq/AndroidStudioProjects/2021-ARReshare/app/src/main/res/layout/activity_product_page.xml" value="0.4" />
+        <entry key="..\:/Users/wzq/AndroidStudioProjects/2021-ARReshare/app/src/main/res/layout/activity_profile.xml" value="0.2" />
       </map>
     </option>
   </component>
@@ -13,5 +15,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.264" />
+      </ProjectState>
+    </option>
   </component>
 </project>
