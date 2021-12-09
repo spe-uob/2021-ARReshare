@@ -62,7 +62,7 @@ public class ProfileActivity extends AppCompatActivity {
                 intent.putExtra("name", A.getName());
                 intent.putExtra("product", B);
                 intent.putExtra("contributor", B.getContributor());
-                intent.putExtra("profilePicId", B.getImages().get(0));
+                intent.putExtra("profilePicId", B.getContributor().getProfileIcon());
                 intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) B.getImages());
 
                 startActivity(intent);
