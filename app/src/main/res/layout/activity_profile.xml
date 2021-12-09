@@ -98,7 +98,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Gained"
+                            android:text="Shared"
                             android:textColor="@color/black"
                             android:textSize="30sp">
                         </TextView>
@@ -111,7 +111,7 @@
                             android:layout_marginBottom="5dp">
 
                             <ImageButton
-                                android:id="@+id/gain1"
+                                android:id="@+id/shared1"
                                 android:layout_width="40dp"
                                 android:layout_height="120dp"
                                 android:layout_weight="1"
@@ -126,7 +126,7 @@
                                 android:layout_marginLeft="5dp"
                                 android:layout_marginRight="5dp"
                                 android:layout_weight="1"
-                                android:background="@color/white"
+                                android:background="#C0C0C0"
                                 android:scaleType="centerCrop">
                             </ImageButton>
 
@@ -136,7 +136,7 @@
                                 android:layout_height="120dp"
                                 android:layout_weight="1"
                                 android:scaleType="centerCrop"
-                                android:background="@color/white">
+                                android:background="#C0C0C0">
                             </ImageButton>
                         </LinearLayout>
 
@@ -146,7 +146,7 @@
                             <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Shared"
+                            android:text="Gained"
                             android:textColor="@color/black"
                             android:textSize="30sp">
                         </TextView>
@@ -154,14 +154,18 @@
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="5dp">
 
                             <ImageButton
-                                android:id="@+id/shared1"
+                                android:id="@+id/gain1"
                                 android:layout_width="40dp"
                                 android:layout_height="120dp"
                                 android:layout_weight="1"
-                                android:background="@color/white"
+                                android:background="#C0C0C0"
                                 android:scaleType="centerCrop">
                             </ImageButton>
 
@@ -170,7 +174,9 @@
                                 android:layout_width="40dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
-                                android:background="@color/white"
+                                android:layout_marginLeft="5dp"
+                                android:layout_marginRight="5dp"
+                                android:background="#C0C0C0"
                                 android:scaleType="centerCrop">
                             </ImageButton>
 
@@ -179,7 +185,7 @@
                                 android:layout_width="40dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
-                                android:background="@color/white"
+                                android:background="#C0C0C0"
                                 android:scaleType="centerCrop">
                             </ImageButton>
                         </LinearLayout>
@@ -198,14 +204,18 @@
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="5dp">
 
                             <ImageButton
                                 android:id="@+id/saved1"
                                 android:layout_width="40dp"
                                 android:layout_height="120dp"
                                 android:layout_weight="1"
-                                android:background="@color/white"
+                                android:background="#C0C0C0"
                                 android:scaleType="centerCrop">
                             </ImageButton>
 
@@ -214,7 +224,9 @@
                                 android:layout_width="40dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
-                                android:background="@color/white"
+                                android:layout_marginLeft="5dp"
+                                android:layout_marginRight="5dp"
+                                android:background="#C0C0C0"
                                 android:scaleType="centerCrop">
                             </ImageButton>
 
@@ -223,7 +235,7 @@
                                 android:layout_width="40dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
-                                android:background="@color/white"
+                                android:background="#C0C0C0"
                                 android:scaleType="centerCrop">
                             </ImageButton>
                         </LinearLayout>

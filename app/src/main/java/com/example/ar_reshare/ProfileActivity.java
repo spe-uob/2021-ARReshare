@@ -25,8 +25,8 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        User A = ExampleData.getUsers().get(1);
-        Product B = ExampleData.getProducts().get(1);
+        User A = ExampleData.getUsers().get(0);
+        Product B = ExampleData.getProducts().get(0);
 
         TextView name = findViewById(R.id.username);
         name.setText(A.getName());
@@ -45,7 +45,6 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ProfileActivity.this, MessagingActivity.class);
-                startActivity(intent);
             }
         });
 
