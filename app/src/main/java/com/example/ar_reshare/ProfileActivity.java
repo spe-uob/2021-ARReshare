@@ -1,6 +1,5 @@
 package com.example.ar_reshare;
 
-import androidx.annotation.DrawableRes;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -10,15 +9,13 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
 public class ProfileActivity extends AppCompatActivity {
-    private Button btM;
-    private Button btS;
-    private ImageButton btB;
-    private ImageButton btImto;
+    private Button MessageButton;
+    private ImageButton BackButton;
+    private ImageButton ProductButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,16 +37,16 @@ public class ProfileActivity extends AppCompatActivity {
         ImageButton product1 = findViewById(R.id.shared1);
         product1.setImageResource(B.getImages().get(0));
 
-        btM = (Button)findViewById(R.id.btM);
-        btM.setOnClickListener(new View.OnClickListener() {
+        MessageButton = (Button)findViewById(R.id.btM);
+        MessageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ProfileActivity.this, MessagingActivity.class);
             }
         });
 
-        btB = (ImageButton)findViewById(R.id.back);
-        btB.setOnClickListener(new View.OnClickListener() {
+        BackButton = (ImageButton)findViewById(R.id.back);
+        BackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
@@ -57,8 +54,8 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        btImto = (ImageButton) findViewById(R.id.shared1);
-        btImto.setOnClickListener(new View.OnClickListener() {
+        ProductButton = (ImageButton) findViewById(R.id.shared1);
+        ProductButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
