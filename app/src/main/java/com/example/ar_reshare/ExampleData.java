@@ -28,7 +28,7 @@ public class ExampleData {
 
         User user2 = new User("Lingtao","",1);
         users.add(user2);
-        products.add(new Product("Pink Umbrella", "Who wouldn't this fashionable pink umbrella?", user2, Category.CLOTHING, 51.45416805430673, -2.591828561043675));
+        products.add(new Product("Pink Umbrella", "Who wouldn't want this fashionable pink umbrella?", user2, Category.CLOTHING, 51.45416805430673, -2.591828561043675));
         user2.setProfileIcon(R.drawable.lingtao_profile_icon);
         products.get(2).addImages(R.drawable.umbrella1);
         products.get(2).addImages(R.drawable.umbrella2);
