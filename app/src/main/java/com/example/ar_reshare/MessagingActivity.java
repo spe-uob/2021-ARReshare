@@ -73,6 +73,11 @@ public class MessagingActivity extends AppCompatActivity{
 //        profilePicId = extras.getInt("profilePicId");
         user = i.getParcelableExtra("user");
         contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
+        for (User user : ExampleData.getUsers()) {
+            if (contributor.getName().equals(user.getName())) {
+                contributor = user;
+            }
+        }
         profilePicId = i.getIntExtra("profilePicId",0);
         contributor.setProfileIcon(profilePicId);
 

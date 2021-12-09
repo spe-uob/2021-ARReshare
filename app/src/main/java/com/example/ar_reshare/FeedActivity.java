@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -27,8 +28,11 @@ public class FeedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_feed);
 
         // This needs to be done temporarily since not all users have icons, and not all products have images
-        arrayList.add(productsList.get(1)); // Artur's product
-        arrayList.add(productsList.get(5)); // Arafat's product
+        arrayList.add(productsList.get(1));
+        arrayList.add(productsList.get(2));
+        arrayList.add(productsList.get(3));
+        arrayList.add(productsList.get(4));
+        arrayList.add(productsList.get(5));
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         RecyclerAdapter recyclerAdapter = new RecyclerAdapter(arrayList);
@@ -57,6 +61,7 @@ public class FeedActivity extends AppCompatActivity {
             Intent intent = new Intent(FeedActivity.this, MessagingActivity.class);
             intent.putExtra("product", (Product) v.getTag());
             intent.putExtra("contributor", ((Product) v.getTag()).getContributor());
+            intent.putExtra("profilePicId", ((Product) v.getTag()).getContributor().getProfileIcon());
             intent.putExtra("user", ExampleData.getUsers().get(0));
             startActivity(intent);
         });
@@ -74,6 +79,7 @@ public class FeedActivity extends AppCompatActivity {
             intent.putExtra("product", (Product) v.getTag());
             intent.putExtra("contributor", ((Product) v.getTag()).getContributor());
             intent.putExtra("profilePicId", ((Product) v.getTag()).getContributor().getProfileIcon());
+            intent.putExtra("productPicId", (ArrayList<Integer>) ((Product) v.getTag()).getImages());
             startActivity(intent);
         });
     }
@@ -90,6 +96,7 @@ public class FeedActivity extends AppCompatActivity {
             intent.putExtra("product", (Product) v.getTag());
             intent.putExtra("contributor", ((Product) v.getTag()).getContributor());
             intent.putExtra("profilePicId", ((Product) v.getTag()).getContributor().getProfileIcon());
+            intent.putExtra("productPicId", (ArrayList<Integer>) ((Product) v.getTag()).getImages());
             startActivity(intent);
         });
     }
@@ -102,6 +109,7 @@ public class FeedActivity extends AppCompatActivity {
             intent.putExtra("product", (Product) v.getTag());
             intent.putExtra("contributor", ((Product) v.getTag()).getContributor());
             intent.putExtra("profilePicId", ((Product) v.getTag()).getContributor().getProfileIcon());
+            intent.putExtra("productPicId", (ArrayList<Integer>) ((Product) v.getTag()).getImages());
             startActivity(intent);
         });
     }

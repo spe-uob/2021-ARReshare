@@ -53,7 +53,6 @@ public class ExampleData {
         users.add(user5);
         products.add(new Product("Magic Pen", "Take amazing notes with this stylish magic pen.", user5, Category.OTHER, 51.459040571152514, -2.6022736036387366));
         products.get(5).addImages(R.drawable.pen);
-        products.get(5).addImages(R.drawable.pen2);
     }
 
     public static List<User> getUsers() {
