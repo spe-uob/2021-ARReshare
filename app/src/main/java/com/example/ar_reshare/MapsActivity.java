@@ -12,6 +12,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -43,6 +45,8 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
 
+    private ImageButton returnButton;
+
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
 
@@ -63,6 +67,12 @@ public class MapsActivity extends FragmentActivity implements
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getLocationPermission();
+
+        returnButton = findViewById(R.id.returnToMainArrow);
+        returnButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MapsActivity.this, MainActivity.class);
+            startActivity(intent);
+        });
     }
 
     // When map is loaded, checks for location permissions and configures the initial
@@ -139,11 +149,6 @@ public class MapsActivity extends FragmentActivity implements
                 }
                 return;
         }
-    }
-
-    public void onReturnArrowClick(View view) {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
     }
 
     // Request location permissions from the device. We will receive a callback
