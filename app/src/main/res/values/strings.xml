@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">AR-Reshare</string>
+    <string name="profile_icon">Profile Icon</string>
+    <string name="product_title">Product Title</string>
+    <string name="product_description">Product Description</string>
+    <string name="product_image">Product Image</string>
+    <string name="contributor">Contributor</string>
+    <string name="bookmark_button">Bookmark Button</string>
+    <string name="message_button">Message Button</string>
+    <string name="API_KEY1">AIzaSyCpMkCR3OcbAK9aZ4mpthgRDtHU4l8tGIk</string>
+    <string name="API_KEY2">AIzaSyBsn8QLFwcsXnxHf2ESE3HrXbch6lux3Ak</string>
+    <string name="title_activity_maps">MapsActivity</string>
+
 </resources>
