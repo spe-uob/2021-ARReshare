@@ -27,7 +27,7 @@ public class FeedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
 
-        // This needs to be done temporarily since not all users have icons, and not all products have images
+        // Done temporarily since not all users have icons, and not all products have images
         arrayList.add(productsList.get(1));
         arrayList.add(productsList.get(2));
         arrayList.add(productsList.get(3));
