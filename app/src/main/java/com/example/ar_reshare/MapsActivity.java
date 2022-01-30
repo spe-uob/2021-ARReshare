@@ -213,7 +213,7 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-            // Product Summary class
+    // Product Summary class
     private class ProductSummary implements GoogleMap.InfoWindowAdapter {
 
         private final View mWindow;
