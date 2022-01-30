@@ -69,6 +69,10 @@ public class ProductPageActivity extends AppCompatActivity {
         messageButton(product,contributor,user, profilePicId);
     }
 
+    public void hideMessageButton(){
+
+    }
+
     // implement a top left return arrow that returns to previous page when clicked
     public void returnListener(){
 
@@ -145,7 +149,9 @@ public class ProductPageActivity extends AppCompatActivity {
 
     public void displayMapPic(double lat, double lng){
         ImageView mapView = findViewById(R.id.map);
-        Glide.with(this).load("https://maps.googleapis.com/maps/api/staticmap?center=%2051.454513,-2.58791&zoom=10&size=400x400&key=AIzaSyAFWHH-yjENxp6a7kQUeFfLjWcbGBuuM6Y").into(mapView);
+        String url = "https://maps.googleapis.com/maps/api/staticmap?center="+ lat + ","+ lng +
+                "&zoom=15&size=400x400&markers=color:red|"+ lat + ","+ lng + "&key=" + getString(R.string.STATIC_MAP_KEY);
+        Glide.with(this).load(url).into(mapView);
 
     }
 }

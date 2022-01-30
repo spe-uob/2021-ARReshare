@@ -33,45 +33,13 @@ public class MessagingActivity extends AppCompatActivity{
     Product product;
 
 
-    public void sendMessage(View view){
-        sendButton = findViewById(R.id.button_send);
-        chatTextView = findViewById(R.id.text_chatbox);
-        String text = chatTextView.getText().toString();
-        Message message1 = new Message(text, user, simpleDateFormat.format(new Date()));
-        mMessageList.add(message1);
-        if (mMessageList.size() == 1) {
-            Message message2 = new Message("hi", contributor, simpleDateFormat.format(new Date()));
-            mMessageList.add(message2);
-        }else if (mMessageList.size() == 3){
-            Message message3 = new Message("yep, it is still available!", contributor, simpleDateFormat.format(new Date()));
-            mMessageList.add(message3);
-        }else if(mMessageList.size() == 5) {
-            Message message4 = new Message("sure, that would work great!", contributor, simpleDateFormat.format(new Date()));
-            mMessageList.add(message4);
-        }else if (mMessageList.size() == 7) {
-            Message message5 = new Message("stay safe and have a good one 🤭", contributor, simpleDateFormat.format(new Date()));
-            mMessageList.add(message5);
-        }else {
-            Message message6 = new Message("okay", contributor, simpleDateFormat.format(new Date()));
-            mMessageList.add(message6);
-        }
-
-        recyclerView.setAdapter(messageListAdapter);
-        chatTextView.setText("");
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sendButton = findViewById(R.id.button_send);
+
         chatTextView = (EditText)findViewById(R.id.text_chatbox);
         setContentView(R.layout.message_list_layout);
         Intent i = getIntent();
-//        Bundle extras = i.getExtras();
-//        product = extras.getParcelable("product");
-//        user = extras.getParcelable("user");
-//        contributor = extras.getParcelable("contributor");
-//        profilePicId = extras.getInt("profilePicId");
         user = i.getParcelableExtra("user");
         contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
         for (User user : ExampleData.getUsers()) {
@@ -90,6 +58,36 @@ public class MessagingActivity extends AppCompatActivity{
                 recyclerView.scrollToPosition(mMessageList.size()-1);
             }
         });
+        sendButton = (Button) findViewById(R.id.button_send);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendButton = findViewById(R.id.button_send);
+                chatTextView = findViewById(R.id.text_chatbox);
+                String text = chatTextView.getText().toString();
+                Message message1 = new Message(text, user, simpleDateFormat.format(new Date()));
+                mMessageList.add(message1);
+                if (mMessageList.size() == 1) {
+                    Message message2 = new Message("hi", contributor, simpleDateFormat.format(new Date()));
+                    mMessageList.add(message2);
+                }else if (mMessageList.size() == 3){
+                    Message message3 = new Message("yep, it is still available!", contributor, simpleDateFormat.format(new Date()));
+                    mMessageList.add(message3);
+                }else if(mMessageList.size() == 5) {
+                    Message message4 = new Message("sure, that would work great!", contributor, simpleDateFormat.format(new Date()));
+                    mMessageList.add(message4);
+                }else if (mMessageList.size() == 7) {
+                    Message message5 = new Message("stay safe and have a good one 🤭", contributor, simpleDateFormat.format(new Date()));
+                    mMessageList.add(message5);
+                }else {
+                    Message message6 = new Message("okay", contributor, simpleDateFormat.format(new Date()));
+                    mMessageList.add(message6);
+                }
+
+                recyclerView.setAdapter(messageListAdapter);
+                chatTextView.setText("");
+            }
+        });
 
         recyclerView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -104,7 +102,6 @@ public class MessagingActivity extends AppCompatActivity{
 
         messageListAdapter = new MessageListAdapter(this,mMessageList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        //linearLayoutManager.setReverseLayout(true);
         recyclerView.setLayoutManager(linearLayoutManager);
 
         recyclerView.setAdapter(messageListAdapter);
