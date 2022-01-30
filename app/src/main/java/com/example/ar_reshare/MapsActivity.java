@@ -1,19 +1,18 @@
 package com.example.ar_reshare;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 
 import com.example.ar_reshare.databinding.ActivityMapsBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -28,14 +27,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
         GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener,
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnInfoWindowClickListener
         {
@@ -61,6 +58,16 @@ public class MapsActivity extends FragmentActivity implements
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        // Set the return arrow button on click event
+        ImageButton returnArrow = findViewById(R.id.returnToMainArrow);
+        returnArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), MainActivity.class);
+                startActivity(intent);
+            }
+        });
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getLocationPermission();
     }
@@ -76,16 +83,13 @@ public class MapsActivity extends FragmentActivity implements
             enableMyLocation();
         }
 
-        // Listen for go back to main arrow click events
-        View returnArrow = findViewById(R.id.returnToMainArrow);
-
         // Listen for on marker click events
         mMap.setOnMarkerClickListener(this);
         // Configure the Product Summary View
         mMap.setInfoWindowAdapter(new ProductSummary());
         mMap.setOnInfoWindowClickListener(this);
 
-        // Create dummy products and display them on the map
+        // Get dummy products and display them on the map
         List<Product> products = ExampleData.getProducts();
         populateMap(mMap, products);
 
@@ -102,7 +106,6 @@ public class MapsActivity extends FragmentActivity implements
             if (mMap != null) {
                 mMap.setMyLocationEnabled(true);
                 mMap.setOnMyLocationButtonClickListener(this);
-                mMap.setOnMyLocationClickListener(this);
             } else {
                 // Raise an error
             }
@@ -113,13 +116,6 @@ public class MapsActivity extends FragmentActivity implements
     public boolean onMyLocationButtonClick() {
         getDeviceLocation();
         return false;
-    }
-
-    @Override
-    public void onMyLocationClick(@NonNull Location location) {
-        // Debugging
-        System.out.println("Saved location = " + lastKnownLocation);
-        System.out.println("From click = " + location);
     }
 
     @Override
@@ -141,18 +137,13 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-    public void onReturnArrowClick(View view) {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-    }
-
     // Request location permissions from the device. We will receive a callback
     // to onRequestPermissionsResult with the results.
     private void getLocationPermission() {
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            // Location has already been granted previously
+            // Location permission has already been granted previously
             locationPermissionGranted = true;
             enableMyLocation();
         } else if (shouldShowRequestPermissionRationale("FINE_LOCATION")) {
@@ -198,13 +189,12 @@ public class MapsActivity extends FragmentActivity implements
     // Start the product page when clicked
     @Override
     public void onInfoWindowClick(Marker marker) {
-        Intent intent = new Intent(this,ProductPageActivity.class);
+        Intent intent = new Intent(this, ProductPageActivity.class);
 
         intent.putExtra("product", (Product) marker.getTag());
         intent.putExtra("contributor", ((Product) marker.getTag()).getContributor());
         intent.putExtra("profilePicId",((Product) marker.getTag()).getContributor().getProfileIcon());
         intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) ((Product) marker.getTag()).getImages());
-
 
         startActivity(intent);
     }
@@ -223,7 +213,7 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-    // Product Summary class
+            // Product Summary class
     private class ProductSummary implements GoogleMap.InfoWindowAdapter {
 
         private final View mWindow;
