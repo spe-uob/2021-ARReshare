@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="../../../../../layout/custom_preview.xml" value="0.22870370370370371" />
+        <entry key="app/src/main/res/drawable-v24/tab_indicator_default.xml" value="0.103125" />
+        <entry key="app/src/main/res/drawable-v24/tab_indicator_selected.xml" value="0.103125" />
+        <entry key="app/src/main/res/drawable-v24/tab_selector.xml" value="0.103125" />
+        <entry key="app/src/main/res/drawable/ic_baseline_bookmark_24.xml" value="0.103125" />
+        <entry key="app/src/main/res/drawable/image_circle.xml" value="0.103125" />
+        <entry key="app/src/main/res/drawable/messages_rectangle.xml" value="0.103125" />
+        <entry key="app/src/main/res/drawable/messages_sender_rectangle.xml" value="0.103125" />
+        <entry key="app/src/main/res/layout/activity_product_page.xml" value="0.10071417473869153" />
+        <entry key="app/src/main/res/layout/activity_profile.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/message_send_layout.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/messages_receive_layout.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/product_summary_map.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/product_summary_map2.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/recycler_view_item.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/slide_item_container.xml" value="0.1" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK" />
+</project>
