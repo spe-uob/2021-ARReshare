@@ -56,7 +56,7 @@ import java.util.List;
 public class ARActivity extends AppCompatActivity implements SampleRender.Renderer {
 
     private static final String SEARCHING_PLANE_MESSAGE = "Searching for surfaces...";
-    private static final String WAITING_FOR_TAP_MESSAGE = "Tap on a surface to place an object.";
+    private static final String USER_MOVED_MESSAGE = "You have left your origin. Please regenerate.";
 
     // See the definition of updateSphericalHarmonicsCoefficients for an explanation of these
     // constants.
@@ -138,8 +138,9 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private final float[] worldLightDirection = {0.0f, 0.0f, 0.0f, 0.0f};
     private final float[] viewLightDirection = new float[4]; // view x world light direction
 
-    private final List<WrappedAnchor> wrappedAnchors = new ArrayList<>();
-    private final List<ProductObject> blobs = new ArrayList<>();
+    // AR-Reshare Code
+    // The list of currently displayed Product Objects
+    private final List<ProductObject> productObjects = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -448,26 +449,22 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             }
         }
 
-        // Handle one tap per frame.
-        //handleTap(frame, camera);
-
+        // TODO: AR-Reshare code
         // MAIN FUNCTIONALITY
+        // ! These are all ideas, there might be better ways of doing things ! :)
         // On each frame update:
         // 0. Check user has not moved -> Reset objects if needed
+        // e.g. checkUserLocation()
         // 1. Get user's angle to the North (Compass)
+        // e.g. Compass.getAngle()
         // 2. Check if user is pointing at a product
+        // e.g. for loop iterating through this.productObjects, comparing angle to north of user and product
+        // For this you will probably need to create a function mapping virtual coordinates to real life GPS coordinates
+        // then define an equation of a line between REAL user location and REAL product location
+        // find the angle to the north of THIS LINE using trigonometry
+        // Then you can compare this angle to the angle that you received from compass
         // 3. Spawn a product in front of the user if yes
-        //    - Get user location in the Virtual Space
-        //
-//        doMagic(camera);
-//        moveMagic(camera);
-//
-//        float[] camPos = camera.getDisplayOrientedPose().getTranslation();
-//        String logging = "x:"+ camPos[0] + " y:" + camPos[1] + " z:" + camPos[2] + " dist=";
-//        if (!this.blobs.isEmpty()) {
-//            logging += this.blobs.get(0).distance;
-//        }
-//        this.amateurLogging = logging;
+        //spawnProduct(camera, null, 0.0);
 
 
         // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
@@ -483,12 +480,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 message = TrackingStateHelper.getTrackingFailureReasonString(camera);
             }
         } else if (hasTrackingPlane()) {
-//            if (true) {
-//                //message = this.amateurLogging;
-//            }
-//            else if (wrappedAnchors.isEmpty()) {
-//                message = WAITING_FOR_TAP_MESSAGE;
-//            }
+
         } else {
             message = SEARCHING_PLANE_MESSAGE;
         }
@@ -546,10 +538,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // Visualize anchors created by touch.
         render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
 
-        for (ProductObject blob : this.blobs)  {
-            WrappedAnchor wrappedAnchor = blob.anchor;
-            Anchor anchor = wrappedAnchor.getAnchor();
-            Trackable trackable = wrappedAnchor.getTrackable();
+        // AR-Reshare Code (modified)
+        // Iterates through existing anchors and draws them on each frame
+        for (ProductObject obj : this.productObjects)  {
+            Anchor anchor = obj.getAnchor();
+            Trackable trackable = obj.getTrackable();
 
             // Get the current pose of an Anchor in world space. The Anchor pose is updated
             // during calls to session.update() as ARCore refines its estimate of the world.
@@ -664,29 +657,48 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         session.configure(config);
     }
 
-    private void doMagic(Camera camera) {
+    // AR-Reshare Code
+    // If it is concluded that a user is currently pointing at a product, and a product should
+    // be spawned, pass the camera, the relevant product and the current angletoNorth to this
+    // method to spawn a product in a virtual space
+    private void spawnProduct(Camera camera, Product product, double angleToNorth) {
         if (true) {
+            // Current position of the user
             Pose cameraPose = camera.getDisplayOrientedPose();
             float[] coords = cameraPose.getTranslation();
-            Pose anchorPose = new Pose(new float[]{coords[0], coords[1], coords[2]+2}, new float[]{0, 0, 0, 0});
-            //this.amateurLogging = "x: " + coords[0] + " y: " + coords[1] + " z: " + coords[2];
-            Anchor newMagic = session.createAnchor(anchorPose);
-            WrappedAnchor magicWrapped = new WrappedAnchor(newMagic, null);
-            ProductObject location = new ProductObject(magicWrapped, cameraPose);
-            this.wrappedAnchors.add(magicWrapped);
-            this.blobs.add(location);
-            //this.clicked = false;
+
+            // Get new coordinates two meters in front of the user
+            // Using Trigonometry
+            double distance = 2; // 2 metres away
+            float deltaX = (float) (Math.sin(angleToNorth) * distance);
+            float deltaZ = (float) (Math.cos(angleToNorth) * distance);
+            float[] objectCoords = new float[]{coords[0], coords[1] + deltaX, coords[2] + deltaZ};
+            Pose anchorPose = new Pose(objectCoords, new float[]{0, 0, 0, 0});
+
+            // Create an anchor and a ProductObject associated with it
+            Anchor newAnchor = session.createAnchor(anchorPose);
+            ProductObject newObject = new ProductObject(newAnchor, null, product);
+            this.productObjects.add(newObject);
         }
     }
 }
 
-class WrappedAnchor {
+// AR-Reshare Code
+// A class to represent the objects in AR showing the direction to products
+class ProductObject {
     private Anchor anchor;
     private Trackable trackable;
+    private Product product;
 
-    public WrappedAnchor(Anchor anchor, Trackable trackable) {
+    public ProductObject(Anchor anchor, Trackable trackable, Product product) {
         this.anchor = anchor;
         this.trackable = trackable;
+        this.product = product;
+    }
+
+    public static float findDistance(float[] source, float[] dest) {
+        float[] sqrDiif = new float[]{(float) Math.pow((source[0]-dest[0]),2), (float) Math.pow((source[1]-dest[1]),2), (float) Math.pow((source[2]-dest[2]),2)};
+        return (float) Math.sqrt(sqrDiif[0] + sqrDiif[1] + sqrDiif[2]);
     }
 
     public Anchor getAnchor() {
@@ -696,22 +708,6 @@ class WrappedAnchor {
     public Trackable getTrackable() {
         return trackable;
     }
-}
 
-// A class to represent the objects in AR showing the direction to products
-class ProductObject {
-    public WrappedAnchor anchor;
-    public Pose source;
-    public float distance;
-
-    public ProductObject(WrappedAnchor anchor, Pose source) {
-        this.anchor = anchor;
-        this.source = source;
-        this.distance = findDistance(anchor.getAnchor().getPose().getTranslation(), source.getTranslation());
-    }
-
-    public static float findDistance(float[] source, float[] dest) {
-        float[] sqrDiif = new float[]{(float) Math.pow((source[0]-dest[0]),2), (float) Math.pow((source[1]-dest[1]),2), (float) Math.pow((source[2]-dest[2]),2)};
-        return (float) Math.sqrt(sqrDiif[0] + sqrDiif[1] + sqrDiif[2]);
-    }
+    public Product getProduct() { return product; }
 }
