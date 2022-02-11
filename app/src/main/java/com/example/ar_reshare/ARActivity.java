@@ -9,6 +9,7 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.Toast;
@@ -141,6 +142,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     // AR-Reshare Code
     // The list of currently displayed Product Objects
     private final List<ProductObject> productObjects = new ArrayList<>();
+    // temporary example for generating product
+    private int shouldGenerate = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,6 +164,15 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
         depthSettings.onCreate(this);
         instantPlacementSettings.onCreate(this);
+
+        // AR-Reshare code
+        Button regenerate_button = findViewById(R.id.regenerate_button);
+        regenerate_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shouldGenerate += 1;
+            }
+        });
     }
 
     @Override
@@ -464,7 +476,12 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // find the angle to the north of THIS LINE using trigonometry
         // Then you can compare this angle to the angle that you received from compass
         // 3. Spawn a product in front of the user if yes
-        //spawnProduct(camera, null, 0.0);
+        // This if statement is temporary - otherwise we would constantly generate and crash
+        if (shouldGenerate >= 1) {
+            spawnProduct(camera, null, 0.0);
+            shouldGenerate--;
+        }
+
 
 
         // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
