@@ -139,12 +139,12 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private final float[] viewLightDirection = new float[4]; // view x world light direction
 
     private final List<WrappedAnchor> wrappedAnchors = new ArrayList<>();
-    private final List<LocationBlob> blobs = new ArrayList<>();
+    private final List<ProductObject> blobs = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_aractivity);
         surfaceView = findViewById(R.id.surfaceview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
 
@@ -154,6 +154,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
         // Set up renderer.
         render = new SampleRender(surfaceView, this, getAssets());
+        System.out.println(render.toString());
 
         installRequested = false;
 
@@ -419,6 +420,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             messageSnackbarHelper.showError(this, "Camera not available. Try restarting the app.");
             return;
         }
+
         Camera camera = frame.getCamera();
 
         // Update BackgroundRenderer state to match the depth settings.
@@ -449,6 +451,14 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // Handle one tap per frame.
         //handleTap(frame, camera);
 
+        // MAIN FUNCTIONALITY
+        // On each frame update:
+        // 0. Check user has not moved -> Reset objects if needed
+        // 1. Get user's angle to the North (Compass)
+        // 2. Check if user is pointing at a product
+        // 3. Spawn a product in front of the user if yes
+        //    - Get user location in the Virtual Space
+        //
 //        doMagic(camera);
 //        moveMagic(camera);
 //
@@ -536,7 +546,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // Visualize anchors created by touch.
         render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
 
-        for (LocationBlob blob : this.blobs)  {
+        for (ProductObject blob : this.blobs)  {
             WrappedAnchor wrappedAnchor = blob.anchor;
             Anchor anchor = wrappedAnchor.getAnchor();
             Trackable trackable = wrappedAnchor.getTrackable();
@@ -653,6 +663,21 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
         session.configure(config);
     }
+
+    private void doMagic(Camera camera) {
+        if (true) {
+            Pose cameraPose = camera.getDisplayOrientedPose();
+            float[] coords = cameraPose.getTranslation();
+            Pose anchorPose = new Pose(new float[]{coords[0], coords[1], coords[2]+2}, new float[]{0, 0, 0, 0});
+            //this.amateurLogging = "x: " + coords[0] + " y: " + coords[1] + " z: " + coords[2];
+            Anchor newMagic = session.createAnchor(anchorPose);
+            WrappedAnchor magicWrapped = new WrappedAnchor(newMagic, null);
+            ProductObject location = new ProductObject(magicWrapped, cameraPose);
+            this.wrappedAnchors.add(magicWrapped);
+            this.blobs.add(location);
+            //this.clicked = false;
+        }
+    }
 }
 
 class WrappedAnchor {
@@ -673,12 +698,13 @@ class WrappedAnchor {
     }
 }
 
-class LocationBlob {
+// A class to represent the objects in AR showing the direction to products
+class ProductObject {
     public WrappedAnchor anchor;
     public Pose source;
     public float distance;
 
-    public LocationBlob(WrappedAnchor anchor, Pose source) {
+    public ProductObject(WrappedAnchor anchor, Pose source) {
         this.anchor = anchor;
         this.source = source;
         this.distance = findDistance(anchor.getAnchor().getPose().getTranslation(), source.getTranslation());
