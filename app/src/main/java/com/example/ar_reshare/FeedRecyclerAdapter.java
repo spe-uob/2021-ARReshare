@@ -40,13 +40,24 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         holder.productTitle.setText(product.getName());
         holder.productDescription.setText(product.getDescription());
 
-        Linker productClickHandler = new Linker(product, PRODUCT_LINK);
+        ClickHandler productClickHandler = new ClickHandler(product, PRODUCT_LINK);
         holder.productImage.setOnClickListener(productClickHandler);
         holder.productTitle.setOnClickListener(productClickHandler);
         holder.productDescription.setOnClickListener(productClickHandler);
 
-        Linker messageClickHandler = new Linker(product, MESSAGE_LINK);
+        ClickHandler messageClickHandler = new ClickHandler(product, MESSAGE_LINK);
         holder.messageButton.setOnClickListener(messageClickHandler);
+
+        holder.bookmarkButton.setTag(0);
+        holder.bookmarkButton.setOnClickListener(v -> {
+            if (holder.bookmarkButton.getTag().equals(0)) {
+                holder.bookmarkButton.setImageResource(R.drawable.ic_baseline_bookmark_24);
+                holder.bookmarkButton.setTag(1);
+            } else {
+                holder.bookmarkButton.setImageResource(R.drawable.ic_baseline_bookmark_border_24);
+                holder.bookmarkButton.setTag(0);
+            }
+        });
     }
 
     @Override
@@ -62,6 +73,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         TextView productTitle;
         TextView productDescription;
         ImageView messageButton;
+        ImageView bookmarkButton;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -72,15 +84,16 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             productTitle = itemView.findViewById(R.id.productTitle);
             productDescription = itemView.findViewById(R.id.productDescription);
             messageButton = itemView.findViewById(R.id.messageButton);
+            bookmarkButton = itemView.findViewById(R.id.bookmarkButton);
         }
     }
 
-    private static class Linker implements View.OnClickListener {
+    private static class ClickHandler implements View.OnClickListener {
 
         Product product;
         int type;
 
-        Linker(Product product, int type) {
+        ClickHandler(Product product, int type) {
             this.product = product;
             this.type = type;
         }
@@ -93,7 +106,6 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             if (type == MESSAGE_LINK) {
                 messageClick(v);
             }
-
         }
 
         public void productClick(View v) {

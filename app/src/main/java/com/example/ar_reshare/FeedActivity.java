@@ -35,18 +35,4 @@ public class FeedActivity extends AppCompatActivity {
         recyclerView.setAdapter(feedRecyclerAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
-
-    public void changeBookmark(View view) {
-        ImageView bookmark = findViewById(R.id.bookmarkButton);
-        bookmark.setTag(0);
-        bookmark.setOnClickListener(v -> {
-            if(bookmark.getTag().equals(0)) {
-                bookmark.setImageResource(R.drawable.ic_baseline_bookmark_24);
-                bookmark.setTag(1);
-            } else {
-                bookmark.setImageResource(R.drawable.ic_baseline_bookmark_border_24);
-                bookmark.setTag(0);
-            }
-        });
-    }
 }
