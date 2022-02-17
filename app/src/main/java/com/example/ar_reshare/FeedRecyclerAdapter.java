@@ -106,7 +106,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         }
 
         public void messageClick(View v) {
-            Intent intent = new Intent(v.getContext(), Message.class);
+            Intent intent = new Intent(v.getContext(), MessagingActivity.class);
             intent.putExtra("product", product);
             intent.putExtra("contributor", product.getContributor());
             intent.putExtra("profilePicId", product.getContributor().getProfileIcon());

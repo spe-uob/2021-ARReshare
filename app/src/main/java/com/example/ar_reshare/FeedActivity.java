@@ -49,17 +49,4 @@ public class FeedActivity extends AppCompatActivity {
             }
         });
     }
-
-    public void goToMessages(View view) {
-        ImageView message = findViewById(R.id.messageButton);
-        message.setOnClickListener(v -> {
-            v.setTag(arrayList.get(0));
-            Intent intent = new Intent(FeedActivity.this, MessagingActivity.class);
-            intent.putExtra("product", (Product) v.getTag());
-            intent.putExtra("contributor", ((Product) v.getTag()).getContributor());
-            intent.putExtra("profilePicId", ((Product) v.getTag()).getContributor().getProfileIcon());
-            intent.putExtra("user", ExampleData.getUsers().get(0));
-            startActivity(intent);
-        });
-    }
 }
