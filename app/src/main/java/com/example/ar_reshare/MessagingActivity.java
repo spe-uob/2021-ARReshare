@@ -58,6 +58,15 @@ public class MessagingActivity extends AppCompatActivity{
                 recyclerView.scrollToPosition(mMessageList.size()-1);
             }
         });
+
+        for (Chat chat : ExampleData.getChats()) {
+            if (chat.getCurrentUser().getName().equals(user.getName()) && chat.getContributor().getName().equals(contributor.getName())){
+                for (Message message : chat.getMessages()) {
+                    mMessageList.add(message);
+                }
+            }
+        }
+
         sendButton = (Button) findViewById(R.id.button_send);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,6 +108,8 @@ public class MessagingActivity extends AppCompatActivity{
                 return false;
             }
         });
+
+
 
         messageListAdapter = new MessageListAdapter(this,mMessageList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);

@@ -1,6 +1,8 @@
 package com.example.ar_reshare;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ExampleData {
@@ -8,10 +10,14 @@ public class ExampleData {
     private static boolean initialised = false;
     private static List<User> users = null;
     private static List<Product> products = null;
+    private static List<Chat> chats = null;
 
     private ExampleData() {
         users = new ArrayList<>();
         products = new ArrayList<>();
+        chats = new ArrayList<>();
+
+
 
         User user0 = new User("John","",0);
         users.add(user0);
@@ -53,6 +59,23 @@ public class ExampleData {
         users.add(user5);
         products.add(new Product("Magic Pen", "Take amazing notes with this stylish magic pen.", user5, Category.OTHER, 51.459040571152514, -2.6022736036387366));
         products.get(5).addImages(R.drawable.pen);
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
+        List<Message> messages1 = new ArrayList<>();
+        Message message1 = new Message("hello!!!", user1, simpleDateFormat.format(new Date()));
+        messages1.add(message1);
+        Message message2 = new Message("hi!!!", user0, simpleDateFormat.format(new Date()));
+        messages1.add(message2);
+        Chat chat1 = new Chat(user0,user1,messages1);
+        chats.add(chat1);
+        List<Message> messages2 = new ArrayList<>();
+        Message message3 = new Message("how are you", user2, simpleDateFormat.format(new Date()));
+        messages2.add(message3);
+        Message message4 = new Message("I am fine thank you!", user0, simpleDateFormat.format(new Date()));
+        messages2.add(message4);
+        Chat chat2 = new Chat(user0,user2,messages2);
+        chats.add(chat2);
+
     }
 
     public static List<User> getUsers() {
@@ -71,5 +94,11 @@ public class ExampleData {
         return products;
     }
 
-
+    public static List<Chat> getChats() {
+        if (!initialised) {
+            // Create dummy products
+            new ExampleData();
+        }
+        return chats;
+    }
 }
