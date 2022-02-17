@@ -52,4 +52,6 @@
         android:layout_marginLeft="4dp"
         app:layout_constraintBottom_toBottomOf="@+id/message_body" />
 
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
