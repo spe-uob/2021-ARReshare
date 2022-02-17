@@ -15,11 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileActivity extends AppCompatActivity {
-    private Button MessageButton;
-    private ImageButton BackButton;
-    private User contributor;
-    private int profilePicId;
-    private String bio;
+    public int profilePicId;
     private Product currentProduct;
 
     @Override
@@ -28,15 +24,17 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
 
         Intent i = getIntent();
-        contributor = i.getParcelableExtra("contributor");
+        User contributor = i.getParcelableExtra("contributor");
+        String bio;
         if (contributor == null) {
             contributor = ExampleData.getUsers().get(0);
             profilePicId = contributor.getProfileIcon();
-            bio = contributor.getBio();
             currentProduct = ExampleData.getProducts().get(0);
         } else {
             profilePicId = i.getIntExtra("profilePicId", 0);
+            contributor.setProfileIcon(profilePicId);
             bio = i.getStringExtra("bio");
+            contributor.setBio(bio);
         }
 
         List<Product> products = ExampleData.getProducts();
@@ -45,12 +43,12 @@ public class ProfileActivity extends AppCompatActivity {
         name.setText(contributor.getName());
 
         TextView bioText = findViewById(R.id.description);
-        bioText.setText(bio);
+        bioText.setText(contributor.getBio());
 
         ImageView profileIcon = findViewById(R.id.avatar);
-        profileIcon.setImageResource(profilePicId);
+        profileIcon.setImageResource(contributor.getProfileIcon());
 
-        ImageView productImage = findViewById(R.id.shared1);
+        ImageButton productImage = findViewById(R.id.shared1);
         for (Product product : products) {
             if(product.getContributor().getName().equals(contributor.getName())){
                 currentProduct = product;
@@ -58,8 +56,8 @@ public class ProfileActivity extends AppCompatActivity {
         }
         productImage.setImageResource(currentProduct.getImages().get(0));
 
-        MessageButton = (Button)findViewById(R.id.btM);
-        MessageButton.setOnClickListener(new View.OnClickListener() {
+        Button messageButton = (Button) findViewById(R.id.btM);
+        messageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(), MessagingActivity.class);
@@ -71,8 +69,8 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        BackButton = (ImageButton)findViewById(R.id.back);
-        BackButton.setOnClickListener(new View.OnClickListener() {
+        ImageButton backButton = (ImageButton) findViewById(R.id.back);
+        backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
