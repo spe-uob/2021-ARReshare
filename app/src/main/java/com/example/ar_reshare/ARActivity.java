@@ -144,6 +144,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private final List<ProductObject> productObjects = new ArrayList<>();
     // temporary example for generating product
     private int shouldGenerate = 0;
+    private String debugText;
+    private Compass compass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,6 +175,9 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 shouldGenerate += 1;
             }
         });
+
+        compass = new Compass(this);
+
     }
 
     @Override
@@ -479,6 +484,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // This if statement is temporary - otherwise we would constantly generate and crash
         if (shouldGenerate >= 1) {
             spawnProduct(camera, null, 0.0);
+            double angle = compass.getAngleToNorth(this);
+            this.debugText = String.valueOf(angle);
             shouldGenerate--;
         }
 
@@ -497,7 +504,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 message = TrackingStateHelper.getTrackingFailureReasonString(camera);
             }
         } else if (hasTrackingPlane()) {
-
+                message = debugText;
         } else {
             message = SEARCHING_PLANE_MESSAGE;
         }
