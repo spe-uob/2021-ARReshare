@@ -199,6 +199,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 shouldGenerate += 1;
 
                 // Get nearby products and calculate required angles
+                resetProductObjects();
                 populateProducts();
             }
         });
@@ -813,6 +814,16 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             double requiredAngle = lastKnownLocation.bearingTo(productLocation);
             requiredAngle = requiredAngle * Math.PI/180;
             productAngles.put(product, requiredAngle);
+        }
+    }
+
+    private void resetProductObjects() {
+        for (ProductObject productObject : productObjects) {
+            productObject.getAnchor().detach();
+        }
+        int n = productObjects.size();
+        for (int i = 0; i < n; i++) {
+            productObjects.remove(0);
         }
     }
 
