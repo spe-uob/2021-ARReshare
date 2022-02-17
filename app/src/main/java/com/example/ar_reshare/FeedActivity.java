@@ -5,13 +5,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +23,6 @@ public class FeedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
 
-
         // Done temporarily since not all users have icons, and not all products have images
         arrayList.add(productsList.get(1));
         arrayList.add(productsList.get(2));
@@ -36,8 +31,8 @@ public class FeedActivity extends AppCompatActivity {
         arrayList.add(productsList.get(5));
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        RecyclerAdapter recyclerAdapter = new RecyclerAdapter(arrayList);
-        recyclerView.setAdapter(recyclerAdapter);
+        FeedRecyclerAdapter feedRecyclerAdapter = new FeedRecyclerAdapter(arrayList);
+        recyclerView.setAdapter(feedRecyclerAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
@@ -67,53 +62,4 @@ public class FeedActivity extends AppCompatActivity {
             startActivity(intent);
         });
     }
-
-    public void goToProductsTitle(View view) {
-        TextView productTitle = findViewById(R.id.productTitle);
-        productTitle.setOnClickListener(v -> {
-            for (Product product : arrayList) {
-                if (product.getName() == productTitle.getText()) {
-                    v.setTag(product);
-                }
-            }
-            Intent intent = new Intent(FeedActivity.this, ProductPageActivity.class);
-            intent.putExtra("product", (Product) v.getTag());
-            intent.putExtra("contributor", ((Product) v.getTag()).getContributor());
-            intent.putExtra("profilePicId", ((Product) v.getTag()).getContributor().getProfileIcon());
-            intent.putExtra("productPicId", (ArrayList<Integer>) ((Product) v.getTag()).getImages());
-            startActivity(intent);
-        });
-    }
-
-    public void goToProductsDescription(View view) {
-        TextView productDescription = findViewById(R.id.productDescription);
-        productDescription.setOnClickListener(v -> {
-            for (Product product : arrayList) {
-                if (product.getDescription() == productDescription.getText()) {
-                    v.setTag(product);
-                }
-            }
-            Intent intent = new Intent(FeedActivity.this, ProductPageActivity.class);
-            intent.putExtra("product", (Product) v.getTag());
-            intent.putExtra("contributor", ((Product) v.getTag()).getContributor());
-            intent.putExtra("profilePicId", ((Product) v.getTag()).getContributor().getProfileIcon());
-            intent.putExtra("productPicId", (ArrayList<Integer>) ((Product) v.getTag()).getImages());
-            startActivity(intent);
-        });
-    }
-
-    public void goToProductsImage(View view) {
-        ImageView productImage = findViewById(R.id.productImage);
-        productImage.setOnClickListener(v -> {
-            v.setTag(arrayList.get(0));
-            Intent intent = new Intent(FeedActivity.this, ProductPageActivity.class);
-            intent.putExtra("product", (Product) v.getTag());
-            intent.putExtra("contributor", ((Product) v.getTag()).getContributor());
-            intent.putExtra("profilePicId", ((Product) v.getTag()).getContributor().getProfileIcon());
-            intent.putExtra("productPicId", (ArrayList<Integer>) ((Product) v.getTag()).getImages());
-            startActivity(intent);
-        });
-    }
-
-
 }
