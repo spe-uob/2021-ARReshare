@@ -1,7 +1,11 @@
 package com.example.ar_reshare;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.media.Image;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
@@ -24,6 +28,9 @@ import com.example.ar_reshare.samplerender.VertexBuffer;
 import com.example.ar_reshare.samplerender.arcore.BackgroundRenderer;
 import com.example.ar_reshare.samplerender.arcore.PlaneRenderer;
 import com.example.ar_reshare.samplerender.arcore.SpecularCubemapFilter;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
@@ -147,6 +154,15 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private String debugText;
     private Compass compass;
 
+    // Location related attributes:
+    // Built-in class which provider current location
+    private FusedLocationProviderClient fusedLocationClient;
+    // The users last known location
+    private Location lastKnownLocation;
+
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private boolean locationPermissionGranted;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -176,7 +192,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             }
         });
 
+        // Start the compass
         compass = new Compass(this);
+
+        getLocationPermission();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
     }
 
@@ -289,6 +309,18 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 CameraPermissionHelper.launchPermissionSettings(this);
             }
             finish();
+        }
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            // If request is cancelled, the grantResults array will be empty
+            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+                // Location permission has been granted
+                locationPermissionGranted = true;
+                System.out.println("Location has been granted");
+            } else {
+                // TODO: Explain to user that the feature is unavailable because
+                //  the permissions have not been granted
+            }
+            return;
         }
     }
 
@@ -482,10 +514,12 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // Then you can compare this angle to the angle that you received from compass
         // 3. Spawn a product in front of the user if yes
         // This if statement is temporary - otherwise we would constantly generate and crash
+        double angle = compass.getAngleToNorth();
+        getDeviceLocation();
+
         if (shouldGenerate >= 1) {
-            double angle = compass.getAngleToNorth();
-            this.debugText = String.valueOf(angle);
             spawnProduct(camera, null, angle);
+            this.debugText = "azimuth=" + angle + " gps=" + lastKnownLocation.getLatitude() + ", " + lastKnownLocation.getLongitude();
             shouldGenerate--;
         }
 
@@ -710,6 +744,47 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             this.productObjects.add(newObject);
         }
     }
+
+    // Request location permissions from the device. We will receive a callback
+    // to onRequestPermissionsResult with the results.
+    private void getLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            // Location permission has already been granted previously
+            locationPermissionGranted = true;
+        } else if (shouldShowRequestPermissionRationale("FINE_LOCATION")) {
+            // TODO: Explain to the user why the location permission is needed
+        } else {
+            // If the location permission has not been granted already,
+            // open a window requesting this permission
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+
+    // Get the most recent location of the device
+    private void getDeviceLocation() {
+        try {
+            if (locationPermissionGranted) {
+                fusedLocationClient.getLastLocation()
+                        .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+                                // Got last known location. In some rare situations this can be null.
+                                if (location != null) {
+                                    // Logic to handle location object
+                                    lastKnownLocation = location;
+                                }
+                            }
+                        });
+            }
+        } catch (SecurityException e)  {
+            // TODO: Implement appropriate error catching
+        }
+    }
+
 }
 
 // AR-Reshare Code
