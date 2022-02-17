@@ -14,8 +14,9 @@ import java.util.ArrayList;
 
 public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.ViewHolder> {
 
-    private static final int PRODUCT_LINK = 0;
-    private static final int MESSAGE_LINK = 1;
+    private static final int PROFILE_LINK = 0;
+    private static final int PRODUCT_LINK = 1;
+    private static final int MESSAGE_LINK = 2;
 
     private final ArrayList<Product> arrayList;
 
@@ -39,6 +40,10 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         holder.productImage.setImageResource(product.getImages().get(0));
         holder.productTitle.setText(product.getName());
         holder.productDescription.setText(product.getDescription());
+
+        ClickHandler profileClickHandler = new ClickHandler(product, PROFILE_LINK);
+        holder.profileIcon.setOnClickListener(profileClickHandler);
+        holder.contributor.setOnClickListener(profileClickHandler);
 
         ClickHandler productClickHandler = new ClickHandler(product, PRODUCT_LINK);
         holder.productImage.setOnClickListener(productClickHandler);
@@ -100,12 +105,23 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
         @Override
         public void onClick(View v) {
+            if (type == PROFILE_LINK) {
+                profileClick(v);
+            }
             if (type == PRODUCT_LINK) {
                 productClick(v);
             }
             if (type == MESSAGE_LINK) {
                 messageClick(v);
             }
+        }
+
+        public void profileClick(View v) {
+            Intent intent = new Intent(v.getContext(), ProfileActivity.class);
+            intent.putExtra("contributor", product.getContributor());
+            intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
+            intent.putExtra("bio", product.getContributor().getBio());
+            v.getContext().startActivity(intent);
         }
 
         public void productClick(View v) {
