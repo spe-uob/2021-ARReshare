@@ -483,7 +483,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // 3. Spawn a product in front of the user if yes
         // This if statement is temporary - otherwise we would constantly generate and crash
         if (shouldGenerate >= 1) {
-            spawnProduct(camera, null, 0.0);
+            //spawnProduct(camera, null, 0.0);
             double angle = compass.getAngleToNorth(this);
             this.debugText = String.valueOf(angle);
             shouldGenerate--;

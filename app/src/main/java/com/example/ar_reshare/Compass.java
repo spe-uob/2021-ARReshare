@@ -9,7 +9,8 @@ import android.hardware.SensorManager;
 public class Compass implements SensorEventListener {
 
     private SensorManager sensorManager;
-    private Sensor sensor;
+    private Sensor accelerometer;
+    private Sensor magneticField;
     private boolean initialised = false;
 
     private final float[] accelerometerReading = new float[3];
@@ -26,8 +27,10 @@ public class Compass implements SensorEventListener {
 
     public void initialiseCompass(Context context) {
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR);
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        Sensor magneticField = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, magneticField, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public double getAngleToNorth(Context context) {
