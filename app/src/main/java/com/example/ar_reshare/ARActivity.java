@@ -57,9 +57,12 @@ import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationExceptio
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.security.cert.PKIXRevocationChecker;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class ARActivity extends AppCompatActivity implements SampleRender.Renderer {
 
@@ -163,6 +166,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
 
+    // Map to store the required angle for each product
+    private Map<Product, Double> productAngles = new HashMap<>();
+
+    private static final double ANGLE_LIMIT = 0.261799; // ~ 15 degrees
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -195,9 +203,10 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // Start the compass
         compass = new Compass(this);
 
+        // Request location permissions if needed and get latest location
         getLocationPermission();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
+        getDeviceLocation();
     }
 
     @Override
@@ -430,6 +439,10 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             //Log.e(TAG, "Failed to read a required asset file", e);
             messageSnackbarHelper.showError(this, "Failed to read a required asset file: " + e);
         }
+
+        // AR-Reshare code
+        // Get nearby products and calculate required angles
+        populateProducts();
     }
 
     @Override
@@ -504,21 +517,25 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // On each frame update:
         // 0. Check user has not moved -> Reset objects if needed
         // e.g. checkUserLocation()
+
         // 1. Get user's angle to the North (Compass)
-        // e.g. Compass.getAngle()
+        double angle = compass.getAngleToNorth();
+
         // 2. Check if user is pointing at a product
         // e.g. for loop iterating through this.productObjects, comparing angle to north of user and product
         // For this you will probably need to create a function mapping virtual coordinates to real life GPS coordinates
         // then define an equation of a line between REAL user location and REAL product location
         // find the angle to the north of THIS LINE using trigonometry
         // Then you can compare this angle to the angle that you received from compass
-        // 3. Spawn a product in front of the user if yes
-        // This if statement is temporary - otherwise we would constantly generate and crash
-        double angle = compass.getAngleToNorth();
-        getDeviceLocation();
+        Optional<Product> pointingAt = checkIfPointingAtProduct(angle);
 
-        if (shouldGenerate >= 1) {
+        // 3. Spawn a product in front of the user if yes
+        if (pointingAt.isPresent()) {
             spawnProduct(camera, null, angle);
+        }
+
+        // This if statement is temporary - otherwise we would constantly generate and crash
+        if (shouldGenerate >= 1) {
             this.debugText = "azimuth=" + angle + " gps=" + lastKnownLocation.getLatitude() + ", " + lastKnownLocation.getLongitude();
             shouldGenerate--;
         }
@@ -783,6 +800,41 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         } catch (SecurityException e)  {
             // TODO: Implement appropriate error catching
         }
+    }
+
+    private void populateProducts() {
+        List<Product> products = ExampleData.getProducts();
+        for (Product product : products) {
+            Location productLocation = new Location("ManualProvider");
+            productLocation.setLatitude(product.getLocation().latitude);
+            productLocation.setLongitude(product.getLocation().longitude);
+            double requiredAngle = lastKnownLocation.bearingTo(productLocation);
+            requiredAngle = requiredAngle * Math.PI/180;
+            productAngles.put(product, requiredAngle);
+        }
+    }
+
+    private Optional<Product> checkIfPointingAtProduct(double userAngle) {
+        Map.Entry<Product, Double> closestPair = null;
+        for (Map.Entry<Product, Double> productAnglePair : productAngles.entrySet()) {
+            double angleDiff = Math.abs(userAngle - productAnglePair.getValue());
+            if (angleDiff <= ANGLE_LIMIT) {
+                if (closestPair == null) closestPair = productAnglePair;
+                else {
+                    // If two products are close to each other, choose the closest angle
+                    double originalDiff = Math.abs(userAngle - closestPair.getValue());
+                    if (originalDiff > angleDiff) closestPair = productAnglePair;
+                }
+            }
+        }
+        Optional<Product> target;
+        if (closestPair != null ) {
+            target = Optional.of(closestPair.getKey());
+        }
+        else {
+            target = Optional.empty();
+        }
+        return target;
     }
 
 }
