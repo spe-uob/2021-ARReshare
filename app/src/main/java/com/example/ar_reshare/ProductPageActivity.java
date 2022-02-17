@@ -73,10 +73,6 @@ public class ProductPageActivity extends AppCompatActivity {
         messageButton(product,contributor,user, profilePicId);
     }
 
-    public void hideMessageButton(){
-
-    }
-
     // implement a top left return arrow that returns to previous page when clicked
     public void returnListener(){
 
@@ -130,6 +126,7 @@ public class ProductPageActivity extends AppCompatActivity {
     public void messageButton(Product product, User contributor, User user,Integer profilePicId){
 
         Button message = findViewById(R.id.messageButton);
+
         message.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -141,6 +138,11 @@ public class ProductPageActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        if(user.getName().equals(contributor.getName())){ // check if the product's contributor is the user
+            message.setVisibility(View.INVISIBLE); // hide the message button in this case
+            TextView thanksMessage = findViewById(R.id.thanksForSharing);
+            thanksMessage.setVisibility(View.VISIBLE);
+        }
     }
 
     public void displayProductPics(int[] productPicId){
