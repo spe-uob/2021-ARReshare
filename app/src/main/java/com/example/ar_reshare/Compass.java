@@ -63,7 +63,6 @@ public class Compass implements SensorEventListener {
         SensorManager.getRotationMatrix(rotationMatrix, null,
                 accelerometerReading, magnetometerReading);
 
-        //
         float[] output = SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
         // Assign the current angle to the north as an attribute of the class

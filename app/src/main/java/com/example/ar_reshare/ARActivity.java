@@ -689,7 +689,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         if (true) {
             // If the angle (in radians) is negative convert to positive
             if (angleToNorth < 0) {
-                angleToNorth = (angleToNorth * -1) + 3.14159;
+                angleToNorth = (angleToNorth * -1) + Math.PI;
             }
 
             // Current position of the user
