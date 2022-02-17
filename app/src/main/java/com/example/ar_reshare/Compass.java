@@ -19,22 +19,24 @@ public class Compass implements SensorEventListener {
     private final float[] rotationMatrix = new float[9];
     private final float[] orientationAngles = new float[3];
 
+    // The latest angle to the north of the user's device
     private float angle;
 
+    // To use compass anywhere, initialise it and pass it the current context
     Compass(Context context) {
         initialiseCompass(context);
     }
 
-    public void initialiseCompass(Context context) {
+    private void initialiseCompass(Context context) {
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        Sensor magneticField = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magneticField = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this, magneticField, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-    public double getAngleToNorth(Context context) {
-        if (!initialised) initialiseCompass(context);
+    // You can call this method to get the latest recorder angle to north
+    public double getAngleToNorth() {
         updateOrientationAngles();
         return angle;
     }
@@ -50,21 +52,21 @@ public class Compass implements SensorEventListener {
         }
     }
 
+    // We do not need to consider the accuracy of the sensors
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
 
     private void updateOrientationAngles() {
-        // Update rotation matrix, which is needed to update orientation angles.
+        // Read the data from the sensor into the accelerometer and magnetometer stored readings
         SensorManager.getRotationMatrix(rotationMatrix, null,
                 accelerometerReading, magnetometerReading);
 
-        // "rotationMatrix" now has up-to-date information.
-
+        //
         float[] output = SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
+        // Assign the current angle to the north as an attribute of the class
         angle = output[0];
-        // "orientationAngles" now has up-to-date information.
     }
 }
