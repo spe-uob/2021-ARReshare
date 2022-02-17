@@ -197,6 +197,9 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             @Override
             public void onClick(View v) {
                 shouldGenerate += 1;
+
+                // Get nearby products and calculate required angles
+                populateProducts();
             }
         });
 
@@ -439,10 +442,6 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             //Log.e(TAG, "Failed to read a required asset file", e);
             messageSnackbarHelper.showError(this, "Failed to read a required asset file: " + e);
         }
-
-        // AR-Reshare code
-        // Get nearby products and calculate required angles
-        populateProducts();
     }
 
     @Override
@@ -531,7 +530,10 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
         // 3. Spawn a product in front of the user if yes
         if (pointingAt.isPresent()) {
-            spawnProduct(camera, null, angle);
+            spawnProduct(camera, pointingAt.get(), angle);
+            // When ProductObject has been created, remove this product from the HashMap
+            // This can be improved in the future
+            this.productAngles.remove(pointingAt.get());
         }
 
         // This if statement is temporary - otherwise we would constantly generate and crash
