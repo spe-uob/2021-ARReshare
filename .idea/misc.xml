@@ -3,9 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="app/src/main/res/layout/activity_aractivity.xml" value="0.16979166666666667" />
-        <entry key="app/src/main/res/layout/activity_product_page.xml" value="0.15520833333333334" />
+        <entry key="app/src/main/res/layout/activity_product_page.xml" value="0.1859375" />
       </map>
     </option>
   </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK" />
 </project>
