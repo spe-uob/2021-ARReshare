@@ -130,6 +130,12 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
     // Virtual object (ARCore pawn)
     private Mesh virtualObjectMesh;
+
+    private Mesh objectHat;
+    private Mesh objectPhone;
+    private Mesh objectBurger;
+    private Mesh objectCup;
+
     private Shader virtualObjectShader;
     private Texture virtualObjectAlbedoTexture;
     private Texture virtualObjectAlbedoInstantPlacementTexture;
@@ -422,7 +428,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.LINEAR);
 
-            virtualObjectMesh = Mesh.createFromAsset(render, "models/hat.obj");
+            virtualObjectMesh = Mesh.createFromAsset(render, "models/pawn.obj");
+            objectHat = Mesh.createFromAsset(render, "models/hat.obj");
+            objectPhone = Mesh.createFromAsset(render, "models/phone.obj");
+            objectBurger = Mesh.createFromAsset(render, "models/burger.obj");
+            objectCup = Mesh.createFromAsset(render, "models/cup.obj");
             virtualObjectShader =
                     Shader.createFromAssets(
                             render,
@@ -641,6 +651,18 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                         "u_AlbedoTexture", virtualObjectAlbedoInstantPlacementTexture);
             } else {
                 virtualObjectShader.setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture);
+            }
+
+            // check object's category
+            Category objCategory = obj.getProduct().getCategory();
+            if (objCategory.equals(Category.CLOTHING)){
+                virtualObjectMesh = objectHat;
+            }else if(objCategory.equals(Category.OTHER)){
+                virtualObjectMesh = objectCup;
+            }else if(objCategory.equals(Category.ELECTRONICS)){
+                virtualObjectMesh = objectPhone;
+            } else {
+                virtualObjectMesh = objectBurger;
             }
 
             render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
