@@ -144,6 +144,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private final List<ProductObject> productObjects = new ArrayList<>();
     // temporary example for generating product
     private int shouldGenerate = 0;
+    private String debugText;
+    private Compass compass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,6 +175,9 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 shouldGenerate += 1;
             }
         });
+
+        compass = new Compass(this);
+
     }
 
     @Override
@@ -478,7 +483,9 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // 3. Spawn a product in front of the user if yes
         // This if statement is temporary - otherwise we would constantly generate and crash
         if (shouldGenerate >= 1) {
-            spawnProduct(camera, null, 0.0);
+            double angle = compass.getAngleToNorth();
+            this.debugText = String.valueOf(angle);
+            spawnProduct(camera, null, angle);
             shouldGenerate--;
         }
 
@@ -497,7 +504,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 message = TrackingStateHelper.getTrackingFailureReasonString(camera);
             }
         } else if (hasTrackingPlane()) {
-
+                message = debugText;
         } else {
             message = SEARCHING_PLANE_MESSAGE;
         }
@@ -680,6 +687,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     // method to spawn a product in a virtual space
     private void spawnProduct(Camera camera, Product product, double angleToNorth) {
         if (true) {
+            // If the angle (in radians) is negative convert to positive
+            if (angleToNorth < 0) {
+                angleToNorth = (angleToNorth * -1) + Math.PI;
+            }
+
             // Current position of the user
             Pose cameraPose = camera.getDisplayOrientedPose();
             float[] coords = cameraPose.getTranslation();
@@ -689,7 +701,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             double distance = 2; // 2 metres away
             float deltaX = (float) (Math.sin(angleToNorth) * distance);
             float deltaZ = (float) (Math.cos(angleToNorth) * distance);
-            float[] objectCoords = new float[]{coords[0], coords[1] + deltaX, coords[2] + deltaZ};
+            float[] objectCoords = new float[]{coords[0] + deltaX, coords[1], coords[2] + deltaZ};
             Pose anchorPose = new Pose(objectCoords, new float[]{0, 0, 0, 0});
 
             // Create an anchor and a ProductObject associated with it
