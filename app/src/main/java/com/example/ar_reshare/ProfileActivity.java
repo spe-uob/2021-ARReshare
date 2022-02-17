@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -16,41 +17,57 @@ import java.util.List;
 public class ProfileActivity extends AppCompatActivity {
     private Button MessageButton;
     private ImageButton BackButton;
-    private ImageButton ProductButton;
+    private User contributor;
+    private int profilePicId;
+    private String bio;
     private Product currentProduct;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-        Intent i= getIntent();
-        User currentUser = i.getParcelableExtra("user");
 
-        User A = currentUser;
+        Intent i = getIntent();
+        contributor = i.getParcelableExtra("contributor");
+        if (contributor == null) {
+            contributor = ExampleData.getUsers().get(0);
+            profilePicId = contributor.getProfileIcon();
+            bio = contributor.getBio();
+            currentProduct = ExampleData.getProducts().get(0);
+        } else {
+            profilePicId = i.getIntExtra("profilePicId", 0);
+            bio = i.getStringExtra("bio");
+        }
+
         List<Product> products = ExampleData.getProducts();
 
         TextView name = findViewById(R.id.username);
-        name.setText(currentUser.getName());
+        name.setText(contributor.getName());
 
-        TextView bio = findViewById(R.id.description);
-        bio.setText(currentUser.getBio());
+        TextView bioText = findViewById(R.id.description);
+        bioText.setText(bio);
 
-        ImageView avator1 = findViewById(R.id.avator);
-        avator1.setImageResource(currentUser.getProfileIcon());
+        ImageView profileIcon = findViewById(R.id.avatar);
+        profileIcon.setImageResource(profilePicId);
 
-        ImageButton product1 = findViewById(R.id.shared1);
+        ImageView productImage = findViewById(R.id.shared1);
         for (Product product : products) {
-            if(product.getContributor().equals(currentUser)){
+            if(product.getContributor().getName().equals(contributor.getName())){
                 currentProduct = product;
             }
         }
-        product1.setImageResource(currentProduct.getImages().get(0));
+        productImage.setImageResource(currentProduct.getImages().get(0));
 
         MessageButton = (Button)findViewById(R.id.btM);
         MessageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ProfileActivity.this, MessagingActivity.class);
+                Intent intent = new Intent(v.getContext(), MessagingActivity.class);
+                intent.putExtra("product", currentProduct);
+                intent.putExtra("contributor", currentProduct.getContributor());
+                intent.putExtra("profilePicId", currentProduct.getContributor().getProfileIcon());
+                intent.putExtra("user", ExampleData.getUsers().get(0));
+                v.getContext().startActivity(intent);
             }
         });
 
@@ -63,17 +80,14 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        ProductButton = (ImageButton) findViewById(R.id.shared1);
-        ProductButton.setOnClickListener(new View.OnClickListener() {
+        productImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
-                intent.putExtra("name", A.getName());
                 intent.putExtra("product", currentProduct);
                 intent.putExtra("contributor", currentProduct.getContributor());
                 intent.putExtra("profilePicId", currentProduct.getContributor().getProfileIcon());
-                intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) currentProduct.getImages());
-
+                intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct.getImages());
                 startActivity(intent);
             }
         });
