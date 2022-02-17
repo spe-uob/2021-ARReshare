@@ -147,6 +147,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private String debugText;
     private Compass compass;
 
+    private List<Product> exampleObjects = ExampleData.getProducts();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -361,23 +362,23 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             virtualObjectAlbedoTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/pawn_albedo.png",
+                            "models/purple.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
             virtualObjectAlbedoInstantPlacementTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/pawn_albedo_instant_placement.png",
+                            "models/purple.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
             Texture virtualObjectPbrTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/pawn_roughness_metallic_ao.png",
+                            "models/purple.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.LINEAR);
 
-            virtualObjectMesh = Mesh.createFromAsset(render, "models/pawn.obj");
+            virtualObjectMesh = Mesh.createFromAsset(render, "models/hat.obj");
             virtualObjectShader =
                     Shader.createFromAssets(
                             render,
