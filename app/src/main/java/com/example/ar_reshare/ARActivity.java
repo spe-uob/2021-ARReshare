@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -12,16 +13,9 @@ import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.PopupMenu;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,7 +58,6 @@ import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationExceptio
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.security.cert.PKIXRevocationChecker;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -173,6 +166,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
     // Compass object
     private Compass compass;
+    // Compass animation
+    private double lastCompassButtonAngle = 0;
 
     // Location related attributes:
     // Built-in class which provider current location
@@ -209,7 +204,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         instantPlacementSettings.onCreate(this);
 
         // AR-Reshare code
-        Button regenerate_button = findViewById(R.id.regenerate_button);
+        ImageButton regenerate_button = findViewById(R.id.regenerate_button);
         regenerate_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -218,6 +213,9 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 // Get nearby products and calculate required angles
                 resetProductObjects();
                 populateProducts();
+
+                // Rotation animation
+                ObjectAnimator.ofFloat(v, "rotation", 0f, 360f).start();
             }
         });
 
@@ -541,25 +539,33 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
         // 3. Spawn a product in front of the user if yes
         if (pointingAt.isPresent()) {
+            // If product is not already being displayed, spawn it
             if (!this.displayedProducts.contains(pointingAt.get())) {
                 spawnProduct(camera, pointingAt.get(), angle);
                 // When ProductObject has been created, remove this product from the Set
                 this.displayedProducts.add(pointingAt.get());
                 renderProductBox(pointingAt.get());
+                rotateCompass(angle);
             }
+            // Else if the product is displayed, but the product box not, display it
             else if (productBoxHidden) {
                 renderProductBox(pointingAt.get());
+                rotateCompass(angle);
             }
         } else {
             // Hide product box if currently not pointing at any product
-            hideProductBox();
+            if (!productBoxHidden) {
+                hideProductBox();
+                rotateCompass(angle);
+            }
+
         }
 
-        // For debugging purposes
-        if (shouldGenerate >= 1) {
-            //this.debugText = "azimuth=" + angle + " gps=" + lastKnownLocation.getLatitude() + ", " + lastKnownLocation.getLongitude();
-            shouldGenerate--;
-        }
+//        // For debugging purposes
+//        if (shouldGenerate >= 1) {
+//            //this.debugText = "azimuth=" + angle + " gps=" + lastKnownLocation.getLatitude() + ", " + lastKnownLocation.getLongitude();
+//            shouldGenerate--;
+//        }
 
 
         // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
@@ -635,6 +641,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
         // AR-Reshare Code (modified)
         // Iterates through existing anchors and draws them on each frame
+        // TODO: Sometimes ConcurrentModificationException is raised when the regenerate button
+        //  is pressed and (?) the frame is being drawn, detect the issue and resolve it
         for (ProductObject obj : this.productObjects)  {
             Anchor anchor = obj.getAnchor();
             Trackable trackable = obj.getTrackable();
@@ -928,6 +936,21 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             }
         });
         productBoxHidden = true;
+    }
+
+    // Rotates compass to the specified angle to the north
+    private void rotateCompass(double angle) {
+        // Convert angle to positive degrees
+        if (angle < 0) angle = angle + Math.PI;
+        float angleDeg = (float) (angle * 180/Math.PI);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                View compassButton = findViewById(R.id.regenerate_button);
+                ObjectAnimator.ofFloat(compassButton, "rotation", (float) lastCompassButtonAngle, angleDeg).start();
+                lastCompassButtonAngle = angleDeg;
+            }
+        });
     }
 
 
