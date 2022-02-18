@@ -132,9 +132,26 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
     // Virtual object (ARCore pawn)
     private Mesh virtualObjectMesh;
+
+    private Mesh objectHat;
+    private Mesh objectPhone;
+    private Mesh objectBurger;
+    private Mesh objectCup;
+
     private Shader virtualObjectShader;
     private Texture virtualObjectAlbedoTexture;
     private Texture virtualObjectAlbedoInstantPlacementTexture;
+    private Texture virtualObjectPbrTexture;
+
+    private Texture burgerTexture;
+    private Texture hatTexture;
+    private Texture phoneTexture;
+    private Texture cupTexture;
+    private Shader burgerShader;
+    private Shader hatShader;
+    private Shader phoneShader;
+    private Shader cupShader;
+
 
     // Environmental HDR
     private Texture dfgTexture;
@@ -160,10 +177,6 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private final Set<Product> displayedProducts = new HashSet<>();
     private boolean productBoxHidden = true;
     private Product productBoxProduct;
-
-    // Debugging
-    private int shouldGenerate = 0;
-    private String debugText;
 
     // Compass object
     private Compass compass;
@@ -204,7 +217,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         depthSettings.onCreate(this);
         instantPlacementSettings.onCreate(this);
 
-        // AR-Reshare code
+        // Define the onclick event for compass (regenerate) button
         ImageButton regenerate_button = findViewById(R.id.regenerate_button);
         regenerate_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -417,27 +430,80 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                             render, Mesh.PrimitiveMode.POINTS, /*indexBuffer=*/ null, pointCloudVertexBuffers);
 
             // Virtual object to render (ARCore pawn)
-            virtualObjectAlbedoTexture =
-                    Texture.createFromAsset(
-                            render,
-                            "models/pawn_albedo.png",
-                            Texture.WrapMode.CLAMP_TO_EDGE,
-                            Texture.ColorFormat.SRGB);
+//            virtualObjectAlbedoTexture =
+//                    Texture.createFromAsset(
+//                            render,
+//                            "models/pink.png",
+//                            Texture.WrapMode.CLAMP_TO_EDGE,
+//                            Texture.ColorFormat.SRGB);
             virtualObjectAlbedoInstantPlacementTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/pawn_albedo_instant_placement.png",
+                            "models/grey.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
-            Texture virtualObjectPbrTexture =
+            virtualObjectPbrTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/pawn_roughness_metallic_ao.png",
+                            "models/grey.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.LINEAR);
 
             virtualObjectMesh = Mesh.createFromAsset(render, "models/pawn.obj");
-            virtualObjectShader =
+            objectHat = Mesh.createFromAsset(render, "models/hat.obj");
+            hatShader = setObjectShader();
+            hatTexture = setObjectTexture("models/purple.png");
+            objectPhone = Mesh.createFromAsset(render, "models/phone.obj");
+            phoneShader = setObjectShader();
+            phoneTexture = setObjectTexture("models/grey.png");
+            objectBurger = Mesh.createFromAsset(render, "models/burger.obj");
+            burgerShader = setObjectShader();
+            burgerTexture = setObjectTexture("models/burger.png");
+            objectCup = Mesh.createFromAsset(render, "models/cup.obj");
+            cupShader = setObjectShader();
+            cupTexture = setObjectTexture("models/pink.png");
+//            virtualObjectShader =
+//                    Shader.createFromAssets(
+//                            render,
+//                            "shaders/environmental_hdr.vert",
+//                            "shaders/environmental_hdr.frag",
+//                            /*defines=*/ new HashMap<String, String>() {
+//                                {
+//                                    put(
+//                                            "NUMBER_OF_MIPMAP_LEVELS",
+//                                            Integer.toString(cubemapFilter.getNumberOfMipmapLevels()));
+//                                }
+//                            })
+//                            .setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture)
+//                            .setTexture("u_RoughnessMetallicAmbientOcclusionTexture", virtualObjectPbrTexture)
+//                            .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
+//                            .setTexture("u_DfgTexture", dfgTexture);
+            virtualObjectShader = hatShader; // default shader
+        } catch (IOException e) {
+            //Log.e(TAG, "Failed to read a required asset file", e);
+            messageSnackbarHelper.showError(this, "Failed to read a required asset file: " + e);
+        }
+    }
+
+    public Texture setObjectTexture(String textureLocation){
+        Texture texture = null;
+        try {
+            texture =
+            Texture.createFromAsset(
+                    render,
+                    textureLocation,
+                    Texture.WrapMode.CLAMP_TO_EDGE,
+                    Texture.ColorFormat.SRGB);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return texture;
+    }
+
+    public Shader setObjectShader(){
+        Shader shader = null;
+        try {
+            shader =
                     Shader.createFromAssets(
                             render,
                             "shaders/environmental_hdr.vert",
@@ -454,9 +520,9 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                             .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
                             .setTexture("u_DfgTexture", dfgTexture);
         } catch (IOException e) {
-            //Log.e(TAG, "Failed to read a required asset file", e);
-            messageSnackbarHelper.showError(this, "Failed to read a required asset file: " + e);
+            e.printStackTrace();
         }
+        return shader;
     }
 
     @Override
@@ -534,7 +600,6 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
         // 2. Check if user is pointing at a product
         Optional<Product> pointingAt = checkIfPointingAtProduct(angle);
-        this.debugText = pointingAt.toString();
 
         // 3. Spawn a product in front of the user if yes
         if (pointingAt.isPresent()) {
@@ -565,13 +630,6 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
         }
 
-//        // For debugging purposes
-//        if (shouldGenerate >= 1) {
-//            //this.debugText = "azimuth=" + angle + " gps=" + lastKnownLocation.getLatitude() + ", " + lastKnownLocation.getLongitude();
-//            shouldGenerate--;
-//        }
-
-
         // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
         trackingStateHelper.updateKeepScreenOnFlag(camera.getTrackingState());
 
@@ -585,7 +643,6 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 message = TrackingStateHelper.getTrackingFailureReasonString(camera);
             }
         } else if (hasTrackingPlane()) {
-                message = debugText;
         } else {
             message = SEARCHING_PLANE_MESSAGE;
         }
@@ -643,13 +700,32 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // Visualize anchors created by touch.
         render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
 
-        // AR-Reshare Code (modified)
         // Iterates through existing anchors and draws them on each frame
         // TODO: Sometimes ConcurrentModificationException is raised when the regenerate button
         //  is pressed and (?) the frame is being drawn, detect the issue and resolve it
         for (ProductObject obj : this.productObjects)  {
             Anchor anchor = obj.getAnchor();
             Trackable trackable = obj.getTrackable();
+
+            // Check object's category
+            Category objCategory = obj.getProduct().getCategory();
+            if (objCategory.equals(Category.CLOTHING)){
+                virtualObjectMesh = objectHat;
+                virtualObjectShader = hatShader;
+                virtualObjectAlbedoTexture = hatTexture;
+            }else if(objCategory.equals(Category.OTHER)){
+                virtualObjectMesh = objectCup;
+                virtualObjectShader = cupShader;
+                virtualObjectAlbedoTexture = cupTexture;
+            }else if(objCategory.equals(Category.ELECTRONICS)){
+                virtualObjectMesh = objectPhone;
+                virtualObjectShader = phoneShader;
+                virtualObjectAlbedoTexture = phoneTexture;
+            } else {
+                virtualObjectMesh = objectBurger;
+                virtualObjectShader = burgerShader;
+                virtualObjectAlbedoTexture = burgerTexture;
+            }
 
             // Get the current pose of an Anchor in world space. The Anchor pose is updated
             // during calls to session.update() as ARCore refines its estimate of the world.
