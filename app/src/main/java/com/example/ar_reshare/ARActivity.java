@@ -13,6 +13,7 @@ import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -201,12 +202,16 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_aractivity);
+
         surfaceView = findViewById(R.id.surfaceview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
 
         // Set up touch listener.
-        tapHelper = new TapHelper(/*context=*/ this);
-        surfaceView.setOnTouchListener(tapHelper);
+//        tapHelper = new TapHelper(/*context=*/ this);
+//        surfaceView.setOnTouchListener(tapHelper);
+
+
+        surfaceView.setOnTouchListener(new SwipingMechanism());
 
         // Set up renderer.
         render = new SampleRender(surfaceView, this, getAssets());
@@ -1033,6 +1038,37 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 lastCompassButtonAngle = angleDeg;
             }
         });
+    }
+
+    class SwipingMechanism implements View.OnTouchListener {
+
+        private float x1, x2, y1, y2;
+        private final int OFFSET = 50;
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            switch(event.getAction()){
+                case MotionEvent.ACTION_DOWN:
+                    x1 = event.getX();
+                    y1 = event.getY();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    x2 = event.getX();
+                    y2 = event.getY();
+                    if (Math.abs(x1)+OFFSET < Math.abs(x2)) {
+                        Intent i = new Intent(ARActivity.this, FeedActivity.class);
+                        startActivity(i);
+                    } else if((Math.abs(x1) > Math.abs(x2)+OFFSET)) {
+                        Intent i = new Intent(ARActivity.this, ProfileActivity.class);
+                        startActivity(i);
+                    } else {
+                        Intent i = new Intent(ARActivity.this, MapsActivity.class);
+                        startActivity(i);
+                    }
+                    break;
+            }
+            return false;
+        }
     }
 
 
