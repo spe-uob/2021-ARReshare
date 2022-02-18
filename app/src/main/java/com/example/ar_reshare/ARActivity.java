@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.media.Image;
@@ -157,7 +158,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private final float[] worldLightDirection = {0.0f, 0.0f, 0.0f, 0.0f};
     private final float[] viewLightDirection = new float[4]; // view x world light direction
 
-    // AR-Reshare Code
+
     // The list of currently displayed Product Objects
     private final List<ProductObject> productObjects = new ArrayList<>();
 
@@ -166,9 +167,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private final Set<Product> displayedProducts = new HashSet<>();
     private boolean productBoxHidden = true;
 
-    // temporary example for generating product
+    // Debugging
     private int shouldGenerate = 0;
     private String debugText;
+
+    // Compass object
     private Compass compass;
 
     // Location related attributes:
@@ -176,14 +179,14 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private FusedLocationProviderClient fusedLocationClient;
     // The users last known location
     private Location lastKnownLocation;
-
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
 
     // Map to store the required angle for each product
     private Map<Product, Double> productAngles = new HashMap<>();
 
-    private static final double ANGLE_LIMIT = 15 * Math.PI/180; // ~ 20 degrees
+    // The acceptable limit of angle offset to product
+    private static final double ANGLE_LIMIT = 20 * Math.PI/180; // degrees converted to radians
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -525,22 +528,14 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             }
         }
 
-        // TODO: AR-Reshare code
         // MAIN FUNCTIONALITY
-        // ! These are all ideas, there might be better ways of doing things ! :)
         // On each frame update:
-        // 0. Check user has not moved -> Reset objects if needed
-        // e.g. checkUserLocation()
+        // TODO 0. Check user has not moved -> Reset objects if needed
 
         // 1. Get user's angle to the North (Compass)
         double angle = compass.getAngleToNorth();
 
         // 2. Check if user is pointing at a product
-        // e.g. for loop iterating through this.productObjects, comparing angle to north of user and product
-        // For this you will probably need to create a function mapping virtual coordinates to real life GPS coordinates
-        // then define an equation of a line between REAL user location and REAL product location
-        // find the angle to the north of THIS LINE using trigonometry
-        // Then you can compare this angle to the angle that you received from compass
         Optional<Product> pointingAt = checkIfPointingAtProduct(angle);
         this.debugText = pointingAt.toString();
 
@@ -556,15 +551,15 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 renderProductBox(pointingAt.get());
             }
         } else {
+            // Hide product box if currently not pointing at any product
             hideProductBox();
         }
 
-        // This if statement is temporary - otherwise we would constantly generate and crash
+        // For debugging purposes
         if (shouldGenerate >= 1) {
             //this.debugText = "azimuth=" + angle + " gps=" + lastKnownLocation.getLatitude() + ", " + lastKnownLocation.getLongitude();
             shouldGenerate--;
         }
-
 
 
         // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
@@ -757,9 +752,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         session.configure(config);
     }
 
-    // AR-Reshare Code
     // If it is concluded that a user is currently pointing at a product, and a product should
-    // be spawned, pass the camera, the relevant product and the current angletoNorth to this
+    // be spawned, pass the camera, the relevant product and the current angle to north to this
     // method to spawn a product in a virtual space
     private void spawnProduct(Camera camera, Product product, double angleToNorth) {
         if (true) {
@@ -827,6 +821,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
     }
 
+    // Prepare products for display by finding the required angle for each product
     private void populateProducts() {
         List<Product> products = ExampleData.getProducts();
         for (Product product : products) {
@@ -839,6 +834,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
     }
 
+    // Reset anchors in the AR space
     private void resetProductObjects() {
         for (ProductObject productObject : productObjects) {
             productObject.getAnchor().detach();
@@ -849,6 +845,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
     }
 
+    // Returns a product if the user is currently pointing at it
     private Optional<Product> checkIfPointingAtProduct(double userAngle) {
         Map.Entry<Product, Double> closestPair = null;
         for (Map.Entry<Product, Double> productAnglePair : productAngles.entrySet()) {
@@ -872,44 +869,56 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         return target;
     }
 
+    // Given a product, render and display a product box
     private void renderProductBox(Product product) {
-//        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-//        View productBox = inflater.inflate(R.layout.product_summary_map, null);
-//
-//        // create the popup window
-//        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-//        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
-//        boolean focusable = true; // lets taps outside the popup also dismiss it
-//        final PopupWindow popupWindow = new PopupWindow(productBox, width, height, focusable);
-//
-//        // show the popup window
-//        // which view you pass in doesn't matter, it is only used for the window tolken
-//        popupWindow.showAtLocation(findViewById(R.id.surfaceview), Gravity.CENTER, 0, 0);
-
+        // runOnUiThread must be called because Android requires changes to UI to be done only by
+        // the original thread that created the view hierarchy
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                // Make Product Box Visible
                 View productBox = findViewById(R.id.productBoxAR);
                 productBox.setVisibility(View.VISIBLE);
+
+                // Set parameters depending on product
                 TextView title = (TextView) productBox.findViewById(R.id.title);
                 title.setText(product.getName());
                 TextView contributor = (TextView) productBox.findViewById(R.id.contributor);
                 contributor.setText(product.getContributor().getName());
-                TextView distanceAway = (TextView) productBox.findViewById(R.id.distanceAway);
-                distanceAway.setText("");
                 ImageView photo = (ImageView) productBox.findViewById(R.id.productimage);
                 List<Integer> productPhotos = product.getImages();
                 if (productPhotos.size() >= 1) {
                     photo.setImageResource(productPhotos.get(0));
-                } else {
-                    // use default
-                    photo.setImageResource(R.drawable.example_cup);
                 }
+
+                // Find and display distance to product
+                Location productLocation = new Location("ManualProvider");
+                productLocation.setLatitude(product.getLocation().latitude);
+                productLocation.setLongitude(product.getLocation().longitude);
+                float dist = lastKnownLocation.distanceTo(productLocation);
+                TextView distanceAway = (TextView) productBox.findViewById(R.id.distanceAway);
+                distanceAway.setText(Math.round(dist) + " metres away");
+
+                // Link the Product Box to the Product Page
+                productBox.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(v.getContext(), ProductPageActivity.class);
+
+                        intent.putExtra("product", product);
+                        intent.putExtra("contributor", product.getContributor());
+                        intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
+                        intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) product.getImages());
+
+                        startActivity(intent);
+                    }
+                });
             }
         });
         productBoxHidden = false;
     }
 
+    // Hide the product box if not pointing at any product
     private void hideProductBox() {
         runOnUiThread(new Runnable() {
             @Override
@@ -924,7 +933,6 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
 }
 
-// AR-Reshare Code
 // A class to represent the objects in AR showing the direction to products
 class ProductObject {
     private Anchor anchor;
@@ -935,11 +943,6 @@ class ProductObject {
         this.anchor = anchor;
         this.trackable = trackable;
         this.product = product;
-    }
-
-    public static float findDistance(float[] source, float[] dest) {
-        float[] sqrDiif = new float[]{(float) Math.pow((source[0]-dest[0]),2), (float) Math.pow((source[1]-dest[1]),2), (float) Math.pow((source[2]-dest[2]),2)};
-        return (float) Math.sqrt(sqrDiif[0] + sqrDiif[1] + sqrDiif[2]);
     }
 
     public Anchor getAnchor() {
