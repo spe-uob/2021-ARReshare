@@ -159,6 +159,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     // This should be combined with productObjects in the future
     private final Set<Product> displayedProducts = new HashSet<>();
     private boolean productBoxHidden = true;
+    private Product productBoxProduct;
 
     // Debugging
     private int shouldGenerate = 0;
@@ -208,14 +209,12 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         regenerate_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                shouldGenerate += 1;
-
                 // Get nearby products and calculate required angles
                 resetProductObjects();
                 populateProducts();
 
                 // Rotation animation
-                ObjectAnimator.ofFloat(v, "rotation", 0f, 360f).start();
+                ObjectAnimator.ofFloat(v, "rotation", (float) lastCompassButtonAngle, (float) lastCompassButtonAngle+360).start();
             }
         });
 
@@ -548,7 +547,12 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 rotateCompass(angle);
             }
             // Else if the product is displayed, but the product box not, display it
-            else if (productBoxHidden) {
+            else if (productBoxHidden && this.displayedProducts.contains(pointingAt.get())) {
+                renderProductBox(pointingAt.get());
+                rotateCompass(angle);
+            }
+            // Else if the product box is displayed, but is showing other product's information, update it
+            else if (productBoxProduct != pointingAt.get() && this.displayedProducts.contains(pointingAt.get())) {
                 renderProductBox(pointingAt.get());
                 rotateCompass(angle);
             }
@@ -847,10 +851,12 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         for (ProductObject productObject : productObjects) {
             productObject.getAnchor().detach();
         }
+        displayedProducts.removeAll(productAngles.keySet());
         int n = productObjects.size();
         for (int i = 0; i < n; i++) {
             productObjects.remove(0);
         }
+
     }
 
     // Returns a product if the user is currently pointing at it
