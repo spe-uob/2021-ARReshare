@@ -9,6 +9,8 @@
     <string name="message_button">Message Button</string>
     <string name="API_KEY1">AIzaSyCpMkCR3OcbAK9aZ4mpthgRDtHU4l8tGIk</string>
     <string name="API_KEY2">AIzaSyBsn8QLFwcsXnxHf2ESE3HrXbch6lux3Ak</string>
+    <string name="STATIC_MAP_KEY">AIzaSyAFWHH-yjENxp6a7kQUeFfLjWcbGBuuM6Y</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="thanks_message">You added this product,\nthank you for sharing!</string>
 
 </resources>
