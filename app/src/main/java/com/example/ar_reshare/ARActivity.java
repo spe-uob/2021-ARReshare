@@ -12,10 +12,16 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ar_reshare.samplerender.Framebuffer;
@@ -60,9 +66,11 @@ import java.nio.ByteBuffer;
 import java.security.cert.PKIXRevocationChecker;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class ARActivity extends AppCompatActivity implements SampleRender.Renderer {
 
@@ -152,6 +160,12 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     // AR-Reshare Code
     // The list of currently displayed Product Objects
     private final List<ProductObject> productObjects = new ArrayList<>();
+
+    // The set of currently displayed products
+    // This should be combined with productObjects in the future
+    private final Set<Product> displayedProducts = new HashSet<>();
+    private boolean productBoxHidden = true;
+
     // temporary example for generating product
     private int shouldGenerate = 0;
     private String debugText;
@@ -169,7 +183,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     // Map to store the required angle for each product
     private Map<Product, Double> productAngles = new HashMap<>();
 
-    private static final double ANGLE_LIMIT = 0.261799; // ~ 15 degrees
+    private static final double ANGLE_LIMIT = 15 * Math.PI/180; // ~ 20 degrees
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -528,18 +542,26 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // find the angle to the north of THIS LINE using trigonometry
         // Then you can compare this angle to the angle that you received from compass
         Optional<Product> pointingAt = checkIfPointingAtProduct(angle);
+        this.debugText = pointingAt.toString();
 
         // 3. Spawn a product in front of the user if yes
         if (pointingAt.isPresent()) {
-            spawnProduct(camera, pointingAt.get(), angle);
-            // When ProductObject has been created, remove this product from the HashMap
-            // This can be improved in the future
-            this.productAngles.remove(pointingAt.get());
+            if (!this.displayedProducts.contains(pointingAt.get())) {
+                spawnProduct(camera, pointingAt.get(), angle);
+                // When ProductObject has been created, remove this product from the Set
+                this.displayedProducts.add(pointingAt.get());
+                renderProductBox(pointingAt.get());
+            }
+            else if (productBoxHidden) {
+                renderProductBox(pointingAt.get());
+            }
+        } else {
+            hideProductBox();
         }
 
         // This if statement is temporary - otherwise we would constantly generate and crash
         if (shouldGenerate >= 1) {
-            this.debugText = "azimuth=" + angle + " gps=" + lastKnownLocation.getLatitude() + ", " + lastKnownLocation.getLongitude();
+            //this.debugText = "azimuth=" + angle + " gps=" + lastKnownLocation.getLatitude() + ", " + lastKnownLocation.getLongitude();
             shouldGenerate--;
         }
 
@@ -849,6 +871,56 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
         return target;
     }
+
+    private void renderProductBox(Product product) {
+//        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+//        View productBox = inflater.inflate(R.layout.product_summary_map, null);
+//
+//        // create the popup window
+//        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+//        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+//        boolean focusable = true; // lets taps outside the popup also dismiss it
+//        final PopupWindow popupWindow = new PopupWindow(productBox, width, height, focusable);
+//
+//        // show the popup window
+//        // which view you pass in doesn't matter, it is only used for the window tolken
+//        popupWindow.showAtLocation(findViewById(R.id.surfaceview), Gravity.CENTER, 0, 0);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                View productBox = findViewById(R.id.productBoxAR);
+                productBox.setVisibility(View.VISIBLE);
+                TextView title = (TextView) productBox.findViewById(R.id.title);
+                title.setText(product.getName());
+                TextView contributor = (TextView) productBox.findViewById(R.id.contributor);
+                contributor.setText(product.getContributor().getName());
+                TextView distanceAway = (TextView) productBox.findViewById(R.id.distanceAway);
+                distanceAway.setText("");
+                ImageView photo = (ImageView) productBox.findViewById(R.id.productimage);
+                List<Integer> productPhotos = product.getImages();
+                if (productPhotos.size() >= 1) {
+                    photo.setImageResource(productPhotos.get(0));
+                } else {
+                    // use default
+                    photo.setImageResource(R.drawable.example_cup);
+                }
+            }
+        });
+        productBoxHidden = false;
+    }
+
+    private void hideProductBox() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                View productBox = findViewById(R.id.productBoxAR);
+                productBox.setVisibility(View.INVISIBLE);
+            }
+        });
+        productBoxHidden = true;
+    }
+
 
 }
 
