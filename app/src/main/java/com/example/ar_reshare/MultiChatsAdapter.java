@@ -54,7 +54,6 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
                 intent.putExtra("contributor", chat.getContributor());
                 intent.putExtra("user",chat.getCurrentUser());
                 intent.putExtra("profilePicId",chat.getContributor().getProfileIcon());
-
                 mContext.startActivity(intent);
             }
         });

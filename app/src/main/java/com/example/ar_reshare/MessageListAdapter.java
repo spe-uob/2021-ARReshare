@@ -1,6 +1,7 @@
 package com.example.ar_reshare;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,8 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MessageListAdapter extends RecyclerView.Adapter {
 
@@ -67,7 +70,6 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         Message message = (Message) mMessageList.get(position);
-//        ((SentMessageHolder) holder).bind(message);
         switch (holder.getItemViewType()) {
             case VIEW_TYPE_MESSAGE_SENT:
                 ((SentMessageHolder) holder).bind(message);
@@ -116,6 +118,15 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
             // Insert the profile image from the URL into the ImageView.
             profileImage.setImageResource(message.getSender().getProfileIcon());
+            profileImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(v.getContext(), ProfileActivity.class);
+                    intent.putExtra("contributor", message.getSender());
+                    intent.putExtra("profilePicId", message.getSender().getProfileIcon());
+                    mContext.startActivity(intent);
+                }
+            });
         }
     }
 
