@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.animation.ObjectAnimator;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.media.Image;
@@ -11,11 +13,11 @@ import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.PopupMenu;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ar_reshare.samplerender.Framebuffer;
@@ -57,12 +59,13 @@ import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationExceptio
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.security.cert.PKIXRevocationChecker;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class ARActivity extends AppCompatActivity implements SampleRender.Renderer {
 
@@ -166,38 +169,42 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private final float[] worldLightDirection = {0.0f, 0.0f, 0.0f, 0.0f};
     private final float[] viewLightDirection = new float[4]; // view x world light direction
 
-    // AR-Reshare Code
+
     // The list of currently displayed Product Objects
     private final List<ProductObject> productObjects = new ArrayList<>();
-    // temporary example for generating product
-    private int shouldGenerate = 0;
-    private String debugText;
+
+    // The set of currently displayed products
+    // This should be combined with productObjects in the future
+    private final Set<Product> displayedProducts = new HashSet<>();
+    private boolean productBoxHidden = true;
+    private Product productBoxProduct;
+
+    // Compass object
     private Compass compass;
+    // Compass animation
+    private double lastCompassButtonAngle = 0;
 
     // Location related attributes:
     // Built-in class which provider current location
     private FusedLocationProviderClient fusedLocationClient;
     // The users last known location
     private Location lastKnownLocation;
-
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
 
     // Map to store the required angle for each product
     private Map<Product, Double> productAngles = new HashMap<>();
 
-    private static final double ANGLE_LIMIT = 0.261799; // ~ 15 degrees
+    // The acceptable limit of angle offset to product
+    private static final double ANGLE_LIMIT = 20 * Math.PI/180; // degrees converted to radians
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_aractivity);
+
         surfaceView = findViewById(R.id.surfaceview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
-
-        // Set up touch listener.
-        tapHelper = new TapHelper(/*context=*/ this);
-        surfaceView.setOnTouchListener(tapHelper);
 
         // Set up renderer.
         render = new SampleRender(surfaceView, this, getAssets());
@@ -208,16 +215,17 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         depthSettings.onCreate(this);
         instantPlacementSettings.onCreate(this);
 
-        // AR-Reshare code
-        Button regenerate_button = findViewById(R.id.regenerate_button);
+        // Define the onclick event for compass (regenerate) button
+        ImageButton regenerate_button = findViewById(R.id.regenerate_button);
         regenerate_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                shouldGenerate += 1;
-
                 // Get nearby products and calculate required angles
                 resetProductObjects();
                 populateProducts();
+
+                // Rotation animation
+                ObjectAnimator.ofFloat(v, "rotation", (float) lastCompassButtonAngle, (float) lastCompassButtonAngle+360).start();
             }
         });
 
@@ -581,39 +589,44 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             }
         }
 
-        // TODO: AR-Reshare code
         // MAIN FUNCTIONALITY
-        // ! These are all ideas, there might be better ways of doing things ! :)
         // On each frame update:
-        // 0. Check user has not moved -> Reset objects if needed
-        // e.g. checkUserLocation()
+        // TODO 0. Check user has not moved -> Reset objects if needed
 
         // 1. Get user's angle to the North (Compass)
         double angle = compass.getAngleToNorth();
 
         // 2. Check if user is pointing at a product
-        // e.g. for loop iterating through this.productObjects, comparing angle to north of user and product
-        // For this you will probably need to create a function mapping virtual coordinates to real life GPS coordinates
-        // then define an equation of a line between REAL user location and REAL product location
-        // find the angle to the north of THIS LINE using trigonometry
-        // Then you can compare this angle to the angle that you received from compass
         Optional<Product> pointingAt = checkIfPointingAtProduct(angle);
 
         // 3. Spawn a product in front of the user if yes
         if (pointingAt.isPresent()) {
-            spawnProduct(camera, pointingAt.get(), angle);
-            // When ProductObject has been created, remove this product from the HashMap
-            // This can be improved in the future
-            this.productAngles.remove(pointingAt.get());
+            // If product is not already being displayed, spawn it
+            if (!this.displayedProducts.contains(pointingAt.get())) {
+                spawnProduct(camera, pointingAt.get(), angle);
+                // When ProductObject has been created, remove this product from the Set
+                this.displayedProducts.add(pointingAt.get());
+                renderProductBox(pointingAt.get());
+                rotateCompass(angle);
+            }
+            // Else if the product is displayed, but the product box not, display it
+            else if (productBoxHidden && this.displayedProducts.contains(pointingAt.get())) {
+                renderProductBox(pointingAt.get());
+                rotateCompass(angle);
+            }
+            // Else if the product box is displayed, but is showing other product's information, update it
+            else if (productBoxProduct != pointingAt.get() && this.displayedProducts.contains(pointingAt.get())) {
+                renderProductBox(pointingAt.get());
+                rotateCompass(angle);
+            }
+        } else {
+            // Hide product box if currently not pointing at any product
+            if (!productBoxHidden) {
+                hideProductBox();
+                rotateCompass(angle);
+            }
+
         }
-
-        // This if statement is temporary - otherwise we would constantly generate and crash
-        if (shouldGenerate >= 1) {
-            this.debugText = "azimuth=" + angle + " gps=" + lastKnownLocation.getLatitude() + ", " + lastKnownLocation.getLongitude();
-            shouldGenerate--;
-        }
-
-
 
         // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
         trackingStateHelper.updateKeepScreenOnFlag(camera.getTrackingState());
@@ -628,7 +641,6 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 message = TrackingStateHelper.getTrackingFailureReasonString(camera);
             }
         } else if (hasTrackingPlane()) {
-                message = debugText;
         } else {
             message = SEARCHING_PLANE_MESSAGE;
         }
@@ -686,25 +698,14 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // Visualize anchors created by touch.
         render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
 
-        // AR-Reshare Code (modified)
         // Iterates through existing anchors and draws them on each frame
+        // TODO: Sometimes ConcurrentModificationException is raised when the regenerate button
+        //  is pressed and (?) the frame is being drawn, detect the issue and resolve it
         for (ProductObject obj : this.productObjects)  {
             Anchor anchor = obj.getAnchor();
             Trackable trackable = obj.getTrackable();
 
-            // Get the current pose of an Anchor in world space. The Anchor pose is updated
-            // during calls to session.update() as ARCore refines its estimate of the world.
-            anchor.getPose().toMatrix(modelMatrix, 0);
-
-            // Calculate model/view/projection matrices
-            Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-            Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-
-            // Update shader properties and draw
-            virtualObjectShader.setMat4("u_ModelView", modelViewMatrix);
-            virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-
-            // check object's category
+            // Check object's category
             Category objCategory = obj.getProduct().getCategory();
             if (objCategory.equals(Category.CLOTHING)){
                 virtualObjectMesh = objectHat;
@@ -723,6 +724,18 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 virtualObjectShader = burgerShader;
                 virtualObjectAlbedoTexture = burgerTexture;
             }
+
+            // Get the current pose of an Anchor in world space. The Anchor pose is updated
+            // during calls to session.update() as ARCore refines its estimate of the world.
+            anchor.getPose().toMatrix(modelMatrix, 0);
+
+            // Calculate model/view/projection matrices
+            Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+            Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+
+            // Update shader properties and draw
+            virtualObjectShader.setMat4("u_ModelView", modelViewMatrix);
+            virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
 
             if (trackable instanceof InstantPlacementPoint
                     && ((InstantPlacementPoint) trackable).getTrackingMethod()
@@ -825,9 +838,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         session.configure(config);
     }
 
-    // AR-Reshare Code
     // If it is concluded that a user is currently pointing at a product, and a product should
-    // be spawned, pass the camera, the relevant product and the current angletoNorth to this
+    // be spawned, pass the camera, the relevant product and the current angle to north to this
     // method to spawn a product in a virtual space
     private void spawnProduct(Camera camera, Product product, double angleToNorth) {
         if (true) {
@@ -895,6 +907,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
     }
 
+    // Prepare products for display by finding the required angle for each product
     private void populateProducts() {
         List<Product> products = ExampleData.getProducts();
         for (Product product : products) {
@@ -907,16 +920,20 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
     }
 
+    // Reset anchors in the AR space
     private void resetProductObjects() {
         for (ProductObject productObject : productObjects) {
             productObject.getAnchor().detach();
         }
+        displayedProducts.removeAll(productAngles.keySet());
         int n = productObjects.size();
         for (int i = 0; i < n; i++) {
             productObjects.remove(0);
         }
+
     }
 
+    // Returns a product if the user is currently pointing at it
     private Optional<Product> checkIfPointingAtProduct(double userAngle) {
         Map.Entry<Product, Double> closestPair = null;
         for (Map.Entry<Product, Double> productAnglePair : productAngles.entrySet()) {
@@ -940,9 +957,118 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         return target;
     }
 
+    // Given a product, render and display a product box
+    private void renderProductBox(Product product) {
+        // runOnUiThread must be called because Android requires changes to UI to be done only by
+        // the original thread that created the view hierarchy
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Make Product Box Visible
+                View productBox = findViewById(R.id.productBoxAR);
+                productBox.setVisibility(View.VISIBLE);
+
+                // Set parameters depending on product
+                TextView title = (TextView) productBox.findViewById(R.id.title);
+                title.setText(product.getName());
+                TextView contributor = (TextView) productBox.findViewById(R.id.contributor);
+                contributor.setText(product.getContributor().getName());
+                ImageView photo = (ImageView) productBox.findViewById(R.id.productimage);
+                List<Integer> productPhotos = product.getImages();
+                if (productPhotos.size() >= 1) {
+                    photo.setImageResource(productPhotos.get(0));
+                }
+
+                // Find and display distance to product
+                Location productLocation = new Location("ManualProvider");
+                productLocation.setLatitude(product.getLocation().latitude);
+                productLocation.setLongitude(product.getLocation().longitude);
+                float dist = lastKnownLocation.distanceTo(productLocation);
+                TextView distanceAway = (TextView) productBox.findViewById(R.id.distanceAway);
+                distanceAway.setText(Math.round(dist) + " metres away");
+
+                // Link the Product Box to the Product Page
+                productBox.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(v.getContext(), ProductPageActivity.class);
+
+                        intent.putExtra("product", product);
+                        intent.putExtra("contributor", product.getContributor());
+                        intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
+                        intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) product.getImages());
+
+                        startActivity(intent);
+                    }
+                });
+            }
+        });
+        productBoxHidden = false;
+    }
+
+    // Hide the product box if not pointing at any product
+    private void hideProductBox() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                View productBox = findViewById(R.id.productBoxAR);
+                productBox.setVisibility(View.INVISIBLE);
+            }
+        });
+        productBoxHidden = true;
+    }
+
+    // Rotates compass to the specified angle to the north
+    private void rotateCompass(double angle) {
+        // Convert angle to positive degrees
+        if (angle < 0) angle = angle + Math.PI;
+        float angleDeg = (float) (angle * 180/Math.PI);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                View compassButton = findViewById(R.id.regenerate_button);
+                ObjectAnimator.ofFloat(compassButton, "rotation", (float) lastCompassButtonAngle, angleDeg).start();
+                lastCompassButtonAngle = angleDeg;
+            }
+        });
+    }
+
+    class SwipingMechanism implements View.OnTouchListener {
+
+        private float x1, x2, y1, y2;
+        private final int OFFSET = 50;
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            v.performClick();
+            System.out.println("TOUCH DETECTED");
+            switch(event.getAction()){
+                case MotionEvent.ACTION_DOWN:
+                    x1 = event.getX();
+                    y1 = event.getY();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    x2 = event.getX();
+                    y2 = event.getY();
+                    if (Math.abs(x1)+OFFSET < Math.abs(x2)) {
+                        Intent i = new Intent(ARActivity.this, FeedActivity.class);
+                        startActivity(i);
+                    } else if((Math.abs(x1) > Math.abs(x2)+OFFSET)) {
+                        Intent i = new Intent(ARActivity.this, ProfileActivity.class);
+                        startActivity(i);
+                    } else {
+                        Intent i = new Intent(ARActivity.this, MapsActivity.class);
+                        startActivity(i);
+                    }
+                    break;
+            }
+            return false;
+        }
+    }
+
+
 }
 
-// AR-Reshare Code
 // A class to represent the objects in AR showing the direction to products
 class ProductObject {
     private Anchor anchor;
@@ -953,11 +1079,6 @@ class ProductObject {
         this.anchor = anchor;
         this.trackable = trackable;
         this.product = product;
-    }
-
-    public static float findDistance(float[] source, float[] dest) {
-        float[] sqrDiif = new float[]{(float) Math.pow((source[0]-dest[0]),2), (float) Math.pow((source[1]-dest[1]),2), (float) Math.pow((source[2]-dest[2]),2)};
-        return (float) Math.sqrt(sqrDiif[0] + sqrDiif[1] + sqrDiif[2]);
     }
 
     public Anchor getAnchor() {
