@@ -1,6 +1,8 @@
 package com.example.ar_reshare;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
@@ -10,6 +12,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -23,7 +26,9 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProductPageActivity extends AppCompatActivity {
-
+    LinearLayout sliderDotsPanel;
+    private int dotsCount;
+    private ImageView[] dots;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +42,6 @@ public class ProductPageActivity extends AppCompatActivity {
         User user = ExampleData.getUsers().get(0); // this is John
         Integer profilePicId = i.getIntExtra("profilePicId",R.drawable.arfi_profile_icon);
         List<Integer> productPicId = i.getIntegerArrayListExtra("productPicId");
-
 
         //display product name
         displayProductName(product);
@@ -67,10 +71,6 @@ public class ProductPageActivity extends AppCompatActivity {
 
         //links to messaging page
         messageButton(product,contributor,user, profilePicId);
-    }
-
-    public void hideMessageButton(){
-
     }
 
     // implement a top left return arrow that returns to previous page when clicked
@@ -126,6 +126,7 @@ public class ProductPageActivity extends AppCompatActivity {
     public void messageButton(Product product, User contributor, User user,Integer profilePicId){
 
         Button message = findViewById(R.id.messageButton);
+
         message.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -134,17 +135,41 @@ public class ProductPageActivity extends AppCompatActivity {
                 intent.putExtra("contributor", contributor);
                 intent.putExtra("user",user);
                 intent.putExtra("profilePicId", profilePicId);
-
                 startActivity(intent);
             }
         });
+        if(user.getName().equals(contributor.getName())){ // check if the product's contributor is the user
+            message.setVisibility(View.INVISIBLE); // hide the message button in this case
+            TextView thanksMessage = findViewById(R.id.thanksForSharing);
+            thanksMessage.setVisibility(View.VISIBLE);
+        }
     }
 
     public void displayProductPics(int[] productPicId){
         ViewPager2 viewPager = findViewById(R.id.viewPager);
-        SliderAdapter adapter;
-        adapter = new SliderAdapter(productPicId);
+        sliderDotsPanel = (LinearLayout) findViewById(R.id.SliderDots);
+        dotsCount = productPicId.length;
+        dots = new ImageView[dotsCount];
+        for(int i = 0; i < dotsCount; i++){
+            dots[i] = new ImageView(this);
+            dots[i].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.non_active_dot));
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(8,0,8,0);
+            sliderDotsPanel.addView(dots[i], params);
+        }
+        dots[0].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.active_dot));
+        SliderAdapter adapter = new SliderAdapter(productPicId);
         viewPager.setAdapter(adapter);
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                for(int i = 0; i < dotsCount; i++){
+                    dots[i].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.non_active_dot));
+                }
+                dots[position].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.active_dot));
+            }
+
+        });
     }
 
     public void displayMapPic(double lat, double lng){
