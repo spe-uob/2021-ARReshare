@@ -206,13 +206,6 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         surfaceView = findViewById(R.id.surfaceview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
 
-        // Set up touch listener.
-//        tapHelper = new TapHelper(/*context=*/ this);
-//        surfaceView.setOnTouchListener(tapHelper);
-
-
-        surfaceView.setOnTouchListener(new SwipingMechanism());
-
         // Set up renderer.
         render = new SampleRender(surfaceView, this, getAssets());
         System.out.println(render.toString());
@@ -1047,6 +1040,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
+            v.performClick();
+            System.out.println("TOUCH DETECTED");
             switch(event.getAction()){
                 case MotionEvent.ACTION_DOWN:
                     x1 = event.getX();
