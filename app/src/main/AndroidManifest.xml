@@ -20,6 +20,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ARReshare">
         <activity
+            android:name=".ARActivity"
+            android:exported="true" />
+
+        <activity
             android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
@@ -28,9 +32,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".ChatListActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
+
         <activity
             android:name=".ProfileActivity"
             android:exported="true" />
@@ -53,15 +59,18 @@
         <activity
             android:name=".FeedActivity"
             android:exported="true" />
+
         <activity
             android:name=".MessagingActivity"
             android:configChanges="orientation"
             android:exported="true"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
         </activity>
+
         <activity
             android:name=".ProductPageActivity"
             android:exported="true" />
@@ -69,6 +78,13 @@
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+        <!--
+ "AR Optional" app, contains non-AR features that can be used when
+         "Google Play Services for AR" (ARCore) is not available.
+        -->
+        <meta-data
+            android:name="com.google.ar.core"
+            android:value="optional" />
     </application>
 
 </manifest>

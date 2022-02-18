@@ -59,4 +59,10 @@ dependencies {
 
     // CameraX View class
     implementation 'androidx.camera:camera-view:1.0.0-alpha25'
+
+    // ARCore
+    implementation 'com.google.ar:core:1.29.0'
+
+    // Waveform
+    implementation 'de.javagl:obj:0.3.0'
 }
