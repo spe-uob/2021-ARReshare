@@ -48,7 +48,9 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         ClickHandler productClickHandler = new ClickHandler(product, PRODUCT_LINK);
         holder.productImage.setOnClickListener(productClickHandler);
         holder.productTitle.setOnClickListener(productClickHandler);
+        holder.productTitle.setBackgroundColor((int) product.getCategory().getCategoryColour());
         holder.productDescription.setOnClickListener(productClickHandler);
+        holder.productDescription.setBackgroundColor((int) product.getCategory().getCategoryColour());
 
         ClickHandler messageClickHandler = new ClickHandler(product, MESSAGE_LINK);
         holder.messageButton.setOnClickListener(messageClickHandler);
