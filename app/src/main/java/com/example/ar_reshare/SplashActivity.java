@@ -22,7 +22,7 @@ public class SplashActivity extends AppCompatActivity {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                Intent intent = new Intent(SplashActivity.this, ARActivity.class);
                 startActivity(intent);
             }
         }, 4000); // change to main activity after 5 secs
