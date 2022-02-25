@@ -3,6 +3,7 @@ package com.example.ar_reshare;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -203,12 +205,18 @@ public class MapsActivity extends FragmentActivity implements
     // Populates the map with markers given a list of products
     private void populateMap(GoogleMap mMap, List<Product> products) {
         for (Product product : products) {
+            int red = Color.red(product.getCategory().getCategoryColour());
+            int green = Color.green(product.getCategory().getCategoryColour());
+            int blue = Color.blue(product.getCategory().getCategoryColour());
+            float[] hsv = new float[3];
+            Color.RGBToHSV(red, green, blue, hsv);
+            float hue = hsv[0];
             LatLng coordinates = product.getLocation();
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(coordinates)
                     .title(product.getName())
                     .snippet("by " + product.getContributor())
-                    .icon(BitmapDescriptorFactory.defaultMarker(product.getCategory().getCategoryColour())));
+                    .icon(BitmapDescriptorFactory.defaultMarker(hue)));
             marker.setTag(product);
         }
     }
