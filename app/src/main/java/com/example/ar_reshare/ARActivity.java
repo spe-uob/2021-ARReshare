@@ -1050,12 +1050,15 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 if (Math.abs(x1)+OFFSET < Math.abs(x2)) {
                     Intent i = new Intent(ARActivity.this, FeedActivity.class);
                     startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 } else if((Math.abs(x1) > Math.abs(x2)+OFFSET)) {
                     Intent i = new Intent(ARActivity.this, ProfileActivity.class);
                     startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 } else {
                     Intent i = new Intent(ARActivity.this, MapsActivity.class);
                     startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top);
                 }
                 break;
         }

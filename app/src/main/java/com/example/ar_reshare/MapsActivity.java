@@ -65,6 +65,7 @@ public class MapsActivity extends FragmentActivity implements
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), MainActivity.class);
                 startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom);
             }
         });
 
