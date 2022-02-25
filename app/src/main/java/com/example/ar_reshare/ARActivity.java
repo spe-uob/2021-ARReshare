@@ -198,6 +198,10 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     // The acceptable limit of angle offset to product
     private static final double ANGLE_LIMIT = 20 * Math.PI/180; // degrees converted to radians
 
+    // Swiping
+    private float x1, x2, y1, y2;
+    private final int OFFSET = 50;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -1033,39 +1037,30 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         });
     }
 
-    class SwipingMechanism implements View.OnTouchListener {
-
-        private float x1, x2, y1, y2;
-        private final int OFFSET = 50;
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            v.performClick();
-            System.out.println("TOUCH DETECTED");
-            switch(event.getAction()){
-                case MotionEvent.ACTION_DOWN:
-                    x1 = event.getX();
-                    y1 = event.getY();
-                    break;
-                case MotionEvent.ACTION_UP:
-                    x2 = event.getX();
-                    y2 = event.getY();
-                    if (Math.abs(x1)+OFFSET < Math.abs(x2)) {
-                        Intent i = new Intent(ARActivity.this, FeedActivity.class);
-                        startActivity(i);
-                    } else if((Math.abs(x1) > Math.abs(x2)+OFFSET)) {
-                        Intent i = new Intent(ARActivity.this, ProfileActivity.class);
-                        startActivity(i);
-                    } else {
-                        Intent i = new Intent(ARActivity.this, MapsActivity.class);
-                        startActivity(i);
-                    }
-                    break;
-            }
-            return false;
+    @Override
+    public boolean onTouchEvent(MotionEvent touchEvent){
+        switch(touchEvent.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                x1 = touchEvent.getX();
+                y1 = touchEvent.getY();
+                break;
+            case MotionEvent.ACTION_UP:
+                x2 = touchEvent.getX();
+                y2 = touchEvent.getY();
+                if (Math.abs(x1)+OFFSET < Math.abs(x2)) {
+                    Intent i = new Intent(ARActivity.this, FeedActivity.class);
+                    startActivity(i);
+                } else if((Math.abs(x1) > Math.abs(x2)+OFFSET)) {
+                    Intent i = new Intent(ARActivity.this, ProfileActivity.class);
+                    startActivity(i);
+                } else {
+                    Intent i = new Intent(ARActivity.this, MapsActivity.class);
+                    startActivity(i);
+                }
+                break;
         }
+        return false;
     }
-
 
 }
 
