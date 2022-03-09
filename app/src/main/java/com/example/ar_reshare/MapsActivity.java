@@ -73,6 +73,13 @@ public class MapsActivity extends FragmentActivity implements
         getLocationPermission();
     }
 
+    // When leaving the Map Activity always animate sliding down
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom);
+    }
+
     // When map is loaded, checks for location permissions and configures the initial
     // state of the map
     @Override
