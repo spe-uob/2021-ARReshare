@@ -200,7 +200,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
     // Swiping
     private float x1, x2, y1, y2;
-    private final int OFFSET = 50;
+    private final int TOUCH_OFFSET = 100;
+    private final int TAP_OFFSET = 30;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -1043,19 +1044,21 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             case MotionEvent.ACTION_DOWN:
                 x1 = touchEvent.getX();
                 y1 = touchEvent.getY();
+                System.out.println("down: " + x1 + ", " + y1);
                 break;
             case MotionEvent.ACTION_UP:
                 x2 = touchEvent.getX();
                 y2 = touchEvent.getY();
-                if (Math.abs(x1)+OFFSET < Math.abs(x2)) {
+                System.out.println("up: " + x2 + ", " + y2);
+                if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
                     Intent i = new Intent(ARActivity.this, FeedActivity.class);
                     startActivity(i);
                     overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-                } else if((Math.abs(x1) > Math.abs(x2)+OFFSET)) {
+                } else if((Math.abs(x1) > Math.abs(x2)+ TOUCH_OFFSET)) {
                     Intent i = new Intent(ARActivity.this, ProfileActivity.class);
                     startActivity(i);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                } else {
+                } else if ((y2 < y1+ TOUCH_OFFSET) || (Math.abs(x2-x1) < TAP_OFFSET && Math.abs(y2-y1) < TAP_OFFSET)) {
                     Intent i = new Intent(ARActivity.this, MapsActivity.class);
                     startActivity(i);
                     overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top);
