@@ -198,16 +198,27 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     // The acceptable limit of angle offset to product
     private static final double ANGLE_LIMIT = 20 * Math.PI/180; // degrees converted to radians
 
-    // Swiping
+    // Swiping gestures variables and constants
     private float x1, x2, y1, y2;
     private final int TOUCH_OFFSET = 100;
     private final int TAP_OFFSET = 10;
     private boolean touchedDown = false;
     private boolean moved = false;
 
+    private void checkIfARAvailable() {
+        ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(this);
+        if (!availability.isSupported()) {
+            Intent intent = new Intent(ARActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        checkIfARAvailable();
+
         setContentView(R.layout.activity_aractivity);
 
         surfaceView = findViewById(R.id.surfaceview);
@@ -1040,6 +1051,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         });
     }
 
+    // Logic for handling swiping gestures between activities
     @Override
     public boolean onTouchEvent(MotionEvent touchEvent){
         TextView swipingClue = findViewById(R.id.swipingClue);
@@ -1048,13 +1060,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 touchedDown = true;
                 x1 = touchEvent.getX();
                 y1 = touchEvent.getY();
-                System.out.println("down: " + x1 + ", " + y1);
                 break;
             case MotionEvent.ACTION_UP:
                 x2 = touchEvent.getX();
                 y2 = touchEvent.getY();
                 touchedDown = false;
-                System.out.println("up: " + x2 + ", " + y2);
                 if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
                     Intent i = new Intent(ARActivity.this, FeedActivity.class);
                     startActivity(i);
@@ -1079,17 +1089,17 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                         moved = true;
                     }
                     if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
-                        swipingClue.setText("Feed >");
+                        swipingClue.setText("Feed >>>");
                         float diff = ((x2 - x1) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
-                        System.out.println(diff);
+                        swipingClue.setPadding(Math.round(diff*TOUCH_OFFSET), 0, 0, 0);
                         if (diff > 1) diff = 1.0f;
                         else if (diff < 0.5) diff = 0.25f;
                         swipingClue.setAlpha(diff);
                         swipingClue.setVisibility(View.VISIBLE);
                     } else if((Math.abs(x1) > Math.abs(x2)+ TOUCH_OFFSET)) {
-                        swipingClue.setText("< Profile");
+                        swipingClue.setText("<<< Profile");
                         float diff = ((x1 - x2) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
-                        System.out.println(diff);
+                        swipingClue.setPadding(0, 0, Math.round(diff*TOUCH_OFFSET), 0);
                         if (diff > 1) diff = 1.0f;
                         else if (diff < 0.5) diff = 0.25f;
                         swipingClue.setAlpha(diff);
@@ -1098,7 +1108,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                         swipingClue.setText("^ Map ^");
                         swipingClue.setVisibility(View.VISIBLE);
                         float diff = ((y1 - y2) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
-                        System.out.println(diff);
+                        swipingClue.setPadding(0, 0, 0, Math.round(diff*TOUCH_OFFSET));
                         if (diff > 1) diff = 1.0f;
                         else if (diff < 0.5) diff = 0.25f;
                         swipingClue.setAlpha(diff);
