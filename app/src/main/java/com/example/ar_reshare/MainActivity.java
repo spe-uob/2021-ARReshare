@@ -17,6 +17,9 @@ import androidx.lifecycle.LifecycleOwner;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.TextView;
+
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.ExecutionException;
@@ -28,8 +31,12 @@ public class MainActivity extends AppCompatActivity {
     PreviewView previewView;
     boolean cameraPermissionGranted;
 
+    // Swiping gestures variables and constants
     private float x1, x2, y1, y2;
-    private final int OFFSET = 50;
+    private final int TOUCH_OFFSET = 100;
+    private final int TAP_OFFSET = 10;
+    private boolean touchedDown = false;
+    private boolean moved = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +47,19 @@ public class MainActivity extends AppCompatActivity {
 
         previewView = findViewById(R.id.previewView);
 
-        cameraProviderFuture = ProcessCameraProvider.getInstance(this);
-        cameraProviderFuture.addListener(() -> {
-            try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-                startCameraX(cameraProvider);
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }, getExecutor());
+        if (cameraPermissionGranted) {
+
+            cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+            cameraProviderFuture.addListener(() -> {
+                try {
+                    ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                    startCameraX(cameraProvider);
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }, getExecutor());
+
+        }
 
     }
 
@@ -87,24 +98,74 @@ public class MainActivity extends AppCompatActivity {
         cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview);
     }
 
+    // Logic for handling swiping gestures between activities
+    @Override
     public boolean onTouchEvent(MotionEvent touchEvent){
+        TextView swipingClue = findViewById(R.id.swipingClueMain);
         switch(touchEvent.getAction()){
             case MotionEvent.ACTION_DOWN:
+                touchedDown = true;
                 x1 = touchEvent.getX();
                 y1 = touchEvent.getY();
                 break;
             case MotionEvent.ACTION_UP:
                 x2 = touchEvent.getX();
                 y2 = touchEvent.getY();
-                if (Math.abs(x1)+OFFSET < Math.abs(x2)) {
+                touchedDown = false;
+                if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
                     Intent i = new Intent(MainActivity.this, FeedActivity.class);
                     startActivity(i);
-                } else if((Math.abs(x1) > Math.abs(x2)+OFFSET)) {
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                } else if((Math.abs(x1) > Math.abs(x2)+ TOUCH_OFFSET)) {
                     Intent i = new Intent(MainActivity.this, ProfileActivity.class);
                     startActivity(i);
-                } else {
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                } else if ((y1 - y2 > TOUCH_OFFSET) || (Math.abs(x2-x1) < TAP_OFFSET && Math.abs(y2-y1) < TAP_OFFSET && !moved)) {
                     Intent i = new Intent(MainActivity.this, MapsActivity.class);
                     startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top);
+                }
+                swipingClue.setVisibility(View.INVISIBLE);
+                moved = false;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                x2 = touchEvent.getX();
+                y2 = touchEvent.getY();
+                if (touchedDown) {
+                    if (Math.abs(x2 - x1) > TAP_OFFSET || Math.abs(y2 - y1) > TAP_OFFSET) {
+                        moved = true;
+                    }
+                    if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
+                        swipingClue.setText("Feed >>>");
+                        float diff = ((x2 - x1) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
+                        swipingClue.setPadding(Math.round(diff*TOUCH_OFFSET), 0, 0, 0);
+                        if (diff > 1) diff = 1.0f;
+                        else if (diff < 0.5) diff = 0.25f;
+                        swipingClue.setAlpha(diff);
+                        swipingClue.setVisibility(View.VISIBLE);
+                    } else if((Math.abs(x1) > Math.abs(x2)+ TOUCH_OFFSET)) {
+                        swipingClue.setText("<<< Profile");
+                        float diff = ((x1 - x2) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
+                        swipingClue.setPadding(0, 0, Math.round(diff*TOUCH_OFFSET), 0);
+                        if (diff > 1) diff = 1.0f;
+                        else if (diff < 0.5) diff = 0.25f;
+                        swipingClue.setAlpha(diff);
+                        swipingClue.setVisibility(View.VISIBLE);
+                    } else if (y1 - y2 > TOUCH_OFFSET) {
+                        swipingClue.setText("^ Map ^");
+                        swipingClue.setVisibility(View.VISIBLE);
+                        float diff = ((y1 - y2) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
+                        swipingClue.setPadding(0, 0, 0, Math.round(diff*TOUCH_OFFSET));
+                        if (diff > 1) diff = 1.0f;
+                        else if (diff < 0.5) diff = 0.25f;
+                        swipingClue.setAlpha(diff);
+                        swipingClue.setVisibility(View.VISIBLE);
+                    } else {
+                        swipingClue.setVisibility(View.INVISIBLE);
+                    }
+                } else {
+                    swipingClue.setVisibility(View.INVISIBLE);
+                    swipingClue.setText("");
                 }
                 break;
         }
