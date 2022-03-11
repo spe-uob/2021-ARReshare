@@ -30,7 +30,6 @@
             android:id="@+id/productTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:clickable="true"
             android:padding="10dp"
@@ -39,7 +38,7 @@
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/bookmarkButton"
-            app:layout_constraintStart_toEndOf="@id/profileIcon"
+            app:layout_constraintStart_toEndOf="@id/category"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -85,6 +84,17 @@
             app:layout_constraintTop_toTopOf="@+id/contributor"
             app:srcCompat="@drawable/ic_baseline_message_24" />
 
+        <ImageView
+            android:id="@+id/category"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="10dp"
+            app:layout_constraintBottom_toBottomOf="@id/productTitle"
+            app:layout_constraintEnd_toStartOf="@id/productTitle"
+            app:layout_constraintStart_toEndOf="@id/profileIcon"
+            app:layout_constraintTop_toTopOf="@id/productTitle"
+            app:srcCompat="@drawable/ic_baseline_question_mark_24" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -106,8 +116,10 @@
             android:src="@mipmap/ic_launcher"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
