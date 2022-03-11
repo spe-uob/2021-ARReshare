@@ -198,9 +198,27 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     // The acceptable limit of angle offset to product
     private static final double ANGLE_LIMIT = 20 * Math.PI/180; // degrees converted to radians
 
+    // Swiping gestures variables and constants
+    private float x1, x2, y1, y2;
+    private final int TOUCH_OFFSET = 100;
+    private final int TAP_OFFSET = 10;
+    private boolean touchedDown = false;
+    private boolean moved = false;
+
+    private void checkIfARAvailable() {
+        ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(this);
+        if (!availability.isSupported()) {
+            Intent intent = new Intent(ARActivity.this, FallbackActivity.class);
+            startActivity(intent);
+        }
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        checkIfARAvailable();
+
         setContentView(R.layout.activity_aractivity);
 
         surfaceView = findViewById(R.id.surfaceview);
@@ -1033,39 +1051,79 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         });
     }
 
-    class SwipingMechanism implements View.OnTouchListener {
-
-        private float x1, x2, y1, y2;
-        private final int OFFSET = 50;
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            v.performClick();
-            System.out.println("TOUCH DETECTED");
-            switch(event.getAction()){
-                case MotionEvent.ACTION_DOWN:
-                    x1 = event.getX();
-                    y1 = event.getY();
-                    break;
-                case MotionEvent.ACTION_UP:
-                    x2 = event.getX();
-                    y2 = event.getY();
-                    if (Math.abs(x1)+OFFSET < Math.abs(x2)) {
-                        Intent i = new Intent(ARActivity.this, FeedActivity.class);
-                        startActivity(i);
-                    } else if((Math.abs(x1) > Math.abs(x2)+OFFSET)) {
-                        Intent i = new Intent(ARActivity.this, ProfileActivity.class);
-                        startActivity(i);
-                    } else {
-                        Intent i = new Intent(ARActivity.this, MapsActivity.class);
-                        startActivity(i);
+    // Logic for handling swiping gestures between activities
+    @Override
+    public boolean onTouchEvent(MotionEvent touchEvent){
+        TextView swipingClue = findViewById(R.id.swipingClue);
+        switch(touchEvent.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                touchedDown = true;
+                x1 = touchEvent.getX();
+                y1 = touchEvent.getY();
+                break;
+            case MotionEvent.ACTION_UP:
+                x2 = touchEvent.getX();
+                y2 = touchEvent.getY();
+                touchedDown = false;
+                if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
+                    Intent i = new Intent(ARActivity.this, FeedActivity.class);
+                    startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                } else if((Math.abs(x1) > Math.abs(x2)+ TOUCH_OFFSET)) {
+                    Intent i = new Intent(ARActivity.this, ProfileActivity.class);
+                    startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                } else if ((y1 - y2 > TOUCH_OFFSET) || (Math.abs(x2-x1) < TAP_OFFSET && Math.abs(y2-y1) < TAP_OFFSET && !moved)) {
+                    Intent i = new Intent(ARActivity.this, MapsActivity.class);
+                    startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top);
+                }
+                swipingClue.setVisibility(View.INVISIBLE);
+                moved = false;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                x2 = touchEvent.getX();
+                y2 = touchEvent.getY();
+                if (touchedDown) {
+                    if (Math.abs(x2 - x1) > TAP_OFFSET || Math.abs(y2 - y1) > TAP_OFFSET) {
+                        moved = true;
                     }
-                    break;
-            }
-            return false;
+                    if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
+                        swipingClue.setText("Feed >>>");
+                        float diff = ((x2 - x1) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
+                        swipingClue.setPadding(Math.round(diff*TOUCH_OFFSET), 0, 0, 0);
+                        if (diff > 1) diff = 1.0f;
+                        else if (diff < 0.5) diff = 0.25f;
+                        swipingClue.setAlpha(diff);
+                        swipingClue.setVisibility(View.VISIBLE);
+                    } else if((Math.abs(x1) > Math.abs(x2)+ TOUCH_OFFSET)) {
+                        swipingClue.setText("<<< Profile");
+                        float diff = ((x1 - x2) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
+                        swipingClue.setPadding(0, 0, Math.round(diff*TOUCH_OFFSET), 0);
+                        if (diff > 1) diff = 1.0f;
+                        else if (diff < 0.5) diff = 0.25f;
+                        swipingClue.setAlpha(diff);
+                        swipingClue.setVisibility(View.VISIBLE);
+                    } else if (y1 - y2 > TOUCH_OFFSET) {
+                        swipingClue.setText("^ Map ^");
+                        swipingClue.setVisibility(View.VISIBLE);
+                        float diff = ((y1 - y2) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
+                        swipingClue.setPadding(0, 0, 0, Math.round(diff*TOUCH_OFFSET));
+                        if (diff > 1) diff = 1.0f;
+                        else if (diff < 0.5) diff = 0.25f;
+                        swipingClue.setAlpha(diff);
+                        swipingClue.setVisibility(View.VISIBLE);
+                    } else {
+                        swipingClue.setVisibility(View.INVISIBLE);
+                    }
+                } else {
+                    swipingClue.setVisibility(View.INVISIBLE);
+                    swipingClue.setText("");
+                }
+                break;
         }
+        return false;
     }
-
 
 }
 
