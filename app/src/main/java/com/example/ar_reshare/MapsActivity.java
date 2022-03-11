@@ -63,13 +63,20 @@ public class MapsActivity extends FragmentActivity implements
         returnArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), MainActivity.class);
-                startActivity(intent);
+                onBackPressed();
+                overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom);
             }
         });
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getLocationPermission();
+    }
+
+    // When leaving the Map Activity always animate sliding down
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom);
     }
 
     // When map is loaded, checks for location permissions and configures the initial
