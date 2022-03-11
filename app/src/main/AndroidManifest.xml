@@ -67,7 +67,7 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".FallbackActivity"
             android:exported="true">
         </activity>
 

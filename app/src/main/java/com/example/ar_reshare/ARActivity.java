@@ -208,7 +208,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private void checkIfARAvailable() {
         ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(this);
         if (!availability.isSupported()) {
-            Intent intent = new Intent(ARActivity.this, MainActivity.class);
+            Intent intent = new Intent(ARActivity.this, FallbackActivity.class);
             startActivity(intent);
         }
     }

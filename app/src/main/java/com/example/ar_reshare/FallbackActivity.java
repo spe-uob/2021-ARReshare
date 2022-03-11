@@ -15,7 +15,6 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -25,7 +24,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
-public class MainActivity extends AppCompatActivity {
+public class FallbackActivity extends AppCompatActivity {
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
 
     PreviewView previewView;
@@ -41,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_fallback);
 
         getCameraPermission();
 
@@ -101,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     // Logic for handling swiping gestures between activities
     @Override
     public boolean onTouchEvent(MotionEvent touchEvent){
-        TextView swipingClue = findViewById(R.id.swipingClueMain);
+        TextView swipingClue = findViewById(R.id.fallbackSwipingClue);
         switch(touchEvent.getAction()){
             case MotionEvent.ACTION_DOWN:
                 touchedDown = true;
@@ -113,15 +112,15 @@ public class MainActivity extends AppCompatActivity {
                 y2 = touchEvent.getY();
                 touchedDown = false;
                 if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
-                    Intent i = new Intent(MainActivity.this, FeedActivity.class);
+                    Intent i = new Intent(FallbackActivity.this, FeedActivity.class);
                     startActivity(i);
                     overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 } else if((Math.abs(x1) > Math.abs(x2)+ TOUCH_OFFSET)) {
-                    Intent i = new Intent(MainActivity.this, ProfileActivity.class);
+                    Intent i = new Intent(FallbackActivity.this, ProfileActivity.class);
                     startActivity(i);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 } else if ((y1 - y2 > TOUCH_OFFSET) || (Math.abs(x2-x1) < TAP_OFFSET && Math.abs(y2-y1) < TAP_OFFSET && !moved)) {
-                    Intent i = new Intent(MainActivity.this, MapsActivity.class);
+                    Intent i = new Intent(FallbackActivity.this, MapsActivity.class);
                     startActivity(i);
                     overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top);
                 }
