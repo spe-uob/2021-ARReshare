@@ -1,6 +1,8 @@
 package com.example.ar_reshare;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +38,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Product product = arrayList.get(position);
         holder.profileIcon.setImageResource(product.getContributor().getProfileIcon());
+        holder.categoryIcon.setImageResource(product.getCategory().getCategoryIcon());
         holder.contributor.setText(product.getContributor().getName());
         holder.productImage.setImageResource(product.getImages().get(0));
         holder.productTitle.setText(product.getName());
@@ -79,6 +82,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         TextView productDescription;
         ImageView messageButton;
         ImageView bookmarkButton;
+        ImageView categoryIcon;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -90,6 +94,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             productDescription = itemView.findViewById(R.id.productDescription);
             messageButton = itemView.findViewById(R.id.messageButton);
             bookmarkButton = itemView.findViewById(R.id.bookmarkButton);
+            categoryIcon = itemView.findViewById(R.id.category);
         }
     }
 

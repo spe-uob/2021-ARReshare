@@ -1,24 +1,37 @@
 package com.example.ar_reshare;
 
-public enum Category {
-    CLOTHING(0,"models/hat.obj","models/purple.png"),        // RED
-    SHOES(300,"models/pawn.obj","models/pink.png"),         // PINK
-    ELECTRONICS(180,"models/phone.obj","models/grey.png"),   // CYAN BLUE
-    BOOKS(240,"models/pawn.obj","models/pink.png"),         // NAVY
-    FOOD(120,"models/burger.obj","models/burger.png"),          // GREEN
-    OTHER(35,"models/cup.obj","models/pink.png");          // ORANGE
+import android.graphics.Color;
 
-    private float hueColour;
+public enum Category {
+    CLOTHING(Color.rgb(255, 165, 0),"models/hat.obj","models/purple.png",
+            R.drawable.clothing_icon),        // ORANGE
+    ACCESSORIES(Color.MAGENTA, "models/pawn.obj","models/pink.png",
+            R.drawable.accessories_icon), // PINK
+    ELECTRONICS(Color.CYAN,"models/phone.obj","models/grey.png",
+            R.drawable.electronics_icon),   // CYAN
+    BOOKS(Color.RED,"models/pawn.obj","models/pink.png",
+            R.drawable.books_icon),         // RED
+    FOOD(Color.GREEN,"models/burger.obj","models/burger.png",
+            R.drawable.ffood_icon),          // GREEN
+    OTHER(Color.rgb(30, 19, 34),"models/cup.obj","models/pink.png",
+            R.drawable.other_icon);          // PURPLE
+
+    private final int hueColour;
     private String modelLocation;
     private String colorLocation;
+    private int categoryIcon;
 
-    private Category(float colour, String modelLocation, String colorLocation) {
+    Category(int colour, String modelLocation, String colorLocation, int categoryIcon) {
         this.hueColour = colour;
         this.modelLocation = modelLocation;
         this.colorLocation = colorLocation;
+        this.categoryIcon = categoryIcon;
     }
 
-    public float getCategoryColour() {
+    public int getCategoryColour() {
         return this.hueColour;
+    }
+    public int getCategoryIcon() {
+        return this.categoryIcon;
     }
 }
