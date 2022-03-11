@@ -12,5 +12,13 @@
     <string name="STATIC_MAP_KEY">AIzaSyAFWHH-yjENxp6a7kQUeFfLjWcbGBuuM6Y</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="thanks_message">You added this product,\nthank you for sharing!</string>
+    <string-array name="categories">
+        <item>Clothes</item>
+        <item>Accessories</item>
+        <item>Electronics</item>
+        <item>Books</item>
+        <item>Food</item>
+        <item>Other</item>
+    </string-array>
 
 </resources>

@@ -142,6 +142,7 @@ public class ProductPageActivity extends AppCompatActivity {
             message.setVisibility(View.INVISIBLE); // hide the message button in this case
             TextView thanksMessage = findViewById(R.id.thanksForSharing);
             thanksMessage.setVisibility(View.VISIBLE);
+
         }
     }
 
