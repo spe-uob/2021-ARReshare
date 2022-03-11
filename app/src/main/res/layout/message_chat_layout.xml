@@ -11,7 +11,7 @@
 
     <LinearLayout
         android:id="@+id/linearLayout2"
-        android:layout_width="300dp"
+        android:layout_width="320dp"
         android:layout_height="match_parent"
         android:layout_marginStart="70dp"
         android:layout_marginTop="16dp"
@@ -22,6 +22,46 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/chat_title"
+                    android:layout_width="300dp"
+                    android:layout_height="39dp"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="10dp"
+                    android:text="chat_title"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/chat_body"
+                    android:layout_width="300dp"
+                    android:layout_height="38dp"
+                    android:layout_marginStart="0dp"
+                    android:paddingLeft="20dp"
+                    android:text="chat_body" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/chat_product"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:autoSizeTextType="uniform"
+                android:text="product"
+                android:paddingLeft="20dp"
+                android:paddingTop="10dp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
         <TextView
             android:id="@+id/chat_time"
             android:layout_width="wrap_content"
@@ -29,23 +69,6 @@
             android:layout_marginLeft="270dp"
             android:text="15:02"
             android:textSize="10sp" />
-
-        <TextView
-            android:id="@+id/chat_title"
-            android:layout_width="300dp"
-            android:layout_height="39dp"
-            android:paddingLeft="20dp"
-            android:paddingTop="10dp"
-            android:text="chat_title"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/chat_body"
-            android:layout_width="300dp"
-            android:layout_height="38dp"
-            android:layout_marginStart="0dp"
-            android:paddingLeft="20dp"
-            android:text="chat_body" />
 
         <TextView
             android:id="@+id/chat_line"

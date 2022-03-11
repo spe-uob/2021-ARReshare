@@ -65,14 +65,14 @@ public class ExampleData {
         messages1.add(message1);
         Message message2 = new Message("hi!!!", user0, simpleDateFormat.format(new Date()));
         messages1.add(message2);
-        Chat chat1 = new Chat(user0,user1,messages1);
+        Chat chat1 = new Chat(user0,user1,messages1, products.get(1));
         chats.add(chat1);
         List<Message> messages2 = new ArrayList<>();
         Message message3 = new Message("how are you", user2, simpleDateFormat.format(new Date()));
         messages2.add(message3);
         Message message4 = new Message("I am fine thank you!", user0, simpleDateFormat.format(new Date()));
         messages2.add(message4);
-        Chat chat2 = new Chat(user0,user2,messages2);
+        Chat chat2 = new Chat(user0,user2,messages2,products.get(2));
         chats.add(chat2);
 
     }
