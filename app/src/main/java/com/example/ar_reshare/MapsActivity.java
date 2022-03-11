@@ -68,6 +68,14 @@ public class MapsActivity extends FragmentActivity implements
             }
         });
 
+        ImageButton filterButton = findViewById(R.id.filterMapButton);
+        filterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                return;
+            }
+        });
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getLocationPermission();
     }
