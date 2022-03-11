@@ -1,5 +1,9 @@
 package com.example.ar_reshare;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public enum Category {
     CLOTHING(0,"models/hat.obj","models/purple.png"),        // RED
     SHOES(300,"models/pawn.obj","models/pink.png"),         // PINK
@@ -20,5 +24,9 @@ public enum Category {
 
     public float getCategoryColour() {
         return this.hueColour;
+    }
+
+    public static List<Category> getCategories() {
+        return Arrays.asList(Category.values());
     }
 }

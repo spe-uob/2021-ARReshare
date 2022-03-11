@@ -5,9 +5,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
@@ -26,6 +31,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +54,12 @@ public class MapsActivity extends FragmentActivity implements
     private FusedLocationProviderClient fusedLocationClient;
     // The users last known location
     private Location lastKnownLocation;
+
+    // Distance Filtering
+    private final int MIN_DISTANCE = 500; // metres
+    private final int DISTANCE_UNIT = 50; //metres
+
+    private int max_distance_range = MIN_DISTANCE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +85,54 @@ public class MapsActivity extends FragmentActivity implements
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+                View filterWindow = inflater.inflate(R.layout.map_filter_popup, null);
+
+                int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+                int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                // Allows to tap outside the popup to dismiss it
+                boolean focusable = true;
+                final PopupWindow popupWindow = new PopupWindow(filterWindow, width, height, focusable);
+
+                popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0);
+
+
+                ChipGroup filterCategories = filterWindow.findViewById(R.id.mapFilterCategoryChipGroup);
+
+
+                List<Category> categories = Category.getCategories();
+                for (Category category : categories) {
+                    Chip categoryChip = new Chip(MapsActivity.this);
+                    categoryChip.setCheckable(true);
+                    categoryChip.setText(category.toString());
+                    categoryChip.setTextSize(14);
+                    filterCategories.addView(categoryChip);
+                }
+
+                SeekBar distanceBar = filterWindow.findViewById(R.id.mapDistanceBar);
+                TextView distanceAway = filterWindow.findViewById(R.id.mapDistanceText);
+                distanceBar.setProgress((max_distance_range - MIN_DISTANCE)/DISTANCE_UNIT);
+                distanceAway.setText(max_distance_range + " metres away");
+                distanceBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        int distance = MIN_DISTANCE + progress*DISTANCE_UNIT;
+                        distanceAway.setText(distance + " metres away");
+                        max_distance_range = distance;
+                        return;
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                        return;
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        return;
+                    }
+                });
+
                 return;
             }
         });
