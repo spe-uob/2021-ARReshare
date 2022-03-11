@@ -4,17 +4,17 @@ import android.graphics.Color;
 
 public enum Category {
     CLOTHING(Color.rgb(255, 165, 0),"models/hat.obj","models/purple.png",
-            R.drawable.ic_baseline_clothing_24),        // ORANGE
+            R.drawable.clothing_icon),        // ORANGE
     ACCESSORIES(Color.MAGENTA, "models/pawn.obj","models/pink.png",
-            R.drawable.ic_baseline_watch_24), // PINK
+            R.drawable.accessories_icon), // PINK
     ELECTRONICS(Color.CYAN,"models/phone.obj","models/grey.png",
-            R.drawable.ic_baseline_computer_24),   // CYAN
+            R.drawable.electronics_icon),   // CYAN
     BOOKS(Color.RED,"models/pawn.obj","models/pink.png",
-            R.drawable.ic_baseline_menu_book_24),         // RED
+            R.drawable.books_icon),         // RED
     FOOD(Color.GREEN,"models/burger.obj","models/burger.png",
-            R.drawable.ic_baseline_fastfood_24),          // GREEN
+            R.drawable.ffood_icon),          // GREEN
     OTHER(Color.rgb(30, 19, 34),"models/cup.obj","models/pink.png",
-            R.drawable.ic_baseline_handyman_24);          // PURPLE
+            R.drawable.other_icon);          // PURPLE
 
     private final int hueColour;
     private String modelLocation;
