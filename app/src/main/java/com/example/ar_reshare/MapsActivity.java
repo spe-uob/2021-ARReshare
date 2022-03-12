@@ -66,7 +66,6 @@ public class MapsActivity extends FragmentActivity implements
     private final int MIN_DISTANCE = 500; // metres
     private final int MAX_DISTANCE = 5500; //metres
     private final int DISTANCE_UNIT = 50; //metres
-
     private int maxDistanceRange = MAX_DISTANCE;
     private int tempDistanceRange = MIN_DISTANCE;
 
@@ -96,111 +95,140 @@ public class MapsActivity extends FragmentActivity implements
         });
 
         ImageButton filterButton = findViewById(R.id.filterMapButton);
+        setupFilterWindow(filterButton);
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        getLocationPermission();
+    }
+
+    // Setup filter results window
+    private void setupFilterWindow(ImageButton filterButton) {
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
                 View filterWindow = inflater.inflate(R.layout.map_filter_popup, null);
-
                 int width = LinearLayout.LayoutParams.WRAP_CONTENT;
                 int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+
                 // Allows to tap outside the popup to dismiss it
                 boolean focusable = true;
-                final PopupWindow popupWindow = new PopupWindow(filterWindow, width, height, focusable);
 
+                final PopupWindow popupWindow = new PopupWindow(filterWindow, width, height, focusable);
                 popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0);
 
-                ChipGroup filterCategories = filterWindow.findViewById(R.id.mapFilterCategoryChipGroup);
+                popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                    @Override
+                    public void onDismiss() {
+                        cancelFilter(popupWindow);
+                    }
+                });
 
-                List<Category> categories = Category.getCategories();
-                for (Category category : categories) {
-                    Chip categoryChip = new Chip(MapsActivity.this);
-                    categoryChip.setTag(category);
-                    categoryChip.setCheckable(true);
-                    if (categoriesSelected.contains(category)) {
-                        System.out.println("CONTAINED");
-                        categoryChip.setChecked(true);
-                        categoryChip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#3ebd60")));
+                Button cancelFilterButton = filterWindow.findViewById(R.id.mapFilterCancel);
+                cancelFilterButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        cancelFilter(popupWindow);
+                    }
+                });
+
+                Button confirmFilterButton = filterWindow.findViewById(R.id.mapFilterConfirm);
+                confirmFilterButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        confirmFilter(popupWindow);
+                    }
+                });
+
+                setupCategoryChipGroup(filterWindow);
+                setupDistanceSeekbar(filterWindow, popupWindow);
+            }
+        });
+    }
+
+    // Confirm filter changes
+    private void confirmFilter(PopupWindow popupWindow) {
+        maxDistanceRange = tempDistanceRange;
+        categoriesSelected = tempCategories;
+        tempCategories = new HashSet<>(categoriesSelected);
+        popupWindow.dismiss();
+        populateMap(mMap);
+    }
+
+    // Cancel filter changes
+    private void cancelFilter(PopupWindow popupWindow) {
+        tempDistanceRange = maxDistanceRange;
+        tempCategories = new HashSet<>(categoriesSelected);
+        popupWindow.dismiss();
+    }
+
+    // Setup category filtering UI
+    private void setupCategoryChipGroup(View filterWindow) {
+        ChipGroup filterCategories = filterWindow.findViewById(R.id.mapFilterCategoryChipGroup);
+
+        List<Category> categories = Category.getCategories();
+        for (Category category : categories) {
+            Chip categoryChip = new Chip(MapsActivity.this);
+            categoryChip.setTag(category);
+            categoryChip.setCheckable(true);
+            if (categoriesSelected.contains(category)) {
+                categoryChip.setChecked(true);
+                categoryChip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#3ebd60")));
+            } else {
+                categoryChip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
+                categoryChip.setChecked(false);
+            }
+            categoryChip.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Chip chip = (Chip) v;
+                    System.out.println(chip.isChecked());
+                    // Already been checked
+                    if (!chip.isChecked()) {
+                        chip.setChecked(false);
+                        chip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
+                        tempCategories.remove((Category) chip.getTag());
+                        // Not checked
                     } else {
-                        categoryChip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
-                        categoryChip.setChecked(false);
+                        Category category = (Category) chip.getTag();
+                        chip.setChecked(true);
+                        chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#3ebd60")));
+                        tempCategories.add(category);
                     }
-                    categoryChip.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Chip chip = (Chip) v;
-                            System.out.println(chip.isChecked());
-                            // Already been checked
-                            if (!chip.isChecked()) {
-                                chip.setChecked(false);
-                                chip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
-                                tempCategories.remove((Category) chip.getTag());
-                            // Not checked
-                            } else {
-                                Category category = (Category) chip.getTag();
-                                chip.setChecked(true);
-                                chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#3ebd60")));
-                                tempCategories.add(category);
-                            }
-                            System.out.println(tempCategories);
-                        }
-                    });
-                    categoryChip.setText(category.toString());
-                    categoryChip.setTextSize(14);
-                    filterCategories.addView(categoryChip);
+                    System.out.println(tempCategories);
                 }
+            });
+            categoryChip.setText(category.toString());
+            categoryChip.setTextSize(14);
+            filterCategories.addView(categoryChip);
+        }
+    }
 
-                SeekBar distanceBar = filterWindow.findViewById(R.id.mapDistanceBar);
-                TextView distanceAway = filterWindow.findViewById(R.id.mapDistanceText);
-                distanceBar.setProgress((maxDistanceRange - MIN_DISTANCE)/DISTANCE_UNIT);
-                distanceAway.setText(maxDistanceRange + " metres away");
-                distanceBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        int distance = MIN_DISTANCE + progress*DISTANCE_UNIT;
-                        distanceAway.setText(distance + " metres away");
-                        tempDistanceRange = distance;
-                        return;
-                    }
+    // Setup distance filtering UI
+    private void setupDistanceSeekbar(View filterWindow, PopupWindow popupWindow) {
+        SeekBar distanceBar = filterWindow.findViewById(R.id.mapDistanceBar);
+        TextView distanceAway = filterWindow.findViewById(R.id.mapDistanceText);
+        distanceBar.setProgress((maxDistanceRange - MIN_DISTANCE)/DISTANCE_UNIT);
+        distanceAway.setText(maxDistanceRange + " metres away");
+        distanceBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int distance = MIN_DISTANCE + progress*DISTANCE_UNIT;
+                distanceAway.setText(distance + " metres away");
+                tempDistanceRange = distance;
+                return;
+            }
 
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-                        return;
-                    }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                return;
+            }
 
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        return;
-                    }
-                });
-
-                Button confirmFilter = filterWindow.findViewById(R.id.mapFilterConfirm);
-                confirmFilter.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        maxDistanceRange = tempDistanceRange;
-                        categoriesSelected = tempCategories;
-                        tempCategories = new HashSet<>(categoriesSelected);
-                        popupWindow.dismiss();
-                    }
-                });
-
-                Button cancelFilter = filterWindow.findViewById(R.id.mapFilterCancel);
-                cancelFilter.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        tempDistanceRange = maxDistanceRange;
-                        tempCategories = new HashSet<>(categoriesSelected);
-                        popupWindow.dismiss();
-                    }
-                });
-
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
                 return;
             }
         });
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        getLocationPermission();
     }
 
     // When leaving the Map Activity always animate sliding down
@@ -226,10 +254,6 @@ public class MapsActivity extends FragmentActivity implements
         // Configure the Product Summary View
         mMap.setInfoWindowAdapter(new ProductSummary());
         mMap.setOnInfoWindowClickListener(this);
-
-        // Get dummy products and display them on the map
-        List<Product> products = ExampleData.getProducts();
-        populateMap(mMap, products);
 
         // Default map starting location
         LatLng mvb = new LatLng(51.456070226943865, -2.602992299931959);
@@ -308,6 +332,8 @@ public class MapsActivity extends FragmentActivity implements
                                     // Logic to handle location object
                                     lastKnownLocation = location;
                                     System.out.println("onSuccess : " + lastKnownLocation);
+                                    // Populate the map once location is found
+                                    populateMap(mMap);
                                 }
                             }
                         });
@@ -339,15 +365,24 @@ public class MapsActivity extends FragmentActivity implements
 
 
     // Populates the map with markers given a list of products
-    private void populateMap(GoogleMap mMap, List<Product> products) {
+    private void populateMap(GoogleMap mMap) {
+        List<Product> products = ExampleData.getProducts();
+        mMap.clear();
         for (Product product : products) {
             LatLng coordinates = product.getLocation();
-            Marker marker = mMap.addMarker(new MarkerOptions()
-                    .position(coordinates)
-                    .title(product.getName())
-                    .snippet("by " + product.getContributor())
-                    .icon(BitmapDescriptorFactory.defaultMarker(product.getCategory().getCategoryColour())));
-            marker.setTag(product);
+            Location productLocation = new Location("ManualProvider");
+            productLocation.setLatitude(product.getLocation().latitude);
+            productLocation.setLongitude(product.getLocation().longitude);
+            float dist = lastKnownLocation.distanceTo(productLocation);
+            Category productCategory = product.getCategory();
+            if (dist <= maxDistanceRange && categoriesSelected.contains(productCategory)) {
+                Marker marker = mMap.addMarker(new MarkerOptions()
+                        .position(coordinates)
+                        .title(product.getName())
+                        .snippet("by " + product.getContributor())
+                        .icon(BitmapDescriptorFactory.defaultMarker(product.getCategory().getCategoryColour())));
+                marker.setTag(product);
+            }
         }
     }
 
