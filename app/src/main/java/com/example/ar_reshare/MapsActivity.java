@@ -37,6 +37,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -73,6 +74,10 @@ public class MapsActivity extends FragmentActivity implements
     private final int UNCHECKED_CHIP_COLOUR = Color.parseColor("#dbdbdb");
     private Set<Category> categoriesSelected = new HashSet<>(Category.getCategories());
     private Set<Category> tempCategories = new HashSet<>(categoriesSelected);
+
+    // Colour constants for accessibility needs - changing font colour based on contrast
+    private final float MIN_CONTRAST_RATIO = 4.5f;
+    private final int DEFAULT_DARK_FONT = Color.parseColor("#363636");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,7 +178,11 @@ public class MapsActivity extends FragmentActivity implements
             categoryChip.setCheckable(true);
             if (categoriesSelected.contains(category)) {
                 categoryChip.setChecked(true);
-                categoryChip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#3ebd60")));
+                int colour = category.getCategoryColour();
+                if (isColourTooDark(colour)) {
+                    categoryChip.setTextColor(Color.WHITE);
+                }
+                categoryChip.setChipBackgroundColor(ColorStateList.valueOf(colour));
             } else {
                 categoryChip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
                 categoryChip.setChecked(false);
@@ -187,12 +196,17 @@ public class MapsActivity extends FragmentActivity implements
                     if (!chip.isChecked()) {
                         chip.setChecked(false);
                         chip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
+                        chip.setTextColor(DEFAULT_DARK_FONT);
                         tempCategories.remove((Category) chip.getTag());
                         // Not checked
                     } else {
                         Category category = (Category) chip.getTag();
                         chip.setChecked(true);
-                        chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#3ebd60")));
+                        int colour = category.getCategoryColour();
+                        categoryChip.setChipBackgroundColor(ColorStateList.valueOf(colour));
+                        if (isColourTooDark(colour)) {
+                            categoryChip.setTextColor(Color.WHITE);
+                        }
                         tempCategories.add(category);
                     }
                     System.out.println(tempCategories);
@@ -366,8 +380,8 @@ public class MapsActivity extends FragmentActivity implements
 
     // Populates the map with markers given a list of products
     private void populateMap(GoogleMap mMap) {
-        List<Product> products = ExampleData.getProducts();
         mMap.clear();
+        List<Product> products = ExampleData.getProducts();
         for (Product product : products) {
             LatLng coordinates = product.getLocation();
             Location productLocation = new Location("ManualProvider");
@@ -376,14 +390,36 @@ public class MapsActivity extends FragmentActivity implements
             float dist = lastKnownLocation.distanceTo(productLocation);
             Category productCategory = product.getCategory();
             if (dist <= maxDistanceRange && categoriesSelected.contains(productCategory)) {
+                float hue = getHueFromRGB(productCategory.getCategoryColour());
                 Marker marker = mMap.addMarker(new MarkerOptions()
                         .position(coordinates)
                         .title(product.getName())
                         .snippet("by " + product.getContributor())
-                        .icon(BitmapDescriptorFactory.defaultMarker(product.getCategory().getCategoryColour())));
+                        .icon(BitmapDescriptorFactory.defaultMarker(hue)));
                 marker.setTag(product);
             }
         }
+    }
+
+    private float getHueFromRGB(int colour) {
+        int red = Color.red(colour);
+        int green = Color.green(colour);
+        int blue = Color.blue(colour);
+        float[] hsv = new float[3];
+        Color.RGBToHSV(red, green, blue, hsv);
+        float hue = hsv[0];
+        return hue;
+    }
+
+    private boolean isColourTooDark(int colour) {
+        float backgroundLuma = Color.luminance(colour);
+        float textLuma = Color.luminance(DEFAULT_DARK_FONT);
+        float ratio = (float) ((backgroundLuma + 0.05)/(textLuma + 0.05));
+        System.out.println(ratio);
+        if (ratio < MIN_CONTRAST_RATIO) {
+            return true;
+        }
+        return false;
     }
 
     // Product Summary class
