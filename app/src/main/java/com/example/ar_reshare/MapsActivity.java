@@ -191,7 +191,6 @@ public class MapsActivity extends FragmentActivity implements
                 @Override
                 public void onClick(View v) {
                     Chip chip = (Chip) v;
-                    System.out.println(chip.isChecked());
                     // Already been checked
                     if (!chip.isChecked()) {
                         chip.setChecked(false);
@@ -209,7 +208,6 @@ public class MapsActivity extends FragmentActivity implements
                         }
                         tempCategories.add(category);
                     }
-                    System.out.println(tempCategories);
                 }
             });
             categoryChip.setText(category.toString());
@@ -304,7 +302,6 @@ public class MapsActivity extends FragmentActivity implements
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Location permission has been granted
                     locationPermissionGranted = true;
-                    System.out.println("Location has been granted");
                 } else {
                     // TODO: Explain to user that the feature is unavailable because
                     //  the permissions have not been granted
@@ -345,7 +342,6 @@ public class MapsActivity extends FragmentActivity implements
                                 if (location != null) {
                                     // Logic to handle location object
                                     lastKnownLocation = location;
-                                    System.out.println("onSuccess : " + lastKnownLocation);
                                     // Populate the map once location is found
                                     populateMap(mMap);
                                 }
@@ -378,7 +374,7 @@ public class MapsActivity extends FragmentActivity implements
     }
 
 
-    // Populates the map with markers given a list of products
+    // Populates the map with markers given a list of products and filter options
     private void populateMap(GoogleMap mMap) {
         mMap.clear();
         List<Product> products = ExampleData.getProducts();
@@ -411,11 +407,12 @@ public class MapsActivity extends FragmentActivity implements
         return hue;
     }
 
+    // Checks if colour contrast is high enough
+    // If false is returned use a light font colour instead of dark
     private boolean isColourTooDark(int colour) {
         float backgroundLuma = Color.luminance(colour);
         float textLuma = Color.luminance(DEFAULT_DARK_FONT);
         float ratio = (float) ((backgroundLuma + 0.05)/(textLuma + 0.05));
-        System.out.println(ratio);
         if (ratio < MIN_CONTRAST_RATIO) {
             return true;
         }
