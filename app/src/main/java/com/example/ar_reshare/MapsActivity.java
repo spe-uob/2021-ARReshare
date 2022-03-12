@@ -3,11 +3,14 @@ package com.example.ar_reshare;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,7 +38,9 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
@@ -55,11 +60,20 @@ public class MapsActivity extends FragmentActivity implements
     // The users last known location
     private Location lastKnownLocation;
 
+    // Filtering Results
+
     // Distance Filtering
     private final int MIN_DISTANCE = 500; // metres
+    private final int MAX_DISTANCE = 5500; //metres
     private final int DISTANCE_UNIT = 50; //metres
 
-    private int max_distance_range = MIN_DISTANCE;
+    private int maxDistanceRange = MAX_DISTANCE;
+    private int tempDistanceRange = MIN_DISTANCE;
+
+    // Category Filtering
+    private final int UNCHECKED_CHIP_COLOUR = Color.parseColor("#dbdbdb");
+    private Set<Category> categoriesSelected = new HashSet<>(Category.getCategories());
+    private Set<Category> tempCategories = new HashSet<>(categoriesSelected);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,14 +110,41 @@ public class MapsActivity extends FragmentActivity implements
 
                 popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0);
 
-
                 ChipGroup filterCategories = filterWindow.findViewById(R.id.mapFilterCategoryChipGroup);
-
 
                 List<Category> categories = Category.getCategories();
                 for (Category category : categories) {
                     Chip categoryChip = new Chip(MapsActivity.this);
+                    categoryChip.setTag(category);
                     categoryChip.setCheckable(true);
+                    if (categoriesSelected.contains(category)) {
+                        System.out.println("CONTAINED");
+                        categoryChip.setChecked(true);
+                        categoryChip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#3ebd60")));
+                    } else {
+                        categoryChip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
+                        categoryChip.setChecked(false);
+                    }
+                    categoryChip.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Chip chip = (Chip) v;
+                            System.out.println(chip.isChecked());
+                            // Already been checked
+                            if (!chip.isChecked()) {
+                                chip.setChecked(false);
+                                chip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
+                                tempCategories.remove((Category) chip.getTag());
+                            // Not checked
+                            } else {
+                                Category category = (Category) chip.getTag();
+                                chip.setChecked(true);
+                                chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#3ebd60")));
+                                tempCategories.add(category);
+                            }
+                            System.out.println(tempCategories);
+                        }
+                    });
                     categoryChip.setText(category.toString());
                     categoryChip.setTextSize(14);
                     filterCategories.addView(categoryChip);
@@ -111,14 +152,14 @@ public class MapsActivity extends FragmentActivity implements
 
                 SeekBar distanceBar = filterWindow.findViewById(R.id.mapDistanceBar);
                 TextView distanceAway = filterWindow.findViewById(R.id.mapDistanceText);
-                distanceBar.setProgress((max_distance_range - MIN_DISTANCE)/DISTANCE_UNIT);
-                distanceAway.setText(max_distance_range + " metres away");
+                distanceBar.setProgress((maxDistanceRange - MIN_DISTANCE)/DISTANCE_UNIT);
+                distanceAway.setText(maxDistanceRange + " metres away");
                 distanceBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         int distance = MIN_DISTANCE + progress*DISTANCE_UNIT;
                         distanceAway.setText(distance + " metres away");
-                        max_distance_range = distance;
+                        tempDistanceRange = distance;
                         return;
                     }
 
@@ -130,6 +171,27 @@ public class MapsActivity extends FragmentActivity implements
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         return;
+                    }
+                });
+
+                Button confirmFilter = filterWindow.findViewById(R.id.mapFilterConfirm);
+                confirmFilter.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        maxDistanceRange = tempDistanceRange;
+                        categoriesSelected = tempCategories;
+                        tempCategories = new HashSet<>(categoriesSelected);
+                        popupWindow.dismiss();
+                    }
+                });
+
+                Button cancelFilter = filterWindow.findViewById(R.id.mapFilterCancel);
+                cancelFilter.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        tempDistanceRange = maxDistanceRange;
+                        tempCategories = new HashSet<>(categoriesSelected);
+                        popupWindow.dismiss();
                     }
                 });
 
