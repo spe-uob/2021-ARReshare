@@ -15,6 +15,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ar_reshare.helpers.CameraPermissionHelper;
@@ -52,19 +53,15 @@ public class FeedActivity extends AppCompatActivity {
         arrayList.add(productsList.get(4));
         arrayList.add(productsList.get(5));
 
-        // Request location permissions if needed and get latest location
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        getLocationPermission();
-        getDeviceLocation();
-
-        System.out.println("check start");
-        System.out.println(lastKnownLocation);
-        System.out.println("check end");
-
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         FeedRecyclerAdapter feedRecyclerAdapter = new FeedRecyclerAdapter(arrayList, lastKnownLocation);
         recyclerView.setAdapter(feedRecyclerAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Request location permissions if needed and get latest location
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        getLocationPermission();
+        getDeviceLocation(feedRecyclerAdapter);
     }
 
     @Override
@@ -111,13 +108,14 @@ public class FeedActivity extends AppCompatActivity {
     }
 
     // Get the most recent location of the device
-    private void getDeviceLocation() {
+    private void getDeviceLocation(FeedRecyclerAdapter feedRecyclerAdapter) {
             if (locationPermissionGranted) {
                 @SuppressLint("MissingPermission") Task<Location> task = fusedLocationClient.getLastLocation();
                 task.addOnCompleteListener(this, new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
                         lastKnownLocation = task.getResult();
+                        feedRecyclerAdapter.updateDistances(lastKnownLocation);
                     }
                 });
                 } else {

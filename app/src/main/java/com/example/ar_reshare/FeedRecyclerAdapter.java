@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.ViewHolder> {
 
@@ -24,7 +25,11 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     private static final int MESSAGE_LINK = 2;
 
     private final ArrayList<Product> arrayList;
-    private final Location userLocation;
+
+    public List<ViewHolder> cards = new ArrayList<>();
+
+    private Location userLocation;
+    private boolean locationReady = false;
 
     public FeedRecyclerAdapter(ArrayList<Product> arrayList, Location userLocation){
         this.arrayList = arrayList;
@@ -41,6 +46,9 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        // Add the card to the list of cards
+        cards.add(holder);
+
         Product product = arrayList.get(position);
         holder.profileIcon.setImageResource(product.getContributor().getProfileIcon());
         holder.categoryIcon.setImageResource(product.getCategory().getCategoryIcon());
@@ -62,12 +70,16 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         holder.messageButton.setOnClickListener(messageClickHandler);
 
         // Find and display distance to product
-        Location productLocation = new Location("ManualProvider");
-        productLocation.setLatitude(product.getLocation().latitude);
-        productLocation.setLongitude(product.getLocation().longitude);
-        float dist = userLocation.distanceTo(productLocation);
-        int roundedDist = Math.round(dist);
-        holder.location.setText(roundedDist + " metres away");
+        if (locationReady) {
+            Location productLocation = new Location("ManualProvider");
+            productLocation.setLatitude(product.getLocation().latitude);
+            productLocation.setLongitude(product.getLocation().longitude);
+            float dist = userLocation.distanceTo(productLocation);
+            int roundedDist = Math.round(dist);
+            holder.location.setText(roundedDist + " metres away");
+        } else {
+            holder.location.setText("Calculating distance");
+        }
 
         holder.bookmarkButton.setTag(0);
         holder.bookmarkButton.setOnClickListener(v -> {
@@ -79,6 +91,24 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                 holder.bookmarkButton.setTag(0);
             }
         });
+    }
+
+    public void updateDistances(Location location) {
+        // Update the location text of already created cards
+        userLocation = location;
+        for (int i=0; i < cards.size(); i++) {
+            ViewHolder card = cards.get(i);
+            Product product = arrayList.get(i);
+            Location productLocation = new Location("ManualProvider");
+            productLocation.setLatitude(product.getLocation().latitude);
+            productLocation.setLongitude(product.getLocation().longitude);
+            float dist = userLocation.distanceTo(productLocation);
+            int roundedDist = Math.round(dist);
+            card.location.setText(roundedDist + " metres away");
+        }
+
+        // Set userLocation for the remaining cards
+        locationReady = true;
     }
 
     @Override
