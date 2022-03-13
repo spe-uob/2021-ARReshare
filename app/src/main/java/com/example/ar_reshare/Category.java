@@ -7,12 +7,12 @@ public enum Category {
             R.drawable.clothing_icon),        // ORANGE
     ACCESSORIES(Color.MAGENTA, "models/pawn.obj","models/pink.png",
             R.drawable.accessories_icon), // PINK
-    ELECTRONICS(Color.CYAN,"models/phone.obj","models/grey.png",
+    ELECTRONICS(Color.rgb(0, 0, 139),"models/phone.obj","models/grey.png",
             R.drawable.electronics_icon),   // CYAN
     BOOKS(Color.RED,"models/pawn.obj","models/pink.png",
             R.drawable.books_icon),         // RED
     FOOD(Color.GREEN,"models/burger.obj","models/burger.png",
-            R.drawable.ffood_icon),          // GREEN
+            R.drawable.food_icon),          // GREEN
     OTHER(Color.rgb(30, 19, 34),"models/cup.obj","models/pink.png",
             R.drawable.other_icon);          // PURPLE
 
