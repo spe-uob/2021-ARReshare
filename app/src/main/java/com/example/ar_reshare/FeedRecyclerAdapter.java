@@ -1,9 +1,7 @@
 package com.example.ar_reshare;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.location.Location;
-import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.w3c.dom.Text;
-
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,16 +21,14 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     private static final int PRODUCT_LINK = 1;
     private static final int MESSAGE_LINK = 2;
 
-    private final ArrayList<Product> arrayList;
-
-    public List<ViewHolder> cards = new ArrayList<>();
+    private final List<Product> productList;
+    public ArrayList<ViewHolder> cards = new ArrayList<>();
 
     private Location userLocation;
     private boolean locationReady = false;
 
-    public FeedRecyclerAdapter(ArrayList<Product> arrayList, Location userLocation){
-        this.arrayList = arrayList;
-        this.userLocation = userLocation;
+    public FeedRecyclerAdapter(List<Product> productList){
+        this.productList = productList;
     }
 
     @NonNull
@@ -46,41 +41,79 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        // Add the card to the list of cards
+        // Add the product card to the list of product cards
         cards.add(holder);
 
-        Product product = arrayList.get(position);
+        // Assigns current product
+        Product product = productList.get(position);
+
+        // Set values to various resources depending on the product
+        productValueHelper(holder, product);
+
+        // Handle clicks to go to the contributor's profile page
+        ClickHandler profileClickHandler = new ClickHandler(product, PROFILE_LINK);
+        holder.profileIcon.setOnClickListener(profileClickHandler);
+        holder.contributor.setOnClickListener(profileClickHandler);
+
+        // Handle clicks to go to the product page
+        ClickHandler productClickHandler = new ClickHandler(product, PRODUCT_LINK);
+        holder.productImage.setOnClickListener(productClickHandler);
+        holder.productTitle.setOnClickListener(productClickHandler);
+        holder.productDescription.setOnClickListener(productClickHandler);
+
+        // Handle click to message the contributor
+        ClickHandler messageClickHandler = new ClickHandler(product, MESSAGE_LINK);
+        holder.messageButton.setOnClickListener(messageClickHandler);
+
+        // Find and display distance to product to be created
+        distanceValueHelper(holder, product);
+
+        // Bookmark button logic
+        bookmarkToggleHelper(holder);
+    }
+
+    public void productValueHelper(ViewHolder holder, Product product) {
         holder.profileIcon.setImageResource(product.getContributor().getProfileIcon());
         holder.categoryIcon.setImageResource(product.getCategory().getCategoryIcon());
         holder.contributor.setText(product.getContributor().getName());
         holder.productImage.setImageResource(product.getImages().get(0));
         holder.productTitle.setText(product.getName());
         holder.productDescription.setText(product.getDescription());
+    }
 
-        ClickHandler profileClickHandler = new ClickHandler(product, PROFILE_LINK);
-        holder.profileIcon.setOnClickListener(profileClickHandler);
-        holder.contributor.setOnClickListener(profileClickHandler);
-
-        ClickHandler productClickHandler = new ClickHandler(product, PRODUCT_LINK);
-        holder.productImage.setOnClickListener(productClickHandler);
-        holder.productTitle.setOnClickListener(productClickHandler);
-        holder.productDescription.setOnClickListener(productClickHandler);
-
-        ClickHandler messageClickHandler = new ClickHandler(product, MESSAGE_LINK);
-        holder.messageButton.setOnClickListener(messageClickHandler);
-
-        // Find and display distance to product
+    public void distanceValueHelper(ViewHolder holder, Product product) {
         if (locationReady) {
             Location productLocation = new Location("ManualProvider");
             productLocation.setLatitude(product.getLocation().latitude);
             productLocation.setLongitude(product.getLocation().longitude);
             float dist = userLocation.distanceTo(productLocation);
             int roundedDist = Math.round(dist);
-            holder.location.setText(roundedDist + " metres away");
+            holder.location.setText(MessageFormat.format("{0}m", roundedDist));
         } else {
-            holder.location.setText("Calculating distance");
+            holder.location.setText(R.string.calc_distance);
+        }
+    }
+
+    // Grabs userLocation from FeedActivity and uses it to show distance to products created
+    public void updateDistances(Location location) {
+        // Update the location text of already created cards
+        for (int i=0; i < cards.size(); i++) {
+            ViewHolder card = cards.get(i);
+            Product product = productList.get(i);
+            Location productLocation = new Location("ManualProvider");
+            productLocation.setLatitude(product.getLocation().latitude);
+            productLocation.setLongitude(product.getLocation().longitude);
+            float dist = location.distanceTo(productLocation);
+            int roundedDist = Math.round(dist);
+            card.location.setText(MessageFormat.format("{0}m", roundedDist));
         }
 
+        // Set userLocation for the remaining cards
+        userLocation = location;
+        locationReady = true;
+    }
+
+    public void bookmarkToggleHelper(ViewHolder holder) {
         holder.bookmarkButton.setTag(0);
         holder.bookmarkButton.setOnClickListener(v -> {
             if (holder.bookmarkButton.getTag().equals(0)) {
@@ -93,29 +126,13 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         });
     }
 
-    public void updateDistances(Location location) {
-        // Update the location text of already created cards
-        userLocation = location;
-        for (int i=0; i < cards.size(); i++) {
-            ViewHolder card = cards.get(i);
-            Product product = arrayList.get(i);
-            Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(product.getLocation().latitude);
-            productLocation.setLongitude(product.getLocation().longitude);
-            float dist = userLocation.distanceTo(productLocation);
-            int roundedDist = Math.round(dist);
-            card.location.setText(roundedDist + " metres away");
-        }
-
-        // Set userLocation for the remaining cards
-        locationReady = true;
-    }
-
+    // Returns the amount of live products
     @Override
     public int getItemCount() {
-        return arrayList.size();
+        return productList.size();
     }
 
+    // Inner class to set id's to the various parts of a card
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView profileIcon;
@@ -143,6 +160,8 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         }
     }
 
+    // Helps transfer information to different pages that are going to follow
+    // after a click
     private static class ClickHandler implements View.OnClickListener {
 
         Product product;
@@ -166,6 +185,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             }
         }
 
+        // Sends information to the profile page
         public void profileClick(View v) {
             Intent intent = new Intent(v.getContext(), ProfileActivity.class);
             intent.putExtra("contributor", product.getContributor());
@@ -174,6 +194,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             v.getContext().startActivity(intent);
         }
 
+        // Sends information to the product page
         public void productClick(View v) {
             Intent intent = new Intent(v.getContext(), ProductPageActivity.class);
             intent.putExtra("product", product);
@@ -183,6 +204,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             v.getContext().startActivity(intent);
         }
 
+        // Sends information to the messaging page
         public void messageClick(View v) {
             Intent intent = new Intent(v.getContext(), MessagingActivity.class);
             intent.putExtra("product", product);

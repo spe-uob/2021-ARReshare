@@ -7,54 +7,35 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.ar_reshare.helpers.CameraPermissionHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FeedActivity extends AppCompatActivity {
 
-    ArrayList<Product> arrayList = new ArrayList<>();
-    List<Product> productsList = ExampleData.getProducts();
+    // Array to initialise products
+    List<Product> productList =
+            ExampleData.getProducts().subList(1, ExampleData.getProducts().size());
 
+    // Location related attributes
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted = false;
-
     // Built-in class which provides current location
     private FusedLocationProviderClient fusedLocationClient;
-    // The users last known location
-    private Location lastKnownLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
 
-        // Done temporarily since not all users have icons, and not all products have images
-        arrayList.add(productsList.get(1));
-        arrayList.add(productsList.get(2));
-        arrayList.add(productsList.get(3));
-        arrayList.add(productsList.get(4));
-        arrayList.add(productsList.get(5));
-
+        // Allows different products to be displayed as individual cards
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        FeedRecyclerAdapter feedRecyclerAdapter = new FeedRecyclerAdapter(arrayList, lastKnownLocation);
+        FeedRecyclerAdapter feedRecyclerAdapter =
+                new FeedRecyclerAdapter(productList);
         recyclerView.setAdapter(feedRecyclerAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -71,17 +52,18 @@ public class FeedActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {// If request is cancelled, the grantResults array will be empty
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            // If request is cancelled, the grantResults array will be empty
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Location permission has been granted
                 locationPermissionGranted = true;
                 System.out.println("Location has been granted");
             } else {
-                // TODO: Explain to user that the feature is unavailable because
-                //  the permissions have not been granted
+                // Explain to user that the feature is unavailable because
+                // the permissions have not been granted
                 System.out.println("Feature unavailable due to lack of permissions");
             }
         }
@@ -96,7 +78,7 @@ public class FeedActivity extends AppCompatActivity {
             // Location permission has already been granted previously
             locationPermissionGranted = true;
         } else if (shouldShowRequestPermissionRationale("FINE_LOCATION")) {
-            // TODO: Explain to the user why the location permission is needed
+            // Explain to the user why the location permission is needed
             System.out.println("Please enable location to use our app");
         } else {
             // If the location permission has not been granted already,
@@ -109,17 +91,20 @@ public class FeedActivity extends AppCompatActivity {
 
     // Get the most recent location of the device
     private void getDeviceLocation(FeedRecyclerAdapter feedRecyclerAdapter) {
+        try {
             if (locationPermissionGranted) {
-                @SuppressLint("MissingPermission") Task<Location> task = fusedLocationClient.getLastLocation();
-                task.addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        lastKnownLocation = task.getResult();
-                        feedRecyclerAdapter.updateDistances(lastKnownLocation);
-                    }
-                });
-                } else {
-                System.out.println("failed");
+                fusedLocationClient.getLastLocation()
+                        .addOnSuccessListener(this, location -> {
+                            // Got last known location. In some rare situations this can be null.
+                            if (location != null) {
+                                // Logic to handle location object
+                                feedRecyclerAdapter.updateDistances(location);
+                            }
+                        });
             }
+        } catch (SecurityException e)  {
+            // Appropriate error catching
+            System.out.println("Encountered" + e);
+        }
     }
 }
