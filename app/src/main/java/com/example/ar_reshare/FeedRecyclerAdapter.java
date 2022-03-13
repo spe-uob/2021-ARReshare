@@ -2,6 +2,7 @@ package com.example.ar_reshare;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
 import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 
 public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.ViewHolder> {
@@ -21,9 +24,11 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     private static final int MESSAGE_LINK = 2;
 
     private final ArrayList<Product> arrayList;
+    private final Location userLocation;
 
-    public FeedRecyclerAdapter(ArrayList<Product> arrayList){
+    public FeedRecyclerAdapter(ArrayList<Product> arrayList, Location userLocation){
         this.arrayList = arrayList;
+        this.userLocation = userLocation;
     }
 
     @NonNull
@@ -56,6 +61,14 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         ClickHandler messageClickHandler = new ClickHandler(product, MESSAGE_LINK);
         holder.messageButton.setOnClickListener(messageClickHandler);
 
+        // Find and display distance to product
+        Location productLocation = new Location("ManualProvider");
+        productLocation.setLatitude(product.getLocation().latitude);
+        productLocation.setLongitude(product.getLocation().longitude);
+        float dist = userLocation.distanceTo(productLocation);
+        int roundedDist = Math.round(dist);
+        holder.location.setText(roundedDist + " metres away");
+
         holder.bookmarkButton.setTag(0);
         holder.bookmarkButton.setOnClickListener(v -> {
             if (holder.bookmarkButton.getTag().equals(0)) {
@@ -83,6 +96,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         ImageView messageButton;
         ImageView bookmarkButton;
         ImageView categoryIcon;
+        TextView location;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -95,6 +109,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             messageButton = itemView.findViewById(R.id.messageButton);
             bookmarkButton = itemView.findViewById(R.id.bookmarkButton);
             categoryIcon = itemView.findViewById(R.id.category);
+            location = itemView.findViewById(R.id.location);
         }
     }
 
