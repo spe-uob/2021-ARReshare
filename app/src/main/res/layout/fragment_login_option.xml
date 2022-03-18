@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginOptionFragment"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/loginOptionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|top"
+        android:layout_marginTop="50dp"
+        android:width="150dp"
+        android:background="#4C62DC"
+        android:text="Login"
+        android:textColor="#FFFFFF"
+        android:textSize="18dp" />
+
+    <Button
+        android:id="@+id/signUpOptionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign Up"
+        android:layout_gravity="center|top"
+        android:layout_marginTop="110dp"
+        android:width="150dp"
+        android:textSize="18dp"/>
+
+
+</FrameLayout>

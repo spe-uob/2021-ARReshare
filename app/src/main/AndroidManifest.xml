@@ -20,9 +20,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ARReshare">
         <activity
+            android:name=".LoginSignupActivity"
+            android:exported="true" />
+        <activity
             android:name=".ARActivity"
             android:exported="true" />
-
         <activity
             android:name=".SplashActivity"
             android:exported="true">
@@ -32,11 +34,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ChatListActivity"
             android:exported="true" />
-
         <activity
             android:name=".ProfileActivity"
             android:exported="true" />
@@ -59,18 +59,14 @@
         <activity
             android:name=".FeedActivity"
             android:exported="true" />
-
         <activity
             android:name=".MessagingActivity"
             android:configChanges="orientation"
             android:exported="true"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".FallbackActivity"
-            android:exported="true">
-        </activity>
-
+            android:exported="true" />
         <activity
             android:name=".ProductPageActivity"
             android:exported="true" />
