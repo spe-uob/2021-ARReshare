@@ -14,7 +14,7 @@ import android.widget.Button;
 
 public class LoginOptionFragment extends Fragment {
 
-    public LoginOptionFragment(ViewPager2 parent) {
+    public LoginOptionFragment() {
         // Required empty public constructor
     }
 

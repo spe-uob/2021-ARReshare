@@ -24,7 +24,7 @@ public class LoginSignupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_signup);
         this.viewPager = findViewById(R.id.loginOptionViewPager);
-        ViewPagerAdapter adapter = new ViewPagerAdapter(this, viewPager);
+        ViewPagerAdapter adapter = new ViewPagerAdapter(this);
         viewPager.setAdapter(adapter);
         setCurrentFragment(OPTION_FRAGMENT);
     }
@@ -34,10 +34,8 @@ public class LoginSignupActivity extends AppCompatActivity {
     }
 
     private class ViewPagerAdapter extends FragmentStateAdapter {
-        private ViewPager2 viewPager;
-        private Fragment currentFragment;
 
-        ViewPagerAdapter(@NonNull FragmentActivity fragmentActivity, ViewPager2 viewPager) {
+        ViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
             super(fragmentActivity);
         }
 
@@ -48,7 +46,7 @@ public class LoginSignupActivity extends AppCompatActivity {
                 case 0:
                     return new SignUpFragment();
                 case 1:
-                    return new LoginOptionFragment(viewPager);
+                    return new LoginOptionFragment();
                 default:
                     return new LoginFragment();
             }
@@ -57,10 +55,6 @@ public class LoginSignupActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return 3;
-        }
-
-        public Fragment getCurrentFragment() {
-            return currentFragment;
         }
     }
 }

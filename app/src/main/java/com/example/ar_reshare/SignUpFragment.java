@@ -16,8 +16,23 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.concurrent.TimeUnit;
 
 public class SignUpFragment extends Fragment {
+
+    private final int GREEN_COLOUR = Color.parseColor("#32a852");
+    private final int RED_COLOUR = Color.parseColor("#ab2a1f");
+    private final int CLICKABLE_COLOUR = Color.parseColor("#4C62DC");
+    private final int NOT_CLICKABLE_COLOUR = Color.parseColor("#7080db");
+
+    private final long MINIMUM_AGE_REQUIRED = 18L;
 
     public SignUpFragment() {
         // Required empty public constructor
@@ -63,33 +78,97 @@ public class SignUpFragment extends Fragment {
         confirmPasswordText.addTextChangedListener(passwordListener);
     }
 
-    private void changeDateField(String text) {
+    private void changeDateField(Date date) {
         EditText dobText = getView().findViewById(R.id.signUpDateOfBirth);
-        dobText.setText(text);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        dobText.setText(dateFormat.format(date));
+        verifyDob();
     }
 
-    private void checkPasswordsIdentical() {
+    // Verifies if the user meets the minimum age to register
+    private boolean verifyDob() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        EditText dobText = getView().findViewById(R.id.signUpDateOfBirth);
+        try {
+            Date dob = dateFormat.parse(dobText.getText().toString());
+            Date now = Calendar.getInstance().getTime();
+            long years = TimeUnit.DAYS.convert(now.getTime() - dob.getTime(), TimeUnit.MILLISECONDS);
+            if (years >= MINIMUM_AGE_REQUIRED) {
+                return true;
+            } else {
+                Toast dateWarning = Toast.makeText(getContext(), "You must be at least 18 year old to use this app", Toast.LENGTH_LONG);
+                dateWarning.show();
+                return false;
+            }
+        } catch (ParseException e) {
+            Toast dateWarning = Toast.makeText(getContext(), "Date of birth must be in the form dd/mm/yyyy", Toast.LENGTH_LONG);
+            dateWarning.show();
+            return false;
+        }
+    }
+
+    // Verifies is passwords match
+    private boolean verifyPasswordsIdentical() {
         EditText passwordText = getView().findViewById(R.id.signUpPassword);
         EditText confirmPasswordText = getView().findViewById(R.id.signUpConfirmPassword);
+        TextView passwordComment = getView().findViewById(R.id.signUpPasswordComment);
         System.out.println(passwordText.getText());
         System.out.println(confirmPasswordText.getText());
         System.out.println(passwordText.getText().equals(confirmPasswordText.getText()));
-        if (!passwordText.getText().toString().equals(confirmPasswordText.getText().toString())) {
-            System.out.println("PASSWORDS DO NOT MATCH");
-            passwordText.setBackgroundColor(Color.RED);
-            confirmPasswordText.setBackgroundColor(Color.RED);
-        } else {
-            System.out.println("PASSWORDS MATCH");
-            passwordText.setBackgroundColor(Color.GREEN);
-            confirmPasswordText.setBackgroundColor(Color.GREEN);
+        if (passwordText.getText().toString().isEmpty() && confirmPasswordText.getText().toString().isEmpty()) {
+            passwordComment.setVisibility(View.INVISIBLE);
+            return false;
         }
+        else if (!passwordText.getText().toString().equals(confirmPasswordText.getText().toString())) {
+            passwordComment.setVisibility(View.VISIBLE);
+            passwordComment.setText("Passwords do not match!");
+            passwordComment.setTextColor(RED_COLOUR);
+            return false;
+        } else {
+            passwordComment.setVisibility(View.VISIBLE);
+            passwordComment.setText("Passwords match ✓");
+            passwordComment.setTextColor(GREEN_COLOUR);
+            return true;
+        }
+    }
+
+    private boolean verifyEmail() {
+        EditText emailText = getView().findViewById(R.id.signUpEmail);
+        if (emailText.toString().contains("@")) {
+            return true;
+        } else {
+            Toast dateWarning = Toast.makeText(getContext(), "Please make sure you provide a valid email address ", Toast.LENGTH_LONG);
+            dateWarning.show();
+            return false;
+        }
+    }
+
+//    private void disableSingUp() {
+//        Button signUpButton = getView().findViewById(R.id.signUpButton);
+//        signUpButton.setBackgroundColor(NOT_CLICKABLE_COLOUR);
+//        signUpButton.setEnabled(false);
+//    }
+//
+//    private void enableSignUp() {
+//        Button signUpButton = getView().findViewById(R.id.signUpButton);
+//        signUpButton.setBackgroundColor(CLICKABLE_COLOUR);
+//        signUpButton.setEnabled(true);
+//    }
+
+    // Verifies all user inputs
+    private boolean verifyAllInputs() {
+        boolean passed = true;
+        passed = verifyPasswordsIdentical();
+        passed = verifyDob();
+        passed = verifyEmail();
+        return passed;
     }
 
     private class dateChangedListener implements DatePickerDialog.OnDateSetListener {
         @Override
         public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-            changeDateField(dayOfMonth + "/" + month + "/" + year);
-
+            Date chosenDate = new GregorianCalendar(year, month, dayOfMonth).getTime();
+            changeDateField(chosenDate);
         }
     }
 
@@ -102,12 +181,19 @@ public class SignUpFragment extends Fragment {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            checkPasswordsIdentical();
+            verifyPasswordsIdentical();
         }
 
         @Override
         public void afterTextChanged(Editable s) {
 
+        }
+    }
+
+    private class signUpButtonListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            verifyAllInputs();
         }
     }
 }
