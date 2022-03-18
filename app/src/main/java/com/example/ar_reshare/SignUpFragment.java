@@ -1,6 +1,9 @@
 package com.example.ar_reshare;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.icu.util.Calendar;
 import android.os.Bundle;
@@ -8,6 +11,7 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.os.CountDownTimer;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -194,6 +198,29 @@ public class SignUpFragment extends Fragment {
 
     // TODO: Send user registration to backend
     private boolean registerUser() {
+        AlertDialog.Builder successful = new AlertDialog.Builder(getContext());
+        successful.setTitle("Registration Successful!");
+        successful.setMessage("Your account has been successfully registered");
+        AlertDialog dialog = successful.create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                new CountDownTimer(3000, 100) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                    }
+                    @Override
+                    public void onFinish() {
+                        if (((AlertDialog) dialog).isShowing()) {
+                            dialog.dismiss();
+                        }
+                    }
+                }.start();
+            }
+        });
+        dialog.show();
+        Intent intent = new Intent(getContext(), ARActivity.class);
+        startActivity(intent);
         return false;
     }
 
