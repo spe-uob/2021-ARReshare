@@ -65,8 +65,11 @@
             android:exported="true"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".MainActivity"
-            android:exported="true"></activity>
+
+            android:name=".FallbackActivity"
+            android:exported="true">
+        </activity>
+
         <activity
             android:name=".ProductPageActivity"
             android:exported="true" />
@@ -75,7 +78,7 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
         <!--
- "AR Optional" app, contains non-AR features that can be used when
+        "AR Optional" app, contains non-AR features that can be used when
          "Google Play Services for AR" (ARCore) is not available.
         -->
         <meta-data

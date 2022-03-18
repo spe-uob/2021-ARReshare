@@ -8,7 +8,7 @@
         android:id="@+id/surfaceview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_gravity="top"/>
+        android:layout_gravity="top" />
 
     <LinearLayout
         android:id="@+id/productBoxAR"
@@ -87,5 +87,17 @@
         android:background="#00FFFFFF"
         android:scaleType="fitCenter"
         android:src="@drawable/compass_graphic"/>
+
+    <TextView
+        android:id="@+id/swipingClue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:paddingTop="0dp"
+        android:text="AR Activity"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:visibility="invisible" />
 
 </RelativeLayout>

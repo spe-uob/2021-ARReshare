@@ -12,6 +12,7 @@
     <string name="STATIC_MAP_KEY">AIzaSyAFWHH-yjENxp6a7kQUeFfLjWcbGBuuM6Y</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="thanks_message">You added this product,\nthank you for sharing!</string>
+
 <!-- used for addProduct page dropdown   -->
     <string-array name="categories">
         <item>Clothes</item>
@@ -21,13 +22,17 @@
         <item>Food</item>
         <item>Other</item>
     </string-array>
-
     <string-array name="condition">
         <item>Brand-new</item>
         <item>Used-Very Good</item>
         <item>Used-Good</item>
         <item>Used-Acceptable</item>
     </string-array>
+
+    <string name="location">Location</string>
+    <string name="calc_distance">Calculating distance</string>
+    <string name="category">Category</string>
+    <string name="location_pin">Location Pin</string>
 
 
 </resources>
