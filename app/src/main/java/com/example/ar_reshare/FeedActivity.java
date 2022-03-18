@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.widget.ImageView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -43,12 +44,9 @@ public class FeedActivity extends AppCompatActivity {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getLocationPermission();
         getDeviceLocation(feedRecyclerAdapter);
-<<<<<<< HEAD
 
         ImageView refreshButton = findViewById(R.id.feedRefreshButton);
         refreshButton.setOnClickListener(v -> refreshPage());
-=======
->>>>>>> develop
     }
 
     @Override
@@ -113,7 +111,6 @@ public class FeedActivity extends AppCompatActivity {
             System.out.println("Encountered" + e);
         }
     }
-<<<<<<< HEAD
 
     // Refreshes page, ensures the animation overridden by finish does not play
     private void refreshPage() {
@@ -122,6 +119,4 @@ public class FeedActivity extends AppCompatActivity {
         startActivity(getIntent());
         overridePendingTransition(0, 0);
     }
-=======
->>>>>>> develop
 }
