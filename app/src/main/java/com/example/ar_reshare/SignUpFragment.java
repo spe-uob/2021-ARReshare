@@ -19,16 +19,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class SignUpFragment extends Fragment {
 
     private final int GREEN_COLOUR = Color.parseColor("#32a852");
     private final int RED_COLOUR = Color.parseColor("#ab2a1f");
+    private final int DEFAULT_TEXT_COLOUR = Color.parseColor("#808080");
     private final int CLICKABLE_COLOUR = Color.parseColor("#4C62DC");
     private final int NOT_CLICKABLE_COLOUR = Color.parseColor("#7080db");
 
@@ -65,17 +69,24 @@ public class SignUpFragment extends Fragment {
                 }
             }
         });
-        dobText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            }
-        });
+        dobText.addTextChangedListener(new textChangedListener(dobText));
 
         EditText passwordText = getView().findViewById(R.id.signUpPassword);
         EditText confirmPasswordText = getView().findViewById(R.id.signUpConfirmPassword);
         TextWatcher passwordListener = new passwordChangedListener();
         passwordText.addTextChangedListener(passwordListener);
         confirmPasswordText.addTextChangedListener(passwordListener);
+
+        EditText emailText = getView().findViewById(R.id.signUpEmail);
+        TextWatcher emailListener = new textChangedListener(emailText);
+        emailText.addTextChangedListener(emailListener);
+
+        EditText postcodeText = getView().findViewById(R.id.signUpPostCode);
+        TextWatcher postcodeListener = new textChangedListener(postcodeText);
+        postcodeText.addTextChangedListener(postcodeListener);
+
+        Button signUpButton = getView().findViewById(R.id.signUpButton);
+        signUpButton.setOnClickListener(new signUpButtonListener());
     }
 
     private void changeDateField(Date date) {
@@ -94,13 +105,16 @@ public class SignUpFragment extends Fragment {
             Date now = Calendar.getInstance().getTime();
             long years = TimeUnit.DAYS.convert(now.getTime() - dob.getTime(), TimeUnit.MILLISECONDS);
             if (years >= MINIMUM_AGE_REQUIRED) {
+                dobText.setTextColor(DEFAULT_TEXT_COLOUR);
                 return true;
             } else {
+                dobText.setTextColor(RED_COLOUR);
                 Toast dateWarning = Toast.makeText(getContext(), "You must be at least 18 year old to use this app", Toast.LENGTH_LONG);
                 dateWarning.show();
                 return false;
             }
         } catch (ParseException e) {
+            dobText.setTextColor(RED_COLOUR);
             Toast dateWarning = Toast.makeText(getContext(), "Date of birth must be in the form dd/mm/yyyy", Toast.LENGTH_LONG);
             dateWarning.show();
             return false;
@@ -112,11 +126,10 @@ public class SignUpFragment extends Fragment {
         EditText passwordText = getView().findViewById(R.id.signUpPassword);
         EditText confirmPasswordText = getView().findViewById(R.id.signUpConfirmPassword);
         TextView passwordComment = getView().findViewById(R.id.signUpPasswordComment);
-        System.out.println(passwordText.getText());
-        System.out.println(confirmPasswordText.getText());
-        System.out.println(passwordText.getText().equals(confirmPasswordText.getText()));
         if (passwordText.getText().toString().isEmpty() && confirmPasswordText.getText().toString().isEmpty()) {
-            passwordComment.setVisibility(View.INVISIBLE);
+            passwordComment.setVisibility(View.VISIBLE);
+            passwordComment.setText("Password is required!");
+            passwordComment.setTextColor(RED_COLOUR);
             return false;
         }
         else if (!passwordText.getText().toString().equals(confirmPasswordText.getText().toString())) {
@@ -134,34 +147,77 @@ public class SignUpFragment extends Fragment {
 
     private boolean verifyEmail() {
         EditText emailText = getView().findViewById(R.id.signUpEmail);
-        if (emailText.toString().contains("@")) {
+        if (emailText.getText().toString().contains("@")) {
+            emailText.setTextColor(DEFAULT_TEXT_COLOUR);
             return true;
         } else {
+            emailText.setTextColor(RED_COLOUR);
             Toast dateWarning = Toast.makeText(getContext(), "Please make sure you provide a valid email address ", Toast.LENGTH_LONG);
             dateWarning.show();
             return false;
         }
     }
 
-//    private void disableSingUp() {
-//        Button signUpButton = getView().findViewById(R.id.signUpButton);
-//        signUpButton.setBackgroundColor(NOT_CLICKABLE_COLOUR);
-//        signUpButton.setEnabled(false);
-//    }
-//
-//    private void enableSignUp() {
-//        Button signUpButton = getView().findViewById(R.id.signUpButton);
-//        signUpButton.setBackgroundColor(CLICKABLE_COLOUR);
-//        signUpButton.setEnabled(true);
-//    }
+    private boolean verifyPostcode() {
+        EditText postcodeText = getView().findViewById(R.id.signUpPostCode);
+        String postcode = postcodeText.getText().toString();
+        if (postcode.contains(" ")) {
+            postcode = postcode.replaceFirst(" ", "");
+            postcodeText.setText(postcode);
+        }
+        if (postcode.length() > 7 || postcode.length() < 5) {
+            postcodeText.setTextColor(RED_COLOUR);
+            Toast postcodeWarning = Toast.makeText(getContext(), "Please ensure you type your postcode in the correct format", Toast.LENGTH_LONG);
+            postcodeWarning.show();
+            return false;
+        } else if (!Character.isAlphabetic(postcode.charAt(0)) ||
+                !Character.isAlphabetic(postcode.charAt(postcode.length()-1)) ||
+                !Character.isAlphabetic(postcode.charAt(postcode.length()-2))) {
+            postcodeText.setTextColor(RED_COLOUR);
+            Toast postcodeWarning = Toast.makeText(getContext(), "Please ensure you type your postcode in the correct format", Toast.LENGTH_LONG);
+            postcodeWarning.show();
+            return false;
+        } else {
+            postcodeText.setTextColor(DEFAULT_TEXT_COLOUR);
+            return true;
+        }
+    }
 
     // Verifies all user inputs
     private boolean verifyAllInputs() {
-        boolean passed = true;
-        passed = verifyPasswordsIdentical();
-        passed = verifyDob();
-        passed = verifyEmail();
-        return passed;
+        if (!verifyEmail()) return false;
+        if (!verifyPasswordsIdentical()) return false;
+        if (!verifyDob()) return false;
+        if (!verifyPostcode()) return false;
+        return true;
+    }
+
+    // TODO: Send user registration to backend
+    private boolean registerUser() {
+        return false;
+    }
+
+    public class textChangedListener implements TextWatcher {
+        private EditText watchedText;
+
+        textChangedListener(EditText view) {
+            this.watchedText = view;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            watchedText.setTextColor(DEFAULT_TEXT_COLOUR);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
     }
 
     private class dateChangedListener implements DatePickerDialog.OnDateSetListener {
@@ -193,7 +249,9 @@ public class SignUpFragment extends Fragment {
     private class signUpButtonListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            verifyAllInputs();
+            if (verifyAllInputs()) {
+                registerUser();
+            }
         }
     }
 }
