@@ -86,7 +86,8 @@ public class ProductPageActivity extends AppCompatActivity {
             edit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    Intent intent = new Intent(ProductPageActivity.this, ModifyProduct.class);
+                    startActivity(intent);
                 }
             });
         }
