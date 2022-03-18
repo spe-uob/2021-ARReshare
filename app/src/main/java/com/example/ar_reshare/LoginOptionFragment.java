@@ -12,32 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-/**
- * A simple {@link Fragment} subclass.
- * create an instance of this fragment.
- */
 public class LoginOptionFragment extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
     public LoginOptionFragment(ViewPager2 parent) {
         // Required empty public constructor
     }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment login_option_fragment.
-     */
-    // TODO: Rename and change types and number of parameters
-//    public static LoginOptionFragment newInstance(String param1, String param2) {
-//        LoginOptionFragment fragment = new LoginOptionFragment();
-//        return fragment;
-//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,6 +39,15 @@ public class LoginOptionFragment extends Fragment {
             public void onClick(View v) {
                 LoginSignupActivity parent = (LoginSignupActivity) getActivity();
                 parent.setCurrentFragment(2);
+            }
+        });
+
+        Button signUpButton = view.findViewById(R.id.signUpOptionButton);
+        signUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoginSignupActivity parent = (LoginSignupActivity) getActivity();
+                parent.setCurrentFragment(0);
             }
         });
     }

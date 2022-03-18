@@ -13,7 +13,6 @@
         android:layout_width="184dp"
         android:layout_height="190dp"
         android:layout_gravity="top|center"
-        android:layout_marginTop="50dp"
         app:srcCompat="@drawable/splash111" />
 
     <androidx.viewpager2.widget.ViewPager2

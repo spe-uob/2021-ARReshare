@@ -13,6 +13,10 @@ import android.widget.Button;
 
 public class LoginSignupActivity extends AppCompatActivity {
 
+    private final int OPTION_FRAGMENT = 1;
+    private final int LOGIN = 2;
+    private final int SIGN_UP = 0;
+
     private ViewPager2 viewPager;
 
     @Override
@@ -22,7 +26,7 @@ public class LoginSignupActivity extends AppCompatActivity {
         this.viewPager = findViewById(R.id.loginOptionViewPager);
         ViewPagerAdapter adapter = new ViewPagerAdapter(this, viewPager);
         viewPager.setAdapter(adapter);
-        setCurrentFragment(1);
+        setCurrentFragment(OPTION_FRAGMENT);
     }
 
     public void setCurrentFragment(int position) {
@@ -42,11 +46,11 @@ public class LoginSignupActivity extends AppCompatActivity {
         public Fragment createFragment(int position) {
             switch (position) {
                 case 0:
-                    return new LoginFragment();
+                    return new SignUpFragment();
                 case 1:
                     return new LoginOptionFragment(viewPager);
                 default:
-                    return new SignUpFragment();
+                    return new LoginFragment();
             }
         }
 

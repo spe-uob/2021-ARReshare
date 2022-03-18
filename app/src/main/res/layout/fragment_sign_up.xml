@@ -5,10 +5,103 @@
     android:layout_height="match_parent"
     tools:context=".SignUpFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="This is sign up fragment" />
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sign up with a new account"
+                android:layout_gravity="center|top"
+                android:layout_marginTop="10dp"
+                android:textSize="18dp"
+                android:textAlignment="center"/>
+
+            <EditText
+                android:id="@+id/signUpFirstName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="15"
+                android:inputType="textPersonName"
+                android:layout_gravity="center|top"
+                android:layout_marginTop="20dp"
+                android:hint="first name" />
+
+            <EditText
+                android:id="@+id/signUpLastName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="15"
+                android:inputType="textPersonName"
+                android:layout_gravity="center|top"
+                android:hint="last name" />
+
+            <EditText
+                android:id="@+id/signUpEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="15"
+                android:inputType="textEmailAddress"
+                android:layout_gravity="center|top"
+                android:hint="email" />
+
+            <EditText
+                android:id="@+id/signUpPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="15"
+                android:inputType="textPassword"
+                android:layout_gravity="center|top"
+                android:hint="password"/>
+
+            <EditText
+                android:id="@+id/signUpConfirmPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="15"
+                android:inputType="textPassword"
+                android:layout_gravity="center|top"
+                android:hint="confirm password"/>
+
+            <EditText
+                android:id="@+id/signUpDateOfBirth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="15"
+                android:inputType="date"
+                android:layout_gravity="center|top"
+                android:hint="date of birth"/>
+
+            <EditText
+                android:id="@+id/signUpPostCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="15"
+                android:inputType="textPostalAddress"
+                android:layout_gravity="center|top"
+                android:hint="postcode"/>
+
+            <Button
+                android:id="@+id/signUpButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|top"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="50dp"
+                android:width="150dp"
+                android:background="#4C62DC"
+                android:text="Sign Up"
+                android:textColor="#FFFFFF"
+                android:textSize="18dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </FrameLayout>
