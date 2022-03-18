@@ -1,6 +1,8 @@
 package com.example.ar_reshare;
-
 import android.graphics.Color;
+
+import java.util.Arrays;
+import java.util.List;
 
 public enum Category {
     CLOTHING(Color.rgb(255, 165, 0),"models/hat.obj","models/purple.png",
@@ -31,6 +33,11 @@ public enum Category {
     public int getCategoryColour() {
         return this.hueColour;
     }
+
+    public static List<Category> getCategories() {
+        return Arrays.asList(Category.values());
+    }
+
     public int getCategoryIcon() {
         return this.categoryIcon;
     }
