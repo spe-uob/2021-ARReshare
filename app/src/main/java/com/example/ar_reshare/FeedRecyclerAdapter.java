@@ -117,7 +117,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         holder.bookmarkButton.setTag(0);
         holder.bookmarkButton.setOnClickListener(v -> {
             if (holder.bookmarkButton.getTag().equals(0)) {
-                holder.bookmarkButton.setImageResource(R.drawable.fillled_white_bookmark);
+                holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
                 holder.bookmarkButton.setTag(1);
             } else {
                 holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);

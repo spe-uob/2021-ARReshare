@@ -14,7 +14,7 @@
         android:id="@+id/c1Top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#000000"
+        android:background="#363231"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -148,7 +148,7 @@
         android:id="@+id/c2Bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#C2C5CC"
+        android:background="#363231"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/image">
@@ -162,6 +162,7 @@
             android:padding="10dp"
             android:text="@string/product_description"
             android:textAlignment="center"
+            android:textColor="@color/white"
             android:textSize="15sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
