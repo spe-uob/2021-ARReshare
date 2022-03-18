@@ -113,7 +113,7 @@ public class FeedActivity extends AppCompatActivity {
         }
     }
 
-    // Refreshes page
+    // Refreshes page, ensures the animation overridden by finish does not play
     private void refreshPage() {
         finish();
         overridePendingTransition(0, 0);
