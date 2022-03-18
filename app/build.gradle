@@ -65,4 +65,7 @@ dependencies {
 
     // Waveform
     implementation 'de.javagl:obj:0.3.0'
+
+    // Navigation Bar
+    implementation "com.google.android.material:material:1.2.0"
 }

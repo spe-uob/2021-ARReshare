@@ -4,10 +4,10 @@
     android:id="@+id/wholeCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="3dp"
+    android:layout_marginTop="2.5dp"
     android:layout_marginLeft="5dp"
     android:layout_marginRight="5dp"
-    android:layout_marginBottom="3dp"
+    android:layout_marginBottom="2.5dp"
     android:background="@drawable/custom_border">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -132,7 +132,7 @@
             android:id="@+id/productImage"
             android:layout_width="match_parent"
             android:layout_height="510dp"
-            android:background="@drawable/product_image_border"
+            android:background="@drawable/custom_border"
             android:clickable="true"
             android:contentDescription="@string/product_image"
             android:scaleType="centerCrop"

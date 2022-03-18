@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -43,6 +45,9 @@ public class FeedActivity extends AppCompatActivity {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getLocationPermission();
         getDeviceLocation(feedRecyclerAdapter);
+
+        ImageView refreshButton = findViewById(R.id.feedRefreshButton);
+        refreshButton.setOnClickListener(v -> refreshPage());
     }
 
     @Override
@@ -106,5 +111,13 @@ public class FeedActivity extends AppCompatActivity {
             // Appropriate error catching
             System.out.println("Encountered" + e);
         }
+    }
+
+    // Refreshes page
+    private void refreshPage() {
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(getIntent());
+        overridePendingTransition(0, 0);
     }
 }
