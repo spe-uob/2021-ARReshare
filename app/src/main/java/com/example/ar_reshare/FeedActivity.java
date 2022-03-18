@@ -7,14 +7,31 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
+import java.text.MessageFormat;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class FeedActivity extends AppCompatActivity {
 
@@ -27,11 +44,38 @@ public class FeedActivity extends AppCompatActivity {
     private boolean locationPermissionGranted = false;
     // Built-in class which provides current location
     private FusedLocationProviderClient fusedLocationClient;
+    // Location stored;
+    private Location lastKnownLocation;
+
+    // Distance Filtering
+    private final int MIN_DISTANCE = 500; // metres
+    private final int MAX_DISTANCE = 5500; //metres
+    private final int DISTANCE_UNIT = 50; //metres
+    private int maxDistanceRange = MAX_DISTANCE;
+    private int tempDistanceRange = MIN_DISTANCE;
+
+    // Category Filtering
+    private final int UNCHECKED_CHIP_COLOUR = Color.parseColor("#dbdbdb");
+    private Set<Category> categoriesSelected = new HashSet<>(Category.getCategories());
+    private Set<Category> tempCategories = new HashSet<>(categoriesSelected);
+
+    private final int DEFAULT_DARK_FONT = Color.parseColor("#363636");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
+
+        for (Product product: productList) {
+            Location productLocation = new Location("ManualProvider");
+            productLocation.setLatitude(product.getLocation().latitude);
+            productLocation.setLongitude(product.getLocation().longitude);
+            float dist = lastKnownLocation.distanceTo(productLocation);
+            Category productCategory = product.getCategory();
+            if (dist > maxDistanceRange && !categoriesSelected.contains(productCategory)) {
+                productList.remove(product);
+            }
+        }
 
         // Allows different products to be displayed as individual cards
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
@@ -43,10 +87,25 @@ public class FeedActivity extends AppCompatActivity {
         // Request location permissions if needed and get latest location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getLocationPermission();
-        getDeviceLocation(feedRecyclerAdapter);
+        getDeviceLocation(this, feedRecyclerAdapter);
 
         ImageView refreshButton = findViewById(R.id.feedRefreshButton);
         refreshButton.setOnClickListener(v -> refreshPage());
+
+        ImageView filterButton = findViewById(R.id.feedFilterButton);
+        setupFilterWindow(filterButton);
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("chosenDistance", tempDistanceRange);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        tempDistanceRange = savedInstanceState.getInt("chosenDistance");
     }
 
     @Override
@@ -94,7 +153,7 @@ public class FeedActivity extends AppCompatActivity {
     }
 
     // Get the most recent location of the device
-    private void getDeviceLocation(FeedRecyclerAdapter feedRecyclerAdapter) {
+    private void getDeviceLocation(FeedActivity feedActivity, FeedRecyclerAdapter feedRecyclerAdapter) {
         try {
             if (locationPermissionGranted) {
                 fusedLocationClient.getLastLocation()
@@ -102,6 +161,7 @@ public class FeedActivity extends AppCompatActivity {
                             // Got last known location. In some rare situations this can be null.
                             if (location != null) {
                                 // Logic to handle location object
+                                feedActivity.checkDistanceToProduct(location);
                                 feedRecyclerAdapter.updateDistances(location);
                             }
                         });
@@ -112,11 +172,136 @@ public class FeedActivity extends AppCompatActivity {
         }
     }
 
+    // Stores the last known location of user
+    private void checkDistanceToProduct(Location location) {
+        lastKnownLocation = location;
+    }
+
     // Refreshes page, ensures the animation overridden by finish does not play
     private void refreshPage() {
         finish();
         overridePendingTransition(0, 0);
         startActivity(getIntent());
         overridePendingTransition(0, 0);
+    }
+
+    // Setup filter results window
+    private void setupFilterWindow(ImageView filterButton) {
+        filterButton.setOnClickListener(v -> {
+            LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+            @SuppressLint("InflateParams") View filterWindow = inflater.inflate(R.layout.map_filter_popup, null);
+            int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+            int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+
+            final PopupWindow popupWindow = new PopupWindow(filterWindow, width, height, true);
+            popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0);
+
+            popupWindow.setOnDismissListener(() -> cancelFilter(popupWindow));
+
+            Button cancelFilterButton = filterWindow.findViewById(R.id.mapFilterCancel);
+            cancelFilterButton.setOnClickListener(v1 -> cancelFilter(popupWindow));
+
+            Button confirmFilterButton = filterWindow.findViewById(R.id.mapFilterConfirm);
+            confirmFilterButton.setOnClickListener(v12 -> confirmFilter(popupWindow));
+
+            setupCategoryChipGroup(filterWindow);
+            setupDistanceSeekbar(filterWindow);
+        });
+    }
+
+    // Confirm filter changes
+    private void confirmFilter(PopupWindow popupWindow) {
+        maxDistanceRange = tempDistanceRange;
+        categoriesSelected = tempCategories;
+        tempCategories = new HashSet<>(categoriesSelected);
+        popupWindow.dismiss();
+        refreshPage();
+    }
+
+    // Cancel filter changes
+    private void cancelFilter(PopupWindow popupWindow) {
+        tempDistanceRange = maxDistanceRange;
+        tempCategories = new HashSet<>(categoriesSelected);
+        popupWindow.dismiss();
+    }
+
+    // Setup category filtering UI
+    private void setupCategoryChipGroup(View filterWindow) {
+        ChipGroup filterCategories = filterWindow.findViewById(R.id.mapFilterCategoryChipGroup);
+
+        List<Category> categories = Category.getCategories();
+        for (Category category : categories) {
+            Chip categoryChip = new Chip(FeedActivity.this);
+            categoryChip.setTag(category);
+            categoryChip.setCheckable(true);
+            if (categoriesSelected.contains(category)) {
+                categoryChip.setChecked(true);
+                int colour = category.getCategoryColour();
+                if (isColourTooDark(colour)) {
+                    categoryChip.setTextColor(Color.WHITE);
+                }
+                categoryChip.setChipBackgroundColor(ColorStateList.valueOf(colour));
+            } else {
+                categoryChip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
+                categoryChip.setChecked(false);
+            }
+            categoryChip.setOnClickListener(v -> {
+                Chip chip = (Chip) v;
+                // Already been checked
+                if (!chip.isChecked()) {
+                    chip.setChecked(false);
+                    chip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
+                    chip.setTextColor(DEFAULT_DARK_FONT);
+                    //noinspection SuspiciousMethodCalls
+                    tempCategories.remove(chip.getTag());
+                    // Not checked
+                } else {
+                    Category category1 = (Category) chip.getTag();
+                    chip.setChecked(true);
+                    int colour = category1.getCategoryColour();
+                    categoryChip.setChipBackgroundColor(ColorStateList.valueOf(colour));
+                    if (isColourTooDark(colour)) {
+                        categoryChip.setTextColor(Color.WHITE);
+                    }
+                    tempCategories.add(category1);
+                }
+            });
+            categoryChip.setText(category.toString());
+            categoryChip.setTextSize(14);
+            filterCategories.addView(categoryChip);
+        }
+    }
+
+    // Setup distance filtering UI
+    private void setupDistanceSeekbar(View filterWindow) {
+        SeekBar distanceBar = filterWindow.findViewById(R.id.mapDistanceBar);
+        TextView distanceAway = filterWindow.findViewById(R.id.mapDistanceText);
+        distanceBar.setProgress((maxDistanceRange - MIN_DISTANCE)/DISTANCE_UNIT);
+        distanceAway.setText(MessageFormat.format("{0} metres away", maxDistanceRange));
+        distanceBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int distance = MIN_DISTANCE + progress*DISTANCE_UNIT;
+                distanceAway.setText(MessageFormat.format("{0} metres away", distance));
+                tempDistanceRange = distance;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+    }
+
+    // Checks if colour contrast is high enough
+    // If false is returned use a light font colour instead of dark
+    private boolean isColourTooDark(int colour) {
+        float backgroundLuminance = Color.luminance(colour);
+        float textLuminance = Color.luminance(DEFAULT_DARK_FONT);
+        float ratio = (float) ((backgroundLuminance + 0.05)/(textLuminance + 0.05));
+        // Colour constants for accessibility needs - changing font colour based on contrast
+        float MIN_CONTRAST_RATIO = 4.5f;
+        return ratio < MIN_CONTRAST_RATIO;
     }
 }
