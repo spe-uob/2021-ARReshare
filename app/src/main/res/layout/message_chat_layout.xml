@@ -33,7 +33,7 @@
 
                 <TextView
                     android:id="@+id/chat_title"
-                    android:layout_width="300dp"
+                    android:layout_width="310dp"
                     android:layout_height="39dp"
                     android:paddingLeft="20dp"
                     android:paddingTop="10dp"
@@ -55,8 +55,9 @@
                 android:layout_width="160dp"
                 android:layout_height="wrap_content"
                 android:autoSizeTextType="uniform"
+                android:paddingRight="10dp"
                 android:text="product"
-                android:paddingLeft="20dp"
+                android:textAlignment="textEnd"
                 android:paddingTop="10dp"
                 android:textStyle="bold" />
 
@@ -67,6 +68,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="270dp"
+            android:paddingEnd="10dp"
             android:text="15:02"
             android:textSize="10sp" />
 
@@ -81,9 +83,9 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/chat_icon"
-        android:layout_width="85dp"
-        android:layout_height="82dp"
-        android:layout_marginStart="5dp"
+        android:layout_width="76dp"
+        android:layout_height="78dp"
+        android:layout_marginStart="15dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="6dp"
         app:layout_constraintBottom_toBottomOf="parent"
