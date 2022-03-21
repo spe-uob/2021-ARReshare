@@ -28,7 +28,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatListActivity<abstarct> extends AppCompatActivity {
+public class ChatListActivity extends AppCompatActivity {
 
     MultiChatsAdapter chatListAdapter;
     RecyclerView recyclerView;
