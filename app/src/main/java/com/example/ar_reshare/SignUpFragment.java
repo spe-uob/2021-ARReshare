@@ -125,7 +125,7 @@ public class SignUpFragment extends Fragment {
         }
     }
 
-    // Verifies is passwords match
+    // Verifies if passwords match
     private boolean verifyPasswordsIdentical() {
         EditText passwordText = getView().findViewById(R.id.signUpPassword);
         EditText confirmPasswordText = getView().findViewById(R.id.signUpConfirmPassword);
