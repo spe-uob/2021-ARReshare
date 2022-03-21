@@ -14,7 +14,7 @@
         android:drawablePadding="20dp"
         android:fontFamily="@font/montserrat"
         android:gravity="center"
-        android:text="Add Product"
+        android:text="Modify Product"
         android:textColor="#000000"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -42,6 +42,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
 
             <EditText
                 android:id="@+id/editTextTextPersonName"
@@ -189,6 +190,7 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+
     <ImageView
         android:id="@+id/tick"
         android:layout_width="54dp"
@@ -198,6 +200,5 @@
         app:layout_constraintEnd_toEndOf="@+id/nav_name"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_baseline_check_24" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,6 +22,9 @@
         <activity
             android:name=".AddProduct"
             android:exported="true" />
+
+        <activity android:name= ".ModifyProduct"></activity>
+
         <activity
             android:name=".ARActivity"
             android:exported="true" />

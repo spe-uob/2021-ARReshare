@@ -1,40 +1,33 @@
 package com.example.ar_reshare;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SortedList;
-import androidx.recyclerview.widget.SortedListAdapterCallback;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-
-import android.widget.LinearLayout;
 import android.widget.Spinner;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public class AddProduct extends AppCompatActivity {
+public class ModifyProduct extends AppCompatActivity {
 
     private ArrayList<Integer> uploadedImages = new ArrayList<>();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_product);
-
+        setContentView(R.layout.activity_modify_product);
         uploadedImages.add(R.drawable.cup);
         uploadedImages.add(R.drawable.cup2);
-        uploadedImages.add(R.drawable.pen);
-        uploadedImages.add(R.drawable.pen2);
-
-
-
+        tickButton();
         uploadedImageView();
         categoryDropdown();
         conditionDropdown();
+        returnListener();
     }
 
     // used a recycler view to display the images chosen by users
@@ -46,6 +39,7 @@ public class AddProduct extends AppCompatActivity {
         uploaded_image_list.setAdapter(adapter);
 
     }
+
     private void categoryDropdown(){
         Spinner spinner = findViewById(R.id.category_dropdown);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.categories, android.R.layout.simple_spinner_item);
@@ -58,6 +52,16 @@ public class AddProduct extends AppCompatActivity {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.condition, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+    }
+
+    private void tickButton(){
+        ImageView tick = findViewById(R.id.tick);
+        tick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
     }
 
     // implement a top left return arrow that returns to previous page when clicked
