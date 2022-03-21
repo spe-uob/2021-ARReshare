@@ -45,6 +45,10 @@ public class ProductPageActivity extends AppCompatActivity {
 
         //display product name
         displayProductName(product);
+        navProductName(product);
+
+        //edit button
+        showEditIfUser(contributor,user);
 
         //display product description
         displayProductDescription(product);
@@ -71,10 +75,41 @@ public class ProductPageActivity extends AppCompatActivity {
 
         //links to messaging page
         messageButton(product,contributor,user, profilePicId);
+
+    }
+
+    private void showEditIfUser(User contributor, User user){
+        if(contributor.getName().equals(user.getName())){
+            ImageView edit = findViewById(R.id.edit);
+            edit.setVisibility(View.VISIBLE);
+
+            edit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ProductPageActivity.this, ModifyProduct.class);
+                    startActivity(intent);
+                }
+            });
+        }
+    }
+
+    private void displayProductCondition(Product product){
+
+    }
+
+    private void displayProductCategory(Product product){
+        ImageView category_pic = findViewById(R.id.category_pic);
+        category_pic.setImageResource(product.getCategory().getCategoryIcon());
+    }
+
+    // navbar at the top to display the product name
+    private void navProductName(Product product){
+        TextView nav_name = findViewById(R.id.nav_name);
+        nav_name.setText(product.getName());
     }
 
     // implement a top left return arrow that returns to previous page when clicked
-    public void returnListener(){
+    private void returnListener(){
 
         ImageView returnArrow = findViewById(R.id.returnArrow);
         returnArrow.setOnClickListener(new View.OnClickListener() {
@@ -142,6 +177,7 @@ public class ProductPageActivity extends AppCompatActivity {
             message.setVisibility(View.INVISIBLE); // hide the message button in this case
             TextView thanksMessage = findViewById(R.id.thanksForSharing);
             thanksMessage.setVisibility(View.VISIBLE);
+
         }
     }
 
@@ -177,6 +213,5 @@ public class ProductPageActivity extends AppCompatActivity {
         String url = "https://maps.googleapis.com/maps/api/staticmap?center="+ lat + ","+ lng +
                 "&zoom=15&size=400x400&markers=color:red|"+ lat + ","+ lng + "&key=" + getString(R.string.STATIC_MAP_KEY);
         Glide.with(this).load(url).into(mapView);
-
     }
 }

@@ -60,8 +60,10 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
         ((MultiChatsAdapter.ChatHolder) holder).bind(chat);
     }
 
+
+
     private class ChatHolder extends RecyclerView.ViewHolder {
-        TextView chatTitle, chatBody, chatTime;
+        TextView chatTitle, chatBody, chatTime, productInfo;
         ImageView icon;
 
         ChatHolder(View itemView) {
@@ -71,10 +73,12 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
             chatBody = (TextView) itemView.findViewById(R.id.chat_body);
             chatTime = (TextView) itemView.findViewById(R.id.chat_time);
             icon = (ImageView) itemView.findViewById(R.id.chat_icon);
+            productInfo = (TextView) itemView.findViewById(R.id.chat_product);
         }
 
         void bind(Chat chat) {
             chatTitle.setText(chat.getContributor().getName());
+            productInfo.setText(chat.getProduct().getName());
             chatBody.setText(chat.getMessages().get(chat.getMessages().size()-1).getMessage());
             chatTime.setText(chat.getMessages().get(chat.getMessages().size()-1).getCreatedTime());
             icon.setImageResource(chat.getContributor().getProfileIcon());

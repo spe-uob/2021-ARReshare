@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/wholeCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp"
+    android:layout_marginTop="3dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    android:layout_marginBottom="3dp"
     android:background="@drawable/custom_border">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/c1Top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#363231"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -22,7 +25,7 @@
             android:layout_marginStart="10dp"
             android:contentDescription="@string/profile_icon"
             android:src="@mipmap/ic_launcher_round"
-            app:layout_constraintBottom_toBottomOf="@id/contributor"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -33,9 +36,10 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:clickable="true"
-            android:padding="10dp"
+            android:padding="5dp"
             android:text="@string/product_title"
             android:textAlignment="center"
+            android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/bookmarkButton"
@@ -50,13 +54,15 @@
             android:layout_marginTop="2dp"
             android:layout_marginEnd="10dp"
             android:clickable="true"
-            android:padding="10dp"
+            android:padding="5dp"
             android:text="@string/contributor"
             android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textStyle="bold"
             android:textSize="15sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/category"
-            app:layout_constraintStart_toEndOf="@id/profileIcon"
+            app:layout_constraintStart_toEndOf="@id/location"
             app:layout_constraintTop_toBottomOf="@+id/productTitle" />
 
         <ImageView
@@ -70,7 +76,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/productTitle"
             app:layout_constraintTop_toTopOf="@+id/productTitle"
-            app:srcCompat="@drawable/ic_baseline_bookmark_border_24" />
+            app:srcCompat="@drawable/white_bookmark" />
 
         <ImageView
             android:id="@+id/category"
@@ -78,11 +84,39 @@
             android:layout_height="45dp"
             android:layout_marginEnd="5dp"
             android:clickable="true"
+            android:contentDescription="@string/category"
             app:layout_constraintBottom_toBottomOf="@id/contributor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/contributor"
             app:layout_constraintTop_toTopOf="@+id/contributor"
             app:srcCompat="@drawable/ic_baseline_question_mark_24" />
+
+        <TextView
+            android:id="@+id/location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="@string/location"
+            android:textAlignment="center"
+            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/contributor"
+            app:layout_constraintEnd_toStartOf="@id/contributor"
+            app:layout_constraintStart_toEndOf="@id/locationPin"
+            app:layout_constraintTop_toTopOf="@+id/contributor" />
+
+        <ImageView
+            android:id="@+id/locationPin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:contentDescription="@string/location_pin"
+            app:layout_constraintBottom_toBottomOf="@id/contributor"
+            app:layout_constraintEnd_toStartOf="@id/location"
+            app:layout_constraintStart_toEndOf="@id/profileIcon"
+            app:layout_constraintTop_toTopOf="@+id/contributor"
+            app:srcCompat="@drawable/location_pin" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -98,17 +132,15 @@
             android:id="@+id/productImage"
             android:layout_width="match_parent"
             android:layout_height="510dp"
-            android:background="#000000"
+            android:background="@drawable/product_image_border"
             android:clickable="true"
             android:contentDescription="@string/product_image"
             android:scaleType="centerCrop"
             android:src="@mipmap/ic_launcher"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -116,6 +148,8 @@
         android:id="@+id/c2Bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#363231"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/image">
 
@@ -123,13 +157,15 @@
             android:id="@+id/productDescription"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="3dp"
             android:clickable="true"
             android:padding="10dp"
-            android:layout_marginEnd="3dp"
             android:text="@string/product_description"
             android:textAlignment="center"
-            android:textSize="20sp"
-            android:textStyle="italic"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/messageButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
