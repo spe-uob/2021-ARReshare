@@ -27,6 +27,7 @@ public class ModifyProduct extends AppCompatActivity {
         uploadedImageView();
         categoryDropdown();
         conditionDropdown();
+        returnListener();
     }
 
     // used a recycler view to display the images chosen by users
@@ -59,6 +60,28 @@ public class ModifyProduct extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 onBackPressed();
+            }
+        });
+    }
+
+    // implement a top left return arrow that returns to previous page when clicked
+    private void returnListener(){
+
+        ImageView returnArrow = findViewById(R.id.returnArrow);
+        returnArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+    }
+
+    private void confirmListener(){
+        ImageView confirmCheck = findViewById(R.id.tick);
+        confirmCheck.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
     }

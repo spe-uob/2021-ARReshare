@@ -68,8 +68,6 @@ public class UploadImageAdapter extends RecyclerView.Adapter<UploadImageAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.image.setImageResource(uploadedImages.get(position));
-        System.out.println(uploadedImages.get(position));
-        System.out.println(uploadedImages);
         holder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
