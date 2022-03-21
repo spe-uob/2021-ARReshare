@@ -7,9 +7,13 @@ import androidx.recyclerview.widget.SortedList;
 import androidx.recyclerview.widget.SortedListAdapterCallback;
 
 import android.os.Bundle;
+<<<<<<< HEAD
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+=======
+import android.widget.ArrayAdapter;
+>>>>>>> develop
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 

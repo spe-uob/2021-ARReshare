@@ -43,7 +43,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-
             <EditText
                 android:id="@+id/editTextTextPersonName"
                 android:layout_width="350dp"
@@ -190,7 +189,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-
     <ImageView
         android:id="@+id/tick"
         android:layout_width="54dp"
@@ -200,5 +198,6 @@
         app:layout_constraintEnd_toEndOf="@+id/nav_name"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_baseline_check_24" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
