@@ -61,6 +61,8 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
         ((MultiChatsAdapter.ChatHolder) holder).bind(chat);
     }
 
+
+
     private class ChatHolder extends RecyclerView.ViewHolder {
         TextView chatTitle, chatBody, chatTime, productInfo;
         ImageView icon;
