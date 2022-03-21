@@ -142,6 +142,7 @@ public class ProductPageActivity extends AppCompatActivity {
             message.setVisibility(View.INVISIBLE); // hide the message button in this case
             TextView thanksMessage = findViewById(R.id.thanksForSharing);
             thanksMessage.setVisibility(View.VISIBLE);
+
         }
     }
 
@@ -177,6 +178,5 @@ public class ProductPageActivity extends AppCompatActivity {
         String url = "https://maps.googleapis.com/maps/api/staticmap?center="+ lat + ","+ lng +
                 "&zoom=15&size=400x400&markers=color:red|"+ lat + ","+ lng + "&key=" + getString(R.string.STATIC_MAP_KEY);
         Glide.with(this).load(url).into(mapView);
-
     }
 }
