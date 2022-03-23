@@ -1,6 +1,8 @@
 package com.example.ar_reshare;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
@@ -9,6 +11,7 @@ import androidx.recyclerview.widget.SortedListAdapterCallback;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import android.widget.LinearLayout;
@@ -35,7 +38,20 @@ public class AddProduct extends AppCompatActivity {
         uploadedImageView();
         categoryDropdown();
         conditionDropdown();
+        addImageListener();
     }
+
+    private void addImageListener(){
+        Button add_image = findViewById(R.id.add_image);
+        add_image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment add_image_popup = new addPhotoDialog();
+                add_image_popup.show(getSupportFragmentManager(), "add_image_popup");
+            }
+        });
+    }
+
 
     // used a recycler view to display the images chosen by users
     private void uploadedImageView(){
