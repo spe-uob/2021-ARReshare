@@ -45,7 +45,7 @@ public class LoginFragment extends Fragment {
 
     // TODO: Send user login request to backend
     private boolean loginUser() {
-        if (true) {
+        if (false) {
             AlertDialog.Builder successful = new AlertDialog.Builder(getContext());
             successful.setTitle("Login Successful!");
             successful.setMessage("You have successfully logged in.");
@@ -71,6 +71,9 @@ public class LoginFragment extends Fragment {
             Intent intent = new Intent(getContext(), ARActivity.class);
             startActivity(intent);
             return true;
+        } else {
+            LoginSignupActivity parent = (LoginSignupActivity) getActivity();
+            System.out.println(parent.isLoggedIn());
         }
         return false;
     }

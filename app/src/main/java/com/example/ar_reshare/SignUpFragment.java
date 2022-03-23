@@ -7,13 +7,10 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.icu.util.Calendar;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.os.CountDownTimer;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,13 +20,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class SignUpFragment extends Fragment {
@@ -198,6 +197,30 @@ public class SignUpFragment extends Fragment {
 
     // TODO: Send user registration to backend
     private boolean registerUser() {
+        boolean successful = true;
+        if (successful) {
+            EditText emailText = getView().findViewById(R.id.signUpEmail);
+            EditText passwordText = getView().findViewById(R.id.signUpPassword);
+            Pair<byte[], byte[]> encryptedPair = Crypto.encrypt(passwordText.getText().toString());
+
+            System.out.println("ORIGINAL BINARY");
+            System.out.println(encryptedPair.second);
+            System.out.println("STRINGIFIED BINARY");
+            String password = Base64.getEncoder().encodeToString(encryptedPair.first);
+            String iv = Base64.getEncoder().encodeToString(encryptedPair.second);
+            System.out.println(iv);
+            System.out.println("DESTRINGIFIED BINARY");
+            System.out.println(Base64.getDecoder().decode(iv));
+
+            LoginSignupActivity parent = (LoginSignupActivity) getActivity();
+            parent.addAccount(emailText.getText().toString(), encryptedPair.first, encryptedPair.second);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void displaySuccess() {
         AlertDialog.Builder successful = new AlertDialog.Builder(getContext());
         successful.setTitle("Registration Successful!");
         successful.setMessage("Your account has been successfully registered");
@@ -221,7 +244,6 @@ public class SignUpFragment extends Fragment {
         dialog.show();
         Intent intent = new Intent(getContext(), ARActivity.class);
         startActivity(intent);
-        return false;
     }
 
     public class textChangedListener implements TextWatcher {
