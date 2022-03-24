@@ -1,5 +1,6 @@
 package com.example.ar_reshare;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -15,14 +16,13 @@ import java.util.ArrayList;
 
 public class ModifyProduct extends AppCompatActivity {
 
-    private ArrayList<Integer> uploadedImages = new ArrayList<>();
+    private ArrayList<Uri> uploadedImages = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modify_product);
-        uploadedImages.add(R.drawable.cup);
-        uploadedImages.add(R.drawable.cup2);
+
         tickButton();
         uploadedImageView();
         categoryDropdown();

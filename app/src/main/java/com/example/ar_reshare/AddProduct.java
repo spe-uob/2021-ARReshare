@@ -1,14 +1,24 @@
 package com.example.ar_reshare;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 import androidx.recyclerview.widget.SortedListAdapterCallback;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -17,28 +27,46 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
-public class AddProduct extends AppCompatActivity {
+public class AddProduct extends AppCompatActivity implements addPhotoDialog.NoticeDialogListener{
 
-    private ArrayList<Integer> uploadedImages = new ArrayList<>();
+    private ArrayList<Uri> uploadedImages = new ArrayList<>();
+    UploadImageAdapter adapter;
+    private final String CAMERA = "camera";
+    private final String GALLERY = "gallery";
+    ActivityResultLauncher<Intent> activityResultLauncher;
+    File storageDir;
+    Uri photoUri;
+    ArrayList<Uri> photoUris;
+    String currentPhotoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product);
 
-        uploadedImages.add(R.drawable.cup);
-        uploadedImages.add(R.drawable.cup2);
-        uploadedImages.add(R.drawable.pen);
-        uploadedImages.add(R.drawable.pen2);
-
-
 
         uploadedImageView();
         categoryDropdown();
         conditionDropdown();
         addImageListener();
+
+        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if(result.getResultCode() == RESULT_OK && result.getData() != null){
+                            adapter.addItem(photoUri);
+                        }
+                    }
+                }
+        );
+        storageDir = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        photoUris = new ArrayList<>(); // store all the pics uris
     }
 
     private void addImageListener(){
@@ -48,6 +76,7 @@ public class AddProduct extends AppCompatActivity {
             public void onClick(View v) {
                 DialogFragment add_image_popup = new addPhotoDialog();
                 add_image_popup.show(getSupportFragmentManager(), "add_image_popup");
+
             }
         });
     }
@@ -58,7 +87,7 @@ public class AddProduct extends AppCompatActivity {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false);
         RecyclerView uploaded_image_list = findViewById(R.id.uploaded_image_list);
         uploaded_image_list.setLayoutManager(layoutManager);
-        UploadImageAdapter adapter = new UploadImageAdapter(uploadedImages);
+        adapter = new UploadImageAdapter(uploadedImages);
         uploaded_image_list.setAdapter(adapter);
 
     }
@@ -96,5 +125,48 @@ public class AddProduct extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onDialogActionClick(DialogFragment dialog, String action) {
+        if(action == CAMERA){
+            takePicture();
+        }else if(action == GALLERY){
+
+        }
+    }
+
+    private void takePicture(){
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File photoFile = null;
+        try {
+            photoFile = createImageFile();
+        } catch (IOException ex) {
+            // Error occurred while creating the File
+            ex.printStackTrace();
+        }
+        // Continue only if the File was successfully created
+        if (photoFile != null) {
+            photoUri = FileProvider.getUriForFile(getApplicationContext(),
+                    "com.example.ar_reshare.fileprovider",
+                    photoFile);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+        }
+        activityResultLauncher.launch(intent);
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 }
