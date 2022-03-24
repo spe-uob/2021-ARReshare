@@ -213,7 +213,7 @@ public class SignUpFragment extends Fragment {
             System.out.println(Base64.getDecoder().decode(iv));
 
             LoginSignupActivity parent = (LoginSignupActivity) getActivity();
-            parent.addAccount(emailText.getText().toString(), encryptedPair.first, encryptedPair.second);
+            AuthenticationService.addAccount(getContext(), emailText.getText().toString(), encryptedPair.first, encryptedPair.second);
             return true;
         } else {
             return false;

@@ -1,5 +1,6 @@
 package com.example.ar_reshare;
 
+import android.accounts.Account;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +14,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+
+import java.util.Optional;
 
 public class LoginFragment extends Fragment {
 
@@ -46,6 +49,8 @@ public class LoginFragment extends Fragment {
     // TODO: Send user login request to backend
     private boolean loginUser() {
         if (false) {
+            //AuthenticationService.addAccount(getContext(), )
+
             AlertDialog.Builder successful = new AlertDialog.Builder(getContext());
             successful.setTitle("Login Successful!");
             successful.setMessage("You have successfully logged in.");
@@ -72,8 +77,6 @@ public class LoginFragment extends Fragment {
             startActivity(intent);
             return true;
         } else {
-            LoginSignupActivity parent = (LoginSignupActivity) getActivity();
-            System.out.println(parent.isLoggedIn());
         }
         return false;
     }
