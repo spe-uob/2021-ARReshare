@@ -13,10 +13,15 @@ import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -341,6 +346,13 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        //showInstructions();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         if (session != null) {
@@ -384,6 +396,40 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         FullScreenHelper.setFullScreenOnWindowFocusChanged(this, hasFocus);
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        showInstructions();
+    }
+
+    private void showInstructions() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View instructionsWindow = inflater.inflate(R.layout.instructions_popup, null);
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+
+        // Allows to tap outside the popup to dismiss it
+        boolean focusable = true;
+
+        final PopupWindow popupWindow = new PopupWindow(instructionsWindow, width, height, focusable);
+
+        popupWindow.showAtLocation(instructionsWindow, Gravity.CENTER, 0, -100);
+
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                popupWindow.dismiss();
+            }
+        });
+
+        Button button = instructionsWindow.findViewById(R.id.instructionsConfirm);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
     }
 
     @Override
