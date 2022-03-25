@@ -111,7 +111,7 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public void onClick(View v) {
                 LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-                View filterWindow = inflater.inflate(R.layout.map_filter_popup, null);
+                View filterWindow = inflater.inflate(R.layout.filter_popup, null);
                 int width = LinearLayout.LayoutParams.WRAP_CONTENT;
                 int height = LinearLayout.LayoutParams.WRAP_CONTENT;
 
@@ -128,7 +128,7 @@ public class MapsActivity extends FragmentActivity implements
                     }
                 });
 
-                Button cancelFilterButton = filterWindow.findViewById(R.id.mapFilterCancel);
+                Button cancelFilterButton = filterWindow.findViewById(R.id.filterCancel);
                 cancelFilterButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -136,7 +136,7 @@ public class MapsActivity extends FragmentActivity implements
                     }
                 });
 
-                Button confirmFilterButton = filterWindow.findViewById(R.id.mapFilterConfirm);
+                Button confirmFilterButton = filterWindow.findViewById(R.id.filterConfirm);
                 confirmFilterButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -168,7 +168,7 @@ public class MapsActivity extends FragmentActivity implements
 
     // Setup category filtering UI
     private void setupCategoryChipGroup(View filterWindow) {
-        ChipGroup filterCategories = filterWindow.findViewById(R.id.mapFilterCategoryChipGroup);
+        ChipGroup filterCategories = filterWindow.findViewById(R.id.filterCategoryChipGroup);
 
         List<Category> categories = Category.getCategories();
         for (Category category : categories) {
@@ -217,8 +217,8 @@ public class MapsActivity extends FragmentActivity implements
 
     // Setup distance filtering UI
     private void setupDistanceSeekbar(View filterWindow, PopupWindow popupWindow) {
-        SeekBar distanceBar = filterWindow.findViewById(R.id.mapDistanceBar);
-        TextView distanceAway = filterWindow.findViewById(R.id.mapDistanceText);
+        SeekBar distanceBar = filterWindow.findViewById(R.id.distanceBar);
+        TextView distanceAway = filterWindow.findViewById(R.id.distanceText);
         distanceBar.setProgress((maxDistanceRange - MIN_DISTANCE)/DISTANCE_UNIT);
         distanceAway.setText(maxDistanceRange + " metres away");
         distanceBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {

@@ -6,14 +6,68 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"
 tools:context=".FeedActivity">
 
-<androidx.recyclerview.widget.RecyclerView
-    android:id="@+id/recyclerView"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
-    android:background="#211f1f"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintLeft_toLeftOf="parent"
-    app:layout_constraintRight_toRightOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#211f1f"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:paddingTop="2.5dp"
+        android:paddingBottom="47.5dp"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottomNavigationView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#363231"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="2.5dp">
+
+        <ImageView
+            android:id="@+id/feedAddProduct"
+            android:background="@drawable/custom_border"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:contentDescription="@string/add_product"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/feedRefreshButton"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/add_icon" />
+
+        <ImageView
+            android:id="@+id/feedRefreshButton"
+            android:background="@drawable/custom_border"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:contentDescription="@string/refresh"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/feedFilterButton"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/feedAddProduct"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/refresh_icon" />
+
+        <ImageView
+            android:id="@+id/feedFilterButton"
+            android:background="@drawable/custom_border"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:contentDescription="@string/filter"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/feedRefreshButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/feed_filter_icon" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
