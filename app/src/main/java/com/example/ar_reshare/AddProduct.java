@@ -4,8 +4,6 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
@@ -13,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 import androidx.recyclerview.widget.SortedListAdapterCallback;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -24,11 +21,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -135,6 +129,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         });
     }
 
+
     // generates a pop up window showing "added successfully"
     private void confirmListener(){
         ImageView confirmCheck = findViewById(R.id.tick);
@@ -196,4 +191,5 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         currentPhotoPath = image.getAbsolutePath();
         return image;
     }
+
 }
