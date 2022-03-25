@@ -11,7 +11,6 @@ import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.location.Location;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -44,8 +43,6 @@ public class FeedActivity extends AppCompatActivity {
     private boolean locationPermissionGranted = false;
     // Built-in class which provides current location
     private FusedLocationProviderClient fusedLocationClient;
-    // Location stored;
-    private Location lastKnownLocation;
 
     // Distance Filtering
     private final int MIN_DISTANCE = 500; // metres
@@ -66,17 +63,6 @@ public class FeedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
 
-        for (Product product: productList) {
-            Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(product.getLocation().latitude);
-            productLocation.setLongitude(product.getLocation().longitude);
-            float dist = lastKnownLocation.distanceTo(productLocation);
-            Category productCategory = product.getCategory();
-            if (dist > maxDistanceRange && !categoriesSelected.contains(productCategory)) {
-                productList.remove(product);
-            }
-        }
-
         // Allows different products to be displayed as individual cards
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         FeedRecyclerAdapter feedRecyclerAdapter =
@@ -87,7 +73,7 @@ public class FeedActivity extends AppCompatActivity {
         // Request location permissions if needed and get latest location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getLocationPermission();
-        getDeviceLocation(this, feedRecyclerAdapter);
+        getDeviceLocation(feedRecyclerAdapter);
 
         ImageView refreshButton = findViewById(R.id.feedRefreshButton);
         refreshButton.setOnClickListener(v -> refreshPage());
@@ -99,13 +85,13 @@ public class FeedActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("chosenDistance", tempDistanceRange);
+        outState.putInt("chosenDistance", maxDistanceRange);
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        tempDistanceRange = savedInstanceState.getInt("chosenDistance");
+        maxDistanceRange = savedInstanceState.getInt("chosenDistance");
     }
 
     @Override
@@ -153,7 +139,7 @@ public class FeedActivity extends AppCompatActivity {
     }
 
     // Get the most recent location of the device
-    private void getDeviceLocation(FeedActivity feedActivity, FeedRecyclerAdapter feedRecyclerAdapter) {
+    private void getDeviceLocation(FeedRecyclerAdapter feedRecyclerAdapter) {
         try {
             if (locationPermissionGranted) {
                 fusedLocationClient.getLastLocation()
@@ -161,7 +147,7 @@ public class FeedActivity extends AppCompatActivity {
                             // Got last known location. In some rare situations this can be null.
                             if (location != null) {
                                 // Logic to handle location object
-                                feedActivity.checkDistanceToProduct(location);
+                                feedRecyclerAdapter.updateFilter(location, maxDistanceRange, categoriesSelected);
                                 feedRecyclerAdapter.updateDistances(location);
                             }
                         });
@@ -170,11 +156,6 @@ public class FeedActivity extends AppCompatActivity {
             // Appropriate error catching
             System.out.println("Encountered" + e);
         }
-    }
-
-    // Stores the last known location of user
-    private void checkDistanceToProduct(Location location) {
-        lastKnownLocation = location;
     }
 
     // Refreshes page, ensures the animation overridden by finish does not play
