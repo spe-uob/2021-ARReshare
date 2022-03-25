@@ -85,12 +85,9 @@ public class FeedActivity extends AppCompatActivity {
 
         // Link to Add Product page
         ImageView addProductButton = findViewById(R.id.feedAddProduct);
-        addProductButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(FeedActivity.this, AddProduct.class);
-                startActivity(intent);
-            }
+        addProductButton.setOnClickListener(v -> {
+            Intent intent = new Intent(FeedActivity.this, AddProduct.class);
+            startActivity(intent);
         });
 
         // Create rotating animation for refresh button and scroll to top on refresh
