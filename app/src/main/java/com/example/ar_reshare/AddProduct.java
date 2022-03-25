@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
@@ -26,12 +27,14 @@ import android.widget.ImageView;
 
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class AddProduct extends AppCompatActivity implements addPhotoDialog.NoticeDialogListener{
 
@@ -39,34 +42,51 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
     UploadImageAdapter adapter;
     private final String CAMERA = "camera";
     private final String GALLERY = "gallery";
-    ActivityResultLauncher<Intent> activityResultLauncher;
+    ActivityResultLauncher<Intent> cameraActivityResultLauncher;
+    ActivityResultLauncher<String> galleryActivityResultLauncher;
     File storageDir;
     Uri photoUri;
     ArrayList<Uri> photoUris;
     String currentPhotoPath;
+    File photoFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product);
 
-
         uploadedImageView();
         categoryDropdown();
         conditionDropdown();
         addImageListener();
 
-        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        //Camera intent launcher, add the picture to the product pics list once finished
+        cameraActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
                     @Override
                     public void onActivityResult(ActivityResult result) {
-                        if(result.getResultCode() == RESULT_OK && result.getData() != null){
+                        if(result.getResultCode() == RESULT_OK){
+                            System.out.println("helloooo");
                             adapter.addItem(photoUri);
+                        }else{
+                            photoFile.delete();//delete the file if failed
                         }
                     }
                 }
         );
+
+        //Gallery intent launcher, allowing users to select multiple pictures at a time
+        galleryActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.GetMultipleContents(), new ActivityResultCallback<List<Uri>>() {
+                    @Override
+                    public void onActivityResult(List<Uri> uri) {
+                        adapter.addAllItems(uri);
+                    }
+                }
+        );
+
         storageDir = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         photoUris = new ArrayList<>(); // store all the pics uris
+        confirmListener();
+        returnListener();
     }
 
     private void addImageListener(){
@@ -76,7 +96,6 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
             public void onClick(View v) {
                 DialogFragment add_image_popup = new addPhotoDialog();
                 add_image_popup.show(getSupportFragmentManager(), "add_image_popup");
-
             }
         });
     }
@@ -89,8 +108,8 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         uploaded_image_list.setLayoutManager(layoutManager);
         adapter = new UploadImageAdapter(uploadedImages);
         uploaded_image_list.setAdapter(adapter);
-
     }
+
     private void categoryDropdown(){
         Spinner spinner = findViewById(R.id.category_dropdown);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.categories, android.R.layout.simple_spinner_item);
@@ -107,7 +126,6 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
 
     // implement a top left return arrow that returns to previous page when clicked
     private void returnListener(){
-
         ImageView returnArrow = findViewById(R.id.returnArrow);
         returnArrow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,12 +135,17 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         });
     }
 
+    // generates a pop up window showing "added successfully"
     private void confirmListener(){
         ImageView confirmCheck = findViewById(R.id.tick);
         confirmCheck.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Context context = getApplicationContext();
+                CharSequence text = "Added Successfully!";
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
             }
         });
     }
@@ -132,13 +155,16 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         if(action == CAMERA){
             takePicture();
         }else if(action == GALLERY){
-
+            accessGallery();
         }
+    }
+
+    private void accessGallery(){
+        galleryActivityResultLauncher.launch("image/*");
     }
 
     private void takePicture(){
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        File photoFile = null;
         try {
             photoFile = createImageFile();
         } catch (IOException ex) {
@@ -152,9 +178,10 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                     photoFile);
             intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
         }
-        activityResultLauncher.launch(intent);
+        cameraActivityResultLauncher.launch(intent);
     }
 
+    //creates a local photo path to store the pics taken by user
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());

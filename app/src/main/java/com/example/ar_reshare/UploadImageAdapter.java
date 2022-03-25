@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class UploadImageAdapter extends RecyclerView.Adapter<UploadImageAdapter.ViewHolder>{
 
@@ -64,6 +65,7 @@ public class UploadImageAdapter extends RecyclerView.Adapter<UploadImageAdapter.
         return new ViewHolder(view);
     }
 
+    //When users clicks the top right delete button, the image gets deleted from the list
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.image.setImageURI(uploadedImages.get(position));
@@ -83,6 +85,10 @@ public class UploadImageAdapter extends RecyclerView.Adapter<UploadImageAdapter.
 
     public void addItem(Uri uri){
         this.uploadedImages.add(uri);
+    }
+
+    public void addAllItems(List<Uri> uris){
+        this.uploadedImages.addAll(uris);
     }
 
 
