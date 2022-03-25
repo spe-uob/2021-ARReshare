@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,21 +22,23 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class SignUpFragment extends Fragment {
 
     private final int GREEN_COLOUR = Color.parseColor("#32a852");
     private final int RED_COLOUR = Color.parseColor("#ab2a1f");
-    private final int DEFAULT_TEXT_COLOUR = Color.parseColor("#808080");
+    private final int DEFAULT_TEXT_COLOUR = Color.parseColor("#363636");
     private final int CLICKABLE_COLOUR = Color.parseColor("#4C62DC");
     private final int NOT_CLICKABLE_COLOUR = Color.parseColor("#7080db");
+
+    private final List<Character> SPECIAL_CHARACTERS = Arrays.asList('@', '!', '?', '%', '+', '-', '\\', '/', '\'', '$', '#', '^', ':', ';', '(', ')', '[', ']', '{', '}', '~', '_', '.');
 
     private final long MINIMUM_AGE_REQUIRED = 18L;
 
@@ -148,6 +149,46 @@ public class SignUpFragment extends Fragment {
         }
     }
 
+    private boolean checkPasswordStrength() {
+        EditText passwordText = getView().findViewById(R.id.signUpPassword);
+        TextView passwordComment = getView().findViewById(R.id.signUpPasswordComment);
+        String password = passwordText.getText().toString();
+        if (password.length() < 8) {
+            passwordComment.setVisibility(View.VISIBLE);
+            passwordComment.setText("Password must be at least 8 characters long!");
+            passwordComment.setTextColor(RED_COLOUR);
+            return false;
+        } else {
+            boolean containsUppercase = password.matches(".*[a-z].*");
+            boolean containsLowercase = password.matches(".*[A-Z].*");
+            if (!containsLowercase || !containsUppercase) {
+                passwordComment.setVisibility(View.VISIBLE);
+                passwordComment.setText("Password must have both lower and upper case characters!");
+                passwordComment.setTextColor(RED_COLOUR);
+                return false;
+            }
+
+            boolean containsNumber = password.matches(".*[0-9].*");
+            if (!containsNumber) {
+                passwordComment.setVisibility(View.VISIBLE);
+                passwordComment.setText("Password must contain a number!");
+                passwordComment.setTextColor(RED_COLOUR);
+                return false;
+            }
+
+            boolean specialCharacters = SPECIAL_CHARACTERS.stream()
+                    .map(character -> password.contains(character.toString()))
+                    .reduce(false, (x, acc) -> acc || x);
+            if (!specialCharacters) {
+                passwordComment.setVisibility(View.VISIBLE);
+                passwordComment.setText("Password must have special characters!");
+                passwordComment.setTextColor(RED_COLOUR);
+                return false;
+            }
+        }
+        return true;
+    }
+
     private boolean verifyEmail() {
         EditText emailText = getView().findViewById(R.id.signUpEmail);
         if (emailText.getText().toString().contains("@")) {
@@ -190,46 +231,46 @@ public class SignUpFragment extends Fragment {
     private boolean verifyAllInputs() {
         if (!verifyEmail()) return false;
         if (!verifyPasswordsIdentical()) return false;
+        if (!checkPasswordStrength()) return false;
         if (!verifyDob()) return false;
         if (!verifyPostcode()) return false;
         return true;
     }
 
-    // TODO: Send user registration to backend
-    private boolean registerUser() {
+    private void registerUser() {
+        // Signal to the user the registration is taking place
+        Button signUpButton = getView().findViewById(R.id.signUpButton);
+        signUpButton.setText("Signing Up...");
+
         EditText firstNameText = getView().findViewById(R.id.signUpFirstName);
         EditText lastNameText = getView().findViewById(R.id.signUpLastName);
         EditText emailText = getView().findViewById(R.id.signUpEmail);
         EditText passwordText = getView().findViewById(R.id.signUpPassword);
         EditText dobText = getView().findViewById(R.id.signUpDateOfBirth);
+        EditText postcodeText = getView().findViewById(R.id.signUpDateOfBirth);
 
         String name = firstNameText.getText().toString() + " " + lastNameText.getText().toString();
         String email = emailText.getText().toString();
         String password = passwordText.getText().toString();
         String dob = dobText.getText().toString();
+        String postcode = postcodeText.getText().toString();
 
-        boolean successful = BackendClient.registerAccount(name, email, password, dob);
-
-        if (successful) {
-            Pair<byte[], byte[]> encryptedPair = Crypto.encrypt(password);
-
-//            System.out.println("ORIGINAL BINARY");
-//            System.out.println(encryptedPair.second);
-//            System.out.println("STRINGIFIED BINARY");
-//            String password = Base64.getEncoder().encodeToString(encryptedPair.first);
-//            String iv = Base64.getEncoder().encodeToString(encryptedPair.second);
-//            System.out.println(iv);
-//            System.out.println("DESTRINGIFIED BINARY");
-//            System.out.println(Base64.getDecoder().decode(iv));
-
-            AuthenticationService.addAccount(getContext(), email, encryptedPair.first, encryptedPair.second);
-            displaySuccess();
-            return true;
-        } else {
-            Toast unsuccessful = Toast.makeText(getContext(), "Failed to create an account!", Toast.LENGTH_LONG);
-            unsuccessful.show();
-            return false;
-        }
+        BackendController.registerAccount(name, email, password, dob, postcode, new BackendController.BackendCallback() {
+            @Override
+            public void onBackendResult(boolean success, String message) {
+                if (success) {
+                    BackendController.loginAccount(email, password, new BackendController.BackendCallback() {
+                        @Override
+                        public void onBackendResult(boolean success, String message) {
+                            if (success) displaySuccess();
+                            else displayFailure();
+                        }
+                    });
+                } else {
+                    displayFailure();
+                }
+            }
+        });
     }
 
     private void displaySuccess() {
@@ -248,14 +289,23 @@ public class SignUpFragment extends Fragment {
                     public void onFinish() {
                         if (((AlertDialog) dialog).isShowing()) {
                             dialog.dismiss();
+                            Intent intent = new Intent(getContext(), ARActivity.class);
+                            startActivity(intent);
                         }
                     }
                 }.start();
             }
         });
         dialog.show();
-        Intent intent = new Intent(getContext(), ARActivity.class);
-        startActivity(intent);
+    }
+
+    private void displayFailure() {
+        Toast unsuccessful = Toast.makeText(getContext(), "Failed to create an account!", Toast.LENGTH_LONG);
+        unsuccessful.show();
+
+        // Change button text to default
+        Button signUpButton = getView().findViewById(R.id.signUpButton);
+        signUpButton.setText("Sign Up");
     }
 
     public class textChangedListener implements TextWatcher {
@@ -298,7 +348,9 @@ public class SignUpFragment extends Fragment {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            verifyPasswordsIdentical();
+            if (verifyPasswordsIdentical()) {
+                checkPasswordStrength();
+            }
         }
 
         @Override

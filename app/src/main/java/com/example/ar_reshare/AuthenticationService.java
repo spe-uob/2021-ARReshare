@@ -2,7 +2,6 @@ package com.example.ar_reshare;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -43,21 +42,17 @@ public class AuthenticationService extends Service {
     }
 
     // Given an encrypted account, decrypts, and sends a login request through the BackendClient to the API
-    public static boolean loginUser(Context context, Account account, BackendClient.BackendCallback callbackHandler) {
+    public static boolean loginUser(Context context, Account account, BackendController.BackendCallback callbackHandler) {
         AccountManager accountManager = AccountManager.get(context);
-        System.out.println(account.name);
+        System.out.println("Logged in to:" + account.name);
 
         String password = accountManager.getPassword(account);
         String iv = accountManager.getUserData(account, "iv");
-        System.out.println("RAW");
-        System.out.println(password);
-        System.out.println("DECRYPTED");
+
         byte[] passwordBytes = Base64.getDecoder().decode(password);
         byte[] ivBytes = Base64.getDecoder().decode(iv);
-        System.out.println(ivBytes);
-        System.out.println(Crypto.decrypt(passwordBytes, ivBytes));
 
-        BackendClient.loginAccount(account.name, Crypto.decrypt(passwordBytes, ivBytes), callbackHandler);
+        BackendController.loginAccount(account.name, Crypto.decrypt(passwordBytes, ivBytes), callbackHandler);
         return false;
     }
 

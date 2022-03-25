@@ -17,7 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class LoginFragment extends Fragment implements BackendClient.BackendCallback {
+public class LoginFragment extends Fragment implements BackendController.BackendCallback {
 
     public LoginFragment() {
         // Required empty public constructor
@@ -48,6 +48,10 @@ public class LoginFragment extends Fragment implements BackendClient.BackendCall
 
     // TODO: Send user login request to backend
     private void loginUser() {
+        // Signal to the user that login is happening
+        Button loginButton = getView().findViewById(R.id.loginButton);
+        loginButton.setText("Logging in...");
+
         System.out.println("Login pressed");
         EditText emailText = getView().findViewById(R.id.loginEmail);
         EditText passwordText = getView().findViewById(R.id.loginPassword);
@@ -56,7 +60,7 @@ public class LoginFragment extends Fragment implements BackendClient.BackendCall
         String password = passwordText.getText().toString();
 
         // Send a login request to backend
-        BackendClient.loginAccount(email, password, this);
+        BackendController.loginAccount(email, password, this);
     }
 
     private void displaySuccess() {
@@ -78,24 +82,28 @@ public class LoginFragment extends Fragment implements BackendClient.BackendCall
                     public void onFinish() {
                         if (((AlertDialog) dialog).isShowing()) {
                             dialog.dismiss();
+                            Intent intent = new Intent(getContext(), ARActivity.class);
+                            startActivity(intent);
                         }
                     }
                 }.start();
             }
         });
         dialog.show();
-        Intent intent = new Intent(getContext(), ARActivity.class);
-        startActivity(intent);
     }
 
     private void displayFailure() {
         Toast unsuccessful = Toast.makeText(getContext(), "Login failed! Incorrect email or password!", Toast.LENGTH_LONG);
         unsuccessful.show();
+
+        // Change button text to default
+        Button loginButton = getView().findViewById(R.id.loginButton);
+        loginButton.setText("Login");
     }
 
     @Override
-    public void onBackendResult(boolean result) {
-        if (result) {
+    public void onBackendResult(boolean success, String message) {
+        if (success) {
             System.out.println("Successful login");
 
             EditText emailText = getView().findViewById(R.id.loginEmail);

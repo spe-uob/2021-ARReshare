@@ -31,7 +31,6 @@ public class LoginSignupActivity extends AppCompatActivity {
         ViewPagerAdapter adapter = new ViewPagerAdapter(this);
         viewPager.setAdapter(adapter);
         setCurrentFragment(OPTION_FRAGMENT);
-        AuthenticationService.removeAccounts(getApplicationContext());
     }
 
     public void setCurrentFragment(int position) {

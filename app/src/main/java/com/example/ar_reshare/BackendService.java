@@ -11,7 +11,7 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Query;
 
-public interface BackendAPI {
+public interface BackendService {
 
     @Headers("Content-Type: application/json")
     @POST("account/login")
@@ -19,7 +19,7 @@ public interface BackendAPI {
 
     @Headers("Content-Type: application/json")
     @PUT("account/create")
-    Call<ResponseBody> registerAccount(@Body RequestBody data);
+    Call<ResponseBody> createAccount(@Body RequestBody data);
 
     @Headers("Content-Type: application/json")
     @PUT("token/regeneration")
