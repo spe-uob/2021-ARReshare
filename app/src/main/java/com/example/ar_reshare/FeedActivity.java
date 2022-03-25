@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -80,9 +82,16 @@ public class FeedActivity extends AppCompatActivity {
         getLocationPermission();
         getDeviceLocation();
 
+        Animation spinningAnim = new RotateAnimation(0.0f, 360.0f,
+                Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
+                0.5f);
+        spinningAnim.setRepeatCount(0);
+        spinningAnim.setDuration(500);
         ImageView refreshButton = findViewById(R.id.feedRefreshButton);
-        refreshButton.setOnClickListener(v -> refreshPage());
-
+        refreshButton.setOnClickListener(v -> {
+            refreshButton.startAnimation(spinningAnim);
+            recyclerView.scrollToPosition(0);
+        });
         ImageView filterButton = findViewById(R.id.feedFilterButton);
         setupFilterWindow(filterButton);
     }
@@ -152,9 +161,9 @@ public class FeedActivity extends AppCompatActivity {
         }
     }
 
-    // Refreshes page, ensures the animation overridden by finish does not play
+    // Filters page according to selected distance and categories
     @SuppressLint("NotifyDataSetChanged")
-    private void refreshPage() {
+    private void filterPage() {
         List<Product> allProducts = ExampleData.getProducts()
                 .subList(1, ExampleData.getProducts().size());
         List<Product> filteredList = allProducts.stream().filter(x -> {
@@ -173,7 +182,7 @@ public class FeedActivity extends AppCompatActivity {
     private void setupFilterWindow(ImageView filterButton) {
         filterButton.setOnClickListener(v -> {
             LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-            @SuppressLint("InflateParams") View filterWindow = inflater.inflate(R.layout.map_filter_popup, null);
+            @SuppressLint("InflateParams") View filterWindow = inflater.inflate(R.layout.filter_popup, null);
             int width = LinearLayout.LayoutParams.WRAP_CONTENT;
             int height = LinearLayout.LayoutParams.WRAP_CONTENT;
 
@@ -182,10 +191,10 @@ public class FeedActivity extends AppCompatActivity {
 
             popupWindow.setOnDismissListener(() -> cancelFilter(popupWindow));
 
-            Button cancelFilterButton = filterWindow.findViewById(R.id.mapFilterCancel);
+            Button cancelFilterButton = filterWindow.findViewById(R.id.filterCancel);
             cancelFilterButton.setOnClickListener(v1 -> cancelFilter(popupWindow));
 
-            Button confirmFilterButton = filterWindow.findViewById(R.id.mapFilterConfirm);
+            Button confirmFilterButton = filterWindow.findViewById(R.id.filterConfirm);
             confirmFilterButton.setOnClickListener(v12 -> confirmFilter(popupWindow));
 
             setupCategoryChipGroup(filterWindow);
@@ -199,7 +208,7 @@ public class FeedActivity extends AppCompatActivity {
         categoriesSelected = tempCategories;
         tempCategories = new HashSet<>(categoriesSelected);
         popupWindow.dismiss();
-        refreshPage();
+        filterPage();
     }
 
     // Cancel filter changes
@@ -211,7 +220,7 @@ public class FeedActivity extends AppCompatActivity {
 
     // Setup category filtering UI
     private void setupCategoryChipGroup(View filterWindow) {
-        ChipGroup filterCategories = filterWindow.findViewById(R.id.mapFilterCategoryChipGroup);
+        ChipGroup filterCategories = filterWindow.findViewById(R.id.filterCategoryChipGroup);
 
         List<Category> categories = Category.getCategories();
         for (Category category : categories) {
@@ -258,8 +267,8 @@ public class FeedActivity extends AppCompatActivity {
 
     // Setup distance filtering UI
     private void setupDistanceSeekbar(View filterWindow) {
-        SeekBar distanceBar = filterWindow.findViewById(R.id.mapDistanceBar);
-        TextView distanceAway = filterWindow.findViewById(R.id.mapDistanceText);
+        SeekBar distanceBar = filterWindow.findViewById(R.id.distanceBar);
+        TextView distanceAway = filterWindow.findViewById(R.id.distanceText);
         distanceBar.setProgress((maxDistanceRange - MIN_DISTANCE)/DISTANCE_UNIT);
         distanceAway.setText(MessageFormat.format("{0} metres away", maxDistanceRange));
         distanceBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {

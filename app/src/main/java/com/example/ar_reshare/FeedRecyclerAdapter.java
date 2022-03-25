@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.ViewHolder> {
 
@@ -24,10 +23,6 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
     private final List<Product> productList;
     public ArrayList<ViewHolder> cards = new ArrayList<>();
-
-    private int maxDistanceRange;
-    private Set<Category> categoriesSelected;
-    private boolean filterReady = false;
 
     private Location userLocation;
     private boolean locationReady = false;
@@ -48,9 +43,6 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // Assigns current product
         Product product = productList.get(position);
-
-        // Removes current product if not fit in criteria
-        // if (!(filterHelper(product))) return;
 
         // Add the product card to the list of product cards
         cards.add(holder);
@@ -102,38 +94,6 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         }
     }
 
-    /*public boolean filterHelper(Product product) {
-        if (filterReady) {
-            Category productCategory = product.getCategory();
-            Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(product.getLocation().latitude);
-            productLocation.setLongitude(product.getLocation().longitude);
-            float dist = userLocation.distanceTo(productLocation);
-            return (!(dist > maxDistanceRange)) && !categoriesSelected.contains(productCategory);
-        } else return true;
-    }
-
-    public void updateFilter(Location location, int maxDistance, Set<Category>catSelected) {
-        for (int i=0; i < cards.size(); i++) {
-            ViewHolder card = cards.get(i);
-            Product product = productList.get(i);
-            Category productCategory = product.getCategory();
-            Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(product.getLocation().latitude);
-            productLocation.setLongitude(product.getLocation().longitude);
-            float dist = location.distanceTo(productLocation);
-            if ((dist > maxDistance) || catSelected.contains(productCategory)) {
-                cards.remove(card);
-                productList.remove(product);
-            }
-        }
-
-        userLocation = location;
-        maxDistanceRange = maxDistance;
-        categoriesSelected = catSelected;
-        filterReady = true;
-    }
-*/
     // Grabs userLocation from FeedActivity and uses it to show distance to products created
     public void updateDistances(Location location) {
         // Update the location text of already created cards
