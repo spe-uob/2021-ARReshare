@@ -28,6 +28,10 @@
         <item>Used-Good</item>
         <item>Used-Acceptable</item>
     </string-array>
+    <array name="add_image_popup">
+        <item>Camera</item>
+        <item>Gallery</item>
+    </array>
 
     <string name="location">Location</string>
     <string name="calc_distance">Calculating distance</string>
