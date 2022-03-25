@@ -31,13 +31,13 @@
                 android:textSize="14dp"/>
 
             <SeekBar
-                android:id="@+id/mapDistanceBar"
+                android:id="@+id/distanceBar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
 
             <TextView
-                android:id="@+id/mapDistanceText"
+                android:id="@+id/distanceText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
@@ -59,7 +59,7 @@
                 android:textSize="14dp"/>
 
             <com.google.android.material.chip.ChipGroup
-                android:id="@+id/mapFilterCategoryChipGroup"
+                android:id="@+id/filterCategoryChipGroup"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -76,14 +76,14 @@
             android:gravity="center">
 
             <Button
-                android:id="@+id/mapFilterCancel"
+                android:id="@+id/filterCancel"
                 android:layout_width="132dp"
                 android:layout_height="40dp"
                 android:text="Cancel"
                 android:textSize="14dp"/>
 
             <Button
-                android:id="@+id/mapFilterConfirm"
+                android:id="@+id/filterConfirm"
                 android:layout_width="132dp"
                 android:layout_height="40dp"
                 android:text="Filter"

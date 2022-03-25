@@ -41,11 +41,11 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        // Add the product card to the list of product cards
-        cards.add(holder);
-
         // Assigns current product
         Product product = productList.get(position);
+
+        // Add the product card to the list of product cards
+        cards.add(holder);
 
         // Set values to various resources depending on the product
         productValueHelper(holder, product);

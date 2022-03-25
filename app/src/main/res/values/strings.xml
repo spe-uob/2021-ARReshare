@@ -32,11 +32,11 @@
         <item>Camera</item>
         <item>Gallery</item>
     </array>
-
     <string name="location">Location</string>
     <string name="calc_distance">Calculating distance</string>
     <string name="category">Category</string>
     <string name="location_pin">Location Pin</string>
-
-
+    <string name="add_product">Add Product</string>
+    <string name="refresh">Refresh</string>
+    <string name="filter">Filter</string>
 </resources>
