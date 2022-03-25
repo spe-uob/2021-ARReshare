@@ -9,8 +9,6 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SortedList;
-import androidx.recyclerview.widget.SortedListAdapterCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -33,16 +31,14 @@ import java.util.List;
 public class AddProduct extends AppCompatActivity implements addPhotoDialog.NoticeDialogListener{
 
     private ArrayList<Uri> uploadedImages = new ArrayList<>();
-    UploadImageAdapter adapter;
+    private UploadImageAdapter adapter;
     private final String CAMERA = "camera";
     private final String GALLERY = "gallery";
-    ActivityResultLauncher<Intent> cameraActivityResultLauncher;
-    ActivityResultLauncher<String> galleryActivityResultLauncher;
-    File storageDir;
-    Uri photoUri;
-    ArrayList<Uri> photoUris;
-    String currentPhotoPath;
-    File photoFile;
+    private ActivityResultLauncher<Intent> cameraActivityResultLauncher;
+    private ActivityResultLauncher<String> galleryActivityResultLauncher;
+    private File storageDir;
+    private Uri photoUri;
+    private File photoFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +55,6 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                     @Override
                     public void onActivityResult(ActivityResult result) {
                         if(result.getResultCode() == RESULT_OK){
-                            System.out.println("helloooo");
                             adapter.addItem(photoUri);
                         }else{
                             photoFile.delete();//delete the file if failed
@@ -78,7 +73,6 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         );
 
         storageDir = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        photoUris = new ArrayList<>(); // store all the pics uris
         confirmListener();
         returnListener();
     }
@@ -186,9 +180,6 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        currentPhotoPath = image.getAbsolutePath();
         return image;
     }
 
