@@ -50,7 +50,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         Product product = productList.get(position);
 
         // Removes current product if not fit in criteria
-        if (!(filterHelper(product))) return;
+        // if (!(filterHelper(product))) return;
 
         // Add the product card to the list of product cards
         cards.add(holder);
@@ -102,7 +102,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         }
     }
 
-    public boolean filterHelper(Product product) {
+    /*public boolean filterHelper(Product product) {
         if (filterReady) {
             Category productCategory = product.getCategory();
             Location productLocation = new Location("ManualProvider");
@@ -133,7 +133,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         categoriesSelected = catSelected;
         filterReady = true;
     }
-
+*/
     // Grabs userLocation from FeedActivity and uses it to show distance to products created
     public void updateDistances(Location location) {
         // Update the location text of already created cards
