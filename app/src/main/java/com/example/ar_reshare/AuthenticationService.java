@@ -7,8 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 
-import androidx.annotation.Nullable;
-
 import java.util.Base64;
 import java.util.Optional;
 
@@ -43,11 +41,11 @@ public class AuthenticationService extends Service {
         else return Optional.of(accounts[0]);
     }
 
-    // Given an encrypted account, decrypts, and sends a login request through the BackendService to the API
+    // Given an encrypted account, decrypts, and sends a login request through the BackendClient to the API
     public static boolean loginUser(Context context, Account account) {
-        // TODO: Send login request to backend and update key
         AccountManager accountManager = AccountManager.get(context);
         System.out.println(account.name);
+
         String password = accountManager.getPassword(account);
         String iv = accountManager.getUserData(account, "iv");
         System.out.println("RAW");
@@ -57,7 +55,10 @@ public class AuthenticationService extends Service {
         byte[] ivBytes = Base64.getDecoder().decode(iv);
         System.out.println(ivBytes);
         System.out.println(Crypto.decrypt(passwordBytes, ivBytes));
-        return true;
+
+        //TODO: Implement callback
+        //BackendClient.loginAccount(account.name, Crypto.decrypt(passwordBytes, ivBytes));
+        return false;
     }
 
     // Adds a new AR-Reshare account, given encrypted password, to the Account Manager

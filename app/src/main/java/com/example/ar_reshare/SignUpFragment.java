@@ -94,14 +94,14 @@ public class SignUpFragment extends Fragment {
 
     private void changeDateField(Date date) {
         EditText dobText = getView().findViewById(R.id.signUpDateOfBirth);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         dobText.setText(dateFormat.format(date));
         verifyDob();
     }
 
     // Verifies if the user meets the minimum age to register
     private boolean verifyDob() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         EditText dobText = getView().findViewById(R.id.signUpDateOfBirth);
         try {
             Date dob = dateFormat.parse(dobText.getText().toString());
@@ -197,25 +197,37 @@ public class SignUpFragment extends Fragment {
 
     // TODO: Send user registration to backend
     private boolean registerUser() {
-        boolean successful = true;
+        EditText firstNameText = getView().findViewById(R.id.signUpFirstName);
+        EditText lastNameText = getView().findViewById(R.id.signUpLastName);
+        EditText emailText = getView().findViewById(R.id.signUpEmail);
+        EditText passwordText = getView().findViewById(R.id.signUpPassword);
+        EditText dobText = getView().findViewById(R.id.signUpDateOfBirth);
+
+        String name = firstNameText.getText().toString() + " " + lastNameText.getText().toString();
+        String email = emailText.getText().toString();
+        String password = passwordText.getText().toString();
+        String dob = dobText.getText().toString();
+
+        boolean successful = BackendClient.registerAccount(name, email, password, dob);
+
         if (successful) {
-            EditText emailText = getView().findViewById(R.id.signUpEmail);
-            EditText passwordText = getView().findViewById(R.id.signUpPassword);
-            Pair<byte[], byte[]> encryptedPair = Crypto.encrypt(passwordText.getText().toString());
+            Pair<byte[], byte[]> encryptedPair = Crypto.encrypt(password);
 
-            System.out.println("ORIGINAL BINARY");
-            System.out.println(encryptedPair.second);
-            System.out.println("STRINGIFIED BINARY");
-            String password = Base64.getEncoder().encodeToString(encryptedPair.first);
-            String iv = Base64.getEncoder().encodeToString(encryptedPair.second);
-            System.out.println(iv);
-            System.out.println("DESTRINGIFIED BINARY");
-            System.out.println(Base64.getDecoder().decode(iv));
+//            System.out.println("ORIGINAL BINARY");
+//            System.out.println(encryptedPair.second);
+//            System.out.println("STRINGIFIED BINARY");
+//            String password = Base64.getEncoder().encodeToString(encryptedPair.first);
+//            String iv = Base64.getEncoder().encodeToString(encryptedPair.second);
+//            System.out.println(iv);
+//            System.out.println("DESTRINGIFIED BINARY");
+//            System.out.println(Base64.getDecoder().decode(iv));
 
-            LoginSignupActivity parent = (LoginSignupActivity) getActivity();
-            AuthenticationService.addAccount(getContext(), emailText.getText().toString(), encryptedPair.first, encryptedPair.second);
+            AuthenticationService.addAccount(getContext(), email, encryptedPair.first, encryptedPair.second);
+            displaySuccess();
             return true;
         } else {
+            Toast unsuccessful = Toast.makeText(getContext(), "Failed to create an account!", Toast.LENGTH_LONG);
+            unsuccessful.show();
             return false;
         }
     }

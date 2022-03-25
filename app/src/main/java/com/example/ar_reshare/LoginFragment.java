@@ -1,6 +1,5 @@
 package com.example.ar_reshare;
 
-import android.accounts.Account;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,14 +9,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.os.CountDownTimer;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
-import java.util.Optional;
-
-public class LoginFragment extends Fragment {
+public class LoginFragment extends Fragment implements BackendClient.BackendCallback {
 
     public LoginFragment() {
         // Required empty public constructor
@@ -47,37 +47,70 @@ public class LoginFragment extends Fragment {
     }
 
     // TODO: Send user login request to backend
-    private boolean loginUser() {
-        if (false) {
-            //AuthenticationService.addAccount(getContext(), )
+    private void loginUser() {
+        System.out.println("Login pressed");
+        EditText emailText = getView().findViewById(R.id.loginEmail);
+        EditText passwordText = getView().findViewById(R.id.loginPassword);
 
-            AlertDialog.Builder successful = new AlertDialog.Builder(getContext());
-            successful.setTitle("Login Successful!");
-            successful.setMessage("You have successfully logged in.");
-            AlertDialog dialog = successful.create();
-            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                @Override
-                public void onShow(DialogInterface dialog) {
-                    new CountDownTimer(3000, 100) {
-                        @Override
-                        public void onTick(long millisUntilFinished) {
-                        }
+        String email = emailText.getText().toString();
+        String password = passwordText.getText().toString();
 
-                        @Override
-                        public void onFinish() {
-                            if (((AlertDialog) dialog).isShowing()) {
-                                dialog.dismiss();
-                            }
+        // Send a login request to backend
+        BackendClient.loginAccount(email, password, this);
+    }
+
+    private void displaySuccess() {
+        // Show successful dialog
+        System.out.println("Display success");
+        AlertDialog.Builder successful = new AlertDialog.Builder(getContext());
+        successful.setTitle("Login Successful!");
+        successful.setMessage("You have successfully logged in.");
+        AlertDialog dialog = successful.create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                new CountDownTimer(3000, 100) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        if (((AlertDialog) dialog).isShowing()) {
+                            dialog.dismiss();
                         }
-                    }.start();
-                }
-            });
-            dialog.show();
-            Intent intent = new Intent(getContext(), ARActivity.class);
-            startActivity(intent);
-            return true;
+                    }
+                }.start();
+            }
+        });
+        dialog.show();
+        Intent intent = new Intent(getContext(), ARActivity.class);
+        startActivity(intent);
+    }
+
+    private void displayFailure() {
+        Toast unsuccessful = Toast.makeText(getContext(), "Login failed! Incorrect email or password!", Toast.LENGTH_LONG);
+        unsuccessful.show();
+    }
+
+    @Override
+    public void onBackendResult(boolean result) {
+        if (result) {
+            System.out.println("Successful login");
+
+            EditText emailText = getView().findViewById(R.id.loginEmail);
+            EditText passwordText = getView().findViewById(R.id.loginPassword);
+            String email = emailText.getText().toString();
+            String password = passwordText.getText().toString();
+
+            // Add this AR-Reshare account to account manager
+            Pair<byte[], byte[]> encryptedPair = Crypto.encrypt(password);
+            AuthenticationService.addAccount(getContext(), email, encryptedPair.first, encryptedPair.second);
+
+            displaySuccess();
         } else {
+            System.out.println("Failure");
+            displayFailure();
         }
-        return false;
     }
 }

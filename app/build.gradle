@@ -65,4 +65,12 @@ dependencies {
 
     // Waveform
     implementation 'de.javagl:obj:0.3.0'
+
+    // Security and Cryptography
+    implementation "androidx.security:security-crypto:1.0.0"
+
+    // Retrofit API Communication Library
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.7.1'
+    implementation 'com.google.code.gson:gson:2.9.0'
 }
