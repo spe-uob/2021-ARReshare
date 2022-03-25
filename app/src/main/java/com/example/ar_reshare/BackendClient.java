@@ -38,10 +38,19 @@ public class BackendClient {
         Optional<Account> account = AuthenticationService.isLoggedIn(context);
         if (account.isPresent()) {
             // Send login request to get JWT
-            AuthenticationService.loginUser(context, account.get());
+            AuthenticationService.loginUser(context, account.get(), new BackendCallback() {
+                @Override
+                public void onBackendResult(boolean result) {
+                    if (!result) {
+                        // Open the login/signup screen
+                        Intent intent = new Intent(context, LoginSignupActivity.class);
+                        context.startActivity(intent);
+                    }
+                }
+            });
         } else {
             // Open the login/signup screen
-            Intent intent = new Intent(context, ARActivity.class);
+            Intent intent = new Intent(context, LoginSignupActivity.class);
             context.startActivity(intent);
         }
     }

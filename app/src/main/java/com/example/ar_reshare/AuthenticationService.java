@@ -2,6 +2,7 @@ package com.example.ar_reshare;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -42,7 +43,7 @@ public class AuthenticationService extends Service {
     }
 
     // Given an encrypted account, decrypts, and sends a login request through the BackendClient to the API
-    public static boolean loginUser(Context context, Account account) {
+    public static boolean loginUser(Context context, Account account, BackendClient.BackendCallback callbackHandler) {
         AccountManager accountManager = AccountManager.get(context);
         System.out.println(account.name);
 
@@ -56,8 +57,7 @@ public class AuthenticationService extends Service {
         System.out.println(ivBytes);
         System.out.println(Crypto.decrypt(passwordBytes, ivBytes));
 
-        //TODO: Implement callback
-        //BackendClient.loginAccount(account.name, Crypto.decrypt(passwordBytes, ivBytes));
+        BackendClient.loginAccount(account.name, Crypto.decrypt(passwordBytes, ivBytes), callbackHandler);
         return false;
     }
 
