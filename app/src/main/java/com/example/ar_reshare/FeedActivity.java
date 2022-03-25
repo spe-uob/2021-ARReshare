@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -82,6 +83,17 @@ public class FeedActivity extends AppCompatActivity {
         getLocationPermission();
         getDeviceLocation();
 
+        // Link to Add Product page
+        ImageView addProductButton = findViewById(R.id.feedAddProduct);
+        addProductButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FeedActivity.this, AddProduct.class);
+                startActivity(intent);
+            }
+        });
+
+        // Create rotating animation for refresh button and scroll to top on refresh
         Animation spinningAnim = new RotateAnimation(0.0f, 360.0f,
                 Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
                 0.5f);
@@ -92,6 +104,8 @@ public class FeedActivity extends AppCompatActivity {
             refreshButton.startAnimation(spinningAnim);
             recyclerView.scrollToPosition(0);
         });
+
+        // Filter according to user preferences
         ImageView filterButton = findViewById(R.id.feedFilterButton);
         setupFilterWindow(filterButton);
     }
