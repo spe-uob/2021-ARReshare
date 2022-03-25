@@ -27,6 +27,14 @@
         <activity
             android:name=".ARActivity"
             android:exported="true" />
+
+        <activity
+            android:name=".AddProduct"
+            android:exported="true" />
+
+        <activity
+            android:name= ".ModifyProduct"/>
+
         <activity
             android:name=".SplashActivity"
             android:exported="true">
@@ -68,6 +76,7 @@
             android:exported="true"
             android:screenOrientation="portrait" />
         <activity
+
             android:name=".FallbackActivity"
             android:exported="true" />
         <activity
