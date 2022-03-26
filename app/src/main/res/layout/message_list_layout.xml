@@ -45,14 +45,17 @@
             android:minHeight="48dp"
             android:focusableInTouchMode="true"/>
 
-        <Button
+        <ImageButton
             android:id="@+id/button_send"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="bottom"
-            android:backgroundTint="#673AB7"
+            android:backgroundTint="#009688"
+            android:background="@drawable/image_circle"
+            android:layout_marginRight="5dp"
             android:clickable="true"
             android:gravity="center"
+            android:src="@drawable/fly_messager_send_communication_email_icon"
             android:text="SEND"
             android:textSize="14dp" />
     </LinearLayout>

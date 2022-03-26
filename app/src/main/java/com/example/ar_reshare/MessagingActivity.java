@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import java.text.SimpleDateFormat;
@@ -26,7 +27,7 @@ public class MessagingActivity extends AppCompatActivity{
 
     MessageListAdapter messageListAdapter;
     RecyclerView recyclerView;
-    Button sendButton;
+    ImageButton sendButton;
     EditText chatTextView;
     List<Message> mMessageList = new ArrayList<>();
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
@@ -70,7 +71,7 @@ public class MessagingActivity extends AppCompatActivity{
             }
         }
 
-        sendButton = (Button) findViewById(R.id.button_send);
+        sendButton = (ImageButton) findViewById(R.id.button_send);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
