@@ -143,6 +143,10 @@ public class Product implements Parcelable {
         this.productMedia = productMedia;
     }
 
+    public List<Integer> getImages() {
+        return new ArrayList<Integer>();
+    }
+
     //implementation of Parcelable
     @Override
     public int describeContents() {

@@ -40,8 +40,8 @@ import java.util.stream.Collectors;
 public class FeedActivity extends AppCompatActivity {
 
     // Array to initialise products
-    List<Product> productList =
-            ExampleData.getProducts().subList(1, ExampleData.getProducts().size());
+//    List<Product> productList =
+//            ExampleData.getProducts().subList(1, ExampleData.getProducts().size());
 
     // Location related attributes
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -72,9 +72,21 @@ public class FeedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
 
+        BackendController.searchListings(0, 100, new BackendController.BackendSearchResultCallback() {
+            @Override
+            public void onBackendSearchResult(boolean success, List<Product> searchResults) {
+                if (success) {
+                    Product product = searchResults.get(0);
+                    System.out.println(product.getId());
+                    System.out.println(product.getName());
+                    System.out.println(product.getDescription());
+                }
+            }
+        });
+
         // Allows different products to be displayed as individual cards
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        feedRecyclerAdapter = new FeedRecyclerAdapter(productList);
+        //feedRecyclerAdapter = new FeedRecyclerAdapter(productList);
         recyclerView.setAdapter(feedRecyclerAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -84,11 +96,11 @@ public class FeedActivity extends AppCompatActivity {
         getDeviceLocation();
 
         // Link to Add Product page
-        ImageView addProductButton = findViewById(R.id.feedAddProduct);
-        addProductButton.setOnClickListener(v -> {
-            Intent intent = new Intent(FeedActivity.this, AddProduct.class);
-            startActivity(intent);
-        });
+//        ImageView addProductButton = findViewById(R.id.feedAddProduct);
+//        addProductButton.setOnClickListener(v -> {
+//            Intent intent = new Intent(FeedActivity.this, AddProduct.class);
+//            startActivity(intent);
+//        });
 
         // Create rotating animation for refresh button and scroll to top on refresh
         Animation spinningAnim = new RotateAnimation(0.0f, 360.0f,
@@ -102,9 +114,9 @@ public class FeedActivity extends AppCompatActivity {
             recyclerView.scrollToPosition(0);
         });
 
-        // Filter according to user preferences
-        ImageView filterButton = findViewById(R.id.feedFilterButton);
-        setupFilterWindow(filterButton);
+//        // Filter according to user preferences
+//        ImageView filterButton = findViewById(R.id.feedFilterButton);
+//        setupFilterWindow(filterButton);
     }
 
     @Override
@@ -162,7 +174,7 @@ public class FeedActivity extends AppCompatActivity {
 
                                 // Logic to handle location object
                                 userLocation = location;
-                                feedRecyclerAdapter.updateDistances(location);
+                                //feedRecyclerAdapter.updateDistances(location);
                             }
                         });
             }
@@ -173,21 +185,21 @@ public class FeedActivity extends AppCompatActivity {
     }
 
     // Filters page according to selected distance and categories
-    @SuppressLint("NotifyDataSetChanged")
-    private void filterPage() {
-        List<Product> allProducts = ExampleData.getProducts()
-                .subList(1, ExampleData.getProducts().size());
-        List<Product> filteredList = allProducts.stream().filter(x -> {
-            Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(x.getLocation().latitude);
-            productLocation.setLongitude(x.getLocation().longitude);
-            float dist = userLocation.distanceTo(productLocation);
-            return dist <= maxDistanceRange && categoriesSelected.contains(x.getCategory());
-        }).collect(Collectors.toList());
-        productList.clear();
-        productList.addAll(filteredList);
-        feedRecyclerAdapter.notifyDataSetChanged();
-    }
+//    @SuppressLint("NotifyDataSetChanged")
+//    private void filterPage() {
+//        List<Product> allProducts = ExampleData.getProducts()
+//                .subList(1, ExampleData.getProducts().size());
+//        List<Product> filteredList = allProducts.stream().filter(x -> {
+//            Location productLocation = new Location("ManualProvider");
+//            productLocation.setLatitude(x.getLocation().latitude);
+//            productLocation.setLongitude(x.getLocation().longitude);
+//            float dist = userLocation.distanceTo(productLocation);
+//            return dist <= maxDistanceRange && categoriesSelected.contains(x.getCategory());
+//        }).collect(Collectors.toList());
+//        productList.clear();
+//        productList.addAll(filteredList);
+//        feedRecyclerAdapter.notifyDataSetChanged();
+//    }
 
     // Setup filter results window
     private void setupFilterWindow(ImageView filterButton) {
@@ -219,7 +231,7 @@ public class FeedActivity extends AppCompatActivity {
         categoriesSelected = tempCategories;
         tempCategories = new HashSet<>(categoriesSelected);
         popupWindow.dismiss();
-        filterPage();
+        // filterPage();
     }
 
     // Cancel filter changes

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 
 
+import com.google.gson.internal.GsonBuildConfig;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +17,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class BackendController {
     // Possible Status Codes
@@ -184,6 +187,7 @@ public class BackendController {
     public static boolean searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         BackendService service = retrofit.create(BackendService.class);

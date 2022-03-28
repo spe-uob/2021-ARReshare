@@ -53,7 +53,7 @@ public class ProfileActivity extends AppCompatActivity {
                 currentProduct = product;
             }
         }
-        productImage.setImageResource(currentProduct.getImages().get(0));
+        //productImage.setImageResource(currentProduct.getImages().get(0));
 
         Button messageButton = (Button) findViewById(R.id.btM);
         messageButton.setOnClickListener(new View.OnClickListener() {
