@@ -41,7 +41,7 @@
             android:id="@+id/avatar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change Avatar">
+            android:text="Change Profile Picture">
 
         </Button>
 
@@ -57,7 +57,7 @@
             android:id="@+id/birthday"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change Date of Birthday">
+            android:text="Change Date of Birth">
 
         </Button>
 
@@ -81,7 +81,7 @@
             android:id="@+id/homeaddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change Home Address">
+            android:text="Change Postcode">
 
         </Button>
 

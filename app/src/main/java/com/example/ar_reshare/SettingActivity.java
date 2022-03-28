@@ -133,7 +133,7 @@ public class SettingActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         String a = pwd.getText().toString().trim();
 
-                        Toast.makeText(v.getContext(), "Your password have been changed", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(v.getContext(), "Your password has been changed", Toast.LENGTH_SHORT).show();
                     }
                 });
                 dialog4.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -188,20 +188,14 @@ public class SettingActivity extends AppCompatActivity {
                 View view = LayoutInflater.from(v.getContext()).inflate(R.layout.homeaddress_dialog, null);
                 dialog6.setView(view);
 
-               final EditText country = (EditText) view.findViewById(R.id.setting_Country);
-               final EditText city = (EditText) view.findViewById(R.id.setting_City);
-               final EditText street = (EditText) view.findViewById(R.id.setting_Street);
                final EditText postcode = (EditText) view.findViewById(R.id.setting_Postcode);
 
                dialog6.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                    @Override
                    public void onClick(DialogInterface dialog, int which) {
-                       String a = country.getText().toString().trim();
-                       String b = city.getText().toString().trim();
-                       String c = street.getText().toString().trim();
-                       String d = postcode.getText().toString().trim();
+                       String a = postcode.getText().toString().trim();
 
-                       Toast.makeText(v.getContext(), "New Home Address:" + a + "," + b + "," + c + "," + d, Toast.LENGTH_SHORT).show();
+                       Toast.makeText(v.getContext(), "New Postcode:" + a, Toast.LENGTH_SHORT).show();
                    }
                });
                dialog6.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
