@@ -77,11 +77,21 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+        Button profileaddButton = (Button) findViewById(R.id.profileadd);
+        profileaddButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, AddProduct.class);
+                startActivity(intent);
+            }
+        });
+
         if(contributor.getName() == "John"){
             profilePicId = contributor.getProfileIcon();
         } else {
             messageButton.setVisibility(View.GONE);
             settingButton.setVisibility(View.GONE);
+            profileaddButton.setVisibility(View.GONE);
         }
 
         ImageButton backButton = (ImageButton) findViewById(R.id.back);

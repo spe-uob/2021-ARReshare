@@ -21,6 +21,7 @@
         </ImageButton>
 
         <TextView
+
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="Setting"
@@ -76,21 +77,11 @@
 
         </Button>
 
-
-
         <Button
-            android:id="@+id/home"
+            android:id="@+id/homeaddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Change Home Address">
-
-        </Button>
-
-        <Button
-            android:id="@+id/country"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Change Country/Region">
 
         </Button>
 

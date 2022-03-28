@@ -17,7 +17,7 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="10dp"
             android:background="@color/black"
-            android:src="@drawable/gobackqrrow">
+            android:src="@drawable/gobackarrow">
         </ImageButton>
 
         <TextView
@@ -82,7 +82,6 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
-                                android:text="Welcome to my Mainpage!"
                                 android:textColor="@color/black"
                                 android:gravity="center_horizontal"
                                 android:layout_gravity="center_vertical">
@@ -95,13 +94,29 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:orientation="vertical">
-                        <TextView
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Shared"
+                            android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Shared Products"
                             android:textColor="@color/black"
-                            android:textSize="30sp">
+                            android:textSize="25sp"
+                            android:layout_marginStart="5dp">
                         </TextView>
+
+                            <Button
+                                android:id="@+id/profileadd"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="right"
+                                android:text="+ADD PRODUCT"
+                                android:layout_marginStart="30dp">
+
+                            </Button>
+                        </LinearLayout>
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -120,7 +135,7 @@
                             </ImageButton>
 
                             <ImageButton
-                                android:id="@+id/gain2"
+                                android:id="@+id/shared2"
                                 android:layout_width="40dp"
                                 android:layout_height="120dp"
                                 android:layout_marginLeft="5dp"
@@ -131,7 +146,7 @@
                             </ImageButton>
 
                             <ImageButton
-                                android:id="@+id/gain3"
+                                android:id="@+id/shared3"
                                 android:layout_width="40dp"
                                 android:layout_height="120dp"
                                 android:layout_weight="1"
@@ -146,9 +161,10 @@
                             <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Gained"
+                            android:text="Gained Products"
                             android:textColor="@color/black"
-                            android:textSize="30sp">
+                            android:textSize="25sp"
+                                android:layout_marginStart="5dp">
                         </TextView>
                         </LinearLayout>
 
@@ -170,7 +186,7 @@
                             </ImageButton>
 
                             <ImageButton
-                                android:id="@+id/shared2"
+                                android:id="@+id/gain2"
                                 android:layout_width="40dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
@@ -181,7 +197,7 @@
                             </ImageButton>
 
                             <ImageButton
-                                android:id="@+id/shared3"
+                                android:id="@+id/gain3"
                                 android:layout_width="40dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
@@ -196,9 +212,10 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Saved"
+                                android:text="Saved Products"
                                 android:textColor="@color/black"
-                                android:textSize="30sp">
+                                android:textSize="25sp"
+                                android:layout_marginStart="5dp">
                             </TextView>
                         </LinearLayout>
 

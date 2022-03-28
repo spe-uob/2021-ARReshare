@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
@@ -20,6 +21,15 @@ public class SettingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
+
+        ImageButton backButton = (ImageButton) findViewById(R.id.back);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            }
+        });
 
         Button avatarButton = (Button) findViewById(R.id.avatar);
         avatarButton.setOnClickListener(new View.OnClickListener() {
@@ -167,29 +177,49 @@ public class SettingActivity extends AppCompatActivity {
             }
         });
 
+       Button homeaddressButton = (Button) findViewById(R.id.homeaddress);
+       homeaddressButton.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+                AlertDialog.Builder dialog6 = new AlertDialog.Builder(v.getContext());
+                dialog6.setIcon(R.drawable.setting_home);
+                dialog6.setTitle("Please insert your new home address");
+
+                View view = LayoutInflater.from(v.getContext()).inflate(R.layout.homeaddress_dialog, null);
+                dialog6.setView(view);
+
+               final EditText Country = (EditText) view.findViewById(R.id.setting_Country);
+               final EditText City = (EditText) view.findViewById(R.id.setting_City);
+               final EditText Street = (EditText) view.findViewById(R.id.setting_Street);
+               final EditText Postcode = (EditText) view.findViewById(R.id.setting_Postcode);
+
+               dialog6.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                   @Override
+                   public void onClick(DialogInterface dialog, int which) {
+                       String a = Country.getText().toString().trim();
+                       String b = City.getText().toString().trim();
+                       String c = Street.getText().toString().trim();
+                       String d = Postcode.getText().toString().trim();
+
+                       Toast.makeText(v.getContext(), "New Home Address:" + a + "," + b + "," + c + "," + d, Toast.LENGTH_SHORT).show();
+                   }
+               });
+               dialog6.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                   @Override
+                   public void onClick(DialogInterface dialog, int which) {
+
+                   }
+               });
+                dialog6.show();
+           }
+       });
+
         Button logoutButton = (Button) findViewById(R.id.logout);
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder dialog6 = new AlertDialog.Builder(v.getContext());
-                dialog6.setTitle("Warning").setMessage("Are you sure you want to Log out");
-                dialog6.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                });
-                dialog6.setNegativeButton("No", null);
-                dialog6.show() ;
-            }
-        });
-
-        Button deleteButton = (Button) findViewById(R.id.detele);
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
                 AlertDialog.Builder dialog7 = new AlertDialog.Builder(v.getContext());
-                dialog7.setTitle("Warning").setMessage("Are you sure you want to Delete your Account");
+                dialog7.setTitle("Warning").setMessage("Are you sure you want to Log out");
                 dialog7.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -197,7 +227,24 @@ public class SettingActivity extends AppCompatActivity {
                     }
                 });
                 dialog7.setNegativeButton("No", null);
-                dialog7.show();
+                dialog7.show() ;
+            }
+        });
+
+        Button deleteButton = (Button) findViewById(R.id.detele);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder dialog8 = new AlertDialog.Builder(v.getContext());
+                dialog8.setTitle("Warning").setMessage("Are you sure you want to Delete your Account");
+                dialog8.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                dialog8.setNegativeButton("No", null);
+                dialog8.show();
             }
         });
     }
