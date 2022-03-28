@@ -1,5 +1,7 @@
 package com.example.ar_reshare;
 
+import java.util.List;
+
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -20,6 +22,11 @@ public interface BackendService {
     @Headers("Content-Type: application/json")
     @PUT("account/create")
     Call<ResponseBody> createAccount(@Body RequestBody data);
+
+    @Headers("Content-Type: application/json")
+    @GET("listings/search")
+    Call<Product.SearchResults> searchListings(@Query("maxResults") int maxResults,
+                                               @Query("startResults") int startResults);
 
     @Headers("Content-Type: application/json")
     @PUT("token/regeneration")

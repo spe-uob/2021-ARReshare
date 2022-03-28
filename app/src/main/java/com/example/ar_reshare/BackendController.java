@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import okhttp3.MediaType;
@@ -36,6 +37,11 @@ public class BackendController {
     // Interface for callback handlers to receive response from the request
     public interface BackendCallback {
         void onBackendResult(boolean success, String message);
+    }
+
+    // Interface for callback handlers to receive response from the request
+    public interface BackendSearchResultCallback {
+        void onBackendSearchResult(boolean success, List<Product> searchResults);
     }
 
     private static void initialise() {
@@ -174,4 +180,38 @@ public class BackendController {
         }
         return false;
     }
+
+    public static boolean searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
+
+        try {
+            call.enqueue(new Callback<Product.SearchResults>() {
+                @Override
+                public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendSearchResult(true, response.body().getSearchedProducts());
+                    } else {
+                        callback.onBackendSearchResult(false, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendSearchResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+        return false;
+    }
+
 }
