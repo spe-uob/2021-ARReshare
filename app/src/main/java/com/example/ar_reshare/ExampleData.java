@@ -19,7 +19,7 @@ public class ExampleData {
 
         User user0 = new User("John","", 0);
         users.add(user0);
-        user0.setBio("Hellllo");
+        user0.setBio("Hellllo, Welcome to my page!");
         products.add(new Product("Fancy Cup", "This is a really nice fancy cup. Feel free to message me to arrange a pickup.", user0, Category.OTHER,51.45120306024447, -2.5869936269149303));
         user0.setProfileIcon(R.drawable.jon);
         products.get(0).addImages(R.drawable.cup);

@@ -58,19 +58,19 @@ public class SettingActivity extends AppCompatActivity {
                 View view = LayoutInflater.from(v.getContext()).inflate(R.layout.fullname_dialog, null);
                 dialog2.setView(view);
 
-                final EditText Firstname = (EditText) view.findViewById(R.id.Firstname);
-                final EditText Lastname = (EditText) view.findViewById(R.id.Lastname);
+                final EditText firstName = (EditText) view.findViewById(R.id.Firstname);
+                final EditText lastName = (EditText) view.findViewById(R.id.Lastname);
 
-                dialog2.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                dialog2.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String a = Firstname.getText().toString().trim();
-                        String b = Lastname.getText().toString().trim();
+                        String a = firstName.getText().toString().trim();
+                        String b = lastName.getText().toString().trim();
 
                         Toast.makeText(v.getContext(), "New name:" + a +"_"+ b, Toast.LENGTH_SHORT).show();
                     }
                 });
-                dialog2.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                dialog2.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -88,24 +88,24 @@ public class SettingActivity extends AppCompatActivity {
                 dialog3.setIcon(R.drawable.settings_birthday);
                 dialog3.setTitle("Please insert your new birthday");
 
-                View view = LayoutInflater.from(v.getContext()).inflate(R.layout.brithday_dialog, null);
+                View view = LayoutInflater.from(v.getContext()).inflate(R.layout.birthday_dialog, null);
                 dialog3.setView(view);
 
-                final EditText Year = (EditText) view.findViewById(R.id.Year);
-                final EditText Month = (EditText) view.findViewById(R.id.Month);
-                final EditText Day = (EditText) view.findViewById(R.id.Day);
+                final EditText year = (EditText) view.findViewById(R.id.Year);
+                final EditText month = (EditText) view.findViewById(R.id.Month);
+                final EditText day = (EditText) view.findViewById(R.id.Day);
 
-                dialog3.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                dialog3.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String a = Year.getText().toString().trim();
-                        String b = Month.getText().toString().trim();
-                        String c = Day.getText().toString().trim();
+                        String a = year.getText().toString().trim();
+                        String b = month.getText().toString().trim();
+                        String c = day.getText().toString().trim();
 
                         Toast.makeText(v.getContext(), "New Birthday:" + a +"_"+ b + "_" + c, Toast.LENGTH_SHORT).show();
                     }
                 });
-                dialog3.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                dialog3.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -128,15 +128,15 @@ public class SettingActivity extends AppCompatActivity {
 
                 final EditText pwd = (EditText) view.findViewById(R.id.pwd);
 
-                dialog4.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                dialog4.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String a = pwd.getText().toString().trim();
 
-                        Toast.makeText(v.getContext(), "New password:" + a, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(v.getContext(), "Your password have been changed", Toast.LENGTH_SHORT).show();
                     }
                 });
-                dialog4.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                dialog4.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -159,7 +159,7 @@ public class SettingActivity extends AppCompatActivity {
 
                 final EditText email = (EditText) view.findViewById(R.id.email);
 
-                dialog5.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                dialog5.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String a = email.getText().toString().trim();
@@ -167,7 +167,7 @@ public class SettingActivity extends AppCompatActivity {
                         Toast.makeText(v.getContext(), "New Email Address:" + a, Toast.LENGTH_SHORT).show();
                     }
                 });
-                dialog5.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                dialog5.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -188,23 +188,23 @@ public class SettingActivity extends AppCompatActivity {
                 View view = LayoutInflater.from(v.getContext()).inflate(R.layout.homeaddress_dialog, null);
                 dialog6.setView(view);
 
-               final EditText Country = (EditText) view.findViewById(R.id.setting_Country);
-               final EditText City = (EditText) view.findViewById(R.id.setting_City);
-               final EditText Street = (EditText) view.findViewById(R.id.setting_Street);
-               final EditText Postcode = (EditText) view.findViewById(R.id.setting_Postcode);
+               final EditText country = (EditText) view.findViewById(R.id.setting_Country);
+               final EditText city = (EditText) view.findViewById(R.id.setting_City);
+               final EditText street = (EditText) view.findViewById(R.id.setting_Street);
+               final EditText postcode = (EditText) view.findViewById(R.id.setting_Postcode);
 
-               dialog6.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+               dialog6.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                    @Override
                    public void onClick(DialogInterface dialog, int which) {
-                       String a = Country.getText().toString().trim();
-                       String b = City.getText().toString().trim();
-                       String c = Street.getText().toString().trim();
-                       String d = Postcode.getText().toString().trim();
+                       String a = country.getText().toString().trim();
+                       String b = city.getText().toString().trim();
+                       String c = street.getText().toString().trim();
+                       String d = postcode.getText().toString().trim();
 
                        Toast.makeText(v.getContext(), "New Home Address:" + a + "," + b + "," + c + "," + d, Toast.LENGTH_SHORT).show();
                    }
                });
-               dialog6.setNegativeButton("No", new DialogInterface.OnClickListener() {
+               dialog6.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                    @Override
                    public void onClick(DialogInterface dialog, int which) {
 
@@ -220,13 +220,13 @@ public class SettingActivity extends AppCompatActivity {
             public void onClick(View v) {
                 AlertDialog.Builder dialog7 = new AlertDialog.Builder(v.getContext());
                 dialog7.setTitle("Warning").setMessage("Are you sure you want to Log out");
-                dialog7.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                dialog7.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
                     }
                 });
-                dialog7.setNegativeButton("No", null);
+                dialog7.setNegativeButton("Cancel", null);
                 dialog7.show() ;
             }
         });
@@ -237,13 +237,13 @@ public class SettingActivity extends AppCompatActivity {
             public void onClick(View v) {
                 AlertDialog.Builder dialog8 = new AlertDialog.Builder(v.getContext());
                 dialog8.setTitle("Warning").setMessage("Are you sure you want to Delete your Account");
-                dialog8.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                dialog8.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
                     }
                 });
-                dialog8.setNegativeButton("No", null);
+                dialog8.setNegativeButton("Cancel", null);
                 dialog8.show();
             }
         });
