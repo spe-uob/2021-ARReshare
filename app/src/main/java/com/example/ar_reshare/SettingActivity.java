@@ -183,7 +183,7 @@ public class SettingActivity extends AppCompatActivity {
            public void onClick(View v) {
                 AlertDialog.Builder dialog6 = new AlertDialog.Builder(v.getContext());
                 dialog6.setIcon(R.drawable.setting_home);
-                dialog6.setTitle("Please insert your new home address");
+                dialog6.setTitle("Please insert your new Postcode");
 
                 View view = LayoutInflater.from(v.getContext()).inflate(R.layout.homeaddress_dialog, null);
                 dialog6.setView(view);
