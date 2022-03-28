@@ -73,9 +73,9 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     }
 
     public void productValueHelper(ViewHolder holder, Product product) {
-        holder.profileIcon.setImageResource(product.getContributor().getProfileIcon());
-        holder.categoryIcon.setImageResource(product.getCategory().getCategoryIcon());
-        holder.contributor.setText(product.getContributor().getName());
+//        holder.profileIcon.setImageResource(product.getContributor().getProfileIcon());
+//        holder.categoryIcon.setImageResource(product.getCategory().getCategoryIcon());
+//        holder.contributor.setText(product.getContributor().getName());
         //holder.productImage.setImageResource(product.getImages().get(0));
         holder.productTitle.setText(product.getName());
         holder.productDescription.setText(product.getDescription());
