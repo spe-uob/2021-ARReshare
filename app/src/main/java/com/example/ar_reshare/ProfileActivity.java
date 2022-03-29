@@ -55,6 +55,15 @@ public class ProfileActivity extends AppCompatActivity {
         }
         productImage.setImageResource(currentProduct.getImages().get(0));
 
+        Button settingButton = (Button) findViewById(R.id.btS);
+        settingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, SettingActivity.class);
+                startActivity(intent);
+            }
+        });
+
         Button messageButton = (Button) findViewById(R.id.btM);
         messageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,6 +76,23 @@ public class ProfileActivity extends AppCompatActivity {
                 v.getContext().startActivity(intent);
             }
         });
+
+        Button profileaddButton = (Button) findViewById(R.id.profileadd);
+        profileaddButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, AddProduct.class);
+                startActivity(intent);
+            }
+        });
+
+        if(contributor.getName() == "John"){
+            profilePicId = contributor.getProfileIcon();
+        } else {
+            messageButton.setVisibility(View.GONE);
+            settingButton.setVisibility(View.GONE);
+            profileaddButton.setVisibility(View.GONE);
+        }
 
         ImageButton backButton = (ImageButton) findViewById(R.id.back);
         backButton.setOnClickListener(new View.OnClickListener() {
