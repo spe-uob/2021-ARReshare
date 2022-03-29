@@ -3,14 +3,10 @@ package com.example.ar_reshare;
 import android.accounts.Account;
 import android.content.Context;
 import android.content.Intent;
-
-
-import com.google.gson.JsonObject;
-import com.google.protobuf.Enum;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.gson.internal.GsonBuildConfig;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +19,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class BackendController {
     // Possible Status Codes
@@ -47,6 +44,11 @@ public class BackendController {
     // Interface for callback handlers to receive response from the request
     public interface BackendCallback {
         void onBackendResult(boolean success, String message);
+    }
+
+    // Interface for callback handlers to receive response from the request
+    public interface BackendSearchResultCallback {
+        void onBackendSearchResult(boolean success, List<Product> searchResults);
     }
 
     private static void initialise() {
@@ -186,31 +188,37 @@ public class BackendController {
         return false;
     }
 
+
     public static boolean addProduct(String title, String description, String country, String region, String postcode, Integer categoryID, String condition, List<String> media, BackendCallback callback) throws JSONException {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .build();
 
-        JSONObject json = new JSONObject();
-        json.put("title", title);
-        json.put("description", description);
-
-        JSONObject location = new JSONObject();
-        location.put("country", country);
-        location.put("region", region);
-        location.put("postcode", postcode);
-        json.put("location", location);
-        json.put("categoryID", categoryID);
-        json.put("condition", condition);
-        JSONArray pics = new JSONArray();
-        for (String pic : media) {
-            pics.put(pic);
-        }
-        json.put("media",pics);
-        String bodyString = json.toString();
+//        JSONObject json = new JSONObject();
+//        json.put("title", title);
+//        json.put("description", description);
+//
+//        JSONObject location = new JSONObject();
+//        location.put("country", country);
+//        location.put("region", region);
+//        location.put("postcode", postcode);
+//        json.put("location", location);
+//        json.put("categoryID", categoryID);
+//        json.put("condition", condition);
+//        JSONArray pics = new JSONArray();
+//        for (String pic : media) {
+//            pics.put(pic);
+//        }
+//
+//        json.put("media",pics);
+//        String bodyString = json.toString();
+        String bodyString =
+                String.format("{\n  \"title\": \"string1\",\n  \"description\": \"string\",\n  \"location\": {\n    \"country\": \"UK\",\n    \"region\": \"Clifton\",\n    \"postcode\": \"BS12HF\"\n  },\n  \"categoryID\": 1,\n  \"condition\": \"new\",\n  \"media\": [\n    \n  ]\n}");
+        System.out.println(bodyString);
+        System.out.println(JWT);
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
         BackendService service = retrofit.create(BackendService.class);
-        Call<ResponseBody> call = service.addProduct(body);
+        Call<ResponseBody> call = service.addProduct(JWT, body);
 
 
         try {
@@ -244,4 +252,37 @@ public class BackendController {
         return false;
     }
 
+    public static boolean searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
+
+        try {
+            call.enqueue(new Callback<Product.SearchResults>() {
+                @Override
+                public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendSearchResult(true, response.body().getSearchedProducts());
+                    } else {
+                        callback.onBackendSearchResult(false, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendSearchResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+        return false;
+    }
 }

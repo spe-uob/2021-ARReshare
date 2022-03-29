@@ -138,6 +138,10 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
             @Override
             public void onClick(View v) {
                 uploadImagesToCloud(adapter.uploadedImages);
+                ArrayList<String> media = new ArrayList<>();
+                media.add("123123");
+                media.add("2313123");
+
                 Context context = getApplicationContext();
                 CharSequence text = "Added Successfully!";
                 int duration = Toast.LENGTH_SHORT;
@@ -208,7 +212,6 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
             ArrayList<String> media = new ArrayList<>();
             media.add("123123");
             media.add("2313123");
-            System.out.println(downloadUriList.get(0));
             BackendController.addProduct("hello","idk","hello","hello","hello",5,"used",media, AddProduct.this);
         } catch (JSONException e) {
             e.printStackTrace();

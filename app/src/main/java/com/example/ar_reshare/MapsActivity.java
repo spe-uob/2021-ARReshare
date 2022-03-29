@@ -367,7 +367,7 @@ public class MapsActivity extends FragmentActivity implements
         intent.putExtra("product", (Product) marker.getTag());
         intent.putExtra("contributor", ((Product) marker.getTag()).getContributor());
         intent.putExtra("profilePicId",((Product) marker.getTag()).getContributor().getProfileIcon());
-        intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) ((Product) marker.getTag()).getImages());
+        //intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) ((Product) marker.getTag()).getImages());
 
         startActivity(intent);
     }
@@ -436,13 +436,13 @@ public class MapsActivity extends FragmentActivity implements
             TextView description = (TextView) mWindow.findViewById(R.id.description);
             description.setText(product.getDescription());
             ImageView photo = (ImageView) mWindow.findViewById(R.id.productimage);
-            List<Integer> productPhotos = product.getImages();
-            if (productPhotos.size() >= 1) {
-                photo.setImageResource(productPhotos.get(0));
-            } else {
-                // use default
-                photo.setImageResource(R.drawable.example_cup);
-            }
+            //List<Integer> productPhotos = product.getImages();
+//            if (productPhotos.size() >= 1) {
+//                photo.setImageResource(productPhotos.get(0));
+//            } else {
+//                // use default
+//                photo.setImageResource(R.drawable.example_cup);
+//            }
 
         }
 

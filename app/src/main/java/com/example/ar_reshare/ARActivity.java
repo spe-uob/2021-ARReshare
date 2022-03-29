@@ -1038,10 +1038,10 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 TextView contributor = (TextView) productBox.findViewById(R.id.contributor);
                 contributor.setText(product.getContributor().getName());
                 ImageView photo = (ImageView) productBox.findViewById(R.id.productimage);
-                List<Integer> productPhotos = product.getImages();
-                if (productPhotos.size() >= 1) {
-                    photo.setImageResource(productPhotos.get(0));
-                }
+                //List<Integer> productPhotos = product.getImages();
+//                if (productPhotos.size() >= 1) {
+//                    photo.setImageResource(productPhotos.get(0));
+//                }
 
                 // Find and display distance to product
                 Location productLocation = new Location("ManualProvider");
@@ -1060,7 +1060,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                         intent.putExtra("product", product);
                         intent.putExtra("contributor", product.getContributor());
                         intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
-                        intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) product.getImages());
+                        //intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) product.getImages());
 
                         startActivity(intent);
                     }
