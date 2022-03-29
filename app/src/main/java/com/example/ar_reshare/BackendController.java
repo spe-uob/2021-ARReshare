@@ -5,8 +5,17 @@ import android.content.Context;
 import android.content.Intent;
 
 
+import com.google.gson.JsonObject;
+import com.google.protobuf.Enum;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
 import java.util.Optional;
 
+import de.javagl.obj.Obj;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -23,6 +32,8 @@ public class BackendController {
     private static final int INCORRECT_CREDENTIALS = 401;
     private static final int EMAIL_ADDRESS_ALREADY_REGISTERED = 409;
     private static final int PASSWORD_NOT_STRONG = 422;
+    private static final int RESOURCE_NOT_FOUND = 404;
+    private static final int TYPE_NOT_SUPPORTED = 422;
 
 
     private static final String URL = "https://ar-reshare.herokuapp.com/";
@@ -174,4 +185,63 @@ public class BackendController {
         }
         return false;
     }
+
+    public static boolean addProduct(String title, String description, String country, String region, String postcode, Integer categoryID, String condition, List<String> media, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
+
+        JSONObject json = new JSONObject();
+        json.put("title", title);
+        json.put("description", description);
+
+        JSONObject location = new JSONObject();
+        location.put("country", country);
+        location.put("region", region);
+        location.put("postcode", postcode);
+        json.put("location", location);
+        json.put("categoryID", categoryID);
+        json.put("condition", condition);
+        JSONArray pics = new JSONArray();
+        for (String pic : media) {
+            pics.put(pic);
+        }
+        json.put("media",pics);
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.addProduct(body);
+
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESSFUL_CREATION) {
+                        callback.onBackendResult(true, "Success");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The authentication token is missing or invalid");
+                    } else if(response.code() == RESOURCE_NOT_FOUND){
+                        callback.onBackendResult(false, "A requested auxiliary resource (category, address) does not exist or is unavailable to you");
+                    } else if (response.code() == TYPE_NOT_SUPPORTED){
+                        callback.onBackendResult(false, "The media provided is not a supported file type");
+                    } else {
+                        callback.onBackendResult(false, "Failed to regenerate a new token????");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to regenerate a new token");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+        return false;
+    }
+
 }

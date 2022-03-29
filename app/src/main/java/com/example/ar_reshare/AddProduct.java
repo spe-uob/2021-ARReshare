@@ -9,6 +9,8 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -21,16 +23,21 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import org.json.JSONException;
+
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class AddProduct extends AppCompatActivity implements addPhotoDialog.NoticeDialogListener{
+public class AddProduct extends AppCompatActivity implements addPhotoDialog.NoticeDialogListener, BackendController.BackendCallback, StorageActivity.uploadingFinishedListener{
 
     private ArrayList<Uri> uploadedImages = new ArrayList<>();
+    public ArrayList<Uri> downloadUriList = new ArrayList<>();
     private UploadImageAdapter adapter;
     private final String CAMERA = "camera";
     private final String GALLERY = "gallery";
@@ -130,14 +137,20 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         confirmCheck.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                uploadImagesToCloud(adapter.uploadedImages);
                 Context context = getApplicationContext();
                 CharSequence text = "Added Successfully!";
                 int duration = Toast.LENGTH_SHORT;
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
-                onBackPressed();
             }
         });
+    }
+
+    public void uploadImagesToCloud(SortedList<Uri> uploadImages){
+        StorageActivity sa = new StorageActivity(AddProduct.this);
+        sa.uploadImages(uploadImages);
+        System.out.println(sa.downloadUriList);
     }
 
     @Override
@@ -184,4 +197,22 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         return image;
     }
 
+    @Override
+    public void onBackendResult(boolean success, String message) {
+        System.out.println(message);
+    }
+
+    @Override
+    public void notifyUploadingFinished(ArrayList<Uri> downloadUriList) {
+        try {
+            ArrayList<String> media = new ArrayList<>();
+            media.add("123123");
+            media.add("2313123");
+            System.out.println(downloadUriList.get(0));
+            BackendController.addProduct("hello","idk","hello","hello","hello",5,"used",media, AddProduct.this);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        onBackPressed();
+    }
 }

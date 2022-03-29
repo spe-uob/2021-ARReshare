@@ -24,4 +24,8 @@ public interface BackendService {
     @Headers("Content-Type: application/json")
     @PUT("token/regeneration")
     Call<ResponseBody> requestRegeneratedToken(@Header("Authorization") String token);
+
+    @Headers("Content-Type: application/json")
+    @PUT("listing/create")
+    Call<ResponseBody> addProduct(@Body RequestBody data);
 }
