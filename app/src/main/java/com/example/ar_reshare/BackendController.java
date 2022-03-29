@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.internal.GsonBuildConfig;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -199,7 +202,21 @@ public class BackendController {
                 public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
                     System.out.println(response.code());
                     if (response.code() == SUCCESS) {
-                        callback.onBackendSearchResult(true, response.body().getSearchedProducts());
+                        // Find coordinates for each product
+                        CountDownLatch latch = new CountDownLatch(response.body().getSearchedProducts().size());
+                        response.body().getSearchedProducts().forEach(product -> product.findCoordinates(latch));
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    System.out.println("SUCCESS NOW WAITING FOR " + latch.getCount());
+                                    latch.await();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                callback.onBackendSearchResult(true, response.body().getSearchedProducts());
+                            }
+                        }).start();
                     } else {
                         callback.onBackendSearchResult(false, null);
                     }

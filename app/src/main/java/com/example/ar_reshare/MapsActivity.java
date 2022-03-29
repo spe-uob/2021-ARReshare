@@ -41,6 +41,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.Lock;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
@@ -78,9 +80,23 @@ public class MapsActivity extends FragmentActivity implements
     private final float MIN_CONTRAST_RATIO = 4.5f;
     private final int DEFAULT_DARK_FONT = Color.parseColor("#363636");
 
+    // The list of products
+    private List<Product> products;
+    private boolean productsDownloaded = false;
+    private Lock lock;
+    private CountDownLatch latch;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Make the map wait on the following three conditions
+        // 1. Device location is ready
+        // 2. Products have been received from backend
+        // 3. GoogleMap is ready
+        // Once these conditions are met the map can proceed to be populated
+        latch = new CountDownLatch(3);
+        getLatestProducts();
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -103,6 +119,48 @@ public class MapsActivity extends FragmentActivity implements
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getLocationPermission();
+
+        // Create a new thread to wait for the conditions
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println("STARTED WAITING");
+                    latch.await();
+                    System.out.println("STOPPED WAITING");
+                    // Any UI changes must be run on the UI Thread
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            populateMap(mMap);
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    System.out.println("CRASH");
+                }
+            }
+        }).start();
+    }
+
+    private void getLatestProducts() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                BackendController.searchListings(0, 100, new BackendController.BackendSearchResultCallback() {
+                    @Override
+                    public void onBackendSearchResult(boolean success, List<Product> searchResults) {
+                        if (success) {
+                            products = searchResults;
+                            productsDownloaded = true;
+                            System.out.println("********* RECEIVED PRODUCTS **********");
+                            latch.countDown();
+                            System.out.println(latch.getCount());
+                        }
+                    }
+                });
+            }
+        }).start();
+        System.out.println("I AM RETURNED");
     }
 
     // Setup filter results window
@@ -110,6 +168,7 @@ public class MapsActivity extends FragmentActivity implements
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                System.out.println(products.get(0).getLocation().toString());
                 LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
                 View filterWindow = inflater.inflate(R.layout.filter_popup, null);
                 int width = LinearLayout.LayoutParams.WRAP_CONTENT;
@@ -271,6 +330,8 @@ public class MapsActivity extends FragmentActivity implements
         mMap.moveCamera(CameraUpdateFactory.zoomTo(13));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(mvb));
 
+        // Decrement the latch
+        latch.countDown();
     }
 
     // May not need to check for permissions if only called after checking locationPermissionGranted
@@ -341,8 +402,10 @@ public class MapsActivity extends FragmentActivity implements
                                 if (location != null) {
                                     // Logic to handle location object
                                     lastKnownLocation = location;
-                                    // Populate the map once location is found
-                                    populateMap(mMap);
+                                    // Decrement the latch to signal user location is ready
+                                    latch.countDown();
+                                    System.out.println("YO MATE IVE GOT THE LOCATION");
+                                    System.out.println(latch.getCount());
                                 }
                             }
                         });
@@ -376,21 +439,23 @@ public class MapsActivity extends FragmentActivity implements
     // Populates the map with markers given a list of products and filter options
     private void populateMap(GoogleMap mMap) {
         mMap.clear();
-        List<Product> products = ExampleData.getProducts();
+        System.out.println("POPULATE MAP CALLED");
         for (Product product : products) {
-            LatLng coordinates = product.getLocation();
+            System.out.println(product.getName());
+            LatLng coordinates = product.getCoordinates();
             Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(product.getLocation().latitude);
-            productLocation.setLongitude(product.getLocation().longitude);
+            productLocation.setLatitude(coordinates.latitude);
+            productLocation.setLongitude(coordinates.longitude);
             float dist = lastKnownLocation.distanceTo(productLocation);
-            Category productCategory = product.getCategory();
-            if (dist <= maxDistanceRange && categoriesSelected.contains(productCategory)) {
-                float hue = getHueFromRGB(productCategory.getCategoryColour());
+            System.out.println(dist);
+            // Category productCategory = product.getCategory();
+            // && categoriesSelected.contains(productCategory)
+            if (dist <= maxDistanceRange) {
+                //float hue = getHueFromRGB(productCategory.getCategoryColour());
                 Marker marker = mMap.addMarker(new MarkerOptions()
                         .position(coordinates)
                         .title(product.getName())
-                        .snippet("by " + product.getContributor())
-                        .icon(BitmapDescriptorFactory.defaultMarker(hue)));
+                        .snippet("by " + product.getContributor()));
                 marker.setTag(product);
             }
         }
@@ -432,10 +497,12 @@ public class MapsActivity extends FragmentActivity implements
             TextView title = (TextView) mWindow.findViewById(R.id.title);
             title.setText(product.getName());
             TextView contributor = (TextView) mWindow.findViewById(R.id.contributor);
-            contributor.setText(product.getContributor().getName());
+            contributor.setText("Some user");
+            //contributor.setText(product.getContributor().getName());
             TextView description = (TextView) mWindow.findViewById(R.id.description);
             description.setText(product.getDescription());
             ImageView photo = (ImageView) mWindow.findViewById(R.id.productimage);
+            photo.setImageResource(R.drawable.example_cup);
             //List<Integer> productPhotos = product.getImages();
 //            if (productPhotos.size() >= 1) {
 //                photo.setImageResource(productPhotos.get(0));

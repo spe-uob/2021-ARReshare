@@ -13,6 +13,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
 
@@ -31,12 +33,19 @@ public class Product implements Parcelable {
     private String date;
     @SerializedName("postcode")
     private String postcode;
+
     private LatLng location;
+
+    // Coordinates will be updated after request through PostcodeHelper
+    private LatLng coordinates;
+    private boolean coordinatesFound;
 
     @SerializedName("media")
     private List<ProductMedia> productMedia;
 
-    Product(){}
+    Product() {
+        coordinatesFound = false;
+    }
 
     Product(String name, String description, User contributor, Category category, double lat, double lng) {
         this.name = name;
@@ -147,6 +156,25 @@ public class Product implements Parcelable {
         return new ArrayList<Integer>();
     }
 
+    public void findCoordinates(CountDownLatch latch) {
+        PostcodeHelper.lookupPostcode(postcode, new PostcodeHelper.PostcodeCallback() {
+            @Override
+            public void onPostcodeResult(boolean success, PostcodeDetails response) {
+                if (success) {
+                    System.out.println(response.getLatitude());
+                    System.out.println(response.getLongitude());
+                    setCoordinates(new LatLng(response.getLatitude(), response.getLongitude()));
+                    setCoordinatesFound(true);
+                    System.out.println("------ COORDINATES HAVE BEEN UPDATED ------");
+                    latch.countDown();
+                } else {
+                    setCoordinatesFound(false);
+                    System.out.println("------ COORDINATES *FAILED* ------");
+                }
+            }
+        });
+    }
+
     //implementation of Parcelable
     @Override
     public int describeContents() {
@@ -160,6 +188,24 @@ public class Product implements Parcelable {
         dest.writeString(description);
         dest.writeString(date);
         dest.writeParcelable(location, flags);
+    }
+
+    public boolean areCoordinatesFound() {
+        return coordinatesFound;
+    }
+
+    public void setCoordinatesFound(boolean coordinatesFound) {
+        this.coordinatesFound = coordinatesFound;
+    }
+
+    public LatLng getCoordinates() {
+        // TODO: Make this null exception safe
+        if (coordinatesFound) return coordinates;
+        else return null;
+    }
+
+    public void setCoordinates(LatLng coordinates) {
+        this.coordinates = coordinates;
     }
 
     public static class ProductMedia {
