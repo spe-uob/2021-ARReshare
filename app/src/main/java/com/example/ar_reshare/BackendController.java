@@ -174,4 +174,44 @@ public class BackendController {
         }
         return false;
     }
+
+    public static void modifyAccount(String password, String name,  BackendCallback backendCallback){
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
+
+        String bodyString = String.format("{\"password\": \"%s\"\n}", password);
+        RequestBody body =
+                RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.loginAccount(body);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println("Response back");
+                    if (response.code() == SUCCESS) {
+                        JWT = response.headers().get("Authorization");
+                        initialised = true;
+                        backendCallback.onBackendResult(true, "Success");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        backendCallback.onBackendResult(false, "Your password is incorrect");
+                    } else {
+                        backendCallback.onBackendResult(false, "Failed to change");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    backendCallback.onBackendResult(false, "Failed to Change");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            backendCallback.onBackendResult(false, "Failed to Change");
+        }
+    }
+
 }

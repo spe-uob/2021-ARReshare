@@ -24,4 +24,12 @@ public interface BackendService {
     @Headers("Content-Type: application/json")
     @PUT("token/regeneration")
     Call<ResponseBody> requestRegeneratedToken(@Header("Authorization") String token);
+
+    @Headers("Content-Type: application/json")
+    @POST("account/modify")
+    Call<ResponseBody> modifyAccount(@Body RequestBody data);
+
+    @Headers("Content-Type: application/json")
+    @POST("account/addresses/list")
+    Call<ResponseBody> getAccountAddresses(@Body RequestBody data);
 }
