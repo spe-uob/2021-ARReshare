@@ -21,6 +21,7 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
 
     private Context mContext;
     private List<Chat> mChatList;
+    private Chat resChat;
 
     public MultiChatsAdapter(Context context, List<Chat> chatList) {
         mContext = context;
@@ -46,18 +47,46 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
     // Passes the message object to a ViewHolder so that the contents can be bound to UI.
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        Chat chat = (Chat) mChatList.get(position);
+        Chat chat = mChatList.get(position);
+        System.out.println("chat id is" + chat.getConversationID());
+        //Integer index = mChatList.get(position).getConversationID();
+        getConversationByID(chat.getConversationID());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext() ,MessagingActivity.class);
-                intent.putExtra("contributor", chat.getContributor());
-                intent.putExtra("user",chat.getCurrentUser());
-                intent.putExtra("profilePicId",chat.getContributor().getProfileIcon());
+//                intent.putExtra("contributor", chat.getContributor());
+//                intent.putExtra("user",chat.getCurrentUser());
+//                intent.putExtra("profilePicId",chat.getContributor().getProfileIcon());
                 mContext.startActivity(intent);
             }
         });
         ((MultiChatsAdapter.ChatHolder) holder).bind(chat);
+    }
+
+
+    private void getConversationByID(Integer conversationID){
+
+        BackendController.getConversationByID(conversationID, new BackendController.MessageBackendCallback() {
+
+            @Override
+            public void onBackendResult(boolean success, String message, Message.MessageResult messageResult) {
+                if (success) {
+                    System.out.println("get conversations successful");
+                    resChat = messageResult.getChat();
+                    //mContext.notify();
+                    //setConversations(conversations);
+
+                    //recyclerView.getAdapter().notifyDataSetChanged();
+//                    for (Chat chat : conversations.getChats()){
+//                        mChatList.add(chat);
+//                    }
+                }else {
+                    System.out.println(message);
+                    System.out.println("fail to get conversations");
+                }
+            }
+        });
     }
 
 
@@ -77,11 +106,11 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
         }
 
         void bind(Chat chat) {
-            chatTitle.setText(chat.getContributor().getName());
-            productInfo.setText(chat.getProduct().getName());
-            chatBody.setText(chat.getMessages().get(chat.getMessages().size()-1).getMessage());
-            chatTime.setText(chat.getMessages().get(chat.getMessages().size()-1).getCreatedTime());
-            icon.setImageResource(chat.getContributor().getProfileIcon());
+            chatTitle.setText(chat.getContributorName());
+            productInfo.setText(chat.getProductName());
+//            chatBody.setText(chat.getMessages().get(chat.getMessages().size()-1).getMessage());
+//            chatTime.setText(chat.getMessages().get(chat.getMessages().size()-1).getCreatedTime());
+//            icon.setImageResource(chat.getContributor().getProfileIcon());
         }
     }
 

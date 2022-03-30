@@ -78,24 +78,24 @@ public class MessagingActivity extends AppCompatActivity{
                 sendButton = findViewById(R.id.button_send);
                 chatTextView = findViewById(R.id.text_chatbox);
                 String text = chatTextView.getText().toString();
-                Message message1 = new Message(text, user, simpleDateFormat.format(new Date()));
-                mMessageList.add(message1);
-                if (mMessageList.size() == 1) {
-                    Message message2 = new Message("hi", contributor, simpleDateFormat.format(new Date()));
-                    mMessageList.add(message2);
-                }else if (mMessageList.size() == 3){
-                    Message message3 = new Message("yep, it is still available!", contributor, simpleDateFormat.format(new Date()));
-                    mMessageList.add(message3);
-                }else if(mMessageList.size() == 5) {
-                    Message message4 = new Message("sure, that would work great!", contributor, simpleDateFormat.format(new Date()));
-                    mMessageList.add(message4);
-                }else if (mMessageList.size() == 7) {
-                    Message message5 = new Message("stay safe and have a good one 🤭", contributor, simpleDateFormat.format(new Date()));
-                    mMessageList.add(message5);
-                }else {
-                    Message message6 = new Message("okay", contributor, simpleDateFormat.format(new Date()));
-                    mMessageList.add(message6);
-                }
+//                Message message1 = new Message(text, user, simpleDateFormat.format(new Date()));
+//                mMessageList.add(message1);
+//                if (mMessageList.size() == 1) {
+//                    Message message2 = new Message("hi", contributor, simpleDateFormat.format(new Date()));
+//                    mMessageList.add(message2);
+//                }else if (mMessageList.size() == 3){
+//                    Message message3 = new Message("yep, it is still available!", contributor, simpleDateFormat.format(new Date()));
+//                    mMessageList.add(message3);
+//                }else if(mMessageList.size() == 5) {
+//                    Message message4 = new Message("sure, that would work great!", contributor, simpleDateFormat.format(new Date()));
+//                    mMessageList.add(message4);
+//                }else if (mMessageList.size() == 7) {
+//                    Message message5 = new Message("stay safe and have a good one 🤭", contributor, simpleDateFormat.format(new Date()));
+//                    mMessageList.add(message5);
+//                }else {
+//                    Message message6 = new Message("okay", contributor, simpleDateFormat.format(new Date()));
+//                    mMessageList.add(message6);
+//                }
 
                 recyclerView.setAdapter(messageListAdapter);
                 chatTextView.setText("");

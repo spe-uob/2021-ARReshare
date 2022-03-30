@@ -1,34 +1,30 @@
 package com.example.ar_reshare;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.json.JSONException;
 
-public class ChatListActivity extends AppCompatActivity {
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+
+public class ChatListActivity extends AppCompatActivity implements BackendController.ChatBackendCallback {
 
     MultiChatsAdapter chatListAdapter;
     RecyclerView recyclerView;
@@ -51,16 +47,22 @@ public class ChatListActivity extends AppCompatActivity {
 
         chatTitle = findViewById(R.id.chat_title);
         chatBody = findViewById(R.id.chat_body);
-        for (Chat chat : ExampleData.getChats()){
-            mChatList.add(chat);
-        }
 
-       new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+        getConversationDescriptors();
+
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
 
         chatListAdapter = new MultiChatsAdapter(this,mChatList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(chatListAdapter);
+
+//
+//        try {
+//            createConversation(1);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
     }
 
 
@@ -138,4 +140,69 @@ public class ChatListActivity extends AppCompatActivity {
         }
     };
 
+    public static void createConversation(Integer listingID) throws JSONException {
+
+        BackendController.createConversation(listingID, new BackendController.BackendCallback() {
+            @Override
+            public void onBackendResult(boolean success, String message) {
+                if (success) {
+                    System.out.println("conversation created");
+                } else {
+                    System.out.println(message);
+                    System.out.println("conversation created failed");
+                }
+            }
+        });
+    }
+
+//    private void setConversations(Chat.ConversationsResult conversations){
+//        this.conversations = conversations;
+//
+//
+//
+//    }
+
+    private void getConversationDescriptors(){
+
+        BackendController.getConversationDescriptors(new BackendController.ChatBackendCallback() {
+
+            @Override
+            public void onBackendResult(boolean success, String message, Chat.ConversationsResult conversationsResult) {
+                if (success) {
+                    System.out.println("get conversations successful");
+                    //setConversations(conversations);
+                    mChatList.clear();
+                    mChatList.addAll(conversationsResult.getChats());
+                    recyclerView.getAdapter().notifyDataSetChanged();
+//                    for (Chat chat : conversations.getChats()){
+//                        mChatList.add(chat);
+//                    }
+                }else {
+                    System.out.println("fail to get conversations");
+                }
+            }
+        });
+    }
+
+
+    private void closeConversation(){
+        int conversationID = 0;
+
+        BackendController.closeConversation(conversationID, new BackendController.BackendCallback() {
+            @Override
+            public void onBackendResult(boolean success, String message) {
+                if (success) {
+
+                } else {
+
+                }
+            }
+        });
+    }
+
+
+    @Override
+    public void onBackendResult(boolean success, String message, Chat.ConversationsResult conversations) {
+
+    }
 }
