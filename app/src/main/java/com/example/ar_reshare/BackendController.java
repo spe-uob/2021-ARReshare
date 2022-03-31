@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.internal.GsonBuildConfig;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -184,38 +187,65 @@ public class BackendController {
         return false;
     }
 
-    public static boolean searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+    public static void searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(URL)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
 
-        BackendService service = retrofit.create(BackendService.class);
-        Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
+                BackendService service = retrofit.create(BackendService.class);
+                Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
 
-        try {
-            call.enqueue(new Callback<Product.SearchResults>() {
-                @Override
-                public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
-                    System.out.println(response.code());
-                    if (response.code() == SUCCESS) {
-                        callback.onBackendSearchResult(true, response.body().getSearchedProducts());
-                    } else {
-                        callback.onBackendSearchResult(false, null);
-                    }
+                try {
+                    call.enqueue(new Callback<Product.SearchResults>() {
+                        @Override
+                        public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                            System.out.println(response.code());
+                            if (response.code() == SUCCESS) {
+                                initialiseProducts(response.body().getSearchedProducts(), callback);
+                            } else {
+                                callback.onBackendSearchResult(false, null);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                            System.out.println("Failure");
+                            callback.onBackendSearchResult(false, null);
+                        }
+                    });
+                } catch (Exception e) {
+                    System.out.println(e);
                 }
+            }
+        }).start();
+    }
 
-                @Override
-                public void onFailure(Call<Product.SearchResults> call, Throwable t) {
-                    System.out.println("Failure");
-                    callback.onBackendSearchResult(false, null);
+    // Helper method of searchListings()
+    // Waits until all products have had their main photo downloaded and postcode converted into coordinates
+    private static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {
+        final int NUMBER_OF_REQUESTS_PER_PRODUCT = 2;
+
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(products.size() * NUMBER_OF_REQUESTS_PER_PRODUCT);
+        // Find coordinates for each product
+        products.forEach(product -> product.findCoordinates(latch));
+        // Download main photo for each product
+        products.forEach(product -> product.downloadMainPicture(latch));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            });
-        } catch (Exception e) {
-            System.out.println(e);
-            return false;
-        }
-        return false;
+                callback.onBackendSearchResult(true, products);
+            }
+        }).start();
     }
 
 }

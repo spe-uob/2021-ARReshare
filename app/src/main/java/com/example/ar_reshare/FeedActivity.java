@@ -77,7 +77,12 @@ public class FeedActivity extends AppCompatActivity {
         BackendController.searchListings(0, 100, (success, searchResults) -> {
             if (success) {
                 productList = searchResults;
-                adapterCreator();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapterCreator();
+                    }
+                });
             }
             else {
                 System.out.println("searchListings callback failed");
