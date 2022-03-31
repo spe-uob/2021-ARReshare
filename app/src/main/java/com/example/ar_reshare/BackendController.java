@@ -187,38 +187,41 @@ public class BackendController {
         return false;
     }
 
-    public static boolean searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+    public static void searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(URL)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
 
-        BackendService service = retrofit.create(BackendService.class);
-        Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
+                BackendService service = retrofit.create(BackendService.class);
+                Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
 
-        try {
-            call.enqueue(new Callback<Product.SearchResults>() {
-                @Override
-                public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
-                    System.out.println(response.code());
-                    if (response.code() == SUCCESS) {
-                        initialiseProducts(response.body().getSearchedProducts(), callback);
-                    } else {
-                        callback.onBackendSearchResult(false, null);
-                    }
+                try {
+                    call.enqueue(new Callback<Product.SearchResults>() {
+                        @Override
+                        public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                            System.out.println(response.code());
+                            if (response.code() == SUCCESS) {
+                                initialiseProducts(response.body().getSearchedProducts(), callback);
+                            } else {
+                                callback.onBackendSearchResult(false, null);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                            System.out.println("Failure");
+                            callback.onBackendSearchResult(false, null);
+                        }
+                    });
+                } catch (Exception e) {
+                    System.out.println(e);
                 }
-
-                @Override
-                public void onFailure(Call<Product.SearchResults> call, Throwable t) {
-                    System.out.println("Failure");
-                    callback.onBackendSearchResult(false, null);
-                }
-            });
-        } catch (Exception e) {
-            System.out.println(e);
-            return false;
-        }
-        return false;
+            }
+        }).start();
     }
 
     // Helper method of searchListings()

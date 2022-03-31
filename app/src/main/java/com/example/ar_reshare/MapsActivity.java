@@ -124,21 +124,16 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void getLatestProducts() {
-        new Thread(new Runnable() {
+        BackendController.searchListings(0, 100, new BackendController.BackendSearchResultCallback() {
             @Override
-            public void run() {
-                BackendController.searchListings(0, 100, new BackendController.BackendSearchResultCallback() {
-                    @Override
-                    public void onBackendSearchResult(boolean success, List<Product> searchResults) {
-                        if (success) {
-                            products = searchResults;
-                            readyLatch.countDown();
-                            System.out.println(readyLatch.getCount());
-                        }
-                    }
-                });
+            public void onBackendSearchResult(boolean success, List<Product> searchResults) {
+                if (success) {
+                    products = searchResults;
+                    readyLatch.countDown();
+                    System.out.println(readyLatch.getCount());
+                }
             }
-        }).start();
+        });
     }
 
     private void waitOnConditions() {
