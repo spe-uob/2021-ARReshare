@@ -37,7 +37,6 @@ The app allows a contributor to list an item they would like to share for free a
 * Android Studio (available to download [here](https://developer.android.com/studio)), and
 * Android Device with **API Level 27 (8.1 Oreo) or above**, or
 * Computer capable of running the [Android Emulator](https://developer.android.com/studio/run/emulator)
-To build and run this project we recommend using Android Studio due to its easiness of use and the ability to sync all dependencies.
 
 **Note: To use the AR functionality the Android Device must be AR Compatible. Here is the list of [currently supported devices](https://developers.google.com/ar/devices).**
 
