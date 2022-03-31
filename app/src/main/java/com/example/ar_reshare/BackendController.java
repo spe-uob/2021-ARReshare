@@ -5,10 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.internal.GsonBuildConfig;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -48,6 +44,11 @@ public class BackendController {
     // Interface for callback handlers to receive response from the request
     public interface BackendSearchResultCallback {
         void onBackendSearchResult(boolean success, List<Product> searchResults);
+    }
+
+    // Interface for callback handlers to receive response from the request
+    public interface BackendProfileResultCallback {
+        void onBackendProfileResult(boolean success, User userProfile);
     }
 
     private static void initialise() {
@@ -222,6 +223,39 @@ public class BackendController {
                 }
             }
         }).start();
+    }
+
+    public static void getProfileByID(int startResults, int maxResults, int userID,
+                                      BackendProfileResultCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<User> call = service.getProfileByID(maxResults, startResults, userID);
+
+        try {
+            call.enqueue(new Callback<User>() {
+                @Override
+                public void onResponse(Call<User> call, Response<User> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendProfileResult(true, response.body());
+                    } else {
+                        callback.onBackendProfileResult(false, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<User> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendProfileResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     // Helper method of searchListings()

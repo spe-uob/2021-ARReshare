@@ -175,7 +175,7 @@ public class FeedActivity extends AppCompatActivity {
                             if (location != null) {
                                 // Logic to handle location object
                                 userLocation = location;
-                                //feedRecyclerAdapter.updateDistances(location);
+                                // feedRecyclerAdapter.updateDistances(location);
                             }
                         });
             }

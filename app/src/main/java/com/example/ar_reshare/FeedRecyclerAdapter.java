@@ -13,13 +13,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.ViewHolder> {
 
-    private static final int PROFILE_LINK = 0;
-    private static final int PRODUCT_LINK = 1;
-    private static final int MESSAGE_LINK = 2;
+    Map<Integer, Category> intToCat = new HashMap<>();
+
+    private static final int PROFILE_LINK = 100;
+    private static final int PRODUCT_LINK = 101;
+    private static final int MESSAGE_LINK = 102;
 
     private final List<Product> productList;
     public ArrayList<ViewHolder> cards = new ArrayList<>();
@@ -34,6 +38,13 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        intToCat.put(1, Category.OTHER);
+        intToCat.put(2, Category.CLOTHING);
+        intToCat.put(3, Category.ACCESSORIES);
+        intToCat.put(4, Category.ELECTRONICS);
+        intToCat.put(5, Category.BOOKS);
+        intToCat.put(6, Category.HOUSEHOLD);
+
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.item_view,parent, false);
         return new ViewHolder(view);
@@ -74,8 +85,8 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
     public void productValueHelper(ViewHolder holder, Product product) {
 //        holder.profileIcon.setImageResource(product.getContributor().getProfileIcon());
-//        holder.categoryIcon.setImageResource(product.getCategory().getCategoryIcon());
-//        holder.contributor.setText(product.getContributor().getName());
+        holder.categoryIcon.setImageResource(intToCat.get(product.getCategoryID()).getCategoryIcon());
+//        holder.contributor.setText;
         holder.productImage.setImageBitmap(product.getMainPic());
         holder.productTitle.setText(product.getName());
         holder.productDescription.setText(product.getDescription());

@@ -2,13 +2,26 @@ package com.example.ar_reshare;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
+
 public class User implements Parcelable {
+    @SerializedName("name")
     private String name;
+    @SerializedName("url")
+    String url;
+    @SerializedName("mimetype")
+    String mimetype;
+    @SerializedName("listings")
+    List<Product> listings;
     private String profileUrl;
     private int profileIcon;
     //0 for sender, 1 for receiver
     private int messengerType;
     private String bio;
+
+    public User(){}
 
     public User(String name, String profileUrl, int messengerType) {
         this.name = name;
@@ -66,6 +79,30 @@ public class User implements Parcelable {
 
     public int getMessengerType() {
         return messengerType;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getMimetype() {
+        return mimetype;
+    }
+
+    public void setMimetype(String mimetype) {
+        this.mimetype = mimetype;
+    }
+
+    public List<Product> getListings() {
+        return listings;
+    }
+
+    public void setListings(List<Product> listings) {
+        this.listings = listings;
     }
 
     @Override
