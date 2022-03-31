@@ -76,7 +76,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 //        holder.profileIcon.setImageResource(product.getContributor().getProfileIcon());
 //        holder.categoryIcon.setImageResource(product.getCategory().getCategoryIcon());
 //        holder.contributor.setText(product.getContributor().getName());
-        //holder.productImage.setImageResource(product.getImages().get(0));
+        holder.productImage.setImageBitmap(product.getMainPic());
         holder.productTitle.setText(product.getName());
         holder.productDescription.setText(product.getDescription());
     }
@@ -84,8 +84,8 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     public void distanceValueHelper(ViewHolder holder, Product product) {
         if (locationReady) {
             Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(product.getLocation().latitude);
-            productLocation.setLongitude(product.getLocation().longitude);
+            productLocation.setLatitude(product.getCoordinates().latitude);
+            productLocation.setLongitude(product.getCoordinates().longitude);
             float dist = userLocation.distanceTo(productLocation);
             int roundedDist = Math.round(dist);
             holder.location.setText(MessageFormat.format("{0}m", roundedDist));
@@ -96,13 +96,14 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
     // Grabs userLocation from FeedActivity and uses it to show distance to products created
     public void updateDistances(Location location) {
+        System.out.println(location);
         // Update the location text of already created cards
         for (int i=0; i < cards.size(); i++) {
             ViewHolder card = cards.get(i);
             Product product = productList.get(i);
             Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(product.getLocation().latitude);
-            productLocation.setLongitude(product.getLocation().longitude);
+            productLocation.setLatitude(product.getCoordinates().latitude);
+            productLocation.setLongitude(product.getCoordinates().longitude);
             float dist = location.distanceTo(productLocation);
             int roundedDist = Math.round(dist);
             card.location.setText(MessageFormat.format("{0}m", roundedDist));

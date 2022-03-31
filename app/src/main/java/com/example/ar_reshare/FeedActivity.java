@@ -77,12 +77,7 @@ public class FeedActivity extends AppCompatActivity {
         BackendController.searchListings(0, 100, (success, searchResults) -> {
             if (success) {
                 productList = searchResults;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapterCreator();
-                    }
-                });
+                runOnUiThread(this::adapterCreator);
             }
             else {
                 System.out.println("searchListings callback failed");
@@ -178,7 +173,6 @@ public class FeedActivity extends AppCompatActivity {
                         .addOnSuccessListener(this, location -> {
                             // Got last known location. In some rare situations this can be null.
                             if (location != null) {
-
                                 // Logic to handle location object
                                 userLocation = location;
                                 //feedRecyclerAdapter.updateDistances(location);
