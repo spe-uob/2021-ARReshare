@@ -431,10 +431,11 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onInfoWindowClick(Marker marker) {
         Intent intent = new Intent(this, ProductPageActivity.class);
-
-        intent.putExtra("product", (Product) marker.getTag());
-        intent.putExtra("contributor", ((Product) marker.getTag()).getContributor());
-        intent.putExtra("profilePicId",((Product) marker.getTag()).getContributor().getProfileIcon());
+          intent.putExtra("product", ((Product) marker.getTag()));
+          intent.putExtra("productID",((Product) marker.getTag()).getId());
+//        intent.putExtra("product", (Product) marker.getTag());
+//        intent.putExtra("contributor", ((Product) marker.getTag()).getContributor());
+//        intent.putExtra("profilePicId",((Product) marker.getTag()).getContributor().getProfileIcon());
         //intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) ((Product) marker.getTag()).getImages());
 
         startActivity(intent);

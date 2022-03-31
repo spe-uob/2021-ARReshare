@@ -52,6 +52,10 @@ public class BackendController {
         void onBackendSearchResult(boolean success, List<Product> searchResults);
     }
 
+    public interface BackendGetListingResultCallback{
+        void onBackendGetListingResult(boolean success, Product ListingResult);
+    }
+
     private static void initialise() {
         Optional<Account> account = AuthenticationService.isLoggedIn(context);
         if (account.isPresent()) {
@@ -307,5 +311,36 @@ public class BackendController {
                 callback.onBackendSearchResult(true, products);
             }
         }).start();
+    }
+
+    public static void getListingByID(Integer listingID, BackendGetListingResultCallback callback){
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product> call = service.getListingByID(listingID);
+
+        try {
+            call.enqueue(new Callback<Product>() {
+                @Override
+                public void onResponse(Call<Product> call, Response<Product> response) {
+                    if (response.code() == SUCCESS) {
+                        System.out.println("get success");
+                        callback.onBackendGetListingResult(true,response.body());
+                    } else {
+                        callback.onBackendGetListingResult(false, null);
+                    }
+                }
+                @Override
+                public void onFailure(Call<Product> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendGetListingResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 }

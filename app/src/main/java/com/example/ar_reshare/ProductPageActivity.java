@@ -7,6 +7,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
@@ -22,13 +23,27 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ProductPageActivity extends AppCompatActivity {
+public class ProductPageActivity extends AppCompatActivity implements BackendController.BackendGetListingResultCallback, DownloadImageHelper.ImageDownloadCallback, PostcodeHelper.PostcodeCallback {
     LinearLayout sliderDotsPanel;
     private int dotsCount;
     private ImageView[] dots;
+    private Product product;
+    private int picCount;
+    private ArrayList<Bitmap> picList = new ArrayList<>();
+
+    @Override
+    public void onBackendGetListingResult(boolean success, Product ListingResult) {
+        System.out.println(success);
+        this.product = ListingResult;
+        if(success){
+            picCount = product.getProductMedia().size();
+            displayInfo();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,44 +53,70 @@ public class ProductPageActivity extends AppCompatActivity {
         // getting the stuff we need from previous page
         Intent i = getIntent();
         Product product = i.getParcelableExtra("product");
-        User contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
-        User user = ExampleData.getUsers().get(0); // this is John
-        Integer profilePicId = i.getIntExtra("profilePicId",R.drawable.arfi_profile_icon);
-        List<Integer> productPicId = i.getIntegerArrayListExtra("productPicId");
+        Integer productID = i.getIntExtra("productID",1);
+        System.out.println(productID);
+        BackendController.getListingByID(productID,ProductPageActivity.this);
 
+         // the contributor of the current product
+//        User user = ExampleData.getUsers().get(0); // this is John
+//        Integer profilePicId = i.getIntExtra("profilePicId",R.drawable.arfi_profile_icon);
+//        List<Integer> productPicId = i.getIntegerArrayListExtra("productPicId");
+
+        User contributor = product.getContributor();
         //display product name
         displayProductName(product);
         navProductName(product);
-
-        //edit button
-        showEditIfUser(contributor,user);
-
         //display product description
         displayProductDescription(product);
 
         //display contributor's information
-        displayProductContributor(contributor,profilePicId);
+        //displayProductContributor(contributor,profilePicId);
+
+        //add a bookmark button
+        bookmarkButton();
+
+      //top left return arrow
+        returnListener();
+
+//      //links to messaging page
+//        messageButton(product,contributor,user, profilePicId);
+
+    }
+
+    private void displayInfo(){
+        //edit button
+        //showEditIfUser(contributor,user);
+
+        //display a static map to show product's location
+
+        PostcodeHelper.lookupPostcode(product.getPostcode(),ProductPageActivity.this);
 
         // display product added time
         TextView addedTime = findViewById(R.id.addedtime);
         addedTime.setText(product.getDate() + "  added  ");
 
-        //add a bookmark button
-        bookmarkButton();
-
         //display product pics using slider
-        int[] picList = productPicId.stream().mapToInt(m -> m).toArray();
-        displayProductPics(picList);
+        for (Product.ProductMedia productMedia : product.getProductMedia()) {
+            DownloadImageHelper.downloadImage(productMedia.url,ProductPageActivity.this);
+        }
+    }
 
-        //display a static map to show product's location
-        displayMapPic(product.getLocation().latitude, product.getLocation().longitude);
+    @Override
+    public void onPostcodeResult(boolean success, PostcodeDetails response) {
+        if (success){
+            displayMapPic(response.getLatitude(), response.getLongitude());
+        }
+    }
 
-        //top left return arrow
-        returnListener();
-
-        //links to messaging page
-        messageButton(product,contributor,user, profilePicId);
-
+    @Override
+    public void onImageDownloaded(boolean success, Bitmap image) {
+        if(success){
+            picCount--;
+            picList.add(image);
+        }
+        if(picCount == 0){
+            displayProductPics(picList);
+        }
     }
 
     private void showEditIfUser(User contributor, User user){
@@ -181,10 +222,10 @@ public class ProductPageActivity extends AppCompatActivity {
         }
     }
 
-    public void displayProductPics(int[] productPicId){
+    public void displayProductPics(ArrayList<Bitmap> picList){
         ViewPager2 viewPager = findViewById(R.id.viewPager);
         sliderDotsPanel = (LinearLayout) findViewById(R.id.SliderDots);
-        dotsCount = productPicId.length;
+        dotsCount = picList.size();
         dots = new ImageView[dotsCount];
         for(int i = 0; i < dotsCount; i++){
             dots[i] = new ImageView(this);
@@ -194,7 +235,7 @@ public class ProductPageActivity extends AppCompatActivity {
             sliderDotsPanel.addView(dots[i], params);
         }
         dots[0].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.active_dot));
-        SliderAdapter adapter = new SliderAdapter(productPicId);
+        SliderAdapter adapter = new SliderAdapter(picList);
         viewPager.setAdapter(adapter);
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -214,4 +255,6 @@ public class ProductPageActivity extends AppCompatActivity {
                 "&zoom=15&size=400x400&markers=color:red|"+ lat + ","+ lng + "&key=" + getString(R.string.STATIC_MAP_KEY);
         Glide.with(this).load(url).into(mapView);
     }
+
+
 }

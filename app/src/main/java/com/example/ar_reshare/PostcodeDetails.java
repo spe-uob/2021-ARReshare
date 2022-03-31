@@ -9,6 +9,7 @@ public class PostcodeDetails {
     private String city;
     @SerializedName("latitude")
     private Float latitude;
+    @SerializedName("longitude")
     private Float longitude;
 
     public PostcodeDetails() {
