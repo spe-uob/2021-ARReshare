@@ -161,8 +161,6 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                 EditText productPostcodeText = findViewById(R.id.add_product_postcode);
                 String productPostcode = productPostcodeText.getText().toString();
 
-                //uploadImagesToCloud(adapter.uploadedImages);
-
                 //Checks if user inputs are all valid before uploading to backend
                 if(checkUserInput(productNameText,productName,productPostcodeText,productPostcode)){
                     ArrayList<String> media = new ArrayList<>();
@@ -250,12 +248,6 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         }
     }
 
-//    public void uploadImagesToCloud(SortedList<Uri> uploadImages){
-////        StorageActivity sa = new StorageActivity(AddProduct.this);
-////        sa.uploadImages(uploadImages);
-////        System.out.println(sa.downloadUriList);
-//    }
-
     @Override
     public void onDialogActionClick(DialogFragment dialog, String action) {
         if(action == CAMERA){
@@ -306,17 +298,4 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
     public void onBackendResult(boolean success, String message) {
         System.out.println(message);
     }
-
-//    @Override
-//    //public void notifyUploadingFinished(ArrayList<Uri> downloadUriList) {
-//        try {
-//            ArrayList<String> media = new ArrayList<>();
-//            media.add("123123");
-//            media.add("2313123");
-//            BackendController.addProduct("hello","idk","hello","hello","hello",5,"used",media, AddProduct.this);
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//        onBackPressed();
-//    }
 }

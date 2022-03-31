@@ -34,8 +34,7 @@ public class ToDataURI {
     private static byte[] getBytes(InputStream iStream) {
         byte[] bytesResult = null;
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-        int bufferSize = 102400000;
-        byte[] buffer = new byte[bufferSize];
+        byte[] buffer = new byte[1024];
         try {
             int len;
             while ((len = iStream.read(buffer)) != -1) {
