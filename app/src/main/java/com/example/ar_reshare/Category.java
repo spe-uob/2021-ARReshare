@@ -15,7 +15,7 @@ public enum Category {
             R.drawable.books_icon),         // RED
     HOUSEHOLD(Color.GREEN,"models/burger.obj","models/burger.png",
             R.drawable.household_icon),          // GREEN
-    OTHER(Color.rgb(30, 19, 34),"models/cup.obj","models/pink.png",
+    OTHER(Color.rgb(204, 136, 128),"models/cup.obj","models/pink.png",
             R.drawable.other_icon);          // PURPLE
 
     private final int hueColour;
