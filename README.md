@@ -11,11 +11,13 @@
 
 The app allows a contributor to list an item they would like to share/offer for free along with their postcode. A consumer can either search for an item or they can view their local area via an AR map view. The consumer can then send a request for an item via the tool, get in touch with the contributor and arrange a pickup.
 
-\
+<br>
+
 ![AR Reshare Clip 2](docs/gifs/feed-product.gif)
 ![AR Reshare Clip 2](docs/gifs/augmented-reality.gif)
 ![AR Reshare Clip 3](docs/gifs/messaging.gif)
-\
+
+<br>
 
 ## Table of Contents
 1. [About](#ar-reshare-app)
@@ -23,8 +25,7 @@ The app allows a contributor to list an item they would like to share/offer for 
    * [Prerequisites](#prerequisites)
    * [Setup and Build](#setup-and-build)
    * [Running the Application](#running-the-application)
-1. [Usage](#usage)
-2. [Backend](#backend)
+2. [Backend Deployement](#backend)
 3. [License](#license)
 4. [Contact](#contact)
 
@@ -62,10 +63,11 @@ To run the application on a physical Android Device:
 4. In Android Studio, select *Run > Select Device...* and choose your device.
 5. Now select *Run > Run 'app'* to install and run the application directly on your device.
 
-# Usage
-
-# Backend
+# Backend Deployement
+The backend for this application has been developed by the team from **Durham University**. You may find the API docs [here](https://ar-reshare.herokuapp.com/) and the repository containing the backend source code [here](https://github.com/AR-Reshare/AR-Reshare).
 
 # License
+This project has been licensed under the [**MIT License**](https://github.com/spe-uob/2021-ARReshare/blob/main/LICENSE)
 
 # Contact
+For contact and queries about contributing to the project, please email grp-ar-reshare@groups.bristol.ac.uk.
