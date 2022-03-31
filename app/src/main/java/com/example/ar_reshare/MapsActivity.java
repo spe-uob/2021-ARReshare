@@ -5,10 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -21,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -33,7 +31,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -41,12 +38,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.TimeUnit;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
@@ -86,9 +82,8 @@ public class MapsActivity extends FragmentActivity implements
 
     // The list of products
     private List<Product> products;
-    private boolean productsDownloaded = false;
-    private Lock lock;
-    private CountDownLatch latch;
+    private CountDownLatch readyLatch;
+    private int TIMEOUT_IN_SECONDS = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +94,7 @@ public class MapsActivity extends FragmentActivity implements
         // 2. Products have been received from backend
         // 3. GoogleMap is ready
         // Once these conditions are met the map can proceed to be populated
-        latch = new CountDownLatch(3);
+        readyLatch = new CountDownLatch(3);
         getLatestProducts();
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
@@ -124,26 +119,8 @@ public class MapsActivity extends FragmentActivity implements
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getLocationPermission();
 
-        // Create a new thread to wait for the conditions
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    System.out.println("STARTED WAITING");
-                    latch.await();
-                    System.out.println("STOPPED WAITING");
-                    // Any UI changes must be run on the UI Thread
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            populateMap(mMap);
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    System.out.println("CRASH");
-                }
-            }
-        }).start();
+        // Wait to populate the map until conditions are fulfilled
+        waitOnConditions();
     }
 
     private void getLatestProducts() {
@@ -155,16 +132,45 @@ public class MapsActivity extends FragmentActivity implements
                     public void onBackendSearchResult(boolean success, List<Product> searchResults) {
                         if (success) {
                             products = searchResults;
-                            productsDownloaded = true;
-                            System.out.println("********* RECEIVED PRODUCTS **********");
-                            latch.countDown();
-                            System.out.println(latch.getCount());
+                            readyLatch.countDown();
+                            System.out.println(readyLatch.getCount());
                         }
                     }
                 });
             }
         }).start();
-        System.out.println("I AM RETURNED");
+    }
+
+    private void waitOnConditions() {
+        // Create a new thread to wait for the conditions
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    boolean success = readyLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+                    if (success) {
+                        // Any UI changes must be run on the UI Thread
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                populateMap(mMap);
+                            }
+                        });
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(),
+                                        "Failed to fetch your location or the products from the server. Please ensure you have access to an internet connection.",
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("CRASH");
+                }
+            }
+        }).start();
     }
 
     // Setup filter results window
@@ -335,7 +341,7 @@ public class MapsActivity extends FragmentActivity implements
         mMap.moveCamera(CameraUpdateFactory.newLatLng(mvb));
 
         // Decrement the latch
-        latch.countDown();
+        readyLatch.countDown();
     }
 
     // May not need to check for permissions if only called after checking locationPermissionGranted
@@ -407,9 +413,9 @@ public class MapsActivity extends FragmentActivity implements
                                     // Logic to handle location object
                                     lastKnownLocation = location;
                                     // Decrement the latch to signal user location is ready
-                                    latch.countDown();
+                                    readyLatch.countDown();
                                     System.out.println("YO MATE IVE GOT THE LOCATION");
-                                    System.out.println(latch.getCount());
+                                    System.out.println(readyLatch.getCount());
                                 }
                             }
                         });
@@ -511,19 +517,9 @@ public class MapsActivity extends FragmentActivity implements
             photo.setImageResource(R.drawable.example_cup);
 
             // Try and download photo
-            System.out.println("PHOTO URL");
-            System.out.println(product.getMainPicURL());
-            //Bitmap defaultPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.example_cup);
-            //new DownloadImageHelper("https://en.wikipedia.org/wiki/Google_logo#/media/File:Google_Logo_(1998).png").download();
-            photo.setImageBitmap(product.getMainPic());
-            //List<Integer> productPhotos = product.getImages();
-//            if (productPhotos.size() >= 1) {
-//                photo.setImageResource(productPhotos.get(0));
-//            } else {
-//                // use default
-//                photo.setImageResource(R.drawable.example_cup);
-//            }
-
+            Bitmap productPhoto = product.getMainPic();
+            if (productPhoto != null) photo.setImageBitmap(productPhoto);
+            else photo.setImageResource(R.drawable.example_cup);
         }
 
         @Override
