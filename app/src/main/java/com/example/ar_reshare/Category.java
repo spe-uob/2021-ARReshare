@@ -13,8 +13,8 @@ public enum Category {
             R.drawable.electronics_icon),   // CYAN
     BOOKS(Color.RED,"models/pawn.obj","models/pink.png",
             R.drawable.books_icon),         // RED
-    FOOD(Color.GREEN,"models/burger.obj","models/burger.png",
-            R.drawable.food_icon),          // GREEN
+    HOUSEHOLD(Color.GREEN,"models/burger.obj","models/burger.png",
+            R.drawable.household_icon),          // GREEN
     OTHER(Color.rgb(30, 19, 34),"models/cup.obj","models/pink.png",
             R.drawable.other_icon);          // PURPLE
 
