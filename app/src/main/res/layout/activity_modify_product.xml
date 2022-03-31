@@ -33,19 +33,20 @@
         app:srcCompat="@drawable/gobackarrow" />
 
     <ScrollView
+        android:id="@+id/scrollView4"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/nav_name">
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
+            android:layout_height="match_parent">
 
             <EditText
-                android:id="@+id/editTextTextPersonName"
+                android:id="@+id/add_product_name"
                 android:layout_width="350dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -108,7 +109,7 @@
                 android:textColor="#9A9696"
                 android:textSize="13sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/condition_dropdown" />
+                app:layout_constraintTop_toBottomOf="@+id/add_product_name" />
 
             <TextView
                 android:id="@+id/textView5"
@@ -120,7 +121,7 @@
                 android:textColor="#9A9696"
                 android:textSize="13sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editTextTextPersonName" />
+                app:layout_constraintTop_toBottomOf="@+id/add_product_description" />
 
             <TextView
                 android:id="@+id/textView6"
@@ -135,7 +136,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/category_dropdown" />
 
             <EditText
-                android:id="@+id/editTextTextMultiLine2"
+                android:id="@+id/add_product_description"
                 android:layout_width="350dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -151,6 +152,29 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Pick up postcode"
+                android:textColor="#9A9696"
+                android:textSize="13sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/condition_dropdown" />
+
+            <EditText
+                android:id="@+id/add_product_postcode"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:ems="10"
+                android:inputType="textPostalAddress"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
 
             <Spinner
                 android:id="@+id/category_dropdown"
@@ -190,7 +214,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-
     <ImageView
         android:id="@+id/tick"
         android:layout_width="54dp"
@@ -200,5 +223,6 @@
         app:layout_constraintEnd_toEndOf="@+id/nav_name"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_baseline_check_24" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
