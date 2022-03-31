@@ -75,16 +75,6 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                     public void onActivityResult(ActivityResult result) {
                         if(result.getResultCode() == RESULT_OK){
                             adapter.addItem(photoUri);
-                            System.out.println("uri = " + photoUri);
-                            System.out.println("uri getpath = " + photoUri.getPath());
-                            System.out.println("file topath = " + photoFile.toPath());
-                            System.out.println("file getpath = " + photoFile.getPath());
-//                            try {
-//                                String dataUri = ToDataURI.TranslateToDataURI(getApplicationContext(),photoUri);
-//                                System.out.println("data uri = " + dataUri);
-//                            } catch (FileNotFoundException e) {
-//                                e.printStackTrace();
-//                            }
                         }else{
                             photoFile.delete();//delete the file if failed
                         }
@@ -104,8 +94,6 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         storageDir = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         confirmListener();
         returnListener();
-
-
     }
 
     private void addImageListener(){
@@ -175,12 +163,14 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
 
                 //uploadImagesToCloud(adapter.uploadedImages);
 
-
+                //Checks if user inputs are all valid before uploading to backend
                 if(checkUserInput(productNameText,productName,productPostcodeText,productPostcode)){
                     ArrayList<String> media = new ArrayList<>();
                     try {
-                        convertToDataURI(adapter.uploadedImages);
-                        BackendController.addProduct("cup","hello","UK","Bristol","BS15BY", 1,"new", media, AddProduct.this);
+                        ArrayList<String> dataURIList;
+                        dataURIList = convertToDataURI(adapter.uploadedImages);
+                        media.addAll(dataURIList);
+                        BackendController.addProduct(productName,productDescription,"UK","Bristol",productPostcode, 1,"new", media, AddProduct.this);
                         Toast toast = Toast.makeText(getApplicationContext(), "Added Successfully!", Toast.LENGTH_LONG);
                         toast.show();
                         onBackPressed();
@@ -189,13 +179,12 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                         toast.show();
                         e.printStackTrace();
                     }
-
                 }
             }
         });
     }
 
-    private List<String> convertToDataURI(SortedList<Uri> uriList) throws FileNotFoundException {
+    private ArrayList<String> convertToDataURI(SortedList<Uri> uriList) throws FileNotFoundException {
         ArrayList<String> dataURIList = new ArrayList<>();
         for(int i = 0; i < uriList.size(); i++){
             String dataURI = ToDataURI.TranslateToDataURI(getApplicationContext(),uriList.get(i));

@@ -90,6 +90,7 @@ public class BackendController {
                     System.out.println("Response back");
                     if (response.code() == SUCCESS) {
                         JWT = response.headers().get("Authorization");
+                        System.out.println(JWT);
                         initialised = true;
                         callback.onBackendResult(true, "Success");
                     } else if (response.code() == INCORRECT_CREDENTIALS) {
@@ -194,33 +195,28 @@ public class BackendController {
                 .baseUrl(URL)
                 .build();
 
-//        JSONObject json = new JSONObject();
-//        json.put("title", title);
-//        json.put("description", description);
-//
-//        JSONObject location = new JSONObject();
-//        location.put("country", country);
-//        location.put("region", region);
-//        location.put("postcode", postcode);
-//        json.put("location", location);
-//        json.put("categoryID", categoryID);
-//        json.put("condition", condition);
-//        JSONArray pics = new JSONArray();
-//        for (String pic : media) {
-//            pics.put(pic);
-//        }
-//
-//        json.put("media",pics);
-//        String bodyString = json.toString();
-        String bodyString =
-                String.format("{\n  \"title\": \"string1\",\n  \"description\": \"string\",\n  \"location\": {\n    \"country\": \"UK\",\n    \"region\": \"Clifton\",\n    \"postcode\": \"BS12HF\"\n  },\n  \"categoryID\": 1,\n  \"condition\": \"new\",\n  \"media\": [\n    \n  ]\n}");
+        JSONObject json = new JSONObject();
+        json.put("title", title);
+        json.put("description", description);
+
+        JSONObject location = new JSONObject();
+        location.put("country", country);
+        location.put("region", region);
+        location.put("postcode", postcode);
+        json.put("location", location);
+
+        json.put("categoryID", categoryID);
+        json.put("condition", condition);
+        JSONArray pics = new JSONArray();
+        for (String pic : media) {
+            pics.put(pic);
+        }
+        json.put("media",pics);
+        String bodyString = json.toString();
         System.out.println(bodyString);
-        System.out.println(JWT);
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
         BackendService service = retrofit.create(BackendService.class);
         Call<ResponseBody> call = service.addProduct(JWT, body);
-
-
         try {
             call.enqueue(new Callback<ResponseBody>() {
                 @Override
