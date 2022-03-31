@@ -8,6 +8,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.google.gson.internal.GsonBuildConfig;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -36,6 +40,7 @@ public class BackendController {
 
     private static final String URL = "https://ar-reshare.herokuapp.com/";
     private static String JWT; // Used for authentication
+    private static int loggedInUserID;
 
     private static boolean initialised = false;
     private static Context context;
@@ -91,8 +96,17 @@ public class BackendController {
                     System.out.println("Response back");
                     if (response.code() == SUCCESS) {
                         JWT = response.headers().get("Authorization");
-                        System.out.println(JWT);
-                        initialised = true;
+                        String[] parts = JWT.split("\\.");
+                        // Decode the currently logged in user id from the JWT token
+                        try {
+                            JSONObject payload =
+                                    new JSONObject(new String(Base64.getUrlDecoder().decode(parts[1])));
+                            loggedInUserID = payload.getInt("userID");
+                            System.out.println("Logged in account id = " + loggedInUserID);
+                            initialised = true;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                         callback.onBackendResult(true, "Success");
                     } else if (response.code() == INCORRECT_CREDENTIALS) {
                         callback.onBackendResult(false, "Your email or password are incorrect");
