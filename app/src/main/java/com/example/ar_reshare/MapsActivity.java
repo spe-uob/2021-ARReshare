@@ -4,7 +4,11 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -442,6 +446,8 @@ public class MapsActivity extends FragmentActivity implements
         System.out.println("POPULATE MAP CALLED");
         for (Product product : products) {
             System.out.println(product.getName());
+            System.out.println(product.getPostcode());
+            System.out.println(product.getCoordinates());
             LatLng coordinates = product.getCoordinates();
             Location productLocation = new Location("ManualProvider");
             productLocation.setLatitude(coordinates.latitude);
@@ -503,6 +509,13 @@ public class MapsActivity extends FragmentActivity implements
             description.setText(product.getDescription());
             ImageView photo = (ImageView) mWindow.findViewById(R.id.productimage);
             photo.setImageResource(R.drawable.example_cup);
+
+            // Try and download photo
+            System.out.println("PHOTO URL");
+            System.out.println(product.getMainPicURL());
+            //Bitmap defaultPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.example_cup);
+            //new DownloadImageHelper("https://en.wikipedia.org/wiki/Google_logo#/media/File:Google_Logo_(1998).png").download();
+            photo.setImageBitmap(product.getMainPic());
             //List<Integer> productPhotos = product.getImages();
 //            if (productPhotos.size() >= 1) {
 //                photo.setImageResource(productPhotos.get(0));

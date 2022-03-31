@@ -1,4 +1,6 @@
 package com.example.ar_reshare;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
@@ -34,6 +36,13 @@ public class Product implements Parcelable {
     @SerializedName("postcode")
     private String postcode;
 
+    @SerializedName("mimetype")
+    private String mimetype;
+    @SerializedName("url")
+    private String mainPicURL;
+
+    private Bitmap mainPic;
+
     private LatLng location;
 
     // Coordinates will be updated after request through PostcodeHelper
@@ -63,6 +72,7 @@ public class Product implements Parcelable {
         date = in.readString();
         location = in.readParcelable(LatLng.class.getClassLoader());
     }
+
     //CREATOR for Parcelable items
     public static final Creator<Product> CREATOR = new Creator<Product>() {
         @Override
@@ -175,6 +185,23 @@ public class Product implements Parcelable {
         });
     }
 
+    public void downloadMainPicture(CountDownLatch latch) {
+        DownloadImageHelper.downloadImage(getMainPicURL(), new DownloadImageHelper.ImageDownloadCallback() {
+            @Override
+            public void onImageDownloaded(boolean success, Bitmap image) {
+                if (success) {
+                    System.out.println("RECEIVED SUCCESS CALLBACK");
+                    setMainPic(image);
+                    latch.countDown();
+                } else {
+                    System.out.println("RECEIVED FAILURE CALLBACK");
+                    setMainPic(null);
+                    latch.countDown();
+                }
+            }
+        });
+    }
+
     //implementation of Parcelable
     @Override
     public int describeContents() {
@@ -206,6 +233,30 @@ public class Product implements Parcelable {
 
     public void setCoordinates(LatLng coordinates) {
         this.coordinates = coordinates;
+    }
+
+    public String getMimetype() {
+        return mimetype;
+    }
+
+    public void setMimetype(String mimetype) {
+        this.mimetype = mimetype;
+    }
+
+    public String getMainPicURL() {
+        return mainPicURL;
+    }
+
+    public void setMainPicURL(String mainPicURL) {
+        this.mainPicURL = mainPicURL;
+    }
+
+    public Bitmap getMainPic() {
+        return mainPic;
+    }
+
+    public void setMainPic(Bitmap mainPic) {
+        this.mainPic = mainPic;
     }
 
     public static class ProductMedia {

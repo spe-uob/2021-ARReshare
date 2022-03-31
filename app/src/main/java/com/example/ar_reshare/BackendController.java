@@ -202,21 +202,7 @@ public class BackendController {
                 public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
                     System.out.println(response.code());
                     if (response.code() == SUCCESS) {
-                        // Find coordinates for each product
-                        CountDownLatch latch = new CountDownLatch(response.body().getSearchedProducts().size());
-                        response.body().getSearchedProducts().forEach(product -> product.findCoordinates(latch));
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    System.out.println("SUCCESS NOW WAITING FOR " + latch.getCount());
-                                    latch.await();
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                                callback.onBackendSearchResult(true, response.body().getSearchedProducts());
-                            }
-                        }).start();
+                        initialiseProducts(response.body().getSearchedProducts(), callback);
                     } else {
                         callback.onBackendSearchResult(false, null);
                     }
@@ -233,6 +219,30 @@ public class BackendController {
             return false;
         }
         return false;
+    }
+
+    // Helper method of searchListings()
+    // Waits until all products have had their main photo downloaded and postcode converted into coordinates
+    private static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {
+        final int NUMBER_OF_REQUESTS_PER_PRODUCT = 2;
+
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(products.size() * NUMBER_OF_REQUESTS_PER_PRODUCT);
+        // Find coordinates for each product
+        products.forEach(product -> product.findCoordinates(latch));
+        // Download main photo for each product
+        products.forEach(product -> product.downloadMainPicture(latch));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                callback.onBackendSearchResult(true, products);
+            }
+        }).start();
     }
 
 }
