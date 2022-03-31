@@ -1,16 +1,8 @@
 [![Android CI](https://github.com/spe-uob/2021-ARReshare/actions/workflows/android.yml/badge.svg)](https://github.com/spe-uob/2021-ARReshare/actions/workflows/android.yml)
-<a href="https://github.com/spe-uob/2021-ARReshare/graphs/contributors" alt="Contributors">
-    <img src="docs/contributors_badge.svg" />
-</a>
-<a href="https://github.com/spe-uob/2021-ARReshare/blob/main/LICENSE" alt="License">
-    <img src="docs/license_MIT_badge.svg" />
-</a>
-<a href="https://github.com/spe-uob/2021-ARReshare/issues" alt="Issues">
-    <img src="https://img.shields.io/github/issues/spe-uob/2021-ARReshare?color=brightgreen" />
-</a>
-<a href="https://github.com/spe-uob/2021-ARReshare/pulls" alt="Pull Requests">
-    <img src="https://img.shields.io/github/issues-pr/spe-uob/2021-ARReshare" />
-</a>
+[![Contributors](docs/contributors_badge.svg)](https://github.com/spe-uob/2021-ARReshare/graphs/contributors)
+[![License](docs/license_MIT_badge.svg)](https://github.com/spe-uob/2021-ARReshare/blob/main/LICENSE)
+[![Issues](https://img.shields.io/github/issues/spe-uob/2021-ARReshare?color=brightgreen)](https://github.com/spe-uob/2021-ARReshare/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/spe-uob/2021-ARReshare)](https://github.com/spe-uob/2021-ARReshare/pulls)
 
 
 # AR Reshare App
@@ -18,6 +10,9 @@
 ### An application that allows people to share the goods, gifts and food they no longer need or want.
 
 The app allows a contributor to list an item they would like to share/offer for free along with their postcode. A consumer can either search for an item or they can view their local area via an AR map view. The consumer can then send a request for an item via the tool, get in touch with the contributor and arrange a pickup.
+
+![AR Reshare Clip](docs/feed-product.gif)
+![AR Reshare Clip 2](docs/messaging.gif)
 
 ## Table of Contents
 1. [About the Project](#ar-reshare-app)
