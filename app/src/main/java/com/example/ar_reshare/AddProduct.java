@@ -9,28 +9,47 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
+
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import com.google.android.gms.common.util.Base64Utils;
+
+import org.json.JSONException;
+
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
-public class AddProduct extends AppCompatActivity implements addPhotoDialog.NoticeDialogListener{
+public class AddProduct extends AppCompatActivity implements addPhotoDialog.NoticeDialogListener, BackendController.BackendCallback{
 
     private ArrayList<Uri> uploadedImages = new ArrayList<>();
+    public ArrayList<Uri> downloadUriList = new ArrayList<>();
     private UploadImageAdapter adapter;
     private final String CAMERA = "camera";
     private final String GALLERY = "gallery";
@@ -130,14 +149,103 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         confirmCheck.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Context context = getApplicationContext();
-                CharSequence text = "Added Successfully!";
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
-                onBackPressed();
+                //get all the inputs from user
+                EditText productNameText = (EditText)findViewById(R.id.add_product_name);
+                String productName = productNameText.getText().toString();
+                EditText productDescriptionText = findViewById(R.id.add_product_description);
+                String productDescription = productDescriptionText.getText().toString();
+                Spinner categoryDropdown = findViewById(R.id.category_dropdown);
+                Integer category = categoryDropdown.getSelectedItemPosition() + 1;
+                Spinner conditionDropdown = findViewById(R.id.condition_dropdown);
+                String condition = conditionDropdown.getSelectedItem().toString();
+                EditText productPostcodeText = findViewById(R.id.add_product_postcode);
+                String productPostcode = productPostcodeText.getText().toString();
+
+                //Checks if user inputs are all valid before uploading to backend
+                if(checkUserInput(productNameText,productName,productPostcodeText,productPostcode)){
+                    ArrayList<String> media = new ArrayList<>();
+                    try {
+                        ArrayList<String> dataURIList;
+                        dataURIList = convertToDataURI(adapter.uploadedImages);
+                        media.addAll(dataURIList);
+                        BackendController.addProduct(productName,productDescription,"UK","Bristol",productPostcode, 1,"new", media, AddProduct.this);
+                        Toast toast = Toast.makeText(getApplicationContext(), "Added Successfully!", Toast.LENGTH_LONG);
+                        toast.show();
+                        onBackPressed();
+                    } catch (Exception e) {
+                        Toast toast = Toast.makeText(getApplicationContext(), "Failed to add products", Toast.LENGTH_LONG);
+                        toast.show();
+                        e.printStackTrace();
+                    }
+                }
             }
         });
+    }
+
+    private ArrayList<String> convertToDataURI(SortedList<Uri> uriList) throws FileNotFoundException {
+        ArrayList<String> dataURIList = new ArrayList<>();
+        for(int i = 0; i < uriList.size(); i++){
+            String dataURI = ToDataURI.TranslateToDataURI(getApplicationContext(),uriList.get(i));
+            dataURIList.add(dataURI);
+        }
+        return dataURIList;
+    }
+
+    // check if user inputs are all valid
+    private boolean checkUserInput(EditText productNameText, String productName,EditText productPostcodeText, String productPostcode){
+        if(!checkProductImages()) return false;
+        else if(!checkProductName(productNameText,productName)) return false;
+        else if(!checkProductPostcode(productPostcodeText,productPostcode)) return false;
+        else return true;
+    }
+
+    private boolean checkProductImages(){
+        if(adapter.uploadedImages.size() == 0){
+            Toast toast = Toast.makeText(getApplicationContext(),"Please add a product image", Toast.LENGTH_LONG);
+            toast.show();
+            Button button = findViewById(R.id.add_image);
+            button.startAnimation(AnimationUtils.loadAnimation(this,R.anim.shake));
+            return false;
+        }else return true;
+    }
+
+    private boolean checkProductName(EditText productNameText, String productName){
+        final Animation animShake = AnimationUtils.loadAnimation(this, R.anim.shake);
+        if(productName.length() == 0){
+            Toast toast = Toast.makeText(getApplicationContext(),"Please input a product name", Toast.LENGTH_LONG);
+            toast.show();
+            productNameText.startAnimation(animShake);
+            return false;
+        }else if (!productName.matches("[a-zA-Z0-9.? ]*")){
+            Toast toast = Toast.makeText(getApplicationContext(),"Please input a valid product name", Toast.LENGTH_LONG);
+            toast.show();
+            productNameText.startAnimation(animShake);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkProductPostcode(EditText productPostcodeText, String productPostcode){
+//        if (postcode.contains(" ")) {
+//            postcode = postcode.replaceFirst(" ", "");
+//            postcodeText.setText(postcode);
+//        }
+        final Animation animShake = AnimationUtils.loadAnimation(this, R.anim.shake);
+        if (productPostcode.length() > 7 || productPostcode.length() < 5) {
+            Toast postcodeWarning = Toast.makeText(getApplicationContext(), "Please ensure you type your postcode in the correct format", Toast.LENGTH_LONG);
+            postcodeWarning.show();
+            productPostcodeText.startAnimation(animShake);
+            return false;
+        } else if (!Character.isAlphabetic(productPostcode.charAt(0)) ||
+                !Character.isAlphabetic(productPostcode.charAt(productPostcode.length()-1)) ||
+                !Character.isAlphabetic(productPostcode.charAt(productPostcode.length()-2))) {
+            Toast postcodeWarning = Toast.makeText(getApplicationContext(), "Please ensure you type your postcode in the correct format", Toast.LENGTH_LONG);
+            postcodeWarning.show();
+            productPostcodeText.startAnimation(animShake);
+            return false;
+        } else {
+            return true;
+        }
     }
 
     @Override
@@ -166,8 +274,10 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
             photoUri = FileProvider.getUriForFile(getApplicationContext(),
                     "com.example.ar_reshare.fileprovider",
                     photoFile);
+
             intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
         }
+
         cameraActivityResultLauncher.launch(intent);
     }
 
@@ -184,4 +294,8 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         return image;
     }
 
+    @Override
+    public void onBackendResult(boolean success, String message) {
+        System.out.println(message);
+    }
 }
