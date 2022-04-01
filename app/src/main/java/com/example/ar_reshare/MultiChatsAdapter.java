@@ -4,6 +4,7 @@ package com.example.ar_reshare;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,13 +49,15 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         Chat chat = mChatList.get(position);
-        System.out.println("chat id is" + chat.getConversationID());
-        //Integer index = mChatList.get(position).getConversationID();
-        getConversationByID(chat.getConversationID());
+        //System.out.println("chat id is" + chat.getConversationID());
+        Integer index = mChatList.get(position).getConversationID();
+        //getConversationByID(chat.getConversationID());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext() ,MessagingActivity.class);
+                intent.putExtra("conversationId", index);
+                intent.putExtra("currentUserId", chat.getReceiverID());
 //                intent.putExtra("contributor", chat.getContributor());
 //                intent.putExtra("user",chat.getCurrentUser());
 //                intent.putExtra("profilePicId",chat.getContributor().getProfileIcon());
@@ -65,29 +68,7 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
     }
 
 
-    private void getConversationByID(Integer conversationID){
 
-        BackendController.getConversationByID(conversationID, new BackendController.MessageBackendCallback() {
-
-            @Override
-            public void onBackendResult(boolean success, String message, Message.MessageResult messageResult) {
-                if (success) {
-                    System.out.println("get conversations successful");
-                    resChat = messageResult.getChat();
-                    //mContext.notify();
-                    //setConversations(conversations);
-
-                    //recyclerView.getAdapter().notifyDataSetChanged();
-//                    for (Chat chat : conversations.getChats()){
-//                        mChatList.add(chat);
-//                    }
-                }else {
-                    System.out.println(message);
-                    System.out.println("fail to get conversations");
-                }
-            }
-        });
-    }
 
 
 

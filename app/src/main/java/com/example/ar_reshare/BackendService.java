@@ -43,4 +43,8 @@ public interface BackendService {
     @GET("conversation/view")
     Call<Message.MessageResult> getConversationByID(@Header("Authorization") String token, @Query("maxResults") int maxResults,
                                                     @Query("startResults") int startResults, @Query("conversationID") int conversationID);
+
+    @Headers("Content-Type: application/json")
+    @PUT("conversation/message")
+    Call<ResponseBody> sendConversationMessage(@Header("Authorization") String token, @Body RequestBody data);
 }

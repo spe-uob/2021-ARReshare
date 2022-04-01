@@ -15,12 +15,12 @@ public class Message {
     @SerializedName("mediaContent")
     private String imageUrl;
 
-    public Message(Integer senderID, String message, User sender, String createdTime, String mediaContentMimetype, String imageUrl) {
+    public Message(Integer senderID, String message, String createdTime, String mediaContentMimetype, String imageUrl) {
         this.senderID = senderID;
         this.message = message;
-        this.sender = sender;
+//        this.sender = sender;
         this.createdTime = createdTime;
-        this.mediaContentMimetype = mediaContentMimetype;
+       // this.mediaContentMimetype = mediaContentMimetype;
         this.imageUrl = imageUrl;
     }
 
@@ -49,25 +49,68 @@ public class Message {
     }
 
     class MessageResult{
-//        private Integer listingID;
-//        private String title;
-//        private String mimetype;
-//        private String url;
-        private Chat chat;
-        private List<Message> messages;
+        private Integer listingID;
+        private String title;
+        private String mimetype;
+        private String url;
+        private Integer receiverID;
+        private String receiverName;
+        private Integer contributorID;
+        private String contributorName;
         private String closedDate;
+        //private Chat chat;
+        @SerializedName("messages")
+        private List<Message> messages;
+        //private String closedDate;
 
         public MessageResult() {
         }
 
-        public MessageResult(Chat chat, List<Message> messages, String closedDate) {
-            this.chat = chat;
-            this.messages = messages;
+        public MessageResult(Integer listingID, String title, String mimetype, String url,
+                             Integer receiverID, String receiverName, Integer contributorID,
+                             String contributorName, String closedDate, List<Message> messages) {
+            this.listingID = listingID;
+            this.title = title;
+            this.mimetype = mimetype;
+            this.url = url;
+            this.receiverID = receiverID;
+            this.receiverName = receiverName;
+            this.contributorID = contributorID;
+            this.contributorName = contributorName;
             this.closedDate = closedDate;
+            this.messages = messages;
         }
 
-        public Chat getChat() {
-            return chat;
+        public Integer getListingID() {
+            return listingID;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getMimetype() {
+            return mimetype;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public Integer getReceiverID() {
+            return receiverID;
+        }
+
+        public String getReceiverName() {
+            return receiverName;
+        }
+
+        public Integer getContributorID() {
+            return contributorID;
+        }
+
+        public String getContributorName() {
+            return contributorName;
         }
 
         public List<Message> getMessages() {

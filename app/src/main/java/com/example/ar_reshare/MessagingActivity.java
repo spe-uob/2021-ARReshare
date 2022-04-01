@@ -4,9 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -14,6 +17,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+
+import org.json.JSONException;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,28 +36,26 @@ public class MessagingActivity extends AppCompatActivity{
     EditText chatTextView;
     List<Message> mMessageList = new ArrayList<>();
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
-    User user;
-    User contributor;
-    int profilePicId;
+    Integer conversationId;
+    Integer currentUserId;
     Product product;
+    Handler handler;
+    Runnable refresh;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.handler = new Handler();
 
         chatTextView = (EditText)findViewById(R.id.text_chatbox);
         setContentView(R.layout.message_list_layout);
         Intent i = getIntent();
-        user = i.getParcelableExtra("user");
-        contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
-        for (User user : ExampleData.getUsers()) {
-            if (contributor.getName().equals(user.getName())) {
-                contributor = user;
-            }
+        conversationId = i.getIntExtra("conversationId", -1);
+        currentUserId = i.getIntExtra("currentUserId", -1);
+        if (conversationId != -1){
+            getConversationByID(conversationId);
         }
-        profilePicId = i.getIntExtra("profilePicId",0);
-        contributor.setProfileIcon(profilePicId);
 
         recyclerView = findViewById(R.id.reyclerview_message_list);
         recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -63,13 +66,16 @@ public class MessagingActivity extends AppCompatActivity{
             }
         });
 
-        for (Chat chat : ExampleData.getChats()) {
-            if (chat.getCurrentUser().getName().equals(user.getName()) && chat.getContributor().getName().equals(contributor.getName())){
-                for (Message message : chat.getMessages()) {
-                    mMessageList.add(message);
-                }
+        refresh = new Runnable() {
+            public void run() {
+                // Do something
+                System.out.println("refresh");
+                getConversationByID(conversationId);
+                messageListAdapter.notifyDataSetChanged();
+                handler.postDelayed(refresh,500);
             }
-        }
+        };
+        handler.post(refresh);
 
         sendButton = (ImageButton) findViewById(R.id.button_send);
         sendButton.setOnClickListener(new View.OnClickListener() {
@@ -78,27 +84,10 @@ public class MessagingActivity extends AppCompatActivity{
                 sendButton = findViewById(R.id.button_send);
                 chatTextView = findViewById(R.id.text_chatbox);
                 String text = chatTextView.getText().toString();
-//                Message message1 = new Message(text, user, simpleDateFormat.format(new Date()));
-//                mMessageList.add(message1);
-//                if (mMessageList.size() == 1) {
-//                    Message message2 = new Message("hi", contributor, simpleDateFormat.format(new Date()));
-//                    mMessageList.add(message2);
-//                }else if (mMessageList.size() == 3){
-//                    Message message3 = new Message("yep, it is still available!", contributor, simpleDateFormat.format(new Date()));
-//                    mMessageList.add(message3);
-//                }else if(mMessageList.size() == 5) {
-//                    Message message4 = new Message("sure, that would work great!", contributor, simpleDateFormat.format(new Date()));
-//                    mMessageList.add(message4);
-//                }else if (mMessageList.size() == 7) {
-//                    Message message5 = new Message("stay safe and have a good one 🤭", contributor, simpleDateFormat.format(new Date()));
-//                    mMessageList.add(message5);
-//                }else {
-//                    Message message6 = new Message("okay", contributor, simpleDateFormat.format(new Date()));
-//                    mMessageList.add(message6);
-//                }
-
-                recyclerView.setAdapter(messageListAdapter);
+                Message message1 = new Message(currentUserId,text,simpleDateFormat.format(new Date())," ", " ");
+                mMessageList.add(message1);
                 chatTextView.setText("");
+                sendConversationMessage(conversationId,text,null);
             }
         });
 
@@ -113,12 +102,64 @@ public class MessagingActivity extends AppCompatActivity{
             }
         });
 
-        messageListAdapter = new MessageListAdapter(this,mMessageList);
+        messageListAdapter = new MessageListAdapter (this,mMessageList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
 
         recyclerView.setAdapter(messageListAdapter);
     }
+
+
+
+
+    private void getConversationByID(Integer conversationID){
+
+        BackendController.getConversationByID(conversationID, new BackendController.MessageBackendCallback() {
+
+            @Override
+            public void onBackendResult(boolean success, String message, Message.MessageResult messageResult) {
+                if (success) {
+                    System.out.println("get conversations successful");
+                    System.out.println(message);
+                    messageListAdapter.setMessageResult(messageResult);
+                    mMessageList.clear();
+                    int resSize = messageResult.getMessages().size();
+                    int mSize = mMessageList.size();
+                    if (resSize > mSize){
+                        int offset = resSize-mSize;
+                        for (int i = resSize - 1;i>=(resSize-offset);i--){
+                            mMessageList.add(messageResult.getMessages().get(i));
+                            messageListAdapter.notifyDataSetChanged();
+                        }
+                    }
+                    recyclerView.setAdapter(messageListAdapter);
+                }else {
+                    System.out.println(message);
+                    System.out.println("fail to get conversations");
+                }
+            }
+        });
+    }
+
+
+    private void sendConversationMessage(Integer conversationID, String textContent, String mediaContent){
+
+        try {
+            BackendController.sendConversationMessage(conversationID, textContent, mediaContent, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if (success) {
+                        System.out.println(message);
+                    }else {
+                        System.out.println("fails" + message);
+                    }
+                }
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
 }

@@ -22,6 +22,8 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
     private Context mContext;
     private List<Message> mMessageList;
+    private Message.MessageResult messageResult;
+    private int currentUserId = 15;
 
     public MessageListAdapter(Context context, List<Message> messageList) {
         mContext = context;
@@ -37,14 +39,14 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         Message message = (Message) mMessageList.get(position);
-
-        if (message.getSender().getMessengerType() == 0) {
+        if (message.getSenderID() == currentUserId) {
             // If the current user is the sender of the message
             return VIEW_TYPE_MESSAGE_SENT;
         } else {
             // If some other user sent the message
             return VIEW_TYPE_MESSAGE_RECEIVED;
         }
+//        return VIEW_TYPE_MESSAGE_RECEIVED;
     }
 
     // Inflates the appropriate layout according to the ViewType.
@@ -90,6 +92,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
         }
 
         void bind(Message message) {
+            System.out.println("binding");
             messageText.setText(message.getMessage());
             timeText.setText(message.getCreatedTime());
         }
@@ -114,20 +117,29 @@ public class MessageListAdapter extends RecyclerView.Adapter {
             // Format the stored timestamp into a readable String using method.
             timeText.setText(message.getCreatedTime());
 
-            nameText.setText(message.getSender().getName());
+            if (messageResult.getContributorID() == currentUserId) {
+                nameText.setText(messageResult.getReceiverName());
+            }else {
+                nameText.setText(messageResult.getContributorName());
+            }
+
 
             // Insert the profile image from the URL into the ImageView.
-            profileImage.setImageResource(message.getSender().getProfileIcon());
+            //profileImage.setImageResource(message.getSender().getProfileIcon());
             profileImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-                    intent.putExtra("contributor", message.getSender());
-                    intent.putExtra("profilePicId", message.getSender().getProfileIcon());
+//                    intent.putExtra("contributor", message.getSender());
+//                    intent.putExtra("profilePicId", message.getSender().getProfileIcon());
                     mContext.startActivity(intent);
                 }
             });
         }
+    }
+
+    public void setMessageResult(Message.MessageResult messageResult){
+        this.messageResult = messageResult;
     }
 
 }
