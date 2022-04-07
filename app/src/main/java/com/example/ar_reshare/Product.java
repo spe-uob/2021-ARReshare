@@ -15,6 +15,8 @@ import com.google.gson.annotations.SerializedName;
 public class Product implements Parcelable {
     @SerializedName("listingID")
     private int id;
+    @SerializedName("contributorID")
+    private int contributorID;
     @SerializedName("title")
     private String name;
     @SerializedName("description")
@@ -84,6 +86,14 @@ public class Product implements Parcelable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getContributorID() {
+        return contributorID;
+    }
+
+    public void setName(int contributorID) {
+        this.contributorID = contributorID;
     }
 
     public String getDescription() {

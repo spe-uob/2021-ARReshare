@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.ViewHolder> {
 
@@ -84,9 +85,18 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     }
 
     public void productValueHelper(ViewHolder holder, Product product) {
-//        holder.profileIcon.setImageResource(product.getContributor().getProfileIcon());
-        holder.categoryIcon.setImageResource(intToCat.get(product.getCategoryID()).getCategoryIcon());
-//        holder.contributor.setText;
+        BackendController.getProfileByID(0, 100,
+                product.getContributorID(), (success, userProfile) -> {
+            if (success) {
+                holder.profileIcon.setImageResource(userProfile.getProfileIcon());
+                holder.contributor.setText(userProfile.getName());
+            }
+            else {
+                System.out.println("getProfileByID callback failed");
+            }
+        });
+        holder.categoryIcon.setImageResource(Objects.requireNonNull(
+                intToCat.get(product.getCategoryID())).getCategoryIcon());
         holder.productImage.setImageBitmap(product.getMainPic());
         holder.productTitle.setText(product.getName());
         holder.productDescription.setText(product.getDescription());
@@ -211,7 +221,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             Intent intent = new Intent(v.getContext(), ProductPageActivity.class);
             intent.putExtra("product", product);
             intent.putExtra("contributor", product.getContributor());
-            intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
+            //intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
             //intent.putExtra("productPicId", (ArrayList<Integer>) product.getImages());
             v.getContext().startActivity(intent);
         }
