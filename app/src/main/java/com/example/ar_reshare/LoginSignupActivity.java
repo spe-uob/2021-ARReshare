@@ -47,12 +47,12 @@ public class LoginSignupActivity extends AppCompatActivity {
         @Override
         public Fragment createFragment(int position) {
             switch (position) {
-                case 0:
+                case SIGN_UP:
                     return new SignUpFragment();
-                case 1:
-                    return new LoginOptionFragment();
-                default:
+                case LOGIN:
                     return new LoginFragment();
+                default:
+                    return new LoginOptionFragment();
             }
         }
 
