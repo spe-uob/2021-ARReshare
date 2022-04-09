@@ -1,7 +1,5 @@
 package com.example.ar_reshare;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -33,25 +31,21 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-
-import org.json.JSONException;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class SignUpFragment extends Fragment {
@@ -466,7 +460,9 @@ public class SignUpFragment extends Fragment {
     private void uploadProfilePicture() {
         try {
             String sourceURI = ToDataURI.TranslateToDataURI(getContext(), profilePictureURI);
-            BackendController.addProfilePicture(getContext(), sourceURI, new BackendController.BackendCallback() {
+            Map<String, String> changes = new HashMap<>();
+            changes.put("picture", sourceURI);
+            BackendController.modifyAccount(getContext(), changes, new BackendController.BackendCallback() {
                 @Override
                 public void onBackendResult(boolean success, String message) {
                     if (success) {

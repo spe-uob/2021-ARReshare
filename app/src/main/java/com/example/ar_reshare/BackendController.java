@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
@@ -169,7 +170,7 @@ public class BackendController {
     }
 
     // TODO: Generalise by taking a HashMap as an attribute
-    public static void addProfilePicture(Context context, String profilePictureURI, BackendCallback callback) throws JSONException {
+    public static void modifyAccount(Context context, Map<String, String> changes, BackendCallback callback) throws JSONException {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .build();
@@ -178,7 +179,10 @@ public class BackendController {
         String password = AuthenticationService.getPassword(context);
         json.put("password", password);
         System.out.println(password);
-        json.put("picture", profilePictureURI);
+
+        for (Map.Entry<String, String> change : changes.entrySet()) {
+            json.put(change.getKey(), change.getValue());
+        }
 
         String bodyString = json.toString();
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
