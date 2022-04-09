@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 public class LoginFragment extends Fragment implements BackendController.BackendCallback {
 
+    private final int DIALOG_TIME = 3000; // milliseconds
+
     public LoginFragment() {
         // Required empty public constructor
     }
@@ -69,11 +71,12 @@ public class LoginFragment extends Fragment implements BackendController.Backend
         AlertDialog.Builder successful = new AlertDialog.Builder(getContext());
         successful.setTitle("Login Successful!");
         successful.setMessage("You have successfully logged in.");
+        successful.setCancelable(false);
         AlertDialog dialog = successful.create();
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                new CountDownTimer(3000, 100) {
+                new CountDownTimer(DIALOG_TIME, 100) {
                     @Override
                     public void onTick(long millisUntilFinished) {
                     }

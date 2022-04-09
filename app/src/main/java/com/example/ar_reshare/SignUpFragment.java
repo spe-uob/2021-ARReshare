@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SignUpFragment extends Fragment {
 
+    private final int DIALOG_TIME = 3000; // milliseconds
     private final int GREEN_COLOUR = Color.parseColor("#32a852");
     private final int RED_COLOUR = Color.parseColor("#ab2a1f");
     private final int DEFAULT_TEXT_COLOUR = Color.parseColor("#363636");
@@ -206,7 +207,7 @@ public class SignUpFragment extends Fragment {
         EditText postcodeText = getView().findViewById(R.id.signUpPostCode);
         String postcode = postcodeText.getText().toString();
         if (postcode.contains(" ")) {
-            postcode = postcode.replaceFirst(" ", "");
+            postcode = postcode.replace(" ", "");
             postcodeText.setText(postcode);
         }
         if (postcode.length() > 7 || postcode.length() < 5) {
@@ -277,11 +278,12 @@ public class SignUpFragment extends Fragment {
         AlertDialog.Builder successful = new AlertDialog.Builder(getContext());
         successful.setTitle("Registration Successful!");
         successful.setMessage("Your account has been successfully registered");
+        successful.setCancelable(false);
         AlertDialog dialog = successful.create();
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                new CountDownTimer(3000, 100) {
+                new CountDownTimer(DIALOG_TIME, 100) {
                     @Override
                     public void onTick(long millisUntilFinished) {
                     }
