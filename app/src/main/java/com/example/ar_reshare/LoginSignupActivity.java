@@ -37,6 +37,15 @@ public class LoginSignupActivity extends AppCompatActivity {
         viewPager.setCurrentItem(position);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (viewPager.getCurrentItem() == LOGIN || viewPager.getCurrentItem() == SIGN_UP) {
+            setCurrentFragment(OPTION_FRAGMENT);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     private class ViewPagerAdapter extends FragmentStateAdapter {
 
         ViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
