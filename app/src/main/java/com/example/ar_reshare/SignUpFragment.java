@@ -1,27 +1,47 @@
 package com.example.ar_reshare;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.icu.util.Calendar;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -43,6 +63,12 @@ public class SignUpFragment extends Fragment {
 
     private final long MINIMUM_AGE_REQUIRED = 18L;
 
+    private File profilePicture = null;
+    private Uri profilePictureURI = null;
+
+    private View addPhotoWindow;
+    private ActivityResultLauncher cameraLauncher;
+
     public SignUpFragment() {
         // Required empty public constructor
     }
@@ -50,6 +76,19 @@ public class SignUpFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == -1) {
+                    ImageView profilePictureView = addPhotoWindow.findViewById(R.id.signupProfilePicture);
+                    profilePictureView.setImageURI(profilePictureURI);
+                } else {
+                    System.out.println("UNSUCCESSFUL");
+                    profilePicture.delete();
+                }
+            }
+        });
     }
 
     @Override
@@ -256,22 +295,24 @@ public class SignUpFragment extends Fragment {
         String dob = dobText.getText().toString();
         String postcode = postcodeText.getText().toString();
 
-        BackendController.registerAccount(name, email, password, dob, postcode, new BackendController.BackendCallback() {
-            @Override
-            public void onBackendResult(boolean success, String message) {
-                if (success) {
-                    BackendController.loginAccount(email, password, new BackendController.BackendCallback() {
-                        @Override
-                        public void onBackendResult(boolean success, String message) {
-                            if (success) displaySuccess();
-                            else displayFailure();
-                        }
-                    });
-                } else {
-                    displayFailure();
-                }
-            }
-        });
+        displaySuccess();
+
+//        BackendController.registerAccount(name, email, password, dob, postcode, new BackendController.BackendCallback() {
+//            @Override
+//            public void onBackendResult(boolean success, String message) {
+//                if (success) {
+//                    BackendController.loginAccount(email, password, new BackendController.BackendCallback() {
+//                        @Override
+//                        public void onBackendResult(boolean success, String message) {
+//                            if (success) displaySuccess();
+//                            else displayFailure();
+//                        }
+//                    });
+//                } else {
+//                    displayFailure();
+//                }
+//            }
+//        });
     }
 
     private void displaySuccess() {
@@ -291,8 +332,9 @@ public class SignUpFragment extends Fragment {
                     public void onFinish() {
                         if (((AlertDialog) dialog).isShowing()) {
                             dialog.dismiss();
-                            Intent intent = new Intent(getContext(), ARActivity.class);
-                            startActivity(intent);
+                            askForProfilePicture();
+//                            Intent intent = new Intent(getContext(), ARActivity.class);
+//                            startActivity(intent);
                         }
                     }
                 }.start();
@@ -308,6 +350,75 @@ public class SignUpFragment extends Fragment {
         // Change button text to default
         Button signUpButton = getView().findViewById(R.id.signUpButton);
         signUpButton.setText("Sign Up");
+    }
+
+    private void askForProfilePicture() {
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        addPhotoWindow = inflater.inflate(R.layout.add_user_photo, null);
+        int width = LinearLayout.LayoutParams.MATCH_PARENT;
+        int height = LinearLayout.LayoutParams.MATCH_PARENT;
+
+        // Get users name
+        EditText firstNameText = getView().findViewById(R.id.signUpFirstName);
+        EditText lastNameText = getView().findViewById(R.id.signUpLastName);
+        String name = firstNameText.getText().toString() + " " + lastNameText.getText().toString();
+
+        // Allows to tap outside the popup to dismiss it
+        boolean focusable = false;
+        final PopupWindow popupWindow = new PopupWindow(addPhotoWindow, width, height, focusable);
+
+        TextView nameText = addPhotoWindow.findViewById(R.id.signupPictureName);
+        nameText.setText(name);
+
+        ImageView profilePicture = addPhotoWindow.findViewById(R.id.signupProfilePicture);
+
+        Button cameraButton = addPhotoWindow.findViewById(R.id.signupPictureCamera);
+        Button galleryButton = addPhotoWindow.findViewById(R.id.signupPictureGallery);
+        Button skipButton = addPhotoWindow.findViewById(R.id.signupPictureCancel);
+        cameraButton.setOnClickListener(v -> takePhoto(addPhotoWindow));
+        galleryButton.setOnClickListener(v -> chooseFromGallery());
+
+        popupWindow.showAtLocation(addPhotoWindow, Gravity.CENTER, 0, 0);
+    }
+
+    private void takePhoto(View parent) {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        try {
+            profilePicture = createImageFile();
+        } catch (IOException ex) {
+            // Error occurred while creating the File
+            ex.printStackTrace();
+        }
+        // Continue only if the File was successfully created
+        if (profilePicture != null) {
+            profilePictureURI =
+                    FileProvider.getUriForFile(getContext(), "com.example.ar_reshare.fileprovider", profilePicture);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, profilePictureURI);
+        }
+
+        cameraLauncher.launch(intent);
+    }
+
+    // Creates a local photo path to store the picture taken by user
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+        return image;
+    }
+
+    private void chooseFromGallery() {
+
+    }
+
+    private void proceed() {
+
     }
 
     public class textChangedListener implements TextWatcher {
@@ -364,9 +475,10 @@ public class SignUpFragment extends Fragment {
     private class signUpButtonListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            if (verifyAllInputs()) {
-                registerUser();
-            }
+            displaySuccess();
+//            if (verifyAllInputs()) {
+//                registerUser();
+//            }
         }
     }
 }

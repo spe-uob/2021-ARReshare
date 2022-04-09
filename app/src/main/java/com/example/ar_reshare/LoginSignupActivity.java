@@ -44,6 +44,7 @@ public class LoginSignupActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+
     }
 
     private class ViewPagerAdapter extends FragmentStateAdapter {
