@@ -14,6 +14,11 @@
     <string name="thanks_message">You added this product,\nthank you for sharing!</string>
     <string name="app_description">An augmented-reality enabled application allowing people to share the goods and gifts they no longer need or want.</string>
 
+    <!-- Used for SignUp Fragment -->
+    <string name="signupProfileCameraText">Take a Selfie!</string>
+    <string name="signupProfileGalleryText">Choose From Gallery!</string>
+    <string name="signupProfileCancelText">No Thanks, Skip For Now</string>
+
 <!-- used for addProduct page dropdown   -->
     <string-array name="categories">
         <item>Clothes</item>

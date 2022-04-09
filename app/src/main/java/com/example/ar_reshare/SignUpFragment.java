@@ -54,8 +54,10 @@ public class SignUpFragment extends Fragment {
 
     private final int DIALOG_TIME = 3000; // milliseconds
     private final int GREEN_COLOUR = Color.parseColor("#32a852");
+    private final int GREEN_BACKGROUND_COLOR = Color.parseColor("#198235");
     private final int RED_COLOUR = Color.parseColor("#ab2a1f");
     private final int DEFAULT_TEXT_COLOUR = Color.parseColor("#363636");
+    private final int BLUE_BACKGROUND_COLOUR = Color.parseColor("#4C62DC");
     private final int CLICKABLE_COLOUR = Color.parseColor("#4C62DC");
     private final int NOT_CLICKABLE_COLOUR = Color.parseColor("#7080db");
 
@@ -68,6 +70,7 @@ public class SignUpFragment extends Fragment {
 
     private View addPhotoWindow;
     private ActivityResultLauncher cameraLauncher;
+    private ActivityResultLauncher galleryLauncher;
 
     public SignUpFragment() {
         // Required empty public constructor
@@ -83,10 +86,22 @@ public class SignUpFragment extends Fragment {
                 if (result.getResultCode() == -1) {
                     ImageView profilePictureView = addPhotoWindow.findViewById(R.id.signupProfilePicture);
                     profilePictureView.setImageURI(profilePictureURI);
+                    onProfilePictureChanged();
                 } else {
                     System.out.println("UNSUCCESSFUL");
                     profilePicture.delete();
                 }
+            }
+        });
+
+        //Gallery intent launcher, allowing users to select multiple pictures at a time
+        galleryLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), new ActivityResultCallback<Uri>() {
+            @Override
+            public void onActivityResult(Uri result) {
+                profilePictureURI = result;
+                ImageView profilePictureView = addPhotoWindow.findViewById(R.id.signupProfilePicture);
+                profilePictureView.setImageURI(profilePictureURI);
+                onProfilePictureChanged();
             }
         });
     }
@@ -375,13 +390,14 @@ public class SignUpFragment extends Fragment {
         Button cameraButton = addPhotoWindow.findViewById(R.id.signupPictureCamera);
         Button galleryButton = addPhotoWindow.findViewById(R.id.signupPictureGallery);
         Button skipButton = addPhotoWindow.findViewById(R.id.signupPictureCancel);
-        cameraButton.setOnClickListener(v -> takePhoto(addPhotoWindow));
+        cameraButton.setOnClickListener(v -> takePhoto());
         galleryButton.setOnClickListener(v -> chooseFromGallery());
+        skipButton.setOnClickListener(v -> proceed());
 
         popupWindow.showAtLocation(addPhotoWindow, Gravity.CENTER, 0, 0);
     }
 
-    private void takePhoto(View parent) {
+    private void takePhoto() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         try {
             profilePicture = createImageFile();
@@ -414,7 +430,36 @@ public class SignUpFragment extends Fragment {
     }
 
     private void chooseFromGallery() {
+        galleryLauncher.launch("image/*");
+    }
 
+    private void onProfilePictureChanged() {
+        Button cameraButton = addPhotoWindow.findViewById(R.id.signupPictureCamera);
+        Button galleryButton = addPhotoWindow.findViewById(R.id.signupPictureGallery);
+        Button skipButton = addPhotoWindow.findViewById(R.id.signupPictureCancel);
+        cameraButton.setText("Confirm ✓");
+        cameraButton.setBackgroundColor(GREEN_BACKGROUND_COLOR);
+        galleryButton.setText("Choose a new photo");
+        skipButton.setText("Cancel and Skip");
+
+        galleryButton.setOnClickListener(v -> defaultButtons());
+        cameraButton.setOnClickListener(v -> uploadProfilePicture());
+    }
+
+    private void defaultButtons() {
+        Button cameraButton = addPhotoWindow.findViewById(R.id.signupPictureCamera);
+        Button galleryButton = addPhotoWindow.findViewById(R.id.signupPictureGallery);
+        Button skipButton = addPhotoWindow.findViewById(R.id.signupPictureCancel);
+        cameraButton.setText(getResources().getText(R.string.signupProfileCameraText));
+        cameraButton.setBackgroundColor(BLUE_BACKGROUND_COLOUR);
+        galleryButton.setText(getResources().getText(R.string.signupProfileGalleryText));
+        skipButton.setText(getResources().getText(R.string.signupProfileCancelText));
+        galleryButton.setOnClickListener(v -> chooseFromGallery());
+        cameraButton.setOnClickListener(v -> takePhoto());
+    }
+
+    private void uploadProfilePicture() {
+        proceed();
     }
 
     private void proceed() {
