@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,7 +41,10 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import org.json.JSONException;
+
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -310,24 +314,27 @@ public class SignUpFragment extends Fragment {
         String dob = dobText.getText().toString();
         String postcode = postcodeText.getText().toString();
 
-        displaySuccess();
-
-//        BackendController.registerAccount(name, email, password, dob, postcode, new BackendController.BackendCallback() {
-//            @Override
-//            public void onBackendResult(boolean success, String message) {
-//                if (success) {
-//                    BackendController.loginAccount(email, password, new BackendController.BackendCallback() {
-//                        @Override
-//                        public void onBackendResult(boolean success, String message) {
-//                            if (success) displaySuccess();
-//                            else displayFailure();
-//                        }
-//                    });
-//                } else {
-//                    displayFailure();
-//                }
-//            }
-//        });
+        BackendController.registerAccount(name, email, password, dob, postcode, new BackendController.BackendCallback() {
+            @Override
+            public void onBackendResult(boolean success, String message) {
+                if (success) {
+                    BackendController.loginAccount(email, password, new BackendController.BackendCallback() {
+                        @Override
+                        public void onBackendResult(boolean success, String message) {
+                            if (success) {
+                                // Add this AR-Reshare account to account manager
+                                Pair<byte[], byte[]> encryptedPair = Crypto.encrypt(password);
+                                AuthenticationService.addAccount(getContext(), email, encryptedPair.first, encryptedPair.second);
+                                displaySuccess();
+                            }
+                            else displayFailure();
+                        }
+                    });
+                } else {
+                    displayFailure();
+                }
+            }
+        });
     }
 
     private void displaySuccess() {
@@ -348,8 +355,6 @@ public class SignUpFragment extends Fragment {
                         if (((AlertDialog) dialog).isShowing()) {
                             dialog.dismiss();
                             askForProfilePicture();
-//                            Intent intent = new Intent(getContext(), ARActivity.class);
-//                            startActivity(intent);
                         }
                     }
                 }.start();
@@ -459,11 +464,28 @@ public class SignUpFragment extends Fragment {
     }
 
     private void uploadProfilePicture() {
-        proceed();
+        try {
+            String sourceURI = ToDataURI.TranslateToDataURI(getContext(), profilePictureURI);
+            BackendController.addProfilePicture(getContext(), sourceURI, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if (success) {
+                        proceed();
+                    }
+                    else {
+                        Toast unsuccessful = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
+                        unsuccessful.show();
+                    }
+                }
+            });
+        } catch (Exception e) {
+
+        }
     }
 
     private void proceed() {
-
+        Intent intent = new Intent(getContext(), ARActivity.class);
+        startActivity(intent);
     }
 
     public class textChangedListener implements TextWatcher {
@@ -520,10 +542,10 @@ public class SignUpFragment extends Fragment {
     private class signUpButtonListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            displaySuccess();
-//            if (verifyAllInputs()) {
-//                registerUser();
-//            }
+            //displaySuccess();
+            if (verifyAllInputs()) {
+                registerUser();
+            }
         }
     }
 }

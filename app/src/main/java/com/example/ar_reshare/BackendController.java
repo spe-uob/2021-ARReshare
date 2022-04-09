@@ -1,6 +1,7 @@
 package com.example.ar_reshare;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import org.json.JSONArray;
@@ -103,6 +104,7 @@ public class BackendController {
                                     new JSONObject(new String(Base64.getUrlDecoder().decode(parts[1])));
                             loggedInUserID = payload.getInt("userID");
                             System.out.println("Logged in account id = " + loggedInUserID);
+                            System.out.println(JWT);
                             initialised = true;
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -127,7 +129,7 @@ public class BackendController {
         }
     }
 
-    public static boolean registerAccount(String name, String email, String password, String dob, String postcode, BackendCallback callback) {
+    public static void registerAccount(String name, String email, String password, String dob, String postcode, BackendCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .build();
@@ -163,9 +165,43 @@ public class BackendController {
             });
         } catch (Exception e) {
             System.out.println(e);
-            return false;
         }
-        return false;
+    }
+
+    // TODO: Generalise by taking a HashMap as an attribute
+    public static void addProfilePicture(Context context, String profilePictureURI, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
+
+        JSONObject json = new JSONObject();
+        String password = AuthenticationService.getPassword(context);
+        json.put("password", password);
+        System.out.println(password);
+        json.put("picture", profilePictureURI);
+
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.modifyAccount(JWT, body);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) callback.onBackendResult(true, "");
+                    else callback.onBackendResult(false, "Failed to modify account");
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    callback.onBackendResult(false, "Failed to modify account");
+                }
+            });
+        } catch (Exception e) {
+            callback.onBackendResult(false, e.getMessage());
+        }
     }
 
     // TODO: Add a timer after which this method is called automatically
