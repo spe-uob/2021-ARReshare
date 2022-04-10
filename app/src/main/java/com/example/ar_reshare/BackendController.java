@@ -194,7 +194,6 @@ public class BackendController {
 
         JSONObject json = new JSONObject();
         json.put("password", password);
-        System.out.println(password);
 
         for (Map.Entry<String, String> change : changes.entrySet()) {
             if (!change.getKey().equals("password")) {

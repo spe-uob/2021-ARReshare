@@ -87,7 +87,6 @@ public class SignUpFragment extends Fragment {
                     profilePictureView.setImageURI(profilePictureURI);
                     onProfilePictureChanged();
                 } else {
-                    System.out.println("UNSUCCESSFUL");
                     profilePicture.delete();
                 }
             }
