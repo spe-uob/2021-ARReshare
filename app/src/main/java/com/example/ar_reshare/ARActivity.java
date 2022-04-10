@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.media.Image;
 import android.opengl.GLES30;
@@ -71,6 +72,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class ARActivity extends AppCompatActivity implements SampleRender.Renderer {
 
@@ -174,6 +177,10 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private final float[] worldLightDirection = {0.0f, 0.0f, 0.0f, 0.0f};
     private final float[] viewLightDirection = new float[4]; // view x world light direction
 
+    // The list of products fetched from the backend
+    private List<Product> products;
+    private CountDownLatch readyLatch;
+    private int TIMEOUT_IN_SECONDS = 3;
 
     // The list of currently displayed Product Objects
     private final List<ProductObject> productObjects = new ArrayList<>();
@@ -231,24 +238,26 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
         // Set up renderer.
         render = new SampleRender(surfaceView, this, getAssets());
-        System.out.println(render.toString());
 
         installRequested = false;
 
         depthSettings.onCreate(this);
         instantPlacementSettings.onCreate(this);
 
+        // Make the AR wait on the following two conditions
+        // 1. Device location is ready
+        // 2. Products have been received from backend
+        // Once these conditions are met the AR can proceed to be populated
+        this.readyLatch = new CountDownLatch(2);
+
+        getLatestProducts();
+
         // Define the onclick event for compass (regenerate) button
         ImageButton regenerate_button = findViewById(R.id.regenerate_button);
         regenerate_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Get nearby products and calculate required angles
-                resetProductObjects();
-                populateProducts();
-
-                // Rotation animation
-                ObjectAnimator.ofFloat(v, "rotation", (float) lastCompassButtonAngle, (float) lastCompassButtonAngle+360).start();
+                onCompassButtonPressed(v);
             }
         });
 
@@ -430,6 +439,49 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 popupWindow.dismiss();
             }
         });
+    }
+
+    private void getLatestProducts() {
+        BackendController.searchListings(0, 100, new BackendController.BackendSearchResultCallback() {
+            @Override
+            public void onBackendSearchResult(boolean success, List<Product> searchResults) {
+                if (success) {
+                    products = searchResults;
+                    readyLatch.countDown();
+                    System.out.println(readyLatch.getCount());
+                }
+            }
+        });
+    }
+
+    private void onCompassButtonPressed(View view) {
+        // Rotation animation
+        ObjectAnimator.ofFloat(view, "rotation", (float) lastCompassButtonAngle, (float) lastCompassButtonAngle+360).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    boolean success = readyLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+                    if (success) {
+                        // Get nearby products and calculate required angles
+                        resetProductObjects();
+                        populateProducts();
+                        return;
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(),
+                                        "Failed to fetch your location or the products from the server. Please ensure you have access to an internet connection.",
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -770,7 +822,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             Trackable trackable = obj.getTrackable();
 
             // Check object's category
-            Category objCategory = obj.getProduct().getCategory();
+            // TODO: Change temporary hardcoded category
+            Category objCategory = Category.OTHER;
             if (objCategory.equals(Category.CLOTHING)){
                 virtualObjectMesh = objectHat;
                 virtualObjectShader = hatShader;
@@ -962,6 +1015,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                                 if (location != null) {
                                     // Logic to handle location object
                                     lastKnownLocation = location;
+                                    readyLatch.countDown();
                                 }
                             }
                         });
@@ -973,11 +1027,10 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
     // Prepare products for display by finding the required angle for each product
     private void populateProducts() {
-        List<Product> products = ExampleData.getProducts();
-        for (Product product : products) {
+        for (Product product : this.products) {
             Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(product.getLocation().latitude);
-            productLocation.setLongitude(product.getLocation().longitude);
+            productLocation.setLatitude(product.getCoordinates().latitude);
+            productLocation.setLongitude(product.getCoordinates().longitude);
             double requiredAngle = lastKnownLocation.bearingTo(productLocation);
             requiredAngle = requiredAngle * Math.PI/180;
             productAngles.put(product, requiredAngle);
@@ -1036,17 +1089,17 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 TextView title = (TextView) productBox.findViewById(R.id.title);
                 title.setText(product.getName());
                 TextView contributor = (TextView) productBox.findViewById(R.id.contributor);
-                contributor.setText(product.getContributor().getName());
+                //contributor.setText(product.getContributor().getName());
                 ImageView photo = (ImageView) productBox.findViewById(R.id.productimage);
-                List<Integer> productPhotos = product.getImages();
-                if (productPhotos.size() >= 1) {
-                    photo.setImageResource(productPhotos.get(0));
-                }
+                Bitmap productPhoto = product.getMainPic();
+                if (productPhoto != null) photo.setImageBitmap(product.getMainPic());
+                else photo.setImageResource(R.drawable.example_cup);
 
+                // TODO: Add checking for null product location
                 // Find and display distance to product
                 Location productLocation = new Location("ManualProvider");
-                productLocation.setLatitude(product.getLocation().latitude);
-                productLocation.setLongitude(product.getLocation().longitude);
+                productLocation.setLatitude(product.getCoordinates().latitude);
+                productLocation.setLongitude(product.getCoordinates().longitude);
                 float dist = lastKnownLocation.distanceTo(productLocation);
                 TextView distanceAway = (TextView) productBox.findViewById(R.id.distanceAway);
                 distanceAway.setText(Math.round(dist) + " metres away");
@@ -1060,7 +1113,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                         intent.putExtra("product", product);
                         intent.putExtra("contributor", product.getContributor());
                         intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
-                        intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) product.getImages());
+                        //intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) product.getImages());
 
                         startActivity(intent);
                     }
@@ -1097,6 +1150,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         });
     }
 
+    // TODO: Consider creating an abstract class SwipingActivity
     // Logic for handling swiping gestures between activities
     @Override
     public boolean onTouchEvent(MotionEvent touchEvent){

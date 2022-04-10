@@ -39,9 +39,11 @@ import java.util.stream.Collectors;
 
 public class FeedActivity extends AppCompatActivity {
 
-    // Array to initialise products
-    List<Product> productList =
-            ExampleData.getProducts().subList(1, ExampleData.getProducts().size());
+    // List to initialise products
+    List<Product> productList;
+
+    // Global Recycler View
+    RecyclerView recyclerView;
 
     // Location related attributes
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -72,11 +74,20 @@ public class FeedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
 
-        // Allows different products to be displayed as individual cards
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        feedRecyclerAdapter = new FeedRecyclerAdapter(productList);
-        recyclerView.setAdapter(feedRecyclerAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        BackendController.searchListings(0, 100, (success, searchResults) -> {
+            if (success) {
+                productList = searchResults;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapterCreator();
+                    }
+                });
+            }
+            else {
+                System.out.println("searchListings callback failed");
+            }
+        });
 
         // Request location permissions if needed and get latest location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -105,6 +116,14 @@ public class FeedActivity extends AppCompatActivity {
         // Filter according to user preferences
         ImageView filterButton = findViewById(R.id.feedFilterButton);
         setupFilterWindow(filterButton);
+    }
+
+    public void adapterCreator() {
+        // Allows different products to be displayed as individual cards
+        recyclerView = findViewById(R.id.recyclerView);
+        feedRecyclerAdapter = new FeedRecyclerAdapter(productList);
+        recyclerView.setAdapter(feedRecyclerAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override
@@ -162,7 +181,7 @@ public class FeedActivity extends AppCompatActivity {
 
                                 // Logic to handle location object
                                 userLocation = location;
-                                feedRecyclerAdapter.updateDistances(location);
+                                //feedRecyclerAdapter.updateDistances(location);
                             }
                         });
             }

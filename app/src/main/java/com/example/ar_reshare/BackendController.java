@@ -3,7 +3,13 @@ package com.example.ar_reshare;
 import android.accounts.Account;
 import android.content.Context;
 import android.content.Intent;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.google.gson.internal.GsonBuildConfig;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.google.gson.JsonObject;
 
@@ -16,6 +22,13 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+
+
+import de.javagl.obj.Obj;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -31,14 +44,20 @@ public class BackendController {
     private static final int SUCCESSFUL_CREATION = 201;
     private static final int INCORRECT_FORMAT = 400;
     private static final int INCORRECT_CREDENTIALS = 401;
-    private static final int REQUEST_NOT_FOUND = 404;
+
     private static final int EMAIL_ADDRESS_ALREADY_REGISTERED = 409;
     private static final int PASSWORD_NOT_STRONG = 422;
+
     private static final int MEDIA_NOT_SUPPORT = 422;
+    private static final int REQUEST_NOT_FOUND = 404;
+    private static final int RESOURCE_NOT_FOUND = 404;
+    private static final int TYPE_NOT_SUPPORTED = 422;
+
 
 
     private static final String URL = "https://ar-reshare.herokuapp.com/";
     private static String JWT; // Used for authentication
+    private static int loggedInUserID;
 
     private static boolean initialised = false;
     private static Context context;
@@ -50,12 +69,19 @@ public class BackendController {
         void onBackendResult(boolean success, String message);
     }
 
+
     public interface ChatBackendCallback {
         void onBackendResult(boolean success, String message, Chat.ConversationsResult conversations);
     }
 
     public interface MessageBackendCallback {
         void onBackendResult(boolean success, String message, Message.MessageResult messageResult);
+    }
+
+    // Interface for callback handlers to receive response from the request
+    public interface BackendSearchResultCallback {
+        void onBackendSearchResult(boolean success, List<Product> searchResults);
+
     }
 
     private static void initialise() {
@@ -97,7 +123,17 @@ public class BackendController {
                     System.out.println("Response back");
                     if (response.code() == SUCCESS) {
                         JWT = response.headers().get("Authorization");
-                        initialised = true;
+                        String[] parts = JWT.split("\\.");
+                        // Decode the currently logged in user id from the JWT token
+                        try {
+                            JSONObject payload =
+                                    new JSONObject(new String(Base64.getUrlDecoder().decode(parts[1])));
+                            loggedInUserID = payload.getInt("userID");
+                            System.out.println("Logged in account id = " + loggedInUserID);
+                            initialised = true;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                         callback.onBackendResult(true, "Success");
                     } else if (response.code() == INCORRECT_CREDENTIALS) {
                         callback.onBackendResult(false, "Your email or password are incorrect");
@@ -195,6 +231,7 @@ public class BackendController {
         return false;
     }
 
+
     public static boolean createConversation(Integer listingID, BackendCallback callback) throws JSONException {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
@@ -233,7 +270,7 @@ public class BackendController {
                         callback.onBackendResult(false, "The request was missing required parameters, or was formatted incorrectly");
                     } else if (response.code() == INCORRECT_CREDENTIALS) {
                         callback.onBackendResult(false, "The authentication token was missing or invalid");
-                    } else if (response.code() == REQUEST_NOT_FOUND){
+                    } else if (response.code() == RESOURCE_NOT_FOUND){
                         callback.onBackendResult(false, "The requested resource does not exist or is unavailable to you");
                     } else {
                         System.out.println("response"+response.message());
@@ -309,6 +346,36 @@ public class BackendController {
 
         BackendService service = retrofit.create(BackendService.class);
         Call<ResponseBody> call = service.closeConversation(JWT, body);
+        return false;
+    }
+
+    public static boolean addProduct(String title, String description, String country, String region, String postcode, Integer categoryID, String condition, List<String> media, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
+
+        JSONObject json = new JSONObject();
+        json.put("title", title);
+        json.put("description", description);
+
+        JSONObject location = new JSONObject();
+        location.put("country", country);
+        location.put("region", region);
+        location.put("postcode", postcode);
+        json.put("location", location);
+
+        json.put("categoryID", categoryID);
+        json.put("condition", condition);
+        JSONArray pics = new JSONArray();
+        for (String pic : media) {
+            pics.put(pic);
+        }
+        json.put("media",pics);
+        String bodyString = json.toString();
+        System.out.println(bodyString);
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.addProduct(JWT, body);
 
         try {
             call.enqueue(new Callback<ResponseBody>() {
@@ -317,21 +384,25 @@ public class BackendController {
                     System.out.println(response.code());
                     if (response.code() == SUCCESSFUL_CREATION) {
                         callback.onBackendResult(true, "Success");
-                    } else if (response.code() == INCORRECT_FORMAT) {
-                        callback.onBackendResult(false, "The request was missing required parameters, or was formatted incorrectly");
                     } else if (response.code() == INCORRECT_CREDENTIALS) {
-                        callback.onBackendResult(false, "The authentication token was missing or invalid");
-                    } else if (response.code() == REQUEST_NOT_FOUND){
-                        callback.onBackendResult(false, "The requested resource does not exist or is unavailable to you");
+                        callback.onBackendResult(false, "The authentication token is missing or invalid");
+                    } else if(response.code() == RESOURCE_NOT_FOUND){
+                        callback.onBackendResult(false, "A requested auxiliary resource (category, address) does not exist or is unavailable to you");
+                    } else if (response.code() == TYPE_NOT_SUPPORTED){
+                        callback.onBackendResult(false, "The media provided is not a supported file type");
                     } else {
-                        callback.onBackendResult(false, "That resource is already closed");
+                        callback.onBackendResult(false, "Failed to regenerate a new token????");
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     System.out.println("Failure");
+
                     callback.onBackendResult(false, "Failed to create new conversation");
+
+                    callback.onBackendResult(false, "Failed to regenerate a new token");
+
                 }
             });
         } catch (Exception e) {
@@ -340,6 +411,7 @@ public class BackendController {
         }
         return false;
     }
+
 
     public static boolean getConversationByID(Integer conversationID, MessageBackendCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
@@ -404,7 +476,7 @@ public class BackendController {
                 RequestBody.create(MediaType.parse("application/json"), bodyString);
 
         BackendService service = retrofit.create(BackendService.class);
-        Call<ResponseBody> call = service.sendConversationMessage(JWT,body);
+        Call<ResponseBody> call = service.sendConversationMessage(JWT, body);
 
         try {
             call.enqueue(new Callback<ResponseBody>() {
@@ -418,12 +490,13 @@ public class BackendController {
                         callback.onBackendResult(false, "The request was missing required parameters, or was formatted incorrectly");
                     } else if (response.code() == INCORRECT_CREDENTIALS) {
                         callback.onBackendResult(false, "The authentication token was missing or invalid");
-                    } else if (response.code() == REQUEST_NOT_FOUND) {
+                    } else if (response.code() == RESOURCE_NOT_FOUND) {
                         callback.onBackendResult(false, "The requested resource does not exist or is unavailable to you");
                     } else if (response.code() == MEDIA_NOT_SUPPORT) {
                         callback.onBackendResult(false, "The media provided is not a supported file type");
                     }
                 }
+
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     System.out.println("Failure");
@@ -435,5 +508,67 @@ public class BackendController {
             return false;
         }
         return false;
+    }
+
+    public static void searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(URL)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+
+                BackendService service = retrofit.create(BackendService.class);
+                Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
+
+                try {
+                    call.enqueue(new Callback<Product.SearchResults>() {
+                        @Override
+                        public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                            System.out.println(response.code());
+                            if (response.code() == SUCCESS) {
+                                initialiseProducts(response.body().getSearchedProducts(), callback);
+                            } else {
+                                callback.onBackendSearchResult(false, null);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                            System.out.println("Failure");
+                            callback.onBackendSearchResult(false, null);
+                        }
+                    });
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        }).start();
+    }
+
+    // Helper method of searchListings()
+    // Waits until all products have had their main photo downloaded and postcode converted into coordinates
+    private static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {
+        final int NUMBER_OF_REQUESTS_PER_PRODUCT = 2;
+
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(products.size() * NUMBER_OF_REQUESTS_PER_PRODUCT);
+        // Find coordinates for each product
+        products.forEach(product -> product.findCoordinates(latch));
+        // Download main photo for each product
+        products.forEach(product -> product.downloadMainPicture(latch));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                callback.onBackendSearchResult(true, products);
+            }
+        }).start();
+
     }
 }
