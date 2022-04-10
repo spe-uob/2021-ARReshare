@@ -85,14 +85,14 @@ public class LoginFragment extends Fragment implements BackendController.Backend
                     public void onFinish() {
                         if (((AlertDialog) dialog).isShowing()) {
                             dialog.dismiss();
-                            Intent intent = new Intent(getContext(), ARActivity.class);
-                            startActivity(intent);
                         }
                     }
                 }.start();
             }
         });
         dialog.show();
+        Intent intent = new Intent(getContext(), ARActivity.class);
+        startActivity(intent);
     }
 
     private void displayFailure() {

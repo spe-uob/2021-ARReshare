@@ -85,6 +85,7 @@ public class BackendController {
                 .baseUrl(URL)
                 .build();
 
+        // TODO: Change implementation to use JsonObject
         String bodyString = String.format("{\n  \"email\": \"%s\",\n  \"password\": \"%s\"\n}", email, password);
         RequestBody body =
                 RequestBody.create(MediaType.parse("application/json"), bodyString);
@@ -135,6 +136,7 @@ public class BackendController {
                 .baseUrl(URL)
                 .build();
 
+        // TODO: Change implementation to use JsonObject
         String bodyString =
                 String.format("{\n  \"name\": \"%s\",\n  \"email\": \"%s\",\n  \"password\": \"%s\",\n  \"dob\": \"%s\"\n}",
                         name, email, password, dob);
@@ -169,19 +171,28 @@ public class BackendController {
         }
     }
 
-    // TODO: Generalise by taking a HashMap as an attribute
     public static void modifyAccount(Context context, Map<String, String> changes, BackendCallback callback) throws JSONException {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .build();
 
+        String password;
+        // If user attempts to modify password or email, old password must be provided
+        if (changes.containsKey("newPassword") || changes.containsKey("email")) {
+            password = changes.getOrDefault("password", "NO PASSWORD PROVIDED");
+        } else {
+            // If the change is less sensitive, the authentication service will provide the password
+            password = AuthenticationService.getPassword(context);
+        }
+
         JSONObject json = new JSONObject();
-        String password = AuthenticationService.getPassword(context);
         json.put("password", password);
         System.out.println(password);
 
         for (Map.Entry<String, String> change : changes.entrySet()) {
-            json.put(change.getKey(), change.getValue());
+            if (!change.getKey().equals("password")) {
+                json.put(change.getKey(), change.getValue());
+            }
         }
 
         String bodyString = json.toString();
@@ -193,8 +204,15 @@ public class BackendController {
             call.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    System.out.println(response.code());
-                    if (response.code() == SUCCESS) callback.onBackendResult(true, "");
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "");
+                    }
+                    else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "Incorrect password provided");
+                    }
+                    else if (response.code() == PASSWORD_NOT_STRONG) {
+                        callback.onBackendResult(false, "Password not strong or age below minimum");
+                    }
                     else callback.onBackendResult(false, "Failed to modify account");
                 }
 

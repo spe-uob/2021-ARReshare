@@ -2,6 +2,7 @@ package com.example.ar_reshare;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -321,10 +322,14 @@ public class SignUpFragment extends Fragment {
                                 AuthenticationService.addAccount(getContext(), email, encryptedPair.first, encryptedPair.second);
                                 displaySuccess();
                             }
-                            else displayFailure();
+                            else {
+                                signUpButton.setEnabled(true);
+                                displayFailure();
+                            }
                         }
                     });
                 } else {
+                    signUpButton.setEnabled(true);
                     displayFailure();
                 }
             }
@@ -332,29 +337,30 @@ public class SignUpFragment extends Fragment {
     }
 
     private void displaySuccess() {
-        AlertDialog.Builder successful = new AlertDialog.Builder(getContext());
-        successful.setTitle("Registration Successful!");
-        successful.setMessage("Your account has been successfully registered");
-        successful.setCancelable(false);
-        AlertDialog dialog = successful.create();
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+        AlertDialog dialog = createDialog("Registration Successful!",
+                "Your account has been successfully registered");
+        dialog.setOnShowListener(dialog1 -> new CountDownTimer(DIALOG_TIME, 100) {
             @Override
-            public void onShow(DialogInterface dialog) {
-                new CountDownTimer(DIALOG_TIME, 100) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                    }
-                    @Override
-                    public void onFinish() {
-                        if (((AlertDialog) dialog).isShowing()) {
-                            dialog.dismiss();
-                            askForProfilePicture();
-                        }
-                    }
-                }.start();
+            public void onTick(long millisUntilFinished) {
             }
-        });
+            @Override
+            public void onFinish() {
+                if (((AlertDialog) dialog1).isShowing()) {
+                    dialog1.dismiss();
+                    askForProfilePicture();
+                }
+            }
+        }.start());
         dialog.show();
+    }
+
+    private AlertDialog createDialog(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setCancelable(false);
+        AlertDialog dialog = builder.create();
+        return dialog;
     }
 
     private void displayFailure() {
@@ -366,6 +372,7 @@ public class SignUpFragment extends Fragment {
         signUpButton.setText("Sign Up");
     }
 
+    // Inflates a popup window asking the user to upload a profile picture
     private void askForProfilePicture() {
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         addPhotoWindow = inflater.inflate(R.layout.add_user_photo, null);
@@ -383,8 +390,6 @@ public class SignUpFragment extends Fragment {
 
         TextView nameText = addPhotoWindow.findViewById(R.id.signupPictureName);
         nameText.setText(name);
-
-        ImageView profilePicture = addPhotoWindow.findViewById(R.id.signupProfilePicture);
 
         Button cameraButton = addPhotoWindow.findViewById(R.id.signupPictureCamera);
         Button galleryButton = addPhotoWindow.findViewById(R.id.signupPictureGallery);
@@ -428,10 +433,12 @@ public class SignUpFragment extends Fragment {
         return image;
     }
 
+    // Allows the user to choose a photo from the photo gallery
     private void chooseFromGallery() {
         galleryLauncher.launch("image/*");
     }
 
+    // Changes button text and colours when a picture has been chosen
     private void onProfilePictureChanged() {
         Button cameraButton = addPhotoWindow.findViewById(R.id.signupPictureCamera);
         Button galleryButton = addPhotoWindow.findViewById(R.id.signupPictureGallery);
@@ -439,12 +446,14 @@ public class SignUpFragment extends Fragment {
         cameraButton.setText("Confirm ✓");
         cameraButton.setBackgroundColor(GREEN_BACKGROUND_COLOR);
         galleryButton.setText("Choose a new photo");
+        galleryButton.setBackgroundColor(RED_COLOUR);
         skipButton.setText("Cancel and Skip");
 
         galleryButton.setOnClickListener(v -> defaultButtons());
         cameraButton.setOnClickListener(v -> uploadProfilePicture());
     }
 
+    // Resets button text and colours to default
     private void defaultButtons() {
         Button cameraButton = addPhotoWindow.findViewById(R.id.signupPictureCamera);
         Button galleryButton = addPhotoWindow.findViewById(R.id.signupPictureGallery);
@@ -452,6 +461,7 @@ public class SignUpFragment extends Fragment {
         cameraButton.setText(getResources().getText(R.string.signupProfileCameraText));
         cameraButton.setBackgroundColor(BLUE_BACKGROUND_COLOUR);
         galleryButton.setText(getResources().getText(R.string.signupProfileGalleryText));
+        galleryButton.setBackgroundColor(BLUE_BACKGROUND_COLOUR);
         skipButton.setText(getResources().getText(R.string.signupProfileCancelText));
         galleryButton.setOnClickListener(v -> chooseFromGallery());
         cameraButton.setOnClickListener(v -> takePhoto());
@@ -459,23 +469,43 @@ public class SignUpFragment extends Fragment {
 
     private void uploadProfilePicture() {
         try {
+            Button button = addPhotoWindow.findViewById(R.id.signupPictureCamera);
+            button.setText("Uploading...");
             String sourceURI = ToDataURI.TranslateToDataURI(getContext(), profilePictureURI);
             Map<String, String> changes = new HashMap<>();
             changes.put("picture", sourceURI);
             BackendController.modifyAccount(getContext(), changes, new BackendController.BackendCallback() {
                 @Override
                 public void onBackendResult(boolean success, String message) {
-                    if (success) {
+                    if (false) {
+                        AlertDialog successful = createDialog("Success!", "Your profile picture has been uploaded.");
+                        successful.setOnShowListener(dialog -> {
+                            new CountDownTimer(DIALOG_TIME, 100) {
+                            @Override
+                            public void onTick(long millisUntilFinished) {
+                            }
+                            @Override
+                            public void onFinish() {
+                                if (((AlertDialog) dialog).isShowing()) {
+                                    dialog.dismiss();
+                                }
+                            }
+                            }.start();
+                        });
+                        successful.show();
                         proceed();
                     }
                     else {
-                        Toast unsuccessful = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
+                        defaultButtons();
+                        Toast unsuccessful = Toast.makeText(getContext(), "Failed to upload the picture", Toast.LENGTH_LONG);
                         unsuccessful.show();
                     }
                 }
             });
         } catch (Exception e) {
-
+            defaultButtons();
+            Toast unsuccessful = Toast.makeText(getContext(), "Failed to upload the picture", Toast.LENGTH_LONG);
+            unsuccessful.show();
         }
     }
 
@@ -538,9 +568,13 @@ public class SignUpFragment extends Fragment {
     private class signUpButtonListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            //displaySuccess();
+            // Disable button while request is sent
+            getView().findViewById(R.id.signUpButton).setEnabled(false);
             if (verifyAllInputs()) {
                 registerUser();
+            } else {
+                // Enable the button if verification failed
+                getView().findViewById(R.id.signUpButton).setEnabled(true);
             }
         }
     }
