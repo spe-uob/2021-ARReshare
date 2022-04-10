@@ -69,9 +69,6 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
 
 
 
-
-
-
     private class ChatHolder extends RecyclerView.ViewHolder {
         TextView chatTitle, chatBody, chatTime, productInfo;
         ImageView icon;
