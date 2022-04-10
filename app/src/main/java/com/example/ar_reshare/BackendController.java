@@ -189,40 +189,35 @@ public class BackendController {
     }
 
     public static void searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(URL)
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-                BackendService service = retrofit.create(BackendService.class);
-                Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
 
-                try {
-                    call.enqueue(new Callback<Product.SearchResults>() {
-                        @Override
-                        public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
-                            System.out.println(response.code());
-                            if (response.code() == SUCCESS) {
-                                initialiseProducts(response.body().getSearchedProducts(), callback);
-                            } else {
-                                callback.onBackendSearchResult(false, null);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<Product.SearchResults> call, Throwable t) {
-                            System.out.println("Failure");
-                            callback.onBackendSearchResult(false, null);
-                        }
-                    });
-                } catch (Exception e) {
-                    System.out.println(e);
+        try {
+            call.enqueue(new Callback<Product.SearchResults>() {
+                @Override
+                public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        initialiseProducts(response.body().getSearchedProducts(), callback);
+                    } else {
+                        callback.onBackendSearchResult(false, null);
+                    }
                 }
-            }
-        }).start();
+
+                @Override
+                public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendSearchResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     public static void getProfileByID(int startResults, int maxResults, int userID,

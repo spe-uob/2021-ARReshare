@@ -25,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -35,6 +36,10 @@ import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class FeedActivity extends AppCompatActivity {
@@ -45,11 +50,13 @@ public class FeedActivity extends AppCompatActivity {
     // Global Recycler View
     RecyclerView recyclerView;
 
+    // CountDownLatch to ensure thread only works after results have been received from backend
+    private CountDownLatch readyLatch;
+
     // Location related attributes
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted = false;
     // Built-in class which provides current location
-    private FusedLocationProviderClient fusedLocationClient;
     private Location userLocation;
 
     // Reference to adapter
@@ -74,20 +81,20 @@ public class FeedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
 
+        readyLatch = new CountDownLatch(1);
         BackendController.searchListings(0, 100, (success, searchResults) -> {
             if (success) {
                 productList = searchResults;
                 runOnUiThread(this::adapterCreator);
+                readyLatch.countDown();
             }
             else {
                 System.out.println("searchListings callback failed");
             }
         });
 
-        // Request location permissions if needed and get latest location
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        getLocationPermission();
-        getDeviceLocation();
+        FusedLocationProviderClient fusedLocationClient =
+                LocationServices.getFusedLocationProviderClient(this);
 
         // Link to Add Product page
         ImageView addProductButton = findViewById(R.id.feedAddProduct);
@@ -111,6 +118,8 @@ public class FeedActivity extends AppCompatActivity {
         // Filter according to user preferences
         ImageView filterButton = findViewById(R.id.feedFilterButton);
         setupFilterWindow(filterButton);
+
+        waitOnCondition();
     }
 
     public void adapterCreator() {
@@ -119,6 +128,35 @@ public class FeedActivity extends AppCompatActivity {
         feedRecyclerAdapter = new FeedRecyclerAdapter(productList);
         recyclerView.setAdapter(feedRecyclerAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private void waitOnCondition() {
+        // Create a new thread to wait for the conditions
+        new Thread(() -> {
+            try {
+                boolean success = readyLatch.await(10, TimeUnit.SECONDS);
+                if (success) {
+                    // Any UI changes must be run on the UI Thread
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            getDeviceLocation();
+                        }
+                    });
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(),
+                                    "Failed to fetch your location or the products from the server. Please ensure you have access to an internet connection.",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            } catch (InterruptedException e) {
+                System.out.println("CRASH");
+            }
+        }).start();
     }
 
     @Override
@@ -175,7 +213,7 @@ public class FeedActivity extends AppCompatActivity {
                             if (location != null) {
                                 // Logic to handle location object
                                 userLocation = location;
-                                // feedRecyclerAdapter.updateDistances(location);
+                                feedRecyclerAdapter.updateDistances(location);
                             }
                         });
             }
