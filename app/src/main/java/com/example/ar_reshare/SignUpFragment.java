@@ -477,7 +477,7 @@ public class SignUpFragment extends Fragment {
             BackendController.modifyAccount(getContext(), changes, new BackendController.BackendCallback() {
                 @Override
                 public void onBackendResult(boolean success, String message) {
-                    if (false) {
+                    if (success) {
                         AlertDialog successful = createDialog("Success!", "Your profile picture has been uploaded.");
                         successful.setOnShowListener(dialog -> {
                             new CountDownTimer(DIALOG_TIME, 100) {

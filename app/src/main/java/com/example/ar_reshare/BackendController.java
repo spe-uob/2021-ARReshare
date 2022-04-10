@@ -85,10 +85,14 @@ public class BackendController {
                 .baseUrl(URL)
                 .build();
 
-        // TODO: Change implementation to use JsonObject
-        String bodyString = String.format("{\n  \"email\": \"%s\",\n  \"password\": \"%s\"\n}", email, password);
-        RequestBody body =
-                RequestBody.create(MediaType.parse("application/json"), bodyString);
+        JSONObject json = new JSONObject();
+        try {
+            json.put("email", email);
+            json.put("password", password);
+        } catch (Exception e) { }
+
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
         BackendService service = retrofit.create(BackendService.class);
         Call<ResponseBody> call = service.loginAccount(body);
 
@@ -136,13 +140,16 @@ public class BackendController {
                 .baseUrl(URL)
                 .build();
 
-        // TODO: Change implementation to use JsonObject
-        String bodyString =
-                String.format("{\n  \"name\": \"%s\",\n  \"email\": \"%s\",\n  \"password\": \"%s\",\n  \"dob\": \"%s\"\n}",
-                        name, email, password, dob);
-        RequestBody body =
-                RequestBody.create(MediaType.parse("application/json"), bodyString);
+        JSONObject json = new JSONObject();
+        try {
+            json.put("name", name);
+            json.put("email", email);
+            json.put("password", password);
+            json.put("dob", dob);
+        } catch (Exception e) { }
 
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
         BackendService service = retrofit.create(BackendService.class);
         Call<ResponseBody> call = service.createAccount(body);
 
