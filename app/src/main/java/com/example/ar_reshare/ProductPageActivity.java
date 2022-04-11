@@ -10,16 +10,21 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.maps.model.Circle;
+
+import org.json.JSONException;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -33,6 +38,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ProductPageActivity extends AppCompatActivity implements BackendController.BackendGetListingResultCallback {
     private ImageView[] dots;
     private Product product;
+    private Integer productID;
     private ArrayList<Bitmap> picList = new ArrayList<>();
     private ProductPicsSliderAdapter adapter;
     private CountDownLatch latch;
@@ -45,7 +51,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         // getting the stuff we need from previous page
         Intent i = getIntent();
         Product product = i.getParcelableExtra("product");
-        Integer productID = i.getIntExtra("productID",1);
+        productID = i.getIntExtra("productID",1);
         Double lat = i.getDoubleExtra("lat",0);
         Double lng = i.getDoubleExtra("lng",0);
 
@@ -73,6 +79,8 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
 //      //links to messaging page
 //        messageButton(product,contributor,user, profilePicId);
         waitOnConditions();
+
+        showEditIfUser();
     }
 
     @Override
@@ -87,7 +95,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
 
     private void displayInfo(){
         //edit button
-        //showEditIfUser(contributor,user);
+        showEditIfUser();
 
         // display product added time
         TextView addedTime = findViewById(R.id.addedtime);
@@ -130,21 +138,52 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
             }
         }).start();
     }
-
-    private void showEditIfUser(User contributor, User user){
-        if(contributor.getName().equals(user.getName())){
-            ImageView edit = findViewById(R.id.edit);
-            edit.setVisibility(View.VISIBLE);
-
-            edit.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(ProductPageActivity.this, ModifyProduct.class);
-                    startActivity(intent);
-                }
-            });
-        }
+    //TODO: only show these buttons if user's own product
+    private void showEditIfUser(){
+        ImageView edit = findViewById(R.id.edit);
+        edit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(getApplicationContext(),v);
+                MenuInflater inflater = popupMenu.getMenuInflater();
+                inflater.inflate(R.menu.product_setting, popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getTitle().toString()){
+                            case "Edit":
+                                Intent intent = new Intent(ProductPageActivity.this, ModifyProduct.class);
+                                startActivity(intent);
+                                return true;
+                            case "Delete":
+                                item.setEnabled(false);
+                                try {
+                                    BackendController.closeListing(productID, new BackendController.BackendCallback() {
+                                        @Override
+                                        public void onBackendResult(boolean success, String message) {
+                                            if(success){
+                                                Toast.makeText(getApplicationContext(),
+                                                        "Product deleted successfully!",
+                                                        Toast.LENGTH_LONG).show();
+                                                onBackPressed();
+                                            }
+                                        }
+                                    });
+                                    return true;
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            default:
+                                return false;
+                        }
+                    }
+                });
+                popupMenu.show();
+            }
+        });
     }
+
+
 
     private void displayProductCondition(Product product){
 

@@ -362,6 +362,38 @@ public class BackendController {
                 callback.onBackendGetListingResult(true, product);
             }
         }).start();
+    }
 
+    public static void closeListing(Integer listingID, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
+
+        JSONObject json = new JSONObject();
+        json.put("listingID", listingID);
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.closeListing(JWT,body);
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "Successfully deleted");
+                    }else {
+                        callback.onBackendResult(false, "Failed to delete the product");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    callback.onBackendResult(false, "Failed to delete the product");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            callback.onBackendResult(false, "Failed to delete the product");
+        }
     }
 }

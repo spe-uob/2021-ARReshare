@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:icon="@drawable/ic_baseline_edit_24"
+        android:title="Edit">
+        android:id="product_edit"
+    </item>
+    <item
+        android:icon="@drawable/ic_baseline_edit_24"
+        android:title="Delete">
+        android:id="product_delete"
+    </item>
+</menu>
