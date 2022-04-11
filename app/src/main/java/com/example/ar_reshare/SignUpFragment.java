@@ -63,6 +63,7 @@ public class SignUpFragment extends Fragment {
     private final List<Character> SPECIAL_CHARACTERS = Arrays.asList('@', '!', '?', '%', '+', '-', '\\', '/', '\'', '$', '#', '^', ':', ';', '(', ')', '[', ']', '{', '}', '~', '_', '.');
 
     private final long MINIMUM_AGE_REQUIRED = 18L;
+    private final int RESULT_OK = -1;
 
     private File profilePicture = null;
     private Uri profilePictureURI = null;
@@ -82,7 +83,7 @@ public class SignUpFragment extends Fragment {
         cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
             public void onActivityResult(ActivityResult result) {
-                if (result.getResultCode() == -1) {
+                if (result.getResultCode() == RESULT_OK) {
                     ImageView profilePictureView = addPhotoWindow.findViewById(R.id.signupProfilePicture);
                     profilePictureView.setImageURI(profilePictureURI);
                     onProfilePictureChanged();
@@ -92,7 +93,7 @@ public class SignUpFragment extends Fragment {
             }
         });
 
-        //Gallery intent launcher, allowing users to select multiple pictures at a time
+        // Gallery intent launcher, allowing users to select multiple pictures at a time
         galleryLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), new ActivityResultCallback<Uri>() {
             @Override
             public void onActivityResult(Uri result) {
@@ -378,7 +379,7 @@ public class SignUpFragment extends Fragment {
         int width = LinearLayout.LayoutParams.MATCH_PARENT;
         int height = LinearLayout.LayoutParams.MATCH_PARENT;
 
-        // Get users name
+        // Get user's name
         EditText firstNameText = getView().findViewById(R.id.signUpFirstName);
         EditText lastNameText = getView().findViewById(R.id.signUpLastName);
         String name = firstNameText.getText().toString() + " " + lastNameText.getText().toString();
@@ -405,10 +406,10 @@ public class SignUpFragment extends Fragment {
         try {
             profilePicture = createImageFile();
         } catch (IOException ex) {
-            // Error occurred while creating the File
+            // Error occurred while creating the file
             ex.printStackTrace();
         }
-        // Continue only if the File was successfully created
+        // Continue only if the file was successfully created
         if (profilePicture != null) {
             profilePictureURI =
                     FileProvider.getUriForFile(getContext(), "com.example.ar_reshare.fileprovider", profilePicture);
