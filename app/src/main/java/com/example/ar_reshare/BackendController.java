@@ -236,7 +236,7 @@ public class BackendController {
                 public void onResponse(Call<User> call, Response<User> response) {
                     System.out.println(response.code());
                     if (response.code() == SUCCESS) {
-                        callback.onBackendProfileResult(true, response.body());
+                        initialiseProfilePic(response.body(), callback);
                     } else {
                         callback.onBackendProfileResult(false, null);
                     }
@@ -274,6 +274,22 @@ public class BackendController {
                 }
                 callback.onBackendSearchResult(true, products);
             }
+        }).start();
+    }
+
+    // Helper method of getProfileById()
+    // Waits until the user has had their profile photo downloaded
+    private static void initialiseProfilePic(User user, BackendProfileResultCallback callback) {
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(1);
+        user.downloadProfilePicture(latch);
+        new Thread(() -> {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            callback.onBackendProfileResult(true, user);
         }).start();
     }
 

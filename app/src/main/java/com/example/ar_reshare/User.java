@@ -1,21 +1,24 @@
 package com.example.ar_reshare;
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class User implements Parcelable {
     @SerializedName("name")
     private String name;
     @SerializedName("url")
-    String url;
+    String profilePicUrl;
     @SerializedName("mimetype")
     String mimetype;
     @SerializedName("listings")
     List<Product> listings;
-    private String profileUrl;
+    private String uniqueProfileUrl;
+    private Bitmap profilePic;
     private int profileIcon;
     //0 for sender, 1 for receiver
     private int messengerType;
@@ -25,13 +28,13 @@ public class User implements Parcelable {
 
     public User(String name, String profileUrl, int messengerType) {
         this.name = name;
-        this.profileUrl = profileUrl;
+        this.uniqueProfileUrl = profileUrl;
         this.messengerType = messengerType;
     }
 
     protected User(Parcel in) {
         name = in.readString();
-        profileUrl = in.readString();
+        uniqueProfileUrl = in.readString();
         profileIcon = in.readInt();
         messengerType = in.readInt();
         bio = in.readString();
@@ -65,8 +68,8 @@ public class User implements Parcelable {
         this.name = name;
     }
 
-    public String getProfileUrl() {
-        return profileUrl;
+    public String getUniqueProfileUrl() {
+        return uniqueProfileUrl;
     }
 
     public int getProfileIcon() {
@@ -81,12 +84,12 @@ public class User implements Parcelable {
         return messengerType;
     }
 
-    public String getUrl() {
-        return url;
+    public String getProfilePicUrl() {
+        return profilePicUrl;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setProfilePicUrl(String profilePicUrl) {
+        this.profilePicUrl = profilePicUrl;
     }
 
     public String getMimetype() {
@@ -105,6 +108,10 @@ public class User implements Parcelable {
         this.listings = listings;
     }
 
+    public Bitmap getProfilePic() { return profilePic; }
+
+    public void setProfilePic(Bitmap profilePic) { this.profilePic = profilePic; }
+
     @Override
     public int describeContents() {
         return 0;
@@ -113,9 +120,22 @@ public class User implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
-        dest.writeString(profileUrl);
+        dest.writeString(uniqueProfileUrl);
         dest.writeInt(profileIcon);
         dest.writeInt(messengerType);
         dest.writeString(bio);
+    }
+
+    public void downloadProfilePicture(CountDownLatch latch) {
+        DownloadImageHelper.downloadImage(getProfilePicUrl(), (success, image) -> {
+            if (success) {
+                System.out.println("RECEIVED PFP SUCCESS CALLBACK");
+                setProfilePic(image);
+            } else {
+                System.out.println("RECEIVED PFP FAILURE CALLBACK");
+                setProfilePic(null);
+            }
+            latch.countDown();
+        });
     }
 }

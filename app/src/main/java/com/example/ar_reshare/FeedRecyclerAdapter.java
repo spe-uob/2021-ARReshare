@@ -1,5 +1,7 @@
 package com.example.ar_reshare;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.view.LayoutInflater;
@@ -32,21 +34,23 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     private Location userLocation;
     private boolean locationReady = false;
 
+    private Context context;
+
     public FeedRecyclerAdapter(List<Product> productList){
         this.productList = productList;
-    }
-
-    @NonNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         intToCat.put(1, Category.OTHER);
         intToCat.put(2, Category.CLOTHING);
         intToCat.put(3, Category.ACCESSORIES);
         intToCat.put(4, Category.ELECTRONICS);
         intToCat.put(5, Category.BOOKS);
         intToCat.put(6, Category.HOUSEHOLD);
+    }
 
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        context = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.item_view,parent, false);
         return new ViewHolder(view);
     }
@@ -88,8 +92,14 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         BackendController.getProfileByID(0, 100,
                 product.getContributorID(), (success, userProfile) -> {
             if (success) {
-                holder.profileIcon.setImageResource(userProfile.getProfileIcon());
-                holder.contributor.setText(userProfile.getName());
+                ((Activity) context).runOnUiThread(() -> {
+                    if (userProfile.getProfilePic() == null) {
+                        holder.profileIcon.setImageResource(R.mipmap.ic_launcher_round);
+                    } else {
+                        holder.profileIcon.setImageBitmap(userProfile.getProfilePic());
+                        holder.contributor.setText(userProfile.getName());
+                    }
+                });
             }
             else {
                 System.out.println("getProfileByID callback failed");

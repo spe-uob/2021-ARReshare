@@ -51,8 +51,8 @@ public class FeedActivity extends AppCompatActivity {
     // CountDownLatch to ensure thread only works after results have been received from backend
     private CountDownLatch readyLatch;
 
-    FusedLocationProviderClient fusedLocationClient =
-            LocationServices.getFusedLocationProviderClient(this);
+   // FusedLocationProviderClient fusedLocationClient =
+   //         LocationServices.getFusedLocationProviderClient(this);
 
     // Location related attributes
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -117,7 +117,7 @@ public class FeedActivity extends AppCompatActivity {
         ImageView filterButton = findViewById(R.id.feedFilterButton);
         setupFilterWindow(filterButton);
 
-        waitOnCondition();
+        //waitOnCondition();
     }
 
     public void adapterCreator() {
@@ -128,25 +128,25 @@ public class FeedActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    private void waitOnCondition() {
-        // Create a new thread to wait for the conditions
-        new Thread(() -> {
-            try {
-                boolean success = readyLatch.await(10, TimeUnit.SECONDS);
-                if (success) {
-                    // Any UI changes must be run on the UI Thread
-                    runOnUiThread(this::getDeviceLocation);
-                } else {
-                    runOnUiThread(() -> Toast.makeText(getApplicationContext(),
-                            "Failed to fetch your location or the products from the server. " +
-                                    "Please ensure you have access to an internet connection.",
-                            Toast.LENGTH_LONG).show());
-                }
-            } catch (InterruptedException e) {
-                System.out.println("CRASH");
-            }
-        }).start();
-    }
+//    private void waitOnCondition() {
+//        // Create a new thread to wait for the conditions
+//        new Thread(() -> {
+//            try {
+//                boolean success = readyLatch.await(10, TimeUnit.SECONDS);
+//                if (success) {
+//                    // Any UI changes must be run on the UI Thread
+//                    runOnUiThread(this::getDeviceLocation);
+//                } else {
+//                    runOnUiThread(() -> Toast.makeText(getApplicationContext(),
+//                            "Failed to fetch your location or the products from the server. " +
+//                                    "Please ensure you have access to an internet connection.",
+//                            Toast.LENGTH_LONG).show());
+//                }
+//            } catch (InterruptedException e) {
+//                System.out.println("CRASH");
+//            }
+//        }).start();
+//    }
 
     @Override
     public void finish() {
@@ -192,25 +192,25 @@ public class FeedActivity extends AppCompatActivity {
         }
     }
 
-    // Get the most recent location of the device
-    private void getDeviceLocation() {
-        try {
-            if (locationPermissionGranted) {
-                fusedLocationClient.getLastLocation()
-                        .addOnSuccessListener(this, location -> {
-                            // Got last known location. In some rare situations this can be null.
-                            if (location != null) {
-                                // Logic to handle location object
-                                userLocation = location;
-                                feedRecyclerAdapter.updateDistances(location);
-                            }
-                        });
-            }
-        } catch (SecurityException e)  {
-            // Appropriate error catching
-            System.out.println("Encountered" + e);
-        }
-    }
+//    // Get the most recent location of the device
+//    private void getDeviceLocation() {
+//        try {
+//            if (locationPermissionGranted) {
+//                fusedLocationClient.getLastLocation()
+//                        .addOnSuccessListener(this, location -> {
+//                            // Got last known location. In some rare situations this can be null.
+//                            if (location != null) {
+//                                // Logic to handle location object
+//                                userLocation = location;
+//                                feedRecyclerAdapter.updateDistances(location);
+//                            }
+//                        });
+//            }
+//        } catch (SecurityException e)  {
+//            // Appropriate error catching
+//            System.out.println("Encountered" + e);
+//        }
+//    }
 
     // Filters page according to selected distance and categories
     @SuppressLint("NotifyDataSetChanged")
