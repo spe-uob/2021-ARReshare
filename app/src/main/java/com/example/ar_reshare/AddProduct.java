@@ -11,11 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -23,7 +19,6 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,18 +26,11 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.google.android.gms.common.util.Base64Utils;
-
-import org.json.JSONException;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -168,7 +156,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                         ArrayList<String> dataURIList;
                         dataURIList = convertToDataURI(adapter.uploadedImages);
                         media.addAll(dataURIList);
-                        BackendController.addProduct(productName,productDescription,"UK","Bristol",productPostcode, 1,"new", media, AddProduct.this);
+                        BackendController.addProduct(productName,productDescription,"UK","Bristol",productPostcode, 2,"new", media, AddProduct.this);
                         Toast toast = Toast.makeText(getApplicationContext(), "Added Successfully!", Toast.LENGTH_LONG);
                         toast.show();
                         onBackPressed();
@@ -185,7 +173,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
     private ArrayList<String> convertToDataURI(SortedList<Uri> uriList) throws FileNotFoundException {
         ArrayList<String> dataURIList = new ArrayList<>();
         for(int i = 0; i < uriList.size(); i++){
-            String dataURI = ToDataURI.TranslateToDataURI(getApplicationContext(),uriList.get(i));
+            String dataURI = DataURIHelper.TranslateToDataURI(getApplicationContext(),uriList.get(i));
             dataURIList.add(dataURI);
         }
         return dataURIList;
@@ -226,10 +214,10 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
     }
 
     private boolean checkProductPostcode(EditText productPostcodeText, String productPostcode){
-//        if (postcode.contains(" ")) {
-//            postcode = postcode.replaceFirst(" ", "");
-//            postcodeText.setText(postcode);
-//        }
+        if (productPostcode.contains(" ")) {
+            productPostcode = productPostcode.replace(" ", "");
+            productPostcodeText.setText(productPostcode);
+        }
         final Animation animShake = AnimationUtils.loadAnimation(this, R.anim.shake);
         if (productPostcode.length() > 7 || productPostcode.length() < 5) {
             Toast postcodeWarning = Toast.makeText(getApplicationContext(), "Please ensure you type your postcode in the correct format", Toast.LENGTH_LONG);

@@ -327,8 +327,8 @@ public class BackendController {
                 @Override
                 public void onResponse(Call<Product> call, Response<Product> response) {
                     if (response.code() == SUCCESS) {
-                        System.out.println("get success");
-                        callback.onBackendGetListingResult(true,response.body());
+                        System.out.println("get listing success");
+                        initialiseProduct(response.body(), callback);
                     } else {
                         callback.onBackendGetListingResult(false, null);
                     }
@@ -342,5 +342,26 @@ public class BackendController {
         } catch (Exception e) {
             System.out.println(e);
         }
+    }
+
+    //helper method of getListingByID
+    //wait until the product has all of its images downloaded
+    private static void initialiseProduct(Product product, BackendGetListingResultCallback callback){
+        final int NUMBER_OF_IMAGES = product.getProductMedia().size();
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(NUMBER_OF_IMAGES);
+        product.downloadAllPictures(latch);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    latch.await();
+                }catch(InterruptedException e){
+                    e.printStackTrace();
+                }
+                callback.onBackendGetListingResult(true, product);
+            }
+        }).start();
+
     }
 }

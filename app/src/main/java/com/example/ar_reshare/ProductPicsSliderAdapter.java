@@ -1,7 +1,6 @@
 package com.example.ar_reshare;
 
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,17 +9,14 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 
 
-public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.MyViewHolder>  {
+public class ProductPicsSliderAdapter extends RecyclerView.Adapter<ProductPicsSliderAdapter.MyViewHolder>  {
 
-    ArrayList<Bitmap> productPicList;
+    public ArrayList<Bitmap> productPicList;
 
-    public SliderAdapter(ArrayList<Bitmap> productPicList) {
-
+    public ProductPicsSliderAdapter(ArrayList<Bitmap> productPicList) {
         this.productPicList = productPicList;
     }
 
@@ -28,12 +24,11 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.MyViewHold
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.slide_item_container,parent,false);
-
         return new MyViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SliderAdapter.MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ProductPicsSliderAdapter.MyViewHolder holder, int position) {
         holder.view.setImageBitmap(productPicList.get(position));
     }
 
@@ -46,7 +41,7 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.MyViewHold
         ImageView view;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
-            view = itemView.findViewById(R.id.view);
+            view = itemView.findViewById(R.id.productPicView);
         }
     }
 

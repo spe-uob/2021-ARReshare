@@ -45,6 +45,8 @@ public class Product implements Parcelable {
 
     private Bitmap mainPic;
 
+    private ArrayList<Bitmap> pictures = new ArrayList<>(); // all product images
+
     private LatLng location;
 
     // Coordinates will be updated after request through PostcodeHelper
@@ -164,11 +166,16 @@ public class Product implements Parcelable {
         this.productMedia = productMedia;
     }
 
+    public ArrayList<Bitmap> getPictures() {
+        return pictures;
+    }
+
     public List<Integer> getImages() {
         return new ArrayList<Integer>();
     }
 
     public void findCoordinates(CountDownLatch latch) {
+        System.out.println("postcode" + postcode);
         PostcodeHelper.lookupPostcode(postcode, new PostcodeHelper.PostcodeCallback() {
             @Override
             public void onPostcodeResult(boolean success, PostcodeDetails response) {
@@ -202,6 +209,23 @@ public class Product implements Parcelable {
                 }
             }
         });
+    }
+
+    public void downloadAllPictures(CountDownLatch latch){
+        for (ProductMedia media : getProductMedia()) {
+            DownloadImageHelper.downloadImage(media.url, new DownloadImageHelper.ImageDownloadCallback() {
+                @Override
+                public void onImageDownloaded(boolean success, Bitmap image) {
+                    if(success) {
+                        System.out.println("RECEIVED SUCCESS CALLBACK");
+                        pictures.add(image);
+                    }else{
+                        System.out.println("RECEIVED FAILURE CALLBACK");
+                    }
+                    latch.countDown();
+                }
+            });
+        }
     }
 
     //implementation of Parcelable

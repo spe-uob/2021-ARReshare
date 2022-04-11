@@ -205,14 +205,9 @@
                 android:layout_marginBottom="16dp"
                 android:gravity="center_vertical|center_horizontal"
                 android:orientation="horizontal"
-                app:layout_constraintBottom_toBottomOf="@+id/productPic"></LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/linearLayout2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintBottom_toBottomOf="@+id/productPic"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"></LinearLayout>
 
             <TextView
                 android:id="@+id/addedtime"
