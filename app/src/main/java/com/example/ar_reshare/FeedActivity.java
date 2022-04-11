@@ -37,8 +37,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -52,6 +50,9 @@ public class FeedActivity extends AppCompatActivity {
 
     // CountDownLatch to ensure thread only works after results have been received from backend
     private CountDownLatch readyLatch;
+
+    FusedLocationProviderClient fusedLocationClient =
+            LocationServices.getFusedLocationProviderClient(this);
 
     // Location related attributes
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -92,9 +93,6 @@ public class FeedActivity extends AppCompatActivity {
                 System.out.println("searchListings callback failed");
             }
         });
-
-        FusedLocationProviderClient fusedLocationClient =
-                LocationServices.getFusedLocationProviderClient(this);
 
         // Link to Add Product page
         ImageView addProductButton = findViewById(R.id.feedAddProduct);
@@ -137,21 +135,12 @@ public class FeedActivity extends AppCompatActivity {
                 boolean success = readyLatch.await(10, TimeUnit.SECONDS);
                 if (success) {
                     // Any UI changes must be run on the UI Thread
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            getDeviceLocation();
-                        }
-                    });
+                    runOnUiThread(this::getDeviceLocation);
                 } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(),
-                                    "Failed to fetch your location or the products from the server. Please ensure you have access to an internet connection.",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(),
+                            "Failed to fetch your location or the products from the server. " +
+                                    "Please ensure you have access to an internet connection.",
+                            Toast.LENGTH_LONG).show());
                 }
             } catch (InterruptedException e) {
                 System.out.println("CRASH");
