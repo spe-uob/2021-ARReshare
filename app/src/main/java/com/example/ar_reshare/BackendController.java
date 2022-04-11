@@ -6,21 +6,8 @@ import android.content.Intent;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.google.gson.internal.GsonBuildConfig;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.google.gson.JsonObject;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import java.util.Base64;
 import java.util.List;
@@ -28,7 +15,6 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 
-import de.javagl.obj.Obj;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -54,7 +40,6 @@ public class BackendController {
     private static final int TYPE_NOT_SUPPORTED = 422;
 
 
-
     private static final String URL = "https://ar-reshare.herokuapp.com/";
     private static String JWT; // Used for authentication
     private static int loggedInUserID;
@@ -75,7 +60,7 @@ public class BackendController {
     }
 
     public interface MessageBackendCallback {
-        void onBackendResult(boolean success, String message, Message.MessageResult messageResult);
+        void onBackendResult(boolean success, String message, int loggedInUserID, Message.MessageResult messageResult);
     }
 
     // Interface for callback handlers to receive response from the request
@@ -333,6 +318,104 @@ public class BackendController {
         return false;
     }
 
+    public static boolean getConversationByID(Integer conversationID, MessageBackendCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+//        String bodyString =
+//                String.format("{\n  \"name\": \"%d\"\n}",
+//                        listingID);
+//        RequestBody body =
+//                RequestBody.create(MediaType.parse("application/json"), bodyString);
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Message.MessageResult> call = service.getConversationByID(JWT,10,0, conversationID);
+
+        try {
+            call.enqueue(new Callback<Message.MessageResult>() {
+                @Override
+                public void onResponse(Call<Message.MessageResult> call, Response<Message.MessageResult> response) {
+                    System.out.println(response.code());
+                    Message.MessageResult messageResult = response.body();
+                    System.out.println("url is " + messageResult.getUrl());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "Success", loggedInUserID,messageResult);
+                    } else if (response.code() == INCORRECT_FORMAT) {
+                        callback.onBackendResult(false,"The getConversationDescriptors was missing required parameters", loggedInUserID,null);
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The authentication token was missing or invalid",loggedInUserID,null);
+                    }else if (response.code() == MEDIA_NOT_SUPPORT) {
+                        callback.onBackendResult(false, "The requested resource does not exist or is unavailable to you", loggedInUserID,null);
+                    }
+                }
+                @Override
+                public void onFailure(Call<Message.MessageResult> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to create new conversation", loggedInUserID,null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+        return false;
+    }
+
+    public static boolean sendConversationMessage(Integer conversationID, String textContent, String mediaContent, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("conversationID", conversationID);
+        jsonObject.put("textContent", textContent);
+        jsonObject.put("mediaContent", mediaContent);
+        String bodyString = jsonObject.toString();
+
+        System.out.println(bodyString);
+        System.out.println(JWT);
+
+        RequestBody body =
+                RequestBody.create(MediaType.parse("application/json"), bodyString);
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.sendConversationMessage(JWT, body);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    ResponseBody responseBody = response.body();
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "Success");
+                    } else if (response.code() == INCORRECT_FORMAT) {
+                        callback.onBackendResult(false, "The request was missing required parameters, or was formatted incorrectly");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The authentication token was missing or invalid");
+                    } else if (response.code() == RESOURCE_NOT_FOUND) {
+                        callback.onBackendResult(false, "The requested resource does not exist or is unavailable to you");
+                    } else if (response.code() == MEDIA_NOT_SUPPORT) {
+                        callback.onBackendResult(false, "The media provided is not a supported file type");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to create new conversation");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+        return false;
+    }
+
     public static boolean closeConversation(Integer conversationID, BackendCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
@@ -412,103 +495,6 @@ public class BackendController {
         return false;
     }
 
-
-    public static boolean getConversationByID(Integer conversationID, MessageBackendCallback callback) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-//        String bodyString =
-//                String.format("{\n  \"name\": \"%d\"\n}",
-//                        listingID);
-//        RequestBody body =
-//                RequestBody.create(MediaType.parse("application/json"), bodyString);
-
-        BackendService service = retrofit.create(BackendService.class);
-        Call<Message.MessageResult> call = service.getConversationByID(JWT,10,0, conversationID);
-
-        try {
-            call.enqueue(new Callback<Message.MessageResult>() {
-                @Override
-                public void onResponse(Call<Message.MessageResult> call, Response<Message.MessageResult> response) {
-                    System.out.println(response.code());
-                    Message.MessageResult messageResult = response.body();
-                    if (response.code() == SUCCESS) {
-                        callback.onBackendResult(true, "Success", messageResult);
-                    } else if (response.code() == INCORRECT_FORMAT) {
-                        callback.onBackendResult(false, "The getConversationDescriptors was missing required parameters",null);
-                    } else if (response.code() == INCORRECT_CREDENTIALS) {
-                        callback.onBackendResult(false, "The authentication token was missing or invalid",null);
-                    }else if (response.code() == MEDIA_NOT_SUPPORT) {
-                        callback.onBackendResult(false, "The requested resource does not exist or is unavailable to you",null);
-                    }
-                }
-                @Override
-                public void onFailure(Call<Message.MessageResult> call, Throwable t) {
-                    System.out.println("Failure");
-                    callback.onBackendResult(false, "Failed to create new conversation",null);
-                }
-            });
-        } catch (Exception e) {
-            System.out.println(e);
-            return false;
-        }
-        return false;
-    }
-
-    public static boolean sendConversationMessage(Integer conversationID, String textContent, String mediaContent, BackendCallback callback) throws JSONException {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("conversationID", conversationID);
-        jsonObject.put("textContent", textContent);
-        jsonObject.put("mediaContent", mediaContent);
-        String bodyString = jsonObject.toString();
-
-        System.out.println(bodyString);
-        System.out.println(JWT);
-
-        RequestBody body =
-                RequestBody.create(MediaType.parse("application/json"), bodyString);
-
-        BackendService service = retrofit.create(BackendService.class);
-        Call<ResponseBody> call = service.sendConversationMessage(JWT, body);
-
-        try {
-            call.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    System.out.println(response.code());
-                    ResponseBody responseBody = response.body();
-                    if (response.code() == SUCCESS) {
-                        callback.onBackendResult(true, "Success");
-                    } else if (response.code() == INCORRECT_FORMAT) {
-                        callback.onBackendResult(false, "The request was missing required parameters, or was formatted incorrectly");
-                    } else if (response.code() == INCORRECT_CREDENTIALS) {
-                        callback.onBackendResult(false, "The authentication token was missing or invalid");
-                    } else if (response.code() == RESOURCE_NOT_FOUND) {
-                        callback.onBackendResult(false, "The requested resource does not exist or is unavailable to you");
-                    } else if (response.code() == MEDIA_NOT_SUPPORT) {
-                        callback.onBackendResult(false, "The media provided is not a supported file type");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    System.out.println("Failure");
-                    callback.onBackendResult(false, "Failed to create new conversation");
-                }
-            });
-        } catch (Exception e) {
-            System.out.println(e);
-            return false;
-        }
-        return false;
-    }
 
     public static void searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
         new Thread(new Runnable() {

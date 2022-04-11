@@ -117,7 +117,7 @@ public class MessagingActivity extends AppCompatActivity{
         BackendController.getConversationByID(conversationID, new BackendController.MessageBackendCallback() {
 
             @Override
-            public void onBackendResult(boolean success, String message, Message.MessageResult messageResult) {
+            public void onBackendResult(boolean success, String message, int loggedInUserID,Message.MessageResult messageResult) {
                 if (success) {
                     System.out.println("get conversations successful");
                     System.out.println(message);
