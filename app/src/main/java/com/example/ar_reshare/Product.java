@@ -92,7 +92,7 @@ public class Product implements Parcelable {
         return contributorID;
     }
 
-    public void setName(int contributorID) {
+    public void setContributorID(int contributorID) {
         this.contributorID = contributorID;
     }
 

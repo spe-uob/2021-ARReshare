@@ -295,7 +295,8 @@ public class BackendController {
                 }
             });
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("Encountered error. " + e);
+            callback.onBackendSearchResult(false, null);
         }
     }
 
@@ -328,7 +329,8 @@ public class BackendController {
                 }
             });
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("Encountered error. " + e);
+            callback.onBackendProfileResult(false, null);
         }
     }
 
