@@ -448,7 +448,6 @@ public class MapsActivity extends FragmentActivity implements
         intent.putExtra("categoryID",product.getCategoryID());
 
         startActivity(intent);
-
     }
 
 
