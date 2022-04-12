@@ -43,17 +43,27 @@ public class AuthenticationService extends Service {
 
     // Given an encrypted account, decrypts, and sends a login request through the BackendClient to the API
     public static boolean loginUser(Context context, Account account, BackendController.BackendCallback callbackHandler) {
-        AccountManager accountManager = AccountManager.get(context);
-        System.out.println("Logged in to:" + account.name);
-
-        String password = accountManager.getPassword(account);
-        String iv = accountManager.getUserData(account, "iv");
-
-        byte[] passwordBytes = Base64.getDecoder().decode(password);
-        byte[] ivBytes = Base64.getDecoder().decode(iv);
-
-        BackendController.loginAccount(account.name, Crypto.decrypt(passwordBytes, ivBytes), callbackHandler);
+        String password = getPassword(context);
+        BackendController.loginAccount(account.name, password, callbackHandler);
         return false;
+    }
+
+    // Returns the plaintext password of the logged in account
+    public static String getPassword(Context context) {
+        Optional<Account> account = isLoggedIn(context);
+        if (account.isPresent()) {
+            AccountManager accountManager = AccountManager.get(context);
+
+            String password = accountManager.getPassword(account.get());
+            String iv = accountManager.getUserData(account.get(), "iv");
+
+            byte[] passwordBytes = Base64.getDecoder().decode(password);
+            byte[] ivBytes = Base64.getDecoder().decode(iv);
+
+            String plaintextPassword = Crypto.decrypt(passwordBytes, ivBytes);
+            return plaintextPassword;
+        }
+        return "";
     }
 
     // Adds a new AR-Reshare account, given encrypted password, to the Account Manager

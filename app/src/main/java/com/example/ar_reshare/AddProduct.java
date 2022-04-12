@@ -10,8 +10,8 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
-
 import android.content.Intent;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -25,12 +25,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+
 import java.util.Date;
 import java.util.List;
 
@@ -156,7 +157,8 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                         ArrayList<String> dataURIList;
                         dataURIList = convertToDataURI(adapter.uploadedImages);
                         media.addAll(dataURIList);
-                        BackendController.addProduct(productName,productDescription,"UK","Bristol",productPostcode, 2,"new", media, AddProduct.this);
+                        BackendController.addProduct(productName,productDescription,"UK","Bristol",productPostcode, 1,"new", media, AddProduct.this);
+
                         Toast toast = Toast.makeText(getApplicationContext(), "Added Successfully!", Toast.LENGTH_LONG);
                         toast.show();
                         onBackPressed();
