@@ -19,6 +19,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -146,7 +147,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                 Spinner categoryDropdown = findViewById(R.id.category_dropdown);
                 Integer category = categoryDropdown.getSelectedItemPosition() + 1;
                 Spinner conditionDropdown = findViewById(R.id.condition_dropdown);
-                String condition = conditionDropdown.getSelectedItem().toString();
+                String condition = conditionDropdown.getSelectedItem().toString().toLowerCase();
                 EditText productPostcodeText = findViewById(R.id.add_product_postcode);
                 String productPostcode = productPostcodeText.getText().toString();
 
@@ -157,8 +158,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                         ArrayList<String> dataURIList;
                         dataURIList = convertToDataURI(adapter.uploadedImages);
                         media.addAll(dataURIList);
-                        BackendController.addProduct(productName,productDescription,"UK","Bristol",productPostcode, 1,"new", media, AddProduct.this);
-
+                        BackendController.addProduct(productName,productDescription,"UK","Bristol",productPostcode,category,condition, media, AddProduct.this);
                         Toast toast = Toast.makeText(getApplicationContext(), "Added Successfully!", Toast.LENGTH_LONG);
                         toast.show();
                         onBackPressed();
@@ -172,6 +172,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         });
     }
 
+    //convert the pictures uploaded by user to DataURI
     private ArrayList<String> convertToDataURI(SortedList<Uri> uriList) throws FileNotFoundException {
         ArrayList<String> dataURIList = new ArrayList<>();
         for(int i = 0; i < uriList.size(); i++){
@@ -189,6 +190,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
         else return true;
     }
 
+    // make sure the user has uploaded at least 1 picture
     private boolean checkProductImages(){
         if(adapter.uploadedImages.size() == 0){
             Toast toast = Toast.makeText(getApplicationContext(),"Please add a product image", Toast.LENGTH_LONG);
