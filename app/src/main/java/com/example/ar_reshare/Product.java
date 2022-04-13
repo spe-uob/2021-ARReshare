@@ -22,13 +22,16 @@ public class Product implements Parcelable {
     @SerializedName("description")
     private String description;
     private User contributor;
-    @SerializedName("categoryID")
-    private int categoryID;
     private Category category;
     @SerializedName("creationDate")
     private String date;
     @SerializedName("postcode")
     private String postcode;
+
+    @SerializedName("categoryID")
+    private Integer categoryID;
+    @SerializedName("condition")
+    private String condition;
 
     @SerializedName("mimetype")
     private String mimetype;
@@ -149,6 +152,10 @@ public class Product implements Parcelable {
     public void setCategoryID(int categoryID) {
         this.categoryID = categoryID;
     }
+
+    public String getCondition(){return condition;}
+
+    public void setCondition(String condition){this.condition = condition;}
 
     public String getPostcode() {
         return postcode;

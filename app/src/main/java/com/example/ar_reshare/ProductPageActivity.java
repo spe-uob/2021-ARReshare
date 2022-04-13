@@ -45,6 +45,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_page);
+
         // getting the stuff we need from previous page
         Intent i = getIntent();
         Product product = i.getParcelableExtra("product");
@@ -56,6 +57,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         latch = new CountDownLatch(2); // wait until it gets the product and the user information from the backend
         BackendController.getListingByID(productID,ProductPageActivity.this);
         BackendController.getProfileByID(0,1,contributorID,ProductPageActivity.this);
+
         //display a static map to show product's location
         displayMapPic(lat,lng);
 
@@ -73,6 +75,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
 
         //links to messaging page
 //      messageButton(product,contributor,user, profilePicId);
+
         waitOnConditions();
     }
 
@@ -95,6 +98,9 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
     private void displayInfo(){
         //edit button
         //showEditIfUser(contributor,user);
+
+        displayProductCondition(product);
+        displayProductCategory(product);
 
         //display contributor's information
         displayProductContributor();
@@ -157,12 +163,28 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
     }
 
     private void displayProductCondition(Product product){
-
+        TextView condition = findViewById(R.id.condition);
+        condition.setText("Condition: " + product.getCondition());
     }
 
     private void displayProductCategory(Product product){
         ImageView category_pic = findViewById(R.id.category_pic);
-        category_pic.setImageResource(product.getCategory().getCategoryIcon());
+        switch (product.getCategoryID()){
+            case 1:
+                category_pic.setImageResource(Category.OTHER.getCategoryIcon());
+            case 2:
+                category_pic.setImageResource(Category.CLOTHING.getCategoryIcon());
+            case 3:
+                category_pic.setImageResource(Category.ACCESSORIES.getCategoryIcon());
+            case 4:
+                category_pic.setImageResource(Category.ELECTRONICS.getCategoryIcon());
+            case 5:
+                category_pic.setImageResource(Category.BOOKS.getCategoryIcon());
+            case 6:
+                category_pic.setImageResource(Category.HOUSEHOLD.getCategoryIcon());
+            default:
+                category_pic.setImageResource(Category.OTHER.getCategoryIcon());
+        }
     }
 
     // navbar at the top to display the product name
