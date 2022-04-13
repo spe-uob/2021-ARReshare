@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import java.util.Base64;
@@ -33,7 +34,7 @@ public class BackendController {
 
     private static final int EMAIL_ADDRESS_ALREADY_REGISTERED = 409;
     private static final int PASSWORD_NOT_STRONG = 422;
-
+    private static final int CONVERSATION_ALREADY_CLOSED = 409;
     private static final int MEDIA_NOT_SUPPORT = 422;
     private static final int REQUEST_NOT_FOUND = 404;
     private static final int RESOURCE_NOT_FOUND = 404;
@@ -56,7 +57,7 @@ public class BackendController {
 
 
     public interface ChatBackendCallback {
-        void onBackendResult(boolean success, String message, Chat.ConversationsResult conversations);
+        void onBackendResult(boolean success, String message, int loggedInUserID, Chat.ConversationsResult conversations);
     }
 
     public interface MessageBackendCallback {
@@ -297,18 +298,19 @@ public class BackendController {
                 public void onResponse(Call<Chat.ConversationsResult> call, Response<Chat.ConversationsResult> response) {
                     System.out.println(response.code());
                     Chat.ConversationsResult conversations = response.body();
+                    System.out.println("conversations : " + conversations.getChats().size());
                     if (response.code() == SUCCESS) {
-                        callback.onBackendResult(true, "Success", conversations);
+                        callback.onBackendResult(true, "Success", loggedInUserID, conversations);
                     } else if (response.code() == INCORRECT_FORMAT) {
-                        callback.onBackendResult(false, "The getConversationDescriptors was missing required parameters",conversations);
+                        callback.onBackendResult(false, "The getConversationDescriptors was missing required parameters", loggedInUserID, conversations);
                     } else if (response.code() == INCORRECT_CREDENTIALS) {
-                        callback.onBackendResult(false, "The authentication token was missing or invalid",conversations);
+                        callback.onBackendResult(false, "The authentication token was missing or invalid", loggedInUserID, conversations);
                     }
                 }
                 @Override
                 public void onFailure(Call<Chat.ConversationsResult> call, Throwable t) {
                     System.out.println("Failure");
-                    callback.onBackendResult(false, "Failed to create new conversation",null);
+                    callback.onBackendResult(false, "Failed to create new conversation", loggedInUserID, null);
                 }
             });
         } catch (Exception e) {
@@ -429,6 +431,36 @@ public class BackendController {
 
         BackendService service = retrofit.create(BackendService.class);
         Call<ResponseBody> call = service.closeConversation(JWT, body);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    ResponseBody responseBody = response.body();
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "Success close");
+                    } else if (response.code() == INCORRECT_FORMAT) {
+                        callback.onBackendResult(false, "The request was missing required parameters, or was formatted incorrectly");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The authentication token was missing or invalid");
+                    } else if (response.code() == RESOURCE_NOT_FOUND) {
+                        callback.onBackendResult(false, "The requested resource does not exist or is unavailable to you");
+                    } else if (response.code() == CONVERSATION_ALREADY_CLOSED) {
+                        callback.onBackendResult(false, "That resource is already closed");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to close conversation");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
         return false;
     }
 
@@ -464,6 +496,12 @@ public class BackendController {
             call.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    try {
+                        String string = response.body().string();
+                        System.out.println("product body is " + string);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     System.out.println(response.code());
                     if (response.code() == SUCCESSFUL_CREATION) {
                         callback.onBackendResult(true, "Success");

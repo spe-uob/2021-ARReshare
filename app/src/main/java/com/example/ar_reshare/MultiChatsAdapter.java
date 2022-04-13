@@ -23,6 +23,7 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
     private Context mContext;
     private List<Chat> mChatList;
     private Chat resChat;
+    private int loggedInUserID;
 
     public MultiChatsAdapter(Context context, List<Chat> chatList) {
         mContext = context;
@@ -84,12 +85,27 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
         }
 
         void bind(Chat chat) {
-            chatTitle.setText(chat.getContributorName());
-            productInfo.setText(chat.getProductName());
-//            chatBody.setText(chat.getMessages().get(chat.getMessages().size()-1).getMessage());
+            if (loggedInUserID == chat.getContributorID()) {
+                chatTitle.setText(chat.getReceiverName());
+                productInfo.setText(chat.getProductName());
+            }else {
+                chatTitle.setText(chat.getContributorName());
+                productInfo.setText(chat.getProductName());
+            }
+            chatBody.setText(" ");
+//            if (chat.getMessages().size() > 0) {
+//                chatBody.setText(chat.getMessages().get(chat.getMessages().size()-1).getMessage());
+//            }else {
+//
+//            }
+
 //            chatTime.setText(chat.getMessages().get(chat.getMessages().size()-1).getCreatedTime());
 //            icon.setImageResource(chat.getContributor().getProfileIcon());
         }
+    }
+
+    public void setCurrentUser(int loggedInUserID){
+        this.loggedInUserID = loggedInUserID;
     }
 
 }

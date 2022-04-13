@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-public class ChatListActivity extends AppCompatActivity implements BackendController.ChatBackendCallback {
+public class ChatListActivity extends AppCompatActivity {
 
     MultiChatsAdapter chatListAdapter;
     RecyclerView recyclerView;
@@ -58,11 +58,11 @@ public class ChatListActivity extends AppCompatActivity implements BackendContro
         recyclerView.setAdapter(chatListAdapter);
 
 //
-//        try {
-//            createConversation(1);
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            createConversation(61);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -85,6 +85,7 @@ public class ChatListActivity extends AppCompatActivity implements BackendContro
                             Toast.makeText(ChatListActivity.this, "on Swiped ", Toast.LENGTH_SHORT).show();
                             //Remove swiped item from list and notify the RecyclerView
                             int position = viewHolder.getAdapterPosition();
+                            closeConversation(mChatList.get(position).getConversationID());
                             mChatList.remove(position);
                             chatListAdapter.notifyDataSetChanged();
                         }
@@ -167,11 +168,12 @@ public class ChatListActivity extends AppCompatActivity implements BackendContro
         BackendController.getConversationDescriptors(new BackendController.ChatBackendCallback() {
 
             @Override
-            public void onBackendResult(boolean success, String message, Chat.ConversationsResult conversationsResult) {
+            public void onBackendResult(boolean success, String message, int loggedInUserID, Chat.ConversationsResult conversationsResult) {
                 if (success) {
                     System.out.println("get conversations successful");
                     //setConversations(conversations);
-                    mChatList.clear();
+                    chatListAdapter.setCurrentUser(loggedInUserID);
+                    //mChatList.clear();
                     mChatList.addAll(conversationsResult.getChats());
                     recyclerView.getAdapter().notifyDataSetChanged();
 //                    for (Chat chat : conversations.getChats()){
@@ -185,24 +187,21 @@ public class ChatListActivity extends AppCompatActivity implements BackendContro
     }
 
 
-    private void closeConversation(){
-        int conversationID = 0;
+    private void closeConversation(Integer conversationID){
+        //int conversationID = 0;
 
         BackendController.closeConversation(conversationID, new BackendController.BackendCallback() {
             @Override
             public void onBackendResult(boolean success, String message) {
                 if (success) {
-
+                    System.out.println("close conversation successfully");
                 } else {
-
+                    System.out.println("fail to close conversation");
+                    System.out.println(message);
                 }
             }
         });
     }
 
 
-    @Override
-    public void onBackendResult(boolean success, String message, Chat.ConversationsResult conversations) {
-
-    }
 }

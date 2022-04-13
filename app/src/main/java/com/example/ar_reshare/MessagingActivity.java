@@ -109,8 +109,11 @@ public class MessagingActivity extends AppCompatActivity{
         recyclerView.setAdapter(messageListAdapter);
     }
 
-
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacks(refresh);
+    }
 
     private void getConversationByID(Integer conversationID){
 
@@ -121,7 +124,7 @@ public class MessagingActivity extends AppCompatActivity{
                 if (success) {
                     System.out.println("get conversations successful");
                     System.out.println(message);
-                    messageListAdapter.setMessageResult(messageResult);
+                    messageListAdapter.setMessageResult(messageResult, loggedInUserID);
                     mMessageList.clear();
                     int resSize = messageResult.getMessages().size();
                     int mSize = mMessageList.size();

@@ -23,7 +23,8 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     private Context mContext;
     private List<Message> mMessageList;
     private Message.MessageResult messageResult;
-    private int currentUserId = 15;
+    int loggedInUserID;
+    //private int currentUserId = 15;
 
     public MessageListAdapter(Context context, List<Message> messageList) {
         mContext = context;
@@ -39,7 +40,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         Message message = (Message) mMessageList.get(position);
-        if (message.getSenderID() == currentUserId) {
+        if (message.getSenderID() == loggedInUserID) {
             // If the current user is the sender of the message
             return VIEW_TYPE_MESSAGE_SENT;
         } else {
@@ -117,12 +118,14 @@ public class MessageListAdapter extends RecyclerView.Adapter {
             // Format the stored timestamp into a readable String using method.
             timeText.setText(message.getCreatedTime());
 
-            if (messageResult.getContributorID() == currentUserId) {
+            if (messageResult.getContributorID() == loggedInUserID) {
                 nameText.setText(messageResult.getReceiverName());
             }else {
                 nameText.setText(messageResult.getContributorName());
             }
 
+
+            //profileImage.setImageURI(messageResult.getUrl().);
 
             // Insert the profile image from the URL into the ImageView.
             //profileImage.setImageResource(message.getSender().getProfileIcon());
@@ -138,8 +141,9 @@ public class MessageListAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public void setMessageResult(Message.MessageResult messageResult){
+    public void setMessageResult(Message.MessageResult messageResult, int loggedInUserID){
         this.messageResult = messageResult;
+        this.loggedInUserID = loggedInUserID;
     }
 
 }
