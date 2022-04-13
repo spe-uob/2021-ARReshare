@@ -163,8 +163,10 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
     }
 
     private void displayProductCondition(Product product){
-        TextView condition = findViewById(R.id.condition);
-        condition.setText("Condition: " + product.getCondition());
+        TextView conditionView = findViewById(R.id.condition);
+        // Capitalise the first letter
+        String condition = product.getCondition().substring(0,1).toUpperCase() + product.getCondition().substring(1);
+        conditionView.setText("Condition: " + condition);
     }
 
     private void displayProductCategory(Product product){
