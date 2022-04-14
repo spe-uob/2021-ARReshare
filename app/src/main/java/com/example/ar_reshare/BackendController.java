@@ -97,8 +97,7 @@ public class BackendController {
         try {
             json.put("email", email);
             json.put("password", password);
-        } catch (Exception e) {
-        }
+        } catch (Exception e) { }
 
         String bodyString = json.toString();
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
@@ -155,8 +154,7 @@ public class BackendController {
             json.put("email", email);
             json.put("password", password);
             json.put("dob", dob);
-        } catch (Exception e) {
-        }
+        } catch (Exception e) { }
 
         String bodyString = json.toString();
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
@@ -222,11 +220,14 @@ public class BackendController {
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     if (response.code() == SUCCESS) {
                         callback.onBackendResult(true, "");
-                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                    }
+                    else if (response.code() == INCORRECT_CREDENTIALS) {
                         callback.onBackendResult(false, "Incorrect password provided");
-                    } else if (response.code() == PASSWORD_NOT_STRONG) {
+                    }
+                    else if (response.code() == PASSWORD_NOT_STRONG) {
                         callback.onBackendResult(false, "Password not strong or age below minimum");
-                    } else callback.onBackendResult(false, "Failed to modify account");
+                    }
+                    else callback.onBackendResult(false, "Failed to modify account");
                 }
 
                 @Override
@@ -296,7 +297,7 @@ public class BackendController {
         for (String pic : media) {
             pics.put(pic);
         }
-        json.put("media", pics);
+        json.put("media",pics);
         String bodyString = json.toString();
         System.out.println(bodyString);
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
@@ -311,9 +312,9 @@ public class BackendController {
                         callback.onBackendResult(true, "Success");
                     } else if (response.code() == INCORRECT_CREDENTIALS) {
                         callback.onBackendResult(false, "The authentication token is missing or invalid");
-                    } else if (response.code() == RESOURCE_NOT_FOUND) {
+                    } else if(response.code() == RESOURCE_NOT_FOUND){
                         callback.onBackendResult(false, "A requested auxiliary resource (category, address) does not exist or is unavailable to you");
-                    } else if (response.code() == TYPE_NOT_SUPPORTED) {
+                    } else if(response.code() == TYPE_NOT_SUPPORTED){
                         callback.onBackendResult(false, "The media provided is not a supported file type");
                     } else {
                         callback.onBackendResult(false, "Failed to regenerate a new token????");
