@@ -25,6 +25,10 @@ public interface BackendService {
     Call<ResponseBody> createAccount(@Body RequestBody data);
 
     @Headers("Content-Type: application/json")
+    @PATCH("account/modify")
+    Call<ResponseBody> modifyAccount(@Header("Authorization") String token, @Body RequestBody data);
+
+    @Headers("Content-Type: application/json")
     @GET("listings/search")
     Call<Product.SearchResults> searchListings(@Query("maxResults") int maxResults,
                                                @Query("startResults") int startResults);

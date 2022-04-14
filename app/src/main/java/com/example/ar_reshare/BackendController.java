@@ -1,6 +1,7 @@
 package com.example.ar_reshare;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import org.json.JSONArray;
@@ -12,6 +13,7 @@ import java.util.Optional;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
@@ -96,9 +98,14 @@ public class BackendController {
                 .baseUrl(URL)
                 .build();
 
-        String bodyString = String.format("{\n  \"email\": \"%s\",\n  \"password\": \"%s\"\n}", email, password);
-        RequestBody body =
-                RequestBody.create(MediaType.parse("application/json"), bodyString);
+        JSONObject json = new JSONObject();
+        try {
+            json.put("email", email);
+            json.put("password", password);
+        } catch (Exception e) { }
+
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
         BackendService service = retrofit.create(BackendService.class);
         Call<ResponseBody> call = service.loginAccount(body);
 
@@ -116,6 +123,7 @@ public class BackendController {
                                     new JSONObject(new String(Base64.getUrlDecoder().decode(parts[1])));
                             loggedInUserID = payload.getInt("userID");
                             System.out.println("Logged in account id = " + loggedInUserID);
+                            System.out.println(JWT);
                             initialised = true;
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -140,17 +148,21 @@ public class BackendController {
         }
     }
 
-    public static boolean registerAccount(String name, String email, String password, String dob, String postcode, BackendCallback callback) {
+    public static void registerAccount(String name, String email, String password, String dob, String postcode, BackendCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .build();
 
-        String bodyString =
-                String.format("{\n  \"name\": \"%s\",\n  \"email\": \"%s\",\n  \"password\": \"%s\",\n  \"dob\": \"%s\"\n}",
-                        name, email, password, dob);
-        RequestBody body =
-                RequestBody.create(MediaType.parse("application/json"), bodyString);
+        JSONObject json = new JSONObject();
+        try {
+            json.put("name", name);
+            json.put("email", email);
+            json.put("password", password);
+            json.put("dob", dob);
+        } catch (Exception e) { }
 
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
         BackendService service = retrofit.create(BackendService.class);
         Call<ResponseBody> call = service.createAccount(body);
 
@@ -176,9 +188,61 @@ public class BackendController {
             });
         } catch (Exception e) {
             System.out.println(e);
-            return false;
         }
-        return false;
+    }
+
+    public static void modifyAccount(Context context, Map<String, String> changes, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
+
+        String password;
+        // If user attempts to modify password or email, old password must be provided
+        if (changes.containsKey("newPassword") || changes.containsKey("email")) {
+            password = changes.getOrDefault("password", "NO PASSWORD PROVIDED");
+        } else {
+            // If the change is less sensitive, the authentication service will provide the password
+            password = AuthenticationService.getPassword(context);
+        }
+
+        JSONObject json = new JSONObject();
+        json.put("password", password);
+
+        for (Map.Entry<String, String> change : changes.entrySet()) {
+            if (!change.getKey().equals("password")) {
+                json.put(change.getKey(), change.getValue());
+            }
+        }
+
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.modifyAccount(JWT, body);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "");
+                    }
+                    else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "Incorrect password provided");
+                    }
+                    else if (response.code() == PASSWORD_NOT_STRONG) {
+                        callback.onBackendResult(false, "Password not strong or age below minimum");
+                    }
+                    else callback.onBackendResult(false, "Failed to modify account");
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    callback.onBackendResult(false, "Failed to modify account");
+                }
+            });
+        } catch (Exception e) {
+            callback.onBackendResult(false, e.getMessage());
+        }
     }
 
     // TODO: Add a timer after which this method is called automatically
