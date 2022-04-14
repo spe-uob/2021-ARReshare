@@ -39,9 +39,8 @@ public class ChatListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView_chats_list);
         recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
-            public void onLayoutChange(View v, int left, int top, int right,int bottom, int oldLeft, int oldTop,int oldRight, int oldBottom)
-            {
-                recyclerView.scrollToPosition(mChatList.size()-1);
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                recyclerView.scrollToPosition(mChatList.size() - 1);
             }
         });
 
@@ -52,7 +51,7 @@ public class ChatListActivity extends AppCompatActivity {
 
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
 
-        chatListAdapter = new MultiChatsAdapter(this,mChatList);
+        chatListAdapter = new MultiChatsAdapter(this, mChatList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(chatListAdapter);
@@ -78,7 +77,7 @@ public class ChatListActivity extends AppCompatActivity {
             // remove it from adapter
             new AlertDialog.Builder(viewHolder.itemView.getContext())
                     .setMessage("Do you want to delete?")
-                    .setPositiveButton("yes", new DialogInterface.OnClickListener(){
+                    .setPositiveButton("yes", new DialogInterface.OnClickListener() {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -128,7 +127,7 @@ public class ChatListActivity extends AppCompatActivity {
                 background.setBounds(itemView.getRight() + ((int) dX) - backgroundCornerOffset,
                         itemView.getTop(), itemView.getRight(), itemView.getBottom());
                 background.draw(c);
-                if (dX < -198){
+                if (dX < -198) {
                     int iconLeft = itemView.getRight() - iconMargin - icon.getIntrinsicWidth();
                     int iconRight = itemView.getRight() - iconMargin;
                     icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
@@ -156,12 +155,7 @@ public class ChatListActivity extends AppCompatActivity {
         });
     }
 
-//    private void setConversations(Chat.ConversationsResult conversations){
-//        this.conversations = conversations;
-//
-//
-//
-//    }
+
 
     private void getConversationDescriptors(){
 
@@ -174,13 +168,52 @@ public class ChatListActivity extends AppCompatActivity {
                     //setConversations(conversations);
                     chatListAdapter.setCurrentUser(loggedInUserID);
                     //mChatList.clear();
-                    mChatList.addAll(conversationsResult.getChats());
-                    recyclerView.getAdapter().notifyDataSetChanged();
+                    for (Chat chat : conversationsResult.getChats()) {
+                        addChat(chat.getConversationID(),chat);
+                    }
+                    //mChatList.addAll(conversationsResult.getChats());
+                    //recyclerView.getAdapter().notifyDataSetChanged();
 //                    for (Chat chat : conversations.getChats()){
 //                        mChatList.add(chat);
 //                    }
                 }else {
                     System.out.println("fail to get conversations");
+                }
+            }
+        });
+    }
+
+    private void addChat(Integer conversationID, Chat chat){
+
+        BackendController.getConversationByID(conversationID, new BackendController.MessageBackendCallback() {
+
+            @Override
+            public void onBackendResult(boolean success, String message, int loggedInUserID, Message.MessageResult messageResult) {
+                if (success) {
+                    System.out.println("get lastMessage successful");
+                    System.out.println(message);
+                    int size = messageResult.getMessages().size();
+                    //System.out.println("last message is " + lastMessage.getMessage());
+                    chat.setLastMessage(messageResult.getMessages().get(size-1));
+                    mChatList.add(chat);
+                    recyclerView.getAdapter().notifyDataSetChanged();
+                    //((MultiChatsAdapter.ChatHolder) holder).bind(chat);
+                    //MultiChatsAdapter.this.notify();
+//                    messageListAdapter.setMessageResult(messageResult, loggedInUserID);
+//                    mMessageList.clear();
+//                    int resSize = messageResult.getMessages().size();
+//                    int mSize = mMessageList.size();
+//                    if (resSize > mSize){
+//                        int offset = resSize-mSize;
+//                        for (int i = resSize - 1;i>=(resSize-offset);i--){
+//                            mMessageList.add(messageResult.getMessages().get(i));
+//                            messageListAdapter.notifyDataSetChanged();
+//                        }
+//                    }
+//                    recyclerView.setAdapter(messageListAdapter);
+                }else {
+                    System.out.println(message);
+                    System.out.println("fail to get lastMessage");
                 }
             }
         });
@@ -202,6 +235,8 @@ public class ChatListActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
 
 }

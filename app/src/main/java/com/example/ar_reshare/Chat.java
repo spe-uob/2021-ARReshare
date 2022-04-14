@@ -18,6 +18,7 @@ public class Chat {
     private String contributorName;
     private User currentUser;
     private User contributor;
+    private Message lastMessage;
     private List<Message> messages;
     private Product product;
 
@@ -84,6 +85,14 @@ public class Chat {
 
     public String getContributorName() {
         return contributorName;
+    }
+
+    public Message getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(Message lastMessage) {
+        this.lastMessage = lastMessage;
     }
 
     class ConversationsResult {

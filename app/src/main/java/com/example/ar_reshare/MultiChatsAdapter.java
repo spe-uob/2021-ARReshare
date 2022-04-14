@@ -24,6 +24,7 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
     private List<Chat> mChatList;
     private Chat resChat;
     private int loggedInUserID;
+    private Message lastMessage;
 
     public MultiChatsAdapter(Context context, List<Chat> chatList) {
         mContext = context;
@@ -52,7 +53,7 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
         Chat chat = mChatList.get(position);
         //System.out.println("chat id is" + chat.getConversationID());
         Integer index = mChatList.get(position).getConversationID();
-        //getConversationByID(chat.getConversationID());
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,7 +93,12 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
                 chatTitle.setText(chat.getContributorName());
                 productInfo.setText(chat.getProductName());
             }
-            chatBody.setText(" ");
+            if (chat.getLastMessage() == null) {
+                chatBody.setText(" ");
+            }else {
+                chatBody.setText(chat.getLastMessage().getMessage());
+            }
+            //chatTime.setText(chat.getLastMessage().getCreatedTime());
 //            if (chat.getMessages().size() > 0) {
 //                chatBody.setText(chat.getMessages().get(chat.getMessages().size()-1).getMessage());
 //            }else {
@@ -107,5 +113,27 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
     public void setCurrentUser(int loggedInUserID){
         this.loggedInUserID = loggedInUserID;
     }
+
+//    public void setLastMessage(Message message) {this.lastMessage = message;}
+
+//    private void bindChat(Integer conversationID, RecyclerView.ViewHolder holder, Chat chat){
+//        System.out.println("in getLastMessage");
+//
+//        BackendController.getConversationByID(conversationID, new BackendController.MessageBackendCallback() {
+//
+//            @Override
+//            public void onBackendResult(boolean success, String message, int loggedInUserID, Message.MessageResult messageResult) {
+//                if (success) {
+//                    System.out.println("get lastMessage successful");
+//                    System.out.println(message);
+//                    int size = messageResult.getMessages().size();
+//                    chat.setLastMessage(messageResult.getMessages().get(size-1));
+//                }else {
+//                    System.out.println(message);
+//                    System.out.println("fail to get lastMessage");
+//                }
+//            }
+//        });
+//    }
 
 }
