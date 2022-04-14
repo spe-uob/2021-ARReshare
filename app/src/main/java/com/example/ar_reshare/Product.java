@@ -1,18 +1,8 @@
 package com.example.ar_reshare;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -25,6 +15,8 @@ import com.google.gson.annotations.SerializedName;
 public class Product implements Parcelable {
     @SerializedName("listingID")
     private int id;
+    @SerializedName("contributorID")
+    private int contributorID;
     @SerializedName("title")
     private String name;
     @SerializedName("description")
@@ -94,6 +86,14 @@ public class Product implements Parcelable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getContributorID() {
+        return contributorID;
+    }
+
+    public void setContributorID(int contributorID) {
+        this.contributorID = contributorID;
     }
 
     public String getDescription() {
