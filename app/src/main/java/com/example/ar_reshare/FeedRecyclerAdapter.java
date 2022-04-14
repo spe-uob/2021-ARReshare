@@ -235,7 +235,6 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             intent.putExtra("lat", product.getCoordinates().latitude);
             intent.putExtra("lng",product.getCoordinates().longitude);
             intent.putExtra("categoryID",product.getCategoryID());
-
             v.getContext().startActivity(intent);
         }
 
