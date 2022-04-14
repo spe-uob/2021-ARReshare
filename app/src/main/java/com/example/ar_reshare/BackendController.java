@@ -68,270 +68,270 @@ public class BackendController {
     }
 
     private static void initialise() {
-            Optional<Account> account = AuthenticationService.isLoggedIn(context);
-            if (account.isPresent()) {
-                // Send login request to get JWT
-                AuthenticationService.loginUser(context, account.get(), new BackendCallback() {
-                    @Override
-                    public void onBackendResult(boolean success, String message) {
-                        if (!success) {
-                            // Open the login/signup screen
-                            Intent intent = new Intent(context, LoginSignupActivity.class);
-                            context.startActivity(intent);
-                        }
+        Optional<Account> account = AuthenticationService.isLoggedIn(context);
+        if (account.isPresent()) {
+            // Send login request to get JWT
+            AuthenticationService.loginUser(context, account.get(), new BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if (!success) {
+                        // Open the login/signup screen
+                        Intent intent = new Intent(context, LoginSignupActivity.class);
+                        context.startActivity(intent);
                     }
-                });
-            } else {
-                // Open the login/signup screen
-                Intent intent = new Intent(context, LoginSignupActivity.class);
-                context.startActivity(intent);
-            }
+                }
+            });
+        } else {
+            // Open the login/signup screen
+            Intent intent = new Intent(context, LoginSignupActivity.class);
+            context.startActivity(intent);
         }
+    }
 
     public static void loginAccount(String email, String password, BackendCallback callback) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(URL)
-                    .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
 
-            JSONObject json = new JSONObject();
-            try {
-                json.put("email", email);
-                json.put("password", password);
-            } catch (Exception e) {
-            }
+        JSONObject json = new JSONObject();
+        try {
+            json.put("email", email);
+            json.put("password", password);
+        } catch (Exception e) {
+        }
 
-            String bodyString = json.toString();
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
-            BackendService service = retrofit.create(BackendService.class);
-            Call<ResponseBody> call = service.loginAccount(body);
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.loginAccount(body);
 
-            try {
-                call.enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        System.out.println("Response back");
-                        if (response.code() == SUCCESS) {
-                            JWT = response.headers().get("Authorization");
-                            String[] parts = JWT.split("\\.");
-                            // Decode the currently logged in user id from the JWT token
-                            try {
-                                JSONObject payload =
-                                        new JSONObject(new String(Base64.getUrlDecoder().decode(parts[1])));
-                                loggedInUserID = payload.getInt("userID");
-                                System.out.println("Logged in account id = " + loggedInUserID);
-                                System.out.println(JWT);
-                                initialised = true;
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            callback.onBackendResult(true, "Success");
-                        } else if (response.code() == INCORRECT_CREDENTIALS) {
-                            callback.onBackendResult(false, "Your email or password are incorrect");
-                        } else {
-                            callback.onBackendResult(false, "Failed to login");
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println("Response back");
+                    if (response.code() == SUCCESS) {
+                        JWT = response.headers().get("Authorization");
+                        String[] parts = JWT.split("\\.");
+                        // Decode the currently logged in user id from the JWT token
+                        try {
+                            JSONObject payload =
+                                    new JSONObject(new String(Base64.getUrlDecoder().decode(parts[1])));
+                            loggedInUserID = payload.getInt("userID");
+                            System.out.println("Logged in account id = " + loggedInUserID);
+                            System.out.println(JWT);
+                            initialised = true;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    }
-
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        System.out.println("Failure");
+                        callback.onBackendResult(true, "Success");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "Your email or password are incorrect");
+                    } else {
                         callback.onBackendResult(false, "Failed to login");
                     }
-                });
-            } catch (Exception e) {
-                System.out.println(e);
-                callback.onBackendResult(false, "Failed to login");
-            }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to login");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            callback.onBackendResult(false, "Failed to login");
         }
+    }
 
     public static void registerAccount(String name, String email, String password, String dob, String postcode, BackendCallback callback) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(URL)
-                    .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
 
-            JSONObject json = new JSONObject();
-            try {
-                json.put("name", name);
-                json.put("email", email);
-                json.put("password", password);
-                json.put("dob", dob);
-            } catch (Exception e) {
-            }
+        JSONObject json = new JSONObject();
+        try {
+            json.put("name", name);
+            json.put("email", email);
+            json.put("password", password);
+            json.put("dob", dob);
+        } catch (Exception e) {
+        }
 
-            String bodyString = json.toString();
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
-            BackendService service = retrofit.create(BackendService.class);
-            Call<ResponseBody> call = service.createAccount(body);
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.createAccount(body);
 
-            try {
-                call.enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        System.out.println(response.code());
-                        if (response.code() == SUCCESSFUL_CREATION) {
-                            callback.onBackendResult(true, "Success");
-                        } else if (response.code() == EMAIL_ADDRESS_ALREADY_REGISTERED) {
-                            callback.onBackendResult(false, "This email address is already registered to another account");
-                        } else {
-                            callback.onBackendResult(false, "Failed to register new user");
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        System.out.println("Failure");
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESSFUL_CREATION) {
+                        callback.onBackendResult(true, "Success");
+                    } else if (response.code() == EMAIL_ADDRESS_ALREADY_REGISTERED) {
+                        callback.onBackendResult(false, "This email address is already registered to another account");
+                    } else {
                         callback.onBackendResult(false, "Failed to register new user");
                     }
-                });
-            } catch (Exception e) {
-                System.out.println(e);
-            }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to register new user");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
         }
+    }
 
     public static void modifyAccount(Context context, Map<String, String> changes, BackendCallback callback) throws JSONException {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(URL)
-                    .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
 
-            String password;
-            // If user attempts to modify password or email, old password must be provided
-            if (changes.containsKey("newPassword") || changes.containsKey("email")) {
-                password = changes.getOrDefault("password", "NO PASSWORD PROVIDED");
-            } else {
-                // If the change is less sensitive, the authentication service will provide the password
-                password = AuthenticationService.getPassword(context);
-            }
+        String password;
+        // If user attempts to modify password or email, old password must be provided
+        if (changes.containsKey("newPassword") || changes.containsKey("email")) {
+            password = changes.getOrDefault("password", "NO PASSWORD PROVIDED");
+        } else {
+            // If the change is less sensitive, the authentication service will provide the password
+            password = AuthenticationService.getPassword(context);
+        }
 
-            JSONObject json = new JSONObject();
-            json.put("password", password);
+        JSONObject json = new JSONObject();
+        json.put("password", password);
 
-            for (Map.Entry<String, String> change : changes.entrySet()) {
-                if (!change.getKey().equals("password")) {
-                    json.put(change.getKey(), change.getValue());
-                }
-            }
-
-            String bodyString = json.toString();
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
-            BackendService service = retrofit.create(BackendService.class);
-            Call<ResponseBody> call = service.modifyAccount(JWT, body);
-
-            try {
-                call.enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        if (response.code() == SUCCESS) {
-                            callback.onBackendResult(true, "");
-                        } else if (response.code() == INCORRECT_CREDENTIALS) {
-                            callback.onBackendResult(false, "Incorrect password provided");
-                        } else if (response.code() == PASSWORD_NOT_STRONG) {
-                            callback.onBackendResult(false, "Password not strong or age below minimum");
-                        } else callback.onBackendResult(false, "Failed to modify account");
-                    }
-
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        callback.onBackendResult(false, "Failed to modify account");
-                    }
-                });
-            } catch (Exception e) {
-                callback.onBackendResult(false, e.getMessage());
+        for (Map.Entry<String, String> change : changes.entrySet()) {
+            if (!change.getKey().equals("password")) {
+                json.put(change.getKey(), change.getValue());
             }
         }
+
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.modifyAccount(JWT, body);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "Incorrect password provided");
+                    } else if (response.code() == PASSWORD_NOT_STRONG) {
+                        callback.onBackendResult(false, "Password not strong or age below minimum");
+                    } else callback.onBackendResult(false, "Failed to modify account");
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    callback.onBackendResult(false, "Failed to modify account");
+                }
+            });
+        } catch (Exception e) {
+            callback.onBackendResult(false, e.getMessage());
+        }
+    }
 
     // TODO: Add a timer after which this method is called automatically
     public static boolean requestRegeneratedToken(BackendCallback callback) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(URL)
-                    .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
 
-            BackendService service = retrofit.create(BackendService.class);
-            Call<ResponseBody> call = service.requestRegeneratedToken(JWT);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.requestRegeneratedToken(JWT);
 
-            try {
-                call.enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        System.out.println(response.code());
-                        if (response.code() == SUCCESSFUL_CREATION) {
-                            callback.onBackendResult(true, "Success");
-                        } else if (response.code() == EMAIL_ADDRESS_ALREADY_REGISTERED) {
-                            callback.onBackendResult(false, "The authentication token is missing or invalid");
-                        } else {
-                            callback.onBackendResult(false, "Failed to regenerate a new token");
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        System.out.println("Failure");
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESSFUL_CREATION) {
+                        callback.onBackendResult(true, "Success");
+                    } else if (response.code() == EMAIL_ADDRESS_ALREADY_REGISTERED) {
+                        callback.onBackendResult(false, "The authentication token is missing or invalid");
+                    } else {
                         callback.onBackendResult(false, "Failed to regenerate a new token");
                     }
-                });
-            } catch (Exception e) {
-                System.out.println(e);
-                return false;
-            }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to regenerate a new token");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
             return false;
         }
+        return false;
+    }
 
     public static boolean addProduct(String title, String description, String country, String region, String postcode, Integer categoryID, String condition, List<String> media, BackendCallback callback) throws JSONException {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(URL)
-                    .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
 
-            JSONObject json = new JSONObject();
-            json.put("title", title);
-            json.put("description", description);
+        JSONObject json = new JSONObject();
+        json.put("title", title);
+        json.put("description", description);
 
-            JSONObject location = new JSONObject();
-            location.put("country", country);
-            location.put("region", region);
-            location.put("postcode", postcode);
-            json.put("location", location);
+        JSONObject location = new JSONObject();
+        location.put("country", country);
+        location.put("region", region);
+        location.put("postcode", postcode);
+        json.put("location", location);
 
-            json.put("categoryID", categoryID);
-            json.put("condition", condition);
-            JSONArray pics = new JSONArray();
-            for (String pic : media) {
-                pics.put(pic);
-            }
-            json.put("media", pics);
-            String bodyString = json.toString();
-            System.out.println(bodyString);
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
-            BackendService service = retrofit.create(BackendService.class);
-            Call<ResponseBody> call = service.addProduct(JWT, body);
-            try {
-                call.enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        System.out.println(response.code());
-                        if (response.code() == SUCCESSFUL_CREATION) {
-                            callback.onBackendResult(true, "Success");
-                        } else if (response.code() == INCORRECT_CREDENTIALS) {
-                            callback.onBackendResult(false, "The authentication token is missing or invalid");
-                        } else if (response.code() == RESOURCE_NOT_FOUND) {
-                            callback.onBackendResult(false, "A requested auxiliary resource (category, address) does not exist or is unavailable to you");
-                        } else if (response.code() == TYPE_NOT_SUPPORTED) {
-                            callback.onBackendResult(false, "The media provided is not a supported file type");
-                        } else {
-                            callback.onBackendResult(false, "Failed to regenerate a new token????");
-                        }
+        json.put("categoryID", categoryID);
+        json.put("condition", condition);
+        JSONArray pics = new JSONArray();
+        for (String pic : media) {
+            pics.put(pic);
+        }
+        json.put("media", pics);
+        String bodyString = json.toString();
+        System.out.println(bodyString);
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.addProduct(JWT, body);
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESSFUL_CREATION) {
+                        callback.onBackendResult(true, "Success");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The authentication token is missing or invalid");
+                    } else if (response.code() == RESOURCE_NOT_FOUND) {
+                        callback.onBackendResult(false, "A requested auxiliary resource (category, address) does not exist or is unavailable to you");
+                    } else if (response.code() == TYPE_NOT_SUPPORTED) {
+                        callback.onBackendResult(false, "The media provided is not a supported file type");
+                    } else {
+                        callback.onBackendResult(false, "Failed to regenerate a new token????");
                     }
+                }
 
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        System.out.println("Failure");
-                        callback.onBackendResult(false, "Failed to regenerate a new token");
-                    }
-                });
-            } catch (Exception e) {
-                System.out.println(e);
-                return false;
-            }
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to regenerate a new token");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
             return false;
         }
+        return false;
+    }
 
     public static void searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
@@ -419,81 +419,80 @@ public class BackendController {
     // Helper method of searchListings()
     // Waits until all products have had their main photo downloaded and postcode converted into coordinates
     private static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {
-            final int NUMBER_OF_REQUESTS_PER_PRODUCT = 2;
+        final int NUMBER_OF_REQUESTS_PER_PRODUCT = 2;
 
-            // Initialise the latch to wait for callbacks
-            CountDownLatch latch = new CountDownLatch(products.size() * NUMBER_OF_REQUESTS_PER_PRODUCT);
-            // Find coordinates for each product
-            products.forEach(product -> product.findCoordinates(latch));
-            // Download main photo for each product
-            products.forEach(product -> product.downloadMainPicture(latch));
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        latch.await();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    callback.onBackendSearchResult(true, products);
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(products.size() * NUMBER_OF_REQUESTS_PER_PRODUCT);
+        // Find coordinates for each product
+        products.forEach(product -> product.findCoordinates(latch));
+        // Download main photo for each product
+        products.forEach(product -> product.downloadMainPicture(latch));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            }).start();
-        }
+                callback.onBackendSearchResult(true, products);
+            }
+        }).start();
+    }
 
     public static void getListingByID(Integer listingID, BackendGetListingResultCallback callback) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-            BackendService service = retrofit.create(BackendService.class);
-            Call<Product> call = service.getListingByID(listingID);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product> call = service.getListingByID(listingID);
 
-            try {
-                call.enqueue(new Callback<Product>() {
-                    @Override
-                    public void onResponse(Call<Product> call, Response<Product> response) {
-                        if (response.code() == SUCCESS) {
-                            System.out.println("get listing success");
-                            initialiseProduct(response.body(), callback);
-                        } else {
-                            callback.onBackendGetListingResult(false, null);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Product> call, Throwable t) {
-                        System.out.println("Failure");
+        try {
+            call.enqueue(new Callback<Product>() {
+                @Override
+                public void onResponse(Call<Product> call, Response<Product> response) {
+                    if (response.code() == SUCCESS) {
+                        System.out.println("get listing success");
+                        initialiseProduct(response.body(), callback);
+                    } else {
                         callback.onBackendGetListingResult(false, null);
                     }
-                });
-            } catch (Exception e) {
-                System.out.println(e);
-            }
+                }
+
+                @Override
+                public void onFailure(Call<Product> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendGetListingResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
         }
+    }
 
     //helper method of getListingByID
     //wait until the product has all of its images downloaded
     private static void initialiseProduct(Product product, BackendGetListingResultCallback callback) {
-            final int NUMBER_OF_IMAGES = product.getProductMedia().size();
-            // Initialise the latch to wait for callbacks
-            CountDownLatch latch = new CountDownLatch(NUMBER_OF_IMAGES);
-            product.downloadAllPictures(latch);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        latch.await();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    callback.onBackendGetListingResult(true, product);
+        final int NUMBER_OF_IMAGES = product.getProductMedia().size();
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(NUMBER_OF_IMAGES);
+        product.downloadAllPictures(latch);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            }).start();
+                callback.onBackendGetListingResult(true, product);
+            }
+        }).start();
 
 
-        }
-
+    }
 
 }
 

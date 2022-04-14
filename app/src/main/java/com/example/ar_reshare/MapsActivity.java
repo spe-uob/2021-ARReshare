@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -39,8 +38,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -88,10 +85,6 @@ public class MapsActivity extends FragmentActivity implements
     private CountDownLatch readyLatch;
     private int TIMEOUT_IN_SECONDS = 5;
 
-
-    private int picCount;
-    private ArrayList<Bitmap> picList;
-    private Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -441,8 +434,8 @@ public class MapsActivity extends FragmentActivity implements
         Product product = (Product)marker.getTag();
 
         Intent intent = new Intent(this, ProductPageActivity.class);
-        intent.putExtra("product", ((Product) marker.getTag()));
-        intent.putExtra("productID",((Product) marker.getTag()).getId());
+        intent.putExtra("product", product);
+        intent.putExtra("productID",product.getId());
         intent.putExtra("lat", product.getCoordinates().latitude);
         intent.putExtra("lng",product.getCoordinates().longitude);
         intent.putExtra("categoryID",product.getCategoryID());
