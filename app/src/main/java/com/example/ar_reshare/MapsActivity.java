@@ -31,6 +31,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -69,7 +70,7 @@ public class MapsActivity extends FragmentActivity implements
     private final int MAX_DISTANCE = 5500; //metres
     private final int DISTANCE_UNIT = 50; //metres
     private int maxDistanceRange = MAX_DISTANCE;
-    private int tempDistanceRange = MIN_DISTANCE;
+    private int tempDistanceRange = MAX_DISTANCE;
 
     // Category Filtering
     private final int UNCHECKED_CHIP_COLOUR = Color.parseColor("#dbdbdb");
@@ -409,7 +410,6 @@ public class MapsActivity extends FragmentActivity implements
                                     lastKnownLocation = location;
                                     // Decrement the latch to signal user location is ready
                                     readyLatch.countDown();
-                                    System.out.println("YO MATE IVE GOT THE LOCATION");
                                     System.out.println(readyLatch.getCount());
                                 }
                             }
@@ -470,15 +470,14 @@ public class MapsActivity extends FragmentActivity implements
         productLocation.setLatitude(coordinates.latitude);
         productLocation.setLongitude(coordinates.longitude);
         float dist = lastKnownLocation.distanceTo(productLocation);
-        System.out.println(dist);
-        // Category productCategory = product.getCategory();
-        // && categoriesSelected.contains(productCategory)
-        if (dist <= maxDistanceRange) {
-            //float hue = getHueFromRGB(productCategory.getCategoryColour());
+        Category productCategory = Category.getCategoryById(product.getCategoryID());
+        if (dist <= maxDistanceRange && categoriesSelected.contains(productCategory)) {
+            float hue = getHueFromRGB(productCategory.getCategoryColour());
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(coordinates)
                     .title(product.getName())
-                    .snippet("by " + product.getContributor()));
+                    .snippet("by " + product.getContributor())
+                    .icon(BitmapDescriptorFactory.defaultMarker(hue)));
             marker.setTag(product);
         }
     }
@@ -511,7 +510,6 @@ public class MapsActivity extends FragmentActivity implements
         private final View mWindow;
 
         ProductSummary() {
-            System.out.println("CONSTRUCTOR CALLED");
             mWindow = getLayoutInflater().inflate(R.layout.product_summary_map, null);
         }
 
