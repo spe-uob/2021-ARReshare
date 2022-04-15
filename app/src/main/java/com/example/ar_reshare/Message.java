@@ -1,5 +1,7 @@
 package com.example.ar_reshare;
 
+import android.graphics.Bitmap;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
@@ -58,6 +60,8 @@ public class Message {
         private Integer contributorID;
         private String contributorName;
         private String closedDate;
+        private Bitmap profileIcon;
+
         //private Chat chat;
         @SerializedName("messages")
         private List<Message> messages;
@@ -119,6 +123,14 @@ public class Message {
 
         public String getClosedDate() {
             return closedDate;
+        }
+
+        public Bitmap getProfileIcon() {
+            return profileIcon;
+        }
+
+        public void setProfileIcon(Bitmap profileIcon) {
+            this.profileIcon = profileIcon;
         }
     }
 

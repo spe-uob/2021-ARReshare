@@ -98,6 +98,7 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
             }else {
                 chatBody.setText(chat.getLastMessage().getMessage());
             }
+            icon.setImageBitmap(chat.getProfileIcon());
             //chatTime.setText(chat.getLastMessage().getCreatedTime());
 //            if (chat.getMessages().size() > 0) {
 //                chatBody.setText(chat.getMessages().get(chat.getMessages().size()-1).getMessage());

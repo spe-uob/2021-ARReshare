@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -169,7 +170,12 @@ public class ChatListActivity extends AppCompatActivity {
                     chatListAdapter.setCurrentUser(loggedInUserID);
                     //mChatList.clear();
                     for (Chat chat : conversationsResult.getChats()) {
-                        addChat(chat.getConversationID(),chat);
+                        if (loggedInUserID == chat.getContributorID()) {
+                            getProfileIcon(chat.getReceiverID(), chat);
+                        }else {
+                            getProfileIcon(chat.getContributorID(), chat);
+                        }
+//                        addChat(chat.getConversationID(),chat);
                     }
                     //mChatList.addAll(conversationsResult.getChats());
                     //recyclerView.getAdapter().notifyDataSetChanged();
@@ -178,6 +184,41 @@ public class ChatListActivity extends AppCompatActivity {
 //                    }
                 }else {
                     System.out.println("fail to get conversations");
+                }
+            }
+        });
+    }
+
+    private void getProfileIcon(int id, Chat chat) {
+
+        BackendController.getProfileByID(0, 1, id, new BackendController.BackendProfileResultCallback() {
+            @Override
+            public void onBackendProfileResult(boolean success, User userProfile) {
+                if (success) {
+                    System.out.println("successfully get profile icon");
+                    //chat.setProfilePicUrl(userProfile.getProfilePicUrl());
+                    downloadImage(userProfile.getProfilePicUrl(),chat);
+                    //addChat(chat.getConversationID(), chat);
+//                    mChatList.add(chat);
+//                    recyclerView.getAdapter().notifyDataSetChanged();
+                }else {
+                    System.out.println("fail to get profile icon in chats");
+                }
+            }
+        });
+    }
+
+    private void downloadImage(String url, Chat chat) {
+
+        DownloadImageHelper.downloadImage(url, new DownloadImageHelper.ImageDownloadCallback() {
+            @Override
+            public void onImageDownloaded(boolean success, Bitmap image) {
+                if (success) {
+                    System.out.println("get chat profile icon image");
+                    chat.setProfileIcon(image);
+                    addChat(chat.getConversationID(), chat);
+                }else {
+                    System.out.println("fail to get chat profile icon image");
                 }
             }
         });
@@ -197,20 +238,6 @@ public class ChatListActivity extends AppCompatActivity {
                     chat.setLastMessage(messageResult.getMessages().get(size-1));
                     mChatList.add(chat);
                     recyclerView.getAdapter().notifyDataSetChanged();
-                    //((MultiChatsAdapter.ChatHolder) holder).bind(chat);
-                    //MultiChatsAdapter.this.notify();
-//                    messageListAdapter.setMessageResult(messageResult, loggedInUserID);
-//                    mMessageList.clear();
-//                    int resSize = messageResult.getMessages().size();
-//                    int mSize = mMessageList.size();
-//                    if (resSize > mSize){
-//                        int offset = resSize-mSize;
-//                        for (int i = resSize - 1;i>=(resSize-offset);i--){
-//                            mMessageList.add(messageResult.getMessages().get(i));
-//                            messageListAdapter.notifyDataSetChanged();
-//                        }
-//                    }
-//                    recyclerView.setAdapter(messageListAdapter);
                 }else {
                     System.out.println(message);
                     System.out.println("fail to get lastMessage");
@@ -218,6 +245,7 @@ public class ChatListActivity extends AppCompatActivity {
             }
         });
     }
+
 
 
     private void closeConversation(Integer conversationID){

@@ -1,5 +1,7 @@
 package com.example.ar_reshare;
 
+import android.graphics.Bitmap;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
@@ -14,10 +16,9 @@ public class Chat {
     private Integer receiverID;
     private String receiverName;
     private String url;
+    private Bitmap profileIcon;
     private Integer contributorID;
     private String contributorName;
-    private User currentUser;
-    private User contributor;
     private Message lastMessage;
     private List<Message> messages;
     private Product product;
@@ -35,13 +36,6 @@ public class Chat {
         this.contributorName = contributorName;
     }
 
-    public User getCurrentUser() {
-        return currentUser;
-    }
-
-    public User getContributor() {
-        return contributor;
-    }
 
     public List<Message> getMessages() {
         return messages;
@@ -93,6 +87,14 @@ public class Chat {
 
     public void setLastMessage(Message lastMessage) {
         this.lastMessage = lastMessage;
+    }
+
+    public Bitmap getProfileIcon() {
+        return profileIcon;
+    }
+
+    public void setProfileIcon(Bitmap profileIcon) {
+        this.profileIcon = profileIcon;
     }
 
     class ConversationsResult {
