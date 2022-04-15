@@ -22,7 +22,7 @@ tools:context=".FeedActivity">
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#363231"
+        android:background="@drawable/custom_border"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -45,7 +45,6 @@ tools:context=".FeedActivity">
 
         <ImageView
             android:id="@+id/feedRefreshButton"
-            android:background="@drawable/custom_border"
             android:layout_width="0dp"
             android:layout_height="45dp"
             android:contentDescription="@string/refresh"

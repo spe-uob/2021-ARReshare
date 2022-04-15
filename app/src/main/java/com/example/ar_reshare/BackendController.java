@@ -72,6 +72,11 @@ public class BackendController {
 
     }
 
+    // Interface for callback handlers to receive response from the request
+    public interface BackendProfileResultCallback {
+        void onBackendProfileResult(boolean success, User userProfile);
+    }
+
     private static void initialise() {
         Optional<Account> account = AuthenticationService.isLoggedIn(context);
         if (account.isPresent()) {
@@ -599,40 +604,70 @@ public class BackendController {
 
 
     public static void searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(URL)
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-                BackendService service = retrofit.create(BackendService.class);
-                Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
 
-                try {
-                    call.enqueue(new Callback<Product.SearchResults>() {
-                        @Override
-                        public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
-                            System.out.println(response.code());
-                            if (response.code() == SUCCESS) {
-                                initialiseProducts(response.body().getSearchedProducts(), callback);
-                            } else {
-                                callback.onBackendSearchResult(false, null);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<Product.SearchResults> call, Throwable t) {
-                            System.out.println("Failure");
-                            callback.onBackendSearchResult(false, null);
-                        }
-                    });
-                } catch (Exception e) {
-                    System.out.println(e);
+        try {
+            call.enqueue(new Callback<Product.SearchResults>() {
+                @Override
+                public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        initialiseProducts(response.body().getSearchedProducts(), callback);
+                    } else {
+                        callback.onBackendSearchResult(false, null);
+                    }
                 }
-            }
-        }).start();
+
+                @Override
+                public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendSearchResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println("Encountered error. " + e);
+            callback.onBackendSearchResult(false, null);
+        }
+    }
+
+    public static void getProfileByID(int startResults, int maxResults, int userID,
+                                      BackendProfileResultCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<User> call = service.getProfileByID(maxResults, startResults, userID);
+
+        try {
+            call.enqueue(new Callback<User>() {
+                @Override
+                public void onResponse(Call<User> call, Response<User> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        initialiseProfilePic(response.body(), callback);
+                    } else {
+                        callback.onBackendProfileResult(false, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<User> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendProfileResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println("Encountered error. " + e);
+            callback.onBackendProfileResult(false, null);
+        }
     }
 
     // Helper method of searchListings()
@@ -658,5 +693,21 @@ public class BackendController {
             }
         }).start();
 
+    }
+
+    // Helper method of getProfileById()
+    // Waits until the user has had their profile photo downloaded
+    private static void initialiseProfilePic(User user, BackendProfileResultCallback callback) {
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(1);
+        user.downloadProfilePicture(latch);
+        new Thread(() -> {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            callback.onBackendProfileResult(true, user);
+        }).start();
     }
 }
