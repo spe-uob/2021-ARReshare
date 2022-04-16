@@ -10,6 +10,9 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -30,6 +33,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
         mContext = context;
         mMessageList = messageList;
     }
+
 
     @Override
     public int getItemCount() {
@@ -95,7 +99,8 @@ public class MessageListAdapter extends RecyclerView.Adapter {
         void bind(Message message) {
             System.out.println("binding");
             messageText.setText(message.getMessage());
-            timeText.setText(message.getCreatedTime());
+            String[] dates = MessagingActivity.convertDate(message.getCreatedTime());
+            timeText.setText(dates[3]);
         }
     }
 
@@ -116,7 +121,9 @@ public class MessageListAdapter extends RecyclerView.Adapter {
             messageText.setText(message.getMessage());
 
             // Format the stored timestamp into a readable String using method.
-            timeText.setText(message.getCreatedTime());
+            String[] dates = MessagingActivity.convertDate(message.getCreatedTime());
+
+            timeText.setText(dates[3]);
 
             if (messageResult.getContributorID() == loggedInUserID) {
                 nameText.setText(messageResult.getReceiverName());
@@ -125,7 +132,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
             }
 
 
-            //profileImage.setImageURI(messageResult.getUrl().);
+            profileImage.setImageBitmap(message.getProfileIcon());
 
             // Insert the profile image from the URL into the ImageView.
             //profileImage.setImageResource(message.getSender().getProfileIcon());

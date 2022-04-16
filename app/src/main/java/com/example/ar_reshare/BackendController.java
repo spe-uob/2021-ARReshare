@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 import okhttp3.MediaType;
@@ -287,7 +289,7 @@ public class BackendController {
     }
 
 
-    public static boolean createConversation(Integer listingID, BackendCallback callback) throws JSONException {
+    public static boolean createConversation(Integer listingID, BackendCallback callback){
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -308,19 +310,19 @@ public class BackendController {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     System.out.println(response.code());
-//                    try {
-//                        String string = response.body().string();
-//                        String regex = "[^0-9]";
-//                        Pattern p = Pattern.compile(regex);
-//                        Matcher m = p.matcher(string);
-//                        //String[] s = string.split(regex);
-//                        int conversationId = Integer.valueOf(m.replaceAll("").trim());
-//                        System.out.println("conversation id :"+conversationId);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
+
                     if (response.code() == SUCCESSFUL_CREATION) {
-                        callback.onBackendResult(true, "Success");
+                        try {
+                            String string = response.body().string();
+                            String regex = "[^0-9]";
+                            Pattern p = Pattern.compile(regex);
+                            Matcher m = p.matcher(string);
+                            //String[] s = string.split(regex);
+                            int conversationId = Integer.valueOf(m.replaceAll("").trim());
+                            callback.onBackendResult(true, String.valueOf(conversationId));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     } else if (response.code() == INCORRECT_FORMAT) {
                         callback.onBackendResult(false, "The request was missing required parameters, or was formatted incorrectly");
                     } else if (response.code() == INCORRECT_CREDENTIALS) {

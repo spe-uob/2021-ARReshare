@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
@@ -21,8 +22,13 @@ import android.widget.ImageView;
 import org.json.JSONException;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -36,8 +42,11 @@ public class MessagingActivity extends AppCompatActivity{
     EditText chatTextView;
     List<Message> mMessageList = new ArrayList<>();
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
+    Context mContext;
     Integer conversationId;
     Integer currentUserId;
+    Integer listingId;
+    String profileUrl;
     Product product;
     Handler handler;
     Runnable refresh;
@@ -46,42 +55,30 @@ public class MessagingActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.mContext = this;
         this.handler = new Handler();
 
-        chatTextView = (EditText)findViewById(R.id.text_chatbox);
         setContentView(R.layout.message_list_layout);
         Intent i = getIntent();
+        listingId = i.getIntExtra("listingId", -1);
         conversationId = i.getIntExtra("conversationId", -1);
         currentUserId = i.getIntExtra("currentUserId", -1);
-        if (conversationId != -1){
-            getConversationByID(conversationId);
+        profileUrl = i.getStringExtra("profileUrl");
+
+        chatTextView = (EditText)findViewById(R.id.text_chatbox);
+        recyclerView = findViewById(R.id.reyclerview_message_list);
+
+        if (profileUrl != "" && conversationId != -1 && currentUserId != -1){
+            downloadImage(profileUrl, conversationId);
         }
 
-        recyclerView = findViewById(R.id.reyclerview_message_list);
-        recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right,int bottom, int oldLeft, int oldTop,int oldRight, int oldBottom)
-            {
-                recyclerView.scrollToPosition(mMessageList.size()-1);
-            }
-        });
-
-        refresh = new Runnable() {
-            public void run() {
-                // Do something
-                System.out.println("refresh");
-                getConversationByID(conversationId);
-                messageListAdapter.notifyDataSetChanged();
-                handler.postDelayed(refresh,500);
-            }
-        };
-        handler.post(refresh);
+        setLayOutChangeListener();
 
         sendButton = (ImageButton) findViewById(R.id.button_send);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendButton = findViewById(R.id.button_send);
+                sendButton = (ImageButton) findViewById(R.id.button_send);
                 chatTextView = findViewById(R.id.text_chatbox);
                 String text = chatTextView.getText().toString();
                 Message message1 = new Message(currentUserId,text,simpleDateFormat.format(new Date())," ", " ");
@@ -91,6 +88,23 @@ public class MessagingActivity extends AppCompatActivity{
             }
         });
 
+        setOnTouchListener();
+
+        messageListAdapter = new MessageListAdapter (mContext,mMessageList);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
+        recyclerView.setLayoutManager(linearLayoutManager);
+
+        recyclerView.setAdapter(messageListAdapter);
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacks(refresh);
+    }
+
+    private void setOnTouchListener() {
         recyclerView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -101,21 +115,20 @@ public class MessagingActivity extends AppCompatActivity{
                 return false;
             }
         });
-
-        messageListAdapter = new MessageListAdapter (this,mMessageList);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(linearLayoutManager);
-
-        recyclerView.setAdapter(messageListAdapter);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        handler.removeCallbacks(refresh);
+    private void setLayOutChangeListener() {
+        recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right,int bottom, int oldLeft, int oldTop,int oldRight, int oldBottom)
+            {
+                recyclerView.scrollToPosition(mMessageList.size()-1);
+            }
+        });
     }
 
-    private void getConversationByID(Integer conversationID){
+
+    private void getConversationByID(Integer conversationID, Bitmap image){
 
         BackendController.getConversationByID(conversationID, new BackendController.MessageBackendCallback() {
 
@@ -130,7 +143,9 @@ public class MessagingActivity extends AppCompatActivity{
                     int mSize = mMessageList.size();
                     if (resSize > mSize){
                         int offset = resSize-mSize;
+                        List<Message> messages = new ArrayList<>();
                         for (int i = resSize - 1;i>=(resSize-offset);i--){
+                            messageResult.getMessages().get(i).setProfileIcon(image);
                             mMessageList.add(messageResult.getMessages().get(i));
                             messageListAdapter.notifyDataSetChanged();
                         }
@@ -143,6 +158,35 @@ public class MessagingActivity extends AppCompatActivity{
             }
         });
     }
+
+
+    private void downloadImage(String url, Integer conversationId) {
+
+        DownloadImageHelper.downloadImage(url, new DownloadImageHelper.ImageDownloadCallback() {
+            @Override
+            public void onImageDownloaded(boolean success, Bitmap image) {
+                if (success) {
+                    System.out.println("get message profile icon image");
+                    getConversationByID(conversationId, image);
+                    refresh = new Runnable() {
+                        public void run() {
+                            // Do something
+                            System.out.println("refresh");
+                            getConversationByID(conversationId, image);
+                            messageListAdapter.notifyDataSetChanged();
+                            handler.postDelayed(refresh,500);
+                        }
+                    };
+                    handler.post(refresh);
+                }else {
+                    System.out.println("fail to get message profile icon image");
+                }
+            }
+        });
+    }
+
+
+
 
 
     private void sendConversationMessage(Integer conversationID, String textContent, String mediaContent){
@@ -161,6 +205,27 @@ public class MessagingActivity extends AppCompatActivity{
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+
+//    convert to date as follows
+//    dates[0] day name(Mon, Tue, etc)
+//    dates[1] day number
+//    dates[3] time (hh:mm)
+//    dates[4] time zone
+//    dates[5] year number
+    public static String[] convertDate (String dateString) {
+        TemporalAccessor ta = DateTimeFormatter.ISO_INSTANT.parse(dateString);
+        Instant i = Instant.from(ta);
+        Date date = Date.from(i);
+
+        //List<String> dates = new ArrayList<>();
+
+        String[] dates = date.toString().split(" ");
+        String time = dates[3].substring(0,5);
+        dates[3] = time;
+
+        return dates;
     }
 
 

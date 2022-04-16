@@ -60,9 +60,7 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
                 Intent intent = new Intent(v.getContext() ,MessagingActivity.class);
                 intent.putExtra("conversationId", index);
                 intent.putExtra("currentUserId", chat.getReceiverID());
-//                intent.putExtra("contributor", chat.getContributor());
-//                intent.putExtra("user",chat.getCurrentUser());
-//                intent.putExtra("profilePicId",chat.getContributor().getProfileIcon());
+                intent.putExtra("profileUrl", chat.getProfilerUrl());
                 mContext.startActivity(intent);
             }
         });
@@ -88,26 +86,18 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
         void bind(Chat chat) {
             if (loggedInUserID == chat.getContributorID()) {
                 chatTitle.setText(chat.getReceiverName());
-                productInfo.setText(chat.getProductName());
             }else {
                 chatTitle.setText(chat.getContributorName());
-                productInfo.setText(chat.getProductName());
             }
             if (chat.getLastMessage() == null) {
                 chatBody.setText(" ");
             }else {
                 chatBody.setText(chat.getLastMessage().getMessage());
             }
+            productInfo.setText(chat.getProductName());
             icon.setImageBitmap(chat.getProfileIcon());
-            //chatTime.setText(chat.getLastMessage().getCreatedTime());
-//            if (chat.getMessages().size() > 0) {
-//                chatBody.setText(chat.getMessages().get(chat.getMessages().size()-1).getMessage());
-//            }else {
-//
-//            }
-
-//            chatTime.setText(chat.getMessages().get(chat.getMessages().size()-1).getCreatedTime());
-//            icon.setImageResource(chat.getContributor().getProfileIcon());
+            String[] dates = MessagingActivity.convertDate(chat.getLastMessage().getCreatedTime());
+            chatTime.setText(dates[3]);
         }
     }
 
@@ -115,26 +105,5 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
         this.loggedInUserID = loggedInUserID;
     }
 
-//    public void setLastMessage(Message message) {this.lastMessage = message;}
-
-//    private void bindChat(Integer conversationID, RecyclerView.ViewHolder holder, Chat chat){
-//        System.out.println("in getLastMessage");
-//
-//        BackendController.getConversationByID(conversationID, new BackendController.MessageBackendCallback() {
-//
-//            @Override
-//            public void onBackendResult(boolean success, String message, int loggedInUserID, Message.MessageResult messageResult) {
-//                if (success) {
-//                    System.out.println("get lastMessage successful");
-//                    System.out.println(message);
-//                    int size = messageResult.getMessages().size();
-//                    chat.setLastMessage(messageResult.getMessages().get(size-1));
-//                }else {
-//                    System.out.println(message);
-//                    System.out.println("fail to get lastMessage");
-//                }
-//            }
-//        });
-//    }
 
 }

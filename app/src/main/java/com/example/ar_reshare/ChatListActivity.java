@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -57,12 +58,7 @@ public class ChatListActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(chatListAdapter);
 
-//
-        try {
-            createConversation(61);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        //createConversation(61);
     }
 
 
@@ -82,7 +78,7 @@ public class ChatListActivity extends AppCompatActivity {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Toast.makeText(ChatListActivity.this, "on Swiped ", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ChatListActivity.this, "Deleted ", Toast.LENGTH_SHORT).show();
                             //Remove swiped item from list and notify the RecyclerView
                             int position = viewHolder.getAdapterPosition();
                             closeConversation(mChatList.get(position).getConversationID());
@@ -141,13 +137,14 @@ public class ChatListActivity extends AppCompatActivity {
         }
     };
 
-    public static void createConversation(Integer listingID) throws JSONException {
+    public static void createConversation(Integer listingID) {
 
         BackendController.createConversation(listingID, new BackendController.BackendCallback() {
             @Override
             public void onBackendResult(boolean success, String message) {
                 if (success) {
                     System.out.println("conversation created");
+                   // Intent intent = new Intent(, MessagingActivity.class);
                 } else {
                     System.out.println(message);
                     System.out.println("conversation created failed");
@@ -155,7 +152,6 @@ public class ChatListActivity extends AppCompatActivity {
             }
         });
     }
-
 
 
     private void getConversationDescriptors(){
@@ -166,22 +162,14 @@ public class ChatListActivity extends AppCompatActivity {
             public void onBackendResult(boolean success, String message, int loggedInUserID, Chat.ConversationsResult conversationsResult) {
                 if (success) {
                     System.out.println("get conversations successful");
-                    //setConversations(conversations);
                     chatListAdapter.setCurrentUser(loggedInUserID);
-                    //mChatList.clear();
                     for (Chat chat : conversationsResult.getChats()) {
                         if (loggedInUserID == chat.getContributorID()) {
                             getProfileIcon(chat.getReceiverID(), chat);
                         }else {
                             getProfileIcon(chat.getContributorID(), chat);
                         }
-//                        addChat(chat.getConversationID(),chat);
                     }
-                    //mChatList.addAll(conversationsResult.getChats());
-                    //recyclerView.getAdapter().notifyDataSetChanged();
-//                    for (Chat chat : conversations.getChats()){
-//                        mChatList.add(chat);
-//                    }
                 }else {
                     System.out.println("fail to get conversations");
                 }
@@ -190,6 +178,7 @@ public class ChatListActivity extends AppCompatActivity {
     }
 
     private void getProfileIcon(int id, Chat chat) {
+        System.out.println("received id in chat is " + id);
 
         BackendController.getProfileByID(0, 1, id, new BackendController.BackendProfileResultCallback() {
             @Override
@@ -197,6 +186,7 @@ public class ChatListActivity extends AppCompatActivity {
                 if (success) {
                     System.out.println("successfully get profile icon");
                     //chat.setProfilePicUrl(userProfile.getProfilePicUrl());
+                    chat.setProfilerUrl(userProfile.getProfilePicUrl());
                     downloadImage(userProfile.getProfilePicUrl(),chat);
                     //addChat(chat.getConversationID(), chat);
 //                    mChatList.add(chat);
@@ -214,7 +204,6 @@ public class ChatListActivity extends AppCompatActivity {
             @Override
             public void onImageDownloaded(boolean success, Bitmap image) {
                 if (success) {
-                    System.out.println("get chat profile icon image");
                     chat.setProfileIcon(image);
                     addChat(chat.getConversationID(), chat);
                 }else {
@@ -231,16 +220,13 @@ public class ChatListActivity extends AppCompatActivity {
             @Override
             public void onBackendResult(boolean success, String message, int loggedInUserID, Message.MessageResult messageResult) {
                 if (success) {
-                    System.out.println("get lastMessage successful");
                     System.out.println(message);
                     int size = messageResult.getMessages().size();
-                    //System.out.println("last message is " + lastMessage.getMessage());
-                    chat.setLastMessage(messageResult.getMessages().get(size-1));
+                    chat.setLastMessage(messageResult.getMessages().get(0));
                     mChatList.add(chat);
                     recyclerView.getAdapter().notifyDataSetChanged();
                 }else {
                     System.out.println(message);
-                    System.out.println("fail to get lastMessage");
                 }
             }
         });

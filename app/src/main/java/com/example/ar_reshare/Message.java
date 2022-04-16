@@ -10,17 +10,16 @@ public class Message {
     private Integer senderID;
     @SerializedName("textContent")
     private String message;
-    private User sender;
     @SerializedName("sentTime")
     private String createdTime;
     private String mediaContentMimetype;
     @SerializedName("mediaContent")
     private String imageUrl;
+    private Bitmap profileIcon;
 
     public Message(Integer senderID, String message, String createdTime, String mediaContentMimetype, String imageUrl) {
         this.senderID = senderID;
         this.message = message;
-//        this.sender = sender;
         this.createdTime = createdTime;
        // this.mediaContentMimetype = mediaContentMimetype;
         this.imageUrl = imageUrl;
@@ -42,12 +41,16 @@ public class Message {
         return message;
     }
 
-    public User getSender() {
-        return sender;
-    }
-
     public String getCreatedTime() {
         return createdTime;
+    }
+
+    public Bitmap getProfileIcon() {
+        return profileIcon;
+    }
+
+    public void setProfileIcon(Bitmap profileIcon) {
+        this.profileIcon = profileIcon;
     }
 
     class MessageResult{
@@ -60,12 +63,9 @@ public class Message {
         private Integer contributorID;
         private String contributorName;
         private String closedDate;
-        private Bitmap profileIcon;
 
-        //private Chat chat;
         @SerializedName("messages")
         private List<Message> messages;
-        //private String closedDate;
 
         public MessageResult() {
         }
@@ -125,13 +125,6 @@ public class Message {
             return closedDate;
         }
 
-        public Bitmap getProfileIcon() {
-            return profileIcon;
-        }
-
-        public void setProfileIcon(Bitmap profileIcon) {
-            this.profileIcon = profileIcon;
-        }
     }
 
 

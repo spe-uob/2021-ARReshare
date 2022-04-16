@@ -16,6 +16,7 @@ public class Chat {
     private Integer receiverID;
     private String receiverName;
     private String url;
+    private String profilerUrl;
     private Bitmap profileIcon;
     private Integer contributorID;
     private String contributorName;
@@ -95,6 +96,14 @@ public class Chat {
 
     public void setProfileIcon(Bitmap profileIcon) {
         this.profileIcon = profileIcon;
+    }
+
+    public String getProfilerUrl() {
+        return profilerUrl;
+    }
+
+    public void setProfilerUrl(String profilerUrl) {
+        this.profilerUrl = profilerUrl;
     }
 
     class ConversationsResult {
