@@ -219,8 +219,6 @@ public class MessagingActivity extends AppCompatActivity{
         Instant i = Instant.from(ta);
         Date date = Date.from(i);
 
-        //List<String> dates = new ArrayList<>();
-
         String[] dates = date.toString().split(" ");
         String time = dates[3].substring(0,5);
         dates[3] = time;
