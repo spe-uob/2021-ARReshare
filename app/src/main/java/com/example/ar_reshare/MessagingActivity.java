@@ -210,7 +210,8 @@ public class MessagingActivity extends AppCompatActivity{
 
 //    convert to date as follows
 //    dates[0] day name(Mon, Tue, etc)
-//    dates[1] day number
+//    dates[1] Month name
+//    dates[2] day number
 //    dates[3] time (hh:mm)
 //    dates[4] time zone
 //    dates[5] year number
