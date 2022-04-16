@@ -137,7 +137,7 @@ public class ChatListActivity extends AppCompatActivity {
         }
     };
 
-    public static void createConversation(Integer listingID) {
+    private void createConversation(Integer listingID) {
 
         BackendController.createConversation(listingID, new BackendController.BackendCallback() {
             @Override
