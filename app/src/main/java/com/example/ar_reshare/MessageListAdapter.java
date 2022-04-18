@@ -27,7 +27,6 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     private List<Message> mMessageList;
     private Message.MessageResult messageResult;
     int loggedInUserID;
-    //private int currentUserId = 15;
 
     public MessageListAdapter(Context context, List<Message> messageList) {
         mContext = context;
@@ -51,7 +50,6 @@ public class MessageListAdapter extends RecyclerView.Adapter {
             // If some other user sent the message
             return VIEW_TYPE_MESSAGE_RECEIVED;
         }
-//        return VIEW_TYPE_MESSAGE_RECEIVED;
     }
 
     // Inflates the appropriate layout according to the ViewType.
@@ -140,8 +138,6 @@ public class MessageListAdapter extends RecyclerView.Adapter {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-//                    intent.putExtra("contributor", message.getSender());
-//                    intent.putExtra("profilePicId", message.getSender().getProfileIcon());
                     mContext.startActivity(intent);
                 }
             });

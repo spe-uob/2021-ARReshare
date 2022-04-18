@@ -12,25 +12,19 @@ public class Message {
     private String message;
     @SerializedName("sentTime")
     private String createdTime;
-    private String mediaContentMimetype;
     @SerializedName("mediaContent")
     private String imageUrl;
     private Bitmap profileIcon;
 
-    public Message(Integer senderID, String message, String createdTime, String mediaContentMimetype, String imageUrl) {
+    public Message(Integer senderID, String message, String createdTime, String imageUrl) {
         this.senderID = senderID;
         this.message = message;
         this.createdTime = createdTime;
-       // this.mediaContentMimetype = mediaContentMimetype;
         this.imageUrl = imageUrl;
     }
 
     public Integer getSenderID() {
         return senderID;
-    }
-
-    public String getMediaContentMimetype() {
-        return mediaContentMimetype;
     }
 
     public String getImageUrl() {

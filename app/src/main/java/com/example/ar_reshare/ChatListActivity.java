@@ -81,7 +81,11 @@ public class ChatListActivity extends AppCompatActivity {
                             Toast.makeText(ChatListActivity.this, "Deleted ", Toast.LENGTH_SHORT).show();
                             //Remove swiped item from list and notify the RecyclerView
                             int position = viewHolder.getAdapterPosition();
-                            closeConversation(mChatList.get(position).getConversationID());
+                            try {
+                                closeConversation(mChatList.get(position).getConversationID());
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                             mChatList.remove(position);
                             chatListAdapter.notifyDataSetChanged();
                         }
@@ -137,7 +141,7 @@ public class ChatListActivity extends AppCompatActivity {
         }
     };
 
-    private void createConversation(Integer listingID) {
+    private void createConversation(Integer listingID) throws JSONException {
 
         BackendController.createConversation(listingID, new BackendController.BackendCallback() {
             @Override
@@ -234,7 +238,7 @@ public class ChatListActivity extends AppCompatActivity {
 
 
 
-    private void closeConversation(Integer conversationID){
+    private void closeConversation(Integer conversationID) throws JSONException {
         //int conversationID = 0;
 
         BackendController.closeConversation(conversationID, new BackendController.BackendCallback() {

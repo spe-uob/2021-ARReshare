@@ -289,15 +289,16 @@ public class BackendController {
     }
 
 
-    public static boolean createConversation(Integer listingID, BackendCallback callback){
+    public static boolean createConversation(Integer listingID, BackendCallback callback) throws JSONException {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+        
 
-        String bodyString =
-                String.format("{\n  \"listingID\": \"%d\"\n}",
-                        listingID);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("listingID", listingID);
+        String bodyString = jsonObject.toString();
 
         RequestBody body =
                 RequestBody.create(MediaType.parse("application/json"), bodyString);
@@ -317,7 +318,6 @@ public class BackendController {
                             String regex = "[^0-9]";
                             Pattern p = Pattern.compile(regex);
                             Matcher m = p.matcher(string);
-                            //String[] s = string.split(regex);
                             int conversationId = Integer.valueOf(m.replaceAll("").trim());
                             callback.onBackendResult(true, String.valueOf(conversationId));
                         } catch (IOException e) {
@@ -354,11 +354,6 @@ public class BackendController {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-//        String bodyString =
-//                String.format("{\n  \"name\": \"%d\"\n}",
-//                        listingID);
-//        RequestBody body =
-//                RequestBody.create(MediaType.parse("application/json"), bodyString);
 
         BackendService service = retrofit.create(BackendService.class);
         Call<Chat.ConversationsResult> call = service.getConversationDescriptors(JWT,10,0);
@@ -396,12 +391,7 @@ public class BackendController {
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-
-//        String bodyString =
-//                String.format("{\n  \"name\": \"%d\"\n}",
-//                        listingID);
-//        RequestBody body =
-//                RequestBody.create(MediaType.parse("application/json"), bodyString);
+        
 
         BackendService service = retrofit.create(BackendService.class);
         Call<Message.MessageResult> call = service.getConversationByID(JWT,10,0, conversationID);
@@ -448,7 +438,6 @@ public class BackendController {
         jsonObject.put("mediaContent", mediaContent);
         String bodyString = jsonObject.toString();
 
-        System.out.println(bodyString);
         System.out.println(JWT);
 
         RequestBody body =
@@ -462,7 +451,6 @@ public class BackendController {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     System.out.println(response.code());
-                    ResponseBody responseBody = response.body();
                     if (response.code() == SUCCESS) {
                         callback.onBackendResult(true, "Success");
                     } else if (response.code() == INCORRECT_FORMAT) {
@@ -489,14 +477,16 @@ public class BackendController {
         return false;
     }
 
-    public static boolean closeConversation(Integer conversationID, BackendCallback callback) {
+    public static boolean closeConversation(Integer conversationID, BackendCallback callback) throws JSONException {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .build();
 
-        String bodyString =
-                String.format("{\n  \"conversationID\": \"%d\"\n}",
-                        conversationID);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("conversationID", conversationID);
+        String bodyString = jsonObject.toString();
+
         RequestBody body =
                 RequestBody.create(MediaType.parse("application/json"), bodyString);
 
@@ -508,7 +498,6 @@ public class BackendController {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     System.out.println(response.code());
-                    ResponseBody responseBody = response.body();
                     if (response.code() == SUCCESS) {
                         callback.onBackendResult(true, "Success close");
                     } else if (response.code() == INCORRECT_FORMAT) {
@@ -567,12 +556,6 @@ public class BackendController {
             call.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    try {
-                        String string = response.body().string();
-                        System.out.println("product body is " + string);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                     System.out.println(response.code());
                     if (response.code() == SUCCESSFUL_CREATION) {
                         callback.onBackendResult(true, "Success");
@@ -590,8 +573,6 @@ public class BackendController {
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     System.out.println("Failure");
-
-                    callback.onBackendResult(false, "Failed to create new conversation");
 
                     callback.onBackendResult(false, "Failed to regenerate a new token");
 

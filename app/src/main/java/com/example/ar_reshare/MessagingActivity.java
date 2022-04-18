@@ -81,7 +81,7 @@ public class MessagingActivity extends AppCompatActivity{
                 sendButton = (ImageButton) findViewById(R.id.button_send);
                 chatTextView = findViewById(R.id.text_chatbox);
                 String text = chatTextView.getText().toString();
-                Message message1 = new Message(currentUserId,text,simpleDateFormat.format(new Date())," ", " ");
+                Message message1 = new Message(currentUserId,text,simpleDateFormat.format(new Date())," ");
                 mMessageList.add(message1);
                 chatTextView.setText("");
                 sendConversationMessage(conversationId,text,null);
