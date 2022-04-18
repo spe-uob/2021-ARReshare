@@ -190,6 +190,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private final Set<Product> displayedProducts = new HashSet<>();
     private boolean productBoxHidden = true;
     private Product productBoxProduct;
+    private Map<Product, User> contributorMap = new HashMap<>();
 
     // Compass object
     private Compass compass;
@@ -722,17 +723,17 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 spawnProduct(camera, pointingAt.get(), angle);
                 // When ProductObject has been created, remove this product from the Set
                 this.displayedProducts.add(pointingAt.get());
-                renderProductBox(pointingAt.get());
+                prepareProductBox(pointingAt.get());
                 rotateCompass(angle);
             }
             // Else if the product is displayed, but the product box not, display it
             else if (productBoxHidden && this.displayedProducts.contains(pointingAt.get())) {
-                renderProductBox(pointingAt.get());
+                prepareProductBox(pointingAt.get());
                 rotateCompass(angle);
             }
             // Else if the product box is displayed, but is showing other product's information, update it
             else if (productBoxProduct != pointingAt.get() && this.displayedProducts.contains(pointingAt.get())) {
-                renderProductBox(pointingAt.get());
+                prepareProductBox(pointingAt.get());
                 rotateCompass(angle);
             }
         } else {
@@ -1043,6 +1044,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             productObject.getAnchor().detach();
         }
         displayedProducts.removeAll(productAngles.keySet());
+        contributorMap.clear();
         int n = productObjects.size();
         for (int i = 0; i < n; i++) {
             productObjects.remove(0);
@@ -1074,8 +1076,26 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         return target;
     }
 
+    // Sends a request to the backend to get download the contributor of the product
+    private void prepareProductBox(Product product) {
+        // This optimisation means that the user will be downloaded only once
+        // The assumption made is that the contributor of a product will never change
+        if (this.contributorMap.containsKey(product)) {
+            renderProductBox(product, this.contributorMap.get(product));
+        } else {
+            BackendController.getProfileByID(0, 1, product.getContributorID(), new BackendController.BackendProfileResultCallback() {
+                @Override
+                public void onBackendProfileResult(boolean success, User userProfile) {
+                    System.out.println("NEW USER");
+                    contributorMap.put(product, userProfile);
+                    renderProductBox(product, userProfile);
+                }
+            });
+        }
+    }
+
     // Given a product, render and display a product box
-    private void renderProductBox(Product product) {
+    private void renderProductBox(Product product, User user) {
         // runOnUiThread must be called because Android requires changes to UI to be done only by
         // the original thread that created the view hierarchy
         runOnUiThread(new Runnable() {
@@ -1089,7 +1109,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 TextView title = (TextView) productBox.findViewById(R.id.title);
                 title.setText(product.getName());
                 TextView contributor = (TextView) productBox.findViewById(R.id.contributor);
-                //contributor.setText(product.getContributor().getName());
+                if (user != null) contributor.setText(user.getName());
+                else contributor.setText("AR-Reshare user");
                 ImageView photo = (ImageView) productBox.findViewById(R.id.productimage);
                 Bitmap productPhoto = product.getMainPic();
                 if (productPhoto != null) photo.setImageBitmap(product.getMainPic());
