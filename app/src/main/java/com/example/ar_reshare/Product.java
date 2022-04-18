@@ -22,13 +22,16 @@ public class Product implements Parcelable {
     @SerializedName("description")
     private String description;
     private User contributor;
-    @SerializedName("categoryID")
-    private int categoryID;
     private Category category;
     @SerializedName("creationDate")
     private String date;
     @SerializedName("postcode")
     private String postcode;
+
+    @SerializedName("categoryID")
+    private Integer categoryID;
+    @SerializedName("condition")
+    private String condition;
 
     @SerializedName("mimetype")
     private String mimetype;
@@ -36,6 +39,8 @@ public class Product implements Parcelable {
     private String mainPicURL;
 
     private Bitmap mainPic;
+
+    private ArrayList<Bitmap> pictures = new ArrayList<>(); // all product images
 
     private LatLng location;
 
@@ -148,6 +153,10 @@ public class Product implements Parcelable {
         this.categoryID = categoryID;
     }
 
+    public String getCondition(){return condition;}
+
+    public void setCondition(String condition){this.condition = condition;}
+
     public String getPostcode() {
         return postcode;
     }
@@ -164,11 +173,16 @@ public class Product implements Parcelable {
         this.productMedia = productMedia;
     }
 
+    public ArrayList<Bitmap> getPictures() {
+        return pictures;
+    }
+
     public List<Integer> getImages() {
         return new ArrayList<Integer>();
     }
 
     public void findCoordinates(CountDownLatch latch) {
+        System.out.println("postcode" + postcode);
         PostcodeHelper.lookupPostcode(postcode, new PostcodeHelper.PostcodeCallback() {
             @Override
             public void onPostcodeResult(boolean success, PostcodeDetails response) {
@@ -202,6 +216,23 @@ public class Product implements Parcelable {
                 }
             }
         });
+    }
+
+    public void downloadAllPictures(CountDownLatch latch){
+        for (ProductMedia media : getProductMedia()) {
+            DownloadImageHelper.downloadImage(media.url, new DownloadImageHelper.ImageDownloadCallback() {
+                @Override
+                public void onImageDownloaded(boolean success, Bitmap image) {
+                    if(success) {
+                        System.out.println("RECEIVED SUCCESS CALLBACK");
+                        pictures.add(image);
+                    }else{
+                        System.out.println("RECEIVED FAILURE CALLBACK");
+                    }
+                    latch.countDown();
+                }
+            });
+        }
     }
 
     //implementation of Parcelable

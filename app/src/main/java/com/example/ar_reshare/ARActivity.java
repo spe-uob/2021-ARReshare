@@ -1109,12 +1109,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(v.getContext(), ProductPageActivity.class);
-
                         intent.putExtra("product", product);
-                        intent.putExtra("contributor", product.getContributor());
-                        intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
-                        //intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) product.getImages());
-
+                        intent.putExtra("productID",product.getId());
+                        intent.putExtra("lat", product.getCoordinates().latitude);
+                        intent.putExtra("lng",product.getCoordinates().longitude);
+                        intent.putExtra("categoryID",product.getCategoryID());
                         startActivity(intent);
                     }
                 });
