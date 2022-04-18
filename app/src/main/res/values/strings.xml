@@ -21,18 +21,18 @@
 
 <!-- used for addProduct page dropdown   -->
     <string-array name="categories">
-        <item>Clothes</item>
+        <item>Other</item>
+        <item>Clothing</item>
         <item>Accessories</item>
         <item>Electronics</item>
         <item>Books</item>
-        <item>Food</item>
-        <item>Other</item>
+        <item>Household</item>
     </string-array>
     <string-array name="condition">
-        <item>Brand-new</item>
-        <item>Used-Very Good</item>
-        <item>Used-Good</item>
-        <item>Used-Acceptable</item>
+        <item>New</item>
+        <item>Good</item>
+        <item>Average</item>
+        <item>Poor</item>
     </string-array>
     <array name="add_image_popup">
         <item>Camera</item>

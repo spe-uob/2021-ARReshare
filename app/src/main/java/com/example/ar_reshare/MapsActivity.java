@@ -86,6 +86,7 @@ public class MapsActivity extends FragmentActivity implements
     private CountDownLatch readyLatch;
     private int TIMEOUT_IN_SECONDS = 5;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -428,12 +429,14 @@ public class MapsActivity extends FragmentActivity implements
     // Start the product page when clicked
     @Override
     public void onInfoWindowClick(Marker marker) {
-        Intent intent = new Intent(this, ProductPageActivity.class);
+        Product product = (Product)marker.getTag();
 
-        intent.putExtra("product", (Product) marker.getTag());
-        intent.putExtra("contributor", ((Product) marker.getTag()).getContributor());
-        intent.putExtra("profilePicId",((Product) marker.getTag()).getContributor().getProfileIcon());
-        //intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) ((Product) marker.getTag()).getImages());
+        Intent intent = new Intent(this, ProductPageActivity.class);
+        intent.putExtra("product", product);
+        intent.putExtra("productID",product.getId());
+        intent.putExtra("lat", product.getCoordinates().latitude);
+        intent.putExtra("lng",product.getCoordinates().longitude);
+        intent.putExtra("categoryID",product.getCategoryID());
 
         startActivity(intent);
     }
