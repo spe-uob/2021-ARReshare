@@ -67,4 +67,8 @@ public interface BackendService {
     @PUT("listing/create")
     Call<ResponseBody> addProduct(@Header("Authorization") String token, @Body RequestBody data);
 
+    @Headers("Content-Type: application/json")
+    @GET("listing/view")
+    Call<Product> getListingByID(@Query("listingID") int listingID);
+
 }

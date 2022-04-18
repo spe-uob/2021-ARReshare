@@ -9,9 +9,20 @@ public class PostcodeDetails {
     private String city;
     @SerializedName("latitude")
     private Float latitude;
+    @SerializedName("longitude")
     private Float longitude;
+    @SerializedName("country")
+    private String country;
 
     public PostcodeDetails() {
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     public String getCity() {

@@ -74,6 +74,9 @@ public class BackendController {
 
     }
 
+    public interface BackendGetListingResultCallback {
+        void onBackendGetListingResult(boolean success, Product ListingResult);}
+
     // Interface for callback handlers to receive response from the request
     public interface BackendProfileResultCallback {
         void onBackendProfileResult(boolean success, User userProfile);
@@ -563,7 +566,7 @@ public class BackendController {
                         callback.onBackendResult(false, "The authentication token is missing or invalid");
                     } else if(response.code() == RESOURCE_NOT_FOUND){
                         callback.onBackendResult(false, "A requested auxiliary resource (category, address) does not exist or is unavailable to you");
-                    } else if (response.code() == TYPE_NOT_SUPPORTED){
+                    } else if(response.code() == TYPE_NOT_SUPPORTED){
                         callback.onBackendResult(false, "The media provided is not a supported file type");
                     } else {
                         callback.onBackendResult(false, "Failed to regenerate a new token????");
@@ -653,6 +656,22 @@ public class BackendController {
         }
     }
 
+    // Helper method of getProfileById()
+    // Waits until the user has had their profile photo downloaded
+    private static void initialiseProfilePic(User user, BackendProfileResultCallback callback) {
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(1);
+        user.downloadProfilePicture(latch);
+        new Thread(() -> {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            callback.onBackendProfileResult(true, user);
+        }).start();
+    }
+
     // Helper method of searchListings()
     // Waits until all products have had their main photo downloaded and postcode converted into coordinates
     private static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {
@@ -678,19 +697,59 @@ public class BackendController {
 
     }
 
-    // Helper method of getProfileById()
-    // Waits until the user has had their profile photo downloaded
-    private static void initialiseProfilePic(User user, BackendProfileResultCallback callback) {
-        // Initialise the latch to wait for callbacks
-        CountDownLatch latch = new CountDownLatch(1);
-        user.downloadProfilePicture(latch);
-        new Thread(() -> {
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            callback.onBackendProfileResult(true, user);
-        }).start();
+    public static void getListingByID(Integer listingID, BackendGetListingResultCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product> call = service.getListingByID(listingID);
+
+        try {
+            call.enqueue(new Callback<Product>() {
+                @Override
+                public void onResponse(Call<Product> call, Response<Product> response) {
+                    if (response.code() == SUCCESS) {
+                        System.out.println("get listing success");
+                        initialiseProduct(response.body(), callback);
+                    } else {
+                        callback.onBackendGetListingResult(false, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Product> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendGetListingResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
+
+    //helper method of getListingByID
+    //wait until the product has all of its images downloaded
+    private static void initialiseProduct(Product product, BackendGetListingResultCallback callback) {
+        final int NUMBER_OF_IMAGES = product.getProductMedia().size();
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(NUMBER_OF_IMAGES);
+        product.downloadAllPictures(latch);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                callback.onBackendGetListingResult(true, product);
+            }
+        }).start();
+
+
+    }
+
 }
+
