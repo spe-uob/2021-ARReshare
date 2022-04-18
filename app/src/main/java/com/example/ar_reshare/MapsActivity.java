@@ -258,7 +258,6 @@ public class MapsActivity extends FragmentActivity implements
                     if (!chip.isChecked()) {
                         chip.setChecked(false);
                         chip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
-                        chip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
                         chip.setTextColor(DEFAULT_DARK_FONT);
                         tempCategories.remove((Category) chip.getTag());
                         // Not checked
