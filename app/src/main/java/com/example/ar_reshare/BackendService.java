@@ -43,10 +43,32 @@ public interface BackendService {
     Call<ResponseBody> requestRegeneratedToken(@Header("Authorization") String token);
 
     @Headers("Content-Type: application/json")
+    @PUT("conversation/create")
+    Call<ResponseBody> createConversation(@Header("Authorization") String token, @Body RequestBody data);
+
+    @Headers("Content-Type: application/json")
+    @GET("conversations")
+    Call<Chat.ConversationsResult> getConversationDescriptors(@Header("Authorization") String token, @Query("maxResults") int maxResults,
+                                                              @Query("startResults") int startResults);
+
+    @Headers("Content-Type: application/json")
+    @PATCH("conversation/close")
+    Call<ResponseBody> closeConversation(@Header("Authorization") String token, @Body RequestBody data);
+
+    @Headers("Content-Type: application/json")
+    @GET("conversation/view")
+    Call<Message.MessageResult> getConversationByID(@Header("Authorization") String token, @Query("maxResults") int maxResults,
+                                                    @Query("startResults") int startResults, @Query("conversationID") int conversationID);
+
+    @Headers("Content-Type: application/json")
+    @PUT("conversation/message")
+    Call<ResponseBody> sendConversationMessage(@Header("Authorization") String token, @Body RequestBody data);
+
     @PUT("listing/create")
     Call<ResponseBody> addProduct(@Header("Authorization") String token, @Body RequestBody data);
 
     @Headers("Content-Type: application/json")
     @GET("listing/view")
     Call<Product> getListingByID(@Query("listingID") int listingID);
+
 }
