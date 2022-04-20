@@ -91,20 +91,20 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     public void productValueHelper(ViewHolder holder, Product product) {
         BackendController.getProfileByID(0, 100,
                 product.getContributorID(), (success, userProfile) -> {
-            if (success) {
-                ((Activity) context).runOnUiThread(() -> {
-                    if (userProfile.getProfilePic() == null) {
-                        holder.profileIcon.setImageResource(R.mipmap.ic_launcher_round);
-                    } else {
-                        holder.profileIcon.setImageBitmap(userProfile.getProfilePic());
+                    if (success) {
+                        ((Activity) context).runOnUiThread(() -> {
+                            if (userProfile.getProfilePic() == null) {
+                                holder.profileIcon.setImageResource(R.mipmap.ic_launcher_round);
+                            } else {
+                                holder.profileIcon.setImageBitmap(userProfile.getProfilePic());
+                            }
+                            holder.contributor.setText(userProfile.getName());
+                        });
                     }
-                    holder.contributor.setText(userProfile.getName());
+                    else {
+                        System.out.println("getProfileByID callback failed");
+                    }
                 });
-            }
-            else {
-                System.out.println("getProfileByID callback failed");
-            }
-        });
         holder.categoryIcon.setImageResource(Objects.requireNonNull(
                 intToCat.get(product.getCategoryID())).getCategoryIcon());
         holder.productImage.setImageBitmap(product.getMainPic());
