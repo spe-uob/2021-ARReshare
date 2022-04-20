@@ -46,7 +46,7 @@ public class MessagingActivity extends AppCompatActivity{
     Integer conversationId;
     Integer currentUserId;
     Integer listingId;
-    String profileUrl;
+    Integer contributorId;
     Product product;
     Handler handler;
     Runnable refresh;
@@ -63,13 +63,13 @@ public class MessagingActivity extends AppCompatActivity{
         listingId = i.getIntExtra("listingId", -1);
         conversationId = i.getIntExtra("conversationId", -1);
         currentUserId = i.getIntExtra("currentUserId", -1);
-        profileUrl = i.getStringExtra("profileUrl");
+        contributorId = i.getIntExtra("contributorId", -1);
 
         chatTextView = (EditText)findViewById(R.id.text_chatbox);
         recyclerView = findViewById(R.id.reyclerview_message_list);
 
-        if (profileUrl != "" && conversationId != -1 && currentUserId != -1){
-            downloadImage(profileUrl, conversationId);
+        if (conversationId != -1 && currentUserId != -1){
+            getProfileById(conversationId, contributorId);
         }
 
         setLayOutChangeListener();
@@ -123,6 +123,20 @@ public class MessagingActivity extends AppCompatActivity{
             public void onLayoutChange(View v, int left, int top, int right,int bottom, int oldLeft, int oldTop,int oldRight, int oldBottom)
             {
                 recyclerView.scrollToPosition(mMessageList.size()-1);
+            }
+        });
+    }
+
+    private void getProfileById(Integer conversationId, Integer contributorId) {
+
+        BackendController.getProfileByID(0, 1, contributorId, new BackendController.BackendProfileResultCallback() {
+            @Override
+            public void onBackendProfileResult(boolean success, User userProfile) {
+                if (success) {
+                    downloadImage(userProfile.getProfilePicUrl(), conversationId);
+                }else {
+                    System.out.println("fail to get user profile");
+                }
             }
         });
     }

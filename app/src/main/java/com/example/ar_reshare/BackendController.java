@@ -79,6 +79,10 @@ public class BackendController {
         void onBackendProfileResult(boolean success, User userProfile);
     }
 
+    public static int getLoggedInUserID() {
+        return loggedInUserID;
+    }
+
     private static void initialise() {
         Optional<Account> account = AuthenticationService.isLoggedIn(context);
         if (account.isPresent()) {

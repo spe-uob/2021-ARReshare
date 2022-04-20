@@ -60,7 +60,8 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
                 Intent intent = new Intent(v.getContext() ,MessagingActivity.class);
                 intent.putExtra("conversationId", index);
                 intent.putExtra("currentUserId", chat.getReceiverID());
-                intent.putExtra("profileUrl", chat.getProfilerUrl());
+                intent.putExtra("contributorId", chat.getContributorID());
+                //intent.putExtra("profileUrl", chat.getProfilerUrl());
                 mContext.startActivity(intent);
             }
         });
