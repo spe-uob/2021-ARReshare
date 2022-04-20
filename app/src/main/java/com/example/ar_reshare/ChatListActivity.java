@@ -1,32 +1,30 @@
 package com.example.ar_reshare;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 public class ChatListActivity extends AppCompatActivity {
 
@@ -43,24 +41,24 @@ public class ChatListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView_chats_list);
         recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
-            public void onLayoutChange(View v, int left, int top, int right,int bottom, int oldLeft, int oldTop,int oldRight, int oldBottom)
-            {
-                recyclerView.scrollToPosition(mChatList.size()-1);
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                recyclerView.scrollToPosition(mChatList.size() - 1);
             }
         });
 
         chatTitle = findViewById(R.id.chat_title);
         chatBody = findViewById(R.id.chat_body);
-        for (Chat chat : ExampleData.getChats()){
-            mChatList.add(chat);
-        }
 
-       new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+        getConversationDescriptors();
 
-        chatListAdapter = new MultiChatsAdapter(this,mChatList);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+
+        chatListAdapter = new MultiChatsAdapter(this, mChatList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(chatListAdapter);
+
+        //createConversation(61);
     }
 
 
@@ -76,13 +74,18 @@ public class ChatListActivity extends AppCompatActivity {
             // remove it from adapter
             new AlertDialog.Builder(viewHolder.itemView.getContext())
                     .setMessage("Do you want to delete?")
-                    .setPositiveButton("yes", new DialogInterface.OnClickListener(){
+                    .setPositiveButton("yes", new DialogInterface.OnClickListener() {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Toast.makeText(ChatListActivity.this, "on Swiped ", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ChatListActivity.this, "Deleted ", Toast.LENGTH_SHORT).show();
                             //Remove swiped item from list and notify the RecyclerView
                             int position = viewHolder.getAdapterPosition();
+                            try {
+                                closeConversation(mChatList.get(position).getConversationID());
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                             mChatList.remove(position);
                             chatListAdapter.notifyDataSetChanged();
                         }
@@ -125,7 +128,7 @@ public class ChatListActivity extends AppCompatActivity {
                 background.setBounds(itemView.getRight() + ((int) dX) - backgroundCornerOffset,
                         itemView.getTop(), itemView.getRight(), itemView.getBottom());
                 background.draw(c);
-                if (dX < -198){
+                if (dX < -198) {
                     int iconLeft = itemView.getRight() - iconMargin - icon.getIntrinsicWidth();
                     int iconRight = itemView.getRight() - iconMargin;
                     icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
@@ -137,5 +140,121 @@ public class ChatListActivity extends AppCompatActivity {
             }
         }
     };
+
+    private void createConversation(Integer listingID) throws JSONException {
+
+        BackendController.createConversation(listingID, new BackendController.BackendCallback() {
+            @Override
+            public void onBackendResult(boolean success, String message) {
+                if (success) {
+                    System.out.println("conversation created");
+                   // Intent intent = new Intent(, MessagingActivity.class);
+                } else {
+                    System.out.println(message);
+                    System.out.println("conversation created failed");
+                }
+            }
+        });
+    }
+
+
+    private void getConversationDescriptors(){
+
+        BackendController.getConversationDescriptors(new BackendController.ChatBackendCallback() {
+
+            @Override
+            public void onBackendResult(boolean success, String message, int loggedInUserID, Chat.ConversationsResult conversationsResult) {
+                if (success) {
+                    System.out.println("get conversations successful");
+                    chatListAdapter.setCurrentUser(loggedInUserID);
+                    for (Chat chat : conversationsResult.getChats()) {
+                        if (loggedInUserID == chat.getContributorID()) {
+                            getProfileIcon(chat.getReceiverID(), chat);
+                        }else {
+                            getProfileIcon(chat.getContributorID(), chat);
+                        }
+                    }
+                }else {
+                    System.out.println("fail to get conversations");
+                }
+            }
+        });
+    }
+
+    private void getProfileIcon(int id, Chat chat) {
+        System.out.println("received id in chat is " + id);
+
+        BackendController.getProfileByID(0, 1, id, new BackendController.BackendProfileResultCallback() {
+            @Override
+            public void onBackendProfileResult(boolean success, User userProfile) {
+                if (success) {
+                    System.out.println("successfully get profile icon");
+                    //chat.setProfilePicUrl(userProfile.getProfilePicUrl());
+                    chat.setProfilerUrl(userProfile.getProfilePicUrl());
+                    downloadImage(userProfile.getProfilePicUrl(),chat);
+                    //addChat(chat.getConversationID(), chat);
+//                    mChatList.add(chat);
+//                    recyclerView.getAdapter().notifyDataSetChanged();
+                }else {
+                    System.out.println("fail to get profile icon in chats");
+                }
+            }
+        });
+    }
+
+    private void downloadImage(String url, Chat chat) {
+
+        DownloadImageHelper.downloadImage(url, new DownloadImageHelper.ImageDownloadCallback() {
+            @Override
+            public void onImageDownloaded(boolean success, Bitmap image) {
+                if (success) {
+                    chat.setProfileIcon(image);
+                    addChat(chat.getConversationID(), chat);
+                }else {
+                    System.out.println("fail to get chat profile icon image");
+                }
+            }
+        });
+    }
+
+    private void addChat(Integer conversationID, Chat chat){
+
+        BackendController.getConversationByID(conversationID, new BackendController.MessageBackendCallback() {
+
+            @Override
+            public void onBackendResult(boolean success, String message, int loggedInUserID, Message.MessageResult messageResult) {
+                if (success) {
+                    System.out.println(message);
+                    int size = messageResult.getMessages().size();
+                    chat.setLastMessage(messageResult.getMessages().get(0));
+                    mChatList.add(chat);
+                    recyclerView.getAdapter().notifyDataSetChanged();
+                }else {
+                    System.out.println(message);
+                }
+            }
+        });
+    }
+
+
+
+    private void closeConversation(Integer conversationID) throws JSONException {
+        //int conversationID = 0;
+
+        BackendController.closeConversation(conversationID, new BackendController.BackendCallback() {
+            @Override
+            public void onBackendResult(boolean success, String message) {
+                if (success) {
+                    System.out.println("close conversation successfully");
+                } else {
+                    System.out.println("fail to close conversation");
+                    System.out.println(message);
+                }
+            }
+        });
+    }
+
+
+
 
 }

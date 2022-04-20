@@ -7,6 +7,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
@@ -14,21 +15,31 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.maps.model.Circle;
 
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ProductPageActivity extends AppCompatActivity {
-    LinearLayout sliderDotsPanel;
-    private int dotsCount;
+public class ProductPageActivity extends AppCompatActivity implements BackendController.BackendGetListingResultCallback,
+        BackendController.BackendProfileResultCallback{
+
     private ImageView[] dots;
+    private Product product;
+    private User userProfile;
+    private ArrayList<Bitmap> picList = new ArrayList<>();
+    private ProductPicsSliderAdapter adapter;
+    private CountDownLatch latch;
+    private int TIMEOUT_IN_SECONDS = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,44 +49,102 @@ public class ProductPageActivity extends AppCompatActivity {
         // getting the stuff we need from previous page
         Intent i = getIntent();
         Product product = i.getParcelableExtra("product");
-        User contributor = i.getParcelableExtra("contributor"); // the contributor of the current product
-        User user = ExampleData.getUsers().get(0); // this is John
-        Integer profilePicId = i.getIntExtra("profilePicId",R.drawable.arfi_profile_icon);
-        List<Integer> productPicId = i.getIntegerArrayListExtra("productPicId");
+        Integer productID = i.getIntExtra("productID",1);
+        Integer contributorID = i.getIntExtra("contributorID",1);
+        Double lat = i.getDoubleExtra("lat",0);
+        Double lng = i.getDoubleExtra("lng",0);
+
+        latch = new CountDownLatch(2); // wait until it gets the product and the user information from the backend
+        BackendController.getListingByID(productID,ProductPageActivity.this);
+        BackendController.getProfileByID(0,1,contributorID,ProductPageActivity.this);
+
+        //display a static map to show product's location
+        displayMapPic(lat,lng);
 
         //display product name
         displayProductName(product);
         navProductName(product);
-
-        //edit button
-        showEditIfUser(contributor,user);
-
         //display product description
         displayProductDescription(product);
 
-        //display contributor's information
-        displayProductContributor(contributor,profilePicId);
-
-        // display product added time
-        TextView addedTime = findViewById(R.id.addedtime);
-        addedTime.setText(product.getDate() + "  added  ");
-
         //add a bookmark button
         bookmarkButton();
-
-        //display product pics using slider
-        int[] picList = productPicId.stream().mapToInt(m -> m).toArray();
-        displayProductPics(picList);
-
-        //display a static map to show product's location
-        displayMapPic(product.getLocation().latitude, product.getLocation().longitude);
 
         //top left return arrow
         returnListener();
 
         //links to messaging page
-        messageButton(product,contributor,user, profilePicId);
+//      messageButton(product,contributor,user, profilePicId);
 
+        waitOnConditions();
+    }
+
+    @Override
+    public void onBackendGetListingResult(boolean success, Product ListingResult) {
+        this.product = ListingResult;
+        if(success){
+            latch.countDown();
+        }
+    }
+
+    @Override
+    public void onBackendProfileResult(boolean success, User userProfile) {
+        this.userProfile = userProfile;
+        if(success){
+            latch.countDown();
+        }
+    }
+
+    private void displayInfo(){
+        //edit button
+        //showEditIfUser(contributor,user);
+
+        displayProductCondition(product);
+        displayProductCategory(product);
+
+        //display contributor's information
+        displayProductContributor();
+
+        // display product added time
+        TextView addedTime = findViewById(R.id.addedtime);
+        addedTime.setText(product.getDate() + "  added  ");
+
+        //display product pics using slider
+        picList.addAll(product.getPictures());
+        displayProductPics(picList);
+    }
+
+
+    private void waitOnConditions() {
+        // Create a new thread to wait for the conditions
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    boolean success = latch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+                    if (success) {
+                        // Any UI changes must be run on the UI Thread
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                displayInfo();
+                            }
+                        });
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(),
+                                        "Failed to fetch the product. Please ensure you have access to an internet connection.",
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("CRASH");
+                }
+            }
+        }).start();
     }
 
     private void showEditIfUser(User contributor, User user){
@@ -94,12 +163,30 @@ public class ProductPageActivity extends AppCompatActivity {
     }
 
     private void displayProductCondition(Product product){
-
+        TextView conditionView = findViewById(R.id.condition);
+        // Capitalise the first letter
+        String condition = product.getCondition().substring(0,1).toUpperCase() + product.getCondition().substring(1);
+        conditionView.setText("Condition: " + condition);
     }
 
     private void displayProductCategory(Product product){
         ImageView category_pic = findViewById(R.id.category_pic);
-        category_pic.setImageResource(product.getCategory().getCategoryIcon());
+        switch (product.getCategoryID()){
+            case 1:
+                category_pic.setImageResource(Category.OTHER.getCategoryIcon());
+            case 2:
+                category_pic.setImageResource(Category.CLOTHING.getCategoryIcon());
+            case 3:
+                category_pic.setImageResource(Category.ACCESSORIES.getCategoryIcon());
+            case 4:
+                category_pic.setImageResource(Category.ELECTRONICS.getCategoryIcon());
+            case 5:
+                category_pic.setImageResource(Category.BOOKS.getCategoryIcon());
+            case 6:
+                category_pic.setImageResource(Category.HOUSEHOLD.getCategoryIcon());
+            default:
+                category_pic.setImageResource(Category.OTHER.getCategoryIcon());
+        }
     }
 
     // navbar at the top to display the product name
@@ -120,13 +207,15 @@ public class ProductPageActivity extends AppCompatActivity {
         });
     }
 
-    public void displayProductContributor(User contributor, int id){
+    public void displayProductContributor(){
         TextView contributorName = findViewById(R.id.contributorName);
         CircleImageView contributorIcon = findViewById(R.id.circle);
-
-        contributorName.setText(contributor.getName());
-        contributorIcon.setImageResource(id);
-
+        contributorName.setText(userProfile.getName());
+        if (userProfile.getProfilePic() == null) {
+            contributorIcon.setImageResource(R.mipmap.ic_launcher_round);
+        } else {
+            contributorIcon.setImageBitmap(userProfile.getProfilePic());
+        }
     }
 
 
@@ -181,20 +270,11 @@ public class ProductPageActivity extends AppCompatActivity {
         }
     }
 
-    public void displayProductPics(int[] productPicId){
+    private void displayProductPics(ArrayList<Bitmap> picList){
         ViewPager2 viewPager = findViewById(R.id.viewPager);
-        sliderDotsPanel = (LinearLayout) findViewById(R.id.SliderDots);
-        dotsCount = productPicId.length;
-        dots = new ImageView[dotsCount];
-        for(int i = 0; i < dotsCount; i++){
-            dots[i] = new ImageView(this);
-            dots[i].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.non_active_dot));
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
-            params.setMargins(8,0,8,0);
-            sliderDotsPanel.addView(dots[i], params);
-        }
-        dots[0].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.active_dot));
-        SliderAdapter adapter = new SliderAdapter(productPicId);
+        adapter = new ProductPicsSliderAdapter(picList);
+        int dotsCount = picList.size();
+        displayPictureDots(dotsCount);
         viewPager.setAdapter(adapter);
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -208,10 +288,26 @@ public class ProductPageActivity extends AppCompatActivity {
         });
     }
 
-    public void displayMapPic(double lat, double lng){
+    private void displayPictureDots(int dotsCount){
+        LinearLayout sliderDotsPanel = (LinearLayout) findViewById(R.id.SliderDots);
+        dots = new ImageView[dotsCount];
+        for(int i = 0; i < dotsCount; i++){
+            dots[i] = new ImageView(this);
+            dots[i].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.non_active_dot));
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(8,0,8,0);
+            sliderDotsPanel.addView(dots[i], params);
+        }
+        dots[0].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.active_dot));
+    }
+
+    private void displayMapPic(double lat, double lng){
         ImageView mapView = findViewById(R.id.map);
         String url = "https://maps.googleapis.com/maps/api/staticmap?center="+ lat + ","+ lng +
                 "&zoom=15&size=400x400&markers=color:red|"+ lat + ","+ lng + "&key=" + getString(R.string.STATIC_MAP_KEY);
         Glide.with(this).load(url).into(mapView);
     }
+
+
+
 }

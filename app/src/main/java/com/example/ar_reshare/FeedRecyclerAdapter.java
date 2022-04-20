@@ -230,9 +230,11 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         public void productClick(View v) {
             Intent intent = new Intent(v.getContext(), ProductPageActivity.class);
             intent.putExtra("product", product);
-            intent.putExtra("contributor", product.getContributor());
-            //intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
-            //intent.putExtra("productPicId", (ArrayList<Integer>) product.getImages());
+            intent.putExtra("contributorID", product.getContributorID());
+            intent.putExtra("productID",product.getId());
+            intent.putExtra("lat", product.getCoordinates().latitude);
+            intent.putExtra("lng",product.getCoordinates().longitude);
+            intent.putExtra("categoryID",product.getCategoryID());
             v.getContext().startActivity(intent);
         }
 

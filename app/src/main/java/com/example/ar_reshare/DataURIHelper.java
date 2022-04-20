@@ -12,7 +12,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Base64;
 
-public class ToDataURI {
+public class DataURIHelper {
     public static String TranslateToDataURI(Context context, Uri uri) throws FileNotFoundException {
 
         InputStream iStream = context.getContentResolver().openInputStream(uri);

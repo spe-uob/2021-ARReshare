@@ -31,6 +31,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -69,7 +70,7 @@ public class MapsActivity extends FragmentActivity implements
     private final int MAX_DISTANCE = 5500; //metres
     private final int DISTANCE_UNIT = 50; //metres
     private int maxDistanceRange = MAX_DISTANCE;
-    private int tempDistanceRange = MIN_DISTANCE;
+    private int tempDistanceRange = MAX_DISTANCE;
 
     // Category Filtering
     private final int UNCHECKED_CHIP_COLOUR = Color.parseColor("#dbdbdb");
@@ -84,6 +85,7 @@ public class MapsActivity extends FragmentActivity implements
     private List<Product> products;
     private CountDownLatch readyLatch;
     private int TIMEOUT_IN_SECONDS = 5;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,7 +175,6 @@ public class MapsActivity extends FragmentActivity implements
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println(products.get(0).getLocation().toString());
                 LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
                 View filterWindow = inflater.inflate(R.layout.filter_popup, null);
                 int width = LinearLayout.LayoutParams.WRAP_CONTENT;
@@ -409,7 +410,6 @@ public class MapsActivity extends FragmentActivity implements
                                     lastKnownLocation = location;
                                     // Decrement the latch to signal user location is ready
                                     readyLatch.countDown();
-                                    System.out.println("YO MATE IVE GOT THE LOCATION");
                                     System.out.println(readyLatch.getCount());
                                 }
                             }
@@ -423,19 +423,20 @@ public class MapsActivity extends FragmentActivity implements
     // Show the Product Summary when a marker is clicked
     @Override
     public boolean onMarkerClick(Marker marker) {
-        marker.showInfoWindow();
         return false;
     }
 
     // Start the product page when clicked
     @Override
     public void onInfoWindowClick(Marker marker) {
-        Intent intent = new Intent(this, ProductPageActivity.class);
+        Product product = (Product)marker.getTag();
 
-        intent.putExtra("product", (Product) marker.getTag());
-        intent.putExtra("contributor", ((Product) marker.getTag()).getContributor());
-        intent.putExtra("profilePicId",((Product) marker.getTag()).getContributor().getProfileIcon());
-        //intent.putIntegerArrayListExtra("productPicId", (ArrayList<Integer>) ((Product) marker.getTag()).getImages());
+        Intent intent = new Intent(this, ProductPageActivity.class);
+        intent.putExtra("product", product);
+        intent.putExtra("productID",product.getId());
+        intent.putExtra("lat", product.getCoordinates().latitude);
+        intent.putExtra("lng",product.getCoordinates().longitude);
+        intent.putExtra("categoryID",product.getCategoryID());
 
         startActivity(intent);
     }
@@ -449,22 +450,37 @@ public class MapsActivity extends FragmentActivity implements
             System.out.println(product.getName());
             System.out.println(product.getPostcode());
             System.out.println(product.getCoordinates());
-            LatLng coordinates = product.getCoordinates();
-            Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(coordinates.latitude);
-            productLocation.setLongitude(coordinates.longitude);
-            float dist = lastKnownLocation.distanceTo(productLocation);
-            System.out.println(dist);
-            // Category productCategory = product.getCategory();
-            // && categoriesSelected.contains(productCategory)
-            if (dist <= maxDistanceRange) {
-                //float hue = getHueFromRGB(productCategory.getCategoryColour());
-                Marker marker = mMap.addMarker(new MarkerOptions()
-                        .position(coordinates)
-                        .title(product.getName())
-                        .snippet("by " + product.getContributor()));
-                marker.setTag(product);
+            getProductContributor(product);
+        }
+    }
+
+    // Downloads the profile of the contributor of the product and proceeds to show it on the map
+    private void getProductContributor(Product product) {
+        BackendController.getProfileByID(0, 1, product.getContributorID(), new BackendController.BackendProfileResultCallback() {
+            @Override
+            public void onBackendProfileResult(boolean success, User userProfile) {
+                product.setContributor(userProfile);
+                runOnUiThread(() -> addMarker(product));
             }
+        });
+    }
+
+    // Adds a new marker to the map if it meets the current filter
+    private void addMarker(Product product) {
+        LatLng coordinates = product.getCoordinates();
+        Location productLocation = new Location("ManualProvider");
+        productLocation.setLatitude(coordinates.latitude);
+        productLocation.setLongitude(coordinates.longitude);
+        float dist = lastKnownLocation.distanceTo(productLocation);
+        Category productCategory = Category.getCategoryById(product.getCategoryID());
+        if (dist <= maxDistanceRange && categoriesSelected.contains(productCategory)) {
+            float hue = getHueFromRGB(productCategory.getCategoryColour());
+            Marker marker = mMap.addMarker(new MarkerOptions()
+                    .position(coordinates)
+                    .title(product.getName())
+                    .snippet("by " + product.getContributor())
+                    .icon(BitmapDescriptorFactory.defaultMarker(hue)));
+            marker.setTag(product);
         }
     }
 
@@ -499,19 +515,19 @@ public class MapsActivity extends FragmentActivity implements
             mWindow = getLayoutInflater().inflate(R.layout.product_summary_map, null);
         }
 
-        private void renderInfoWindow(Marker marker) {
-            Product product = (Product) marker.getTag();
+        private void renderInfoWindow(Product product) {
+            User user = product.getContributor();
             TextView title = (TextView) mWindow.findViewById(R.id.title);
             title.setText(product.getName());
             TextView contributor = (TextView) mWindow.findViewById(R.id.contributor);
-            contributor.setText("Some user");
-            //contributor.setText(product.getContributor().getName());
+            if (user != null) contributor.setText(user.getName());
+            else contributor.setText("");
             TextView description = (TextView) mWindow.findViewById(R.id.description);
             description.setText(product.getDescription());
             ImageView photo = (ImageView) mWindow.findViewById(R.id.productimage);
             photo.setImageResource(R.drawable.example_cup);
 
-            // Try and download photo
+            // Show photo
             Bitmap productPhoto = product.getMainPic();
             if (productPhoto != null) photo.setImageBitmap(productPhoto);
             else photo.setImageResource(R.drawable.example_cup);
@@ -519,13 +535,15 @@ public class MapsActivity extends FragmentActivity implements
 
         @Override
         public View getInfoWindow(Marker marker) {
-            renderInfoWindow(marker);
+            Product product = (Product) marker.getTag();
+            renderInfoWindow(product);
             return mWindow;
         }
 
         @Override
         public View getInfoContents(Marker marker) {
-            renderInfoWindow(marker);
+            Product product = (Product) marker.getTag();
+            renderInfoWindow(product);
             return mWindow;
         }
     }
