@@ -115,6 +115,7 @@ public class FeedActivity extends AppCompatActivity {
         ImageView refreshButton = findViewById(R.id.feedRefreshButton);
         refreshButton.setOnClickListener(v -> {
             refreshButton.startAnimation(spinningAnim);
+            productListRecall();
             recyclerView.scrollToPosition(0);
         });
 
@@ -226,7 +227,7 @@ public class FeedActivity extends AppCompatActivity {
         BackendController.searchListings(0, 100, (success, searchResults) -> {
             if (success) {
                 allProducts = searchResults;
-                runOnUiThread(() -> filterPage(allProducts));
+                runOnUiThread(() -> constructNewPage(allProducts));
             }
             else {
                 System.out.println("searchListings filter callback failed");
@@ -235,7 +236,7 @@ public class FeedActivity extends AppCompatActivity {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void filterPage(List<Product> allProducts){
+    private void constructNewPage(List<Product> allProducts){
         List<Product> filteredList = allProducts.stream().filter(x -> {
             LatLng coordinates = x.getCoordinates();
             Location productLocation = new Location("ManualProvider");
