@@ -97,8 +97,8 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                         holder.profileIcon.setImageResource(R.mipmap.ic_launcher_round);
                     } else {
                         holder.profileIcon.setImageBitmap(userProfile.getProfilePic());
-                        holder.contributor.setText(userProfile.getName());
                     }
+                    holder.contributor.setText(userProfile.getName());
                 });
             }
             else {

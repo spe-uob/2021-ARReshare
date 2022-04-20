@@ -746,8 +746,6 @@ public class BackendController {
                 callback.onBackendGetListingResult(true, product);
             }
         }).start();
-
-
     }
 }
 
