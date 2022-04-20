@@ -13,6 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONException;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -213,7 +215,11 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                 productClick(v);
             }
             if (type == MESSAGE_LINK) {
-                messageClick(v);
+                try {
+                    messageClick(v);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -239,12 +245,21 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         }
 
         // Sends information to the messaging page
-        public void messageClick(View v) {
+        public void messageClick(View v) throws JSONException {
             Intent intent = new Intent(v.getContext(), MessagingActivity.class);
-            intent.putExtra("product", product);
-            intent.putExtra("contributor", product.getContributor());
-            intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
-            intent.putExtra("user", ExampleData.getUsers().get(0));
+            BackendController.createConversation(product.getId(), (success, message) -> {
+                if (success) {
+                    System.out.println("conversation created");
+                    Integer conversationId = Integer.valueOf(message);
+                    intent.putExtra("conversationId", conversationId);
+                } else {
+                    System.out.println(message);
+                    System.out.println("conversation creation failed");
+                }
+            });
+            intent.putExtra("listingId", product.getId());
+            intent.putExtra("currentUserId", BackendController.getLoggedInUserID());
+            intent.putExtra("contributorId", product.getContributorID());
             v.getContext().startActivity(intent);
         }
     }
