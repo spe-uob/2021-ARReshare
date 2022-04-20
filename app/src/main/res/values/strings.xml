@@ -11,5 +11,38 @@
     <string name="API_KEY2">AIzaSyBsn8QLFwcsXnxHf2ESE3HrXbch6lux3Ak</string>
     <string name="STATIC_MAP_KEY">AIzaSyAFWHH-yjENxp6a7kQUeFfLjWcbGBuuM6Y</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="thanks_message">You added this product,\nthank you for sharing!</string>
+    <string name="app_description">An augmented-reality enabled application allowing people to share the goods and gifts they no longer need or want.</string>
 
+    <!-- Used for SignUp Fragment -->
+    <string name="signupProfileCameraText">Take a Selfie!</string>
+    <string name="signupProfileGalleryText">Choose From Gallery!</string>
+    <string name="signupProfileCancelText">No Thanks, Skip For Now</string>
+
+<!-- used for addProduct page dropdown   -->
+    <string-array name="categories">
+        <item>Clothes</item>
+        <item>Accessories</item>
+        <item>Electronics</item>
+        <item>Books</item>
+        <item>Food</item>
+        <item>Other</item>
+    </string-array>
+    <string-array name="condition">
+        <item>Brand-new</item>
+        <item>Used-Very Good</item>
+        <item>Used-Good</item>
+        <item>Used-Acceptable</item>
+    </string-array>
+    <array name="add_image_popup">
+        <item>Camera</item>
+        <item>Gallery</item>
+    </array>
+    <string name="location">Location</string>
+    <string name="calc_distance">Calculating distance</string>
+    <string name="category">Category</string>
+    <string name="location_pin">Location Pin</string>
+    <string name="add_product">Add Product</string>
+    <string name="refresh">Refresh</string>
+    <string name="filter">Filter</string>
 </resources>

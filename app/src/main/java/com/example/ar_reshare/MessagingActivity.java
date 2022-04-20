@@ -12,12 +12,15 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MessagingActivity extends AppCompatActivity{
 
@@ -58,6 +61,15 @@ public class MessagingActivity extends AppCompatActivity{
                 recyclerView.scrollToPosition(mMessageList.size()-1);
             }
         });
+
+        for (Chat chat : ExampleData.getChats()) {
+            if (chat.getCurrentUser().getName().equals(user.getName()) && chat.getContributor().getName().equals(contributor.getName())){
+                for (Message message : chat.getMessages()) {
+                    mMessageList.add(message);
+                }
+            }
+        }
+
         sendButton = (Button) findViewById(R.id.button_send);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
