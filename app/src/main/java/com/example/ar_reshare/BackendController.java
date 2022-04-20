@@ -7,18 +7,19 @@ import android.content.Intent;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.google.gson.internal.GsonBuildConfig;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.IOException;
+import java.util.Optional;
 
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import de.javagl.obj.Obj;
+
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -34,8 +35,12 @@ public class BackendController {
     private static final int SUCCESSFUL_CREATION = 201;
     private static final int INCORRECT_FORMAT = 400;
     private static final int INCORRECT_CREDENTIALS = 401;
+
     private static final int EMAIL_ADDRESS_ALREADY_REGISTERED = 409;
     private static final int PASSWORD_NOT_STRONG = 422;
+    private static final int CONVERSATION_ALREADY_CLOSED = 409;
+    private static final int MEDIA_NOT_SUPPORT = 422;
+    private static final int REQUEST_NOT_FOUND = 404;
     private static final int RESOURCE_NOT_FOUND = 404;
     private static final int TYPE_NOT_SUPPORTED = 422;
 
@@ -57,7 +62,11 @@ public class BackendController {
     // Interface for callback handlers to receive response from the request
     public interface BackendSearchResultCallback {
         void onBackendSearchResult(boolean success, List<Product> searchResults);
+
     }
+
+    public interface BackendGetListingResultCallback {
+        void onBackendGetListingResult(boolean success, Product ListingResult);}
 
     // Interface for callback handlers to receive response from the request
     public interface BackendProfileResultCallback {
@@ -300,6 +309,7 @@ public class BackendController {
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
         BackendService service = retrofit.create(BackendService.class);
         Call<ResponseBody> call = service.addProduct(JWT, body);
+
         try {
             call.enqueue(new Callback<ResponseBody>() {
                 @Override
@@ -311,7 +321,7 @@ public class BackendController {
                         callback.onBackendResult(false, "The authentication token is missing or invalid");
                     } else if(response.code() == RESOURCE_NOT_FOUND){
                         callback.onBackendResult(false, "A requested auxiliary resource (category, address) does not exist or is unavailable to you");
-                    } else if (response.code() == TYPE_NOT_SUPPORTED){
+                    } else if(response.code() == TYPE_NOT_SUPPORTED){
                         callback.onBackendResult(false, "The media provided is not a supported file type");
                     } else {
                         callback.onBackendResult(false, "Failed to regenerate a new token????");
@@ -321,7 +331,9 @@ public class BackendController {
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     System.out.println("Failure");
+
                     callback.onBackendResult(false, "Failed to regenerate a new token");
+
                 }
             });
         } catch (Exception e) {
@@ -330,6 +342,7 @@ public class BackendController {
         }
         return false;
     }
+
 
     public static void searchListings(int startResults, int maxResults, BackendSearchResultCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
@@ -398,6 +411,22 @@ public class BackendController {
         }
     }
 
+    // Helper method of getProfileById()
+    // Waits until the user has had their profile photo downloaded
+    private static void initialiseProfilePic(User user, BackendProfileResultCallback callback) {
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(1);
+        user.downloadProfilePicture(latch);
+        new Thread(() -> {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            callback.onBackendProfileResult(true, user);
+        }).start();
+    }
+
     // Helper method of searchListings()
     // Waits until all products have had their main photo downloaded and postcode converted into coordinates
     private static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {
@@ -420,21 +449,7 @@ public class BackendController {
                 callback.onBackendSearchResult(true, products);
             }
         }).start();
+
     }
 
-    // Helper method of getProfileById()
-    // Waits until the user has had their profile photo downloaded
-    private static void initialiseProfilePic(User user, BackendProfileResultCallback callback) {
-        // Initialise the latch to wait for callbacks
-        CountDownLatch latch = new CountDownLatch(1);
-        user.downloadProfilePicture(latch);
-        new Thread(() -> {
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            callback.onBackendProfileResult(true, user);
-        }).start();
-    }
 }

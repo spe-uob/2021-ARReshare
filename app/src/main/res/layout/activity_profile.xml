@@ -121,7 +121,7 @@
                             </ImageButton>
 
                             <ImageButton
-                                android:id="@+id/gain2"
+                                android:id="@+id/shared2"
                                 android:layout_width="40dp"
                                 android:layout_height="120dp"
                                 android:layout_marginLeft="5dp"
@@ -132,7 +132,7 @@
                             </ImageButton>
 
                             <ImageButton
-                                android:id="@+id/gain3"
+                                android:id="@+id/shared3"
                                 android:layout_width="40dp"
                                 android:layout_height="120dp"
                                 android:layout_weight="1"
