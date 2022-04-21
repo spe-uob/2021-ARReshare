@@ -35,10 +35,12 @@ import java.util.concurrent.TimeUnit;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ProductPageActivity extends AppCompatActivity implements BackendController.BackendGetListingResultCallback {
+public class ProductPageActivity extends AppCompatActivity implements BackendController.BackendGetListingResultCallback,
+        BackendController.BackendProfileResultCallback{
+
     private ImageView[] dots;
     private Product product;
-    private Integer productID;
+    private User userProfile;
     private ArrayList<Bitmap> picList = new ArrayList<>();
     private ProductPicsSliderAdapter adapter;
     private CountDownLatch latch;
@@ -51,12 +53,14 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         // getting the stuff we need from previous page
         Intent i = getIntent();
         Product product = i.getParcelableExtra("product");
-        productID = i.getIntExtra("productID",1);
+        Integer productID = i.getIntExtra("productID",1);
+        Integer contributorID = i.getIntExtra("contributorID",1);
         Double lat = i.getDoubleExtra("lat",0);
         Double lng = i.getDoubleExtra("lng",0);
 
-        latch = new CountDownLatch(1); // wait until it gets the product from the backend
+        latch = new CountDownLatch(2); // wait until it gets the product and the user information from the backend
         BackendController.getListingByID(productID,ProductPageActivity.this);
+        BackendController.getProfileByID(0,1,contributorID,ProductPageActivity.this);
 
         //display a static map to show product's location
         displayMapPic(lat,lng);
@@ -67,35 +71,43 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         //display product description
         displayProductDescription(product);
 
-        //display contributor's information
-        //displayProductContributor(contributor,profilePicId);
-
         //add a bookmark button
         bookmarkButton();
 
-      //top left return arrow
+        //top left return arrow
         returnListener();
 
-//      //links to messaging page
-//        messageButton(product,contributor,user, profilePicId);
-        waitOnConditions();
+        //links to messaging page
+//      messageButton(product,contributor,user, profilePicId);
 
-        showEditIfUser();
+        waitOnConditions();
     }
 
     @Override
     public void onBackendGetListingResult(boolean success, Product ListingResult) {
-        System.out.println(success);
         this.product = ListingResult;
         if(success){
             latch.countDown();
-            System.out.println(product.getProductMedia());
+        }
+    }
+
+    @Override
+    public void onBackendProfileResult(boolean success, User userProfile) {
+        this.userProfile = userProfile;
+        if(success){
+            latch.countDown();
         }
     }
 
     private void displayInfo(){
         //edit button
-        showEditIfUser();
+        //showEditIfUser(contributor,user);
+
+        displayProductCondition(product);
+        displayProductCategory(product);
+
+        //display contributor's information
+        displayProductContributor();
 
         // display product added time
         TextView addedTime = findViewById(R.id.addedtime);
@@ -138,6 +150,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
             }
         }).start();
     }
+
     //TODO: only show these buttons if user's own product
     private void showEditIfUser(){
         ImageView edit = findViewById(R.id.edit);
@@ -158,7 +171,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
                             case "Delete":
                                 item.setEnabled(false);
                                 try {
-                                    BackendController.closeListing(productID, new BackendController.BackendCallback() {
+                                    BackendController.closeListing(product.getId(), new BackendController.BackendCallback() {
                                         @Override
                                         public void onBackendResult(boolean success, String message) {
                                             if(success){
@@ -186,12 +199,30 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
 
 
     private void displayProductCondition(Product product){
-
+        TextView conditionView = findViewById(R.id.condition);
+        // Capitalise the first letter
+        String condition = product.getCondition().substring(0,1).toUpperCase() + product.getCondition().substring(1);
+        conditionView.setText("Condition: " + condition);
     }
 
     private void displayProductCategory(Product product){
         ImageView category_pic = findViewById(R.id.category_pic);
-        category_pic.setImageResource(product.getCategory().getCategoryIcon());
+        switch (product.getCategoryID()){
+            case 1:
+                category_pic.setImageResource(Category.OTHER.getCategoryIcon());
+            case 2:
+                category_pic.setImageResource(Category.CLOTHING.getCategoryIcon());
+            case 3:
+                category_pic.setImageResource(Category.ACCESSORIES.getCategoryIcon());
+            case 4:
+                category_pic.setImageResource(Category.ELECTRONICS.getCategoryIcon());
+            case 5:
+                category_pic.setImageResource(Category.BOOKS.getCategoryIcon());
+            case 6:
+                category_pic.setImageResource(Category.HOUSEHOLD.getCategoryIcon());
+            default:
+                category_pic.setImageResource(Category.OTHER.getCategoryIcon());
+        }
     }
 
     // navbar at the top to display the product name
@@ -212,13 +243,15 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         });
     }
 
-    public void displayProductContributor(User contributor, int id){
+    public void displayProductContributor(){
         TextView contributorName = findViewById(R.id.contributorName);
         CircleImageView contributorIcon = findViewById(R.id.circle);
-
-        contributorName.setText(contributor.getName());
-        contributorIcon.setImageResource(id);
-
+        contributorName.setText(userProfile.getName());
+        if (userProfile.getProfilePic() == null) {
+            contributorIcon.setImageResource(R.mipmap.ic_launcher_round);
+        } else {
+            contributorIcon.setImageBitmap(userProfile.getProfilePic());
+        }
     }
 
 
@@ -310,6 +343,5 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
                 "&zoom=15&size=400x400&markers=color:red|"+ lat + ","+ lng + "&key=" + getString(R.string.STATIC_MAP_KEY);
         Glide.with(this).load(url).into(mapView);
     }
-
 
 }
