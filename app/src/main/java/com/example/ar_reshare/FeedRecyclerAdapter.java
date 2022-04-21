@@ -226,7 +226,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         // Sends information to the profile page
         public void profileClick(View v) {
             Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-            intent.putExtra("contributorId", product.getContributorID());
+            intent.putExtra("userId", product.getContributorID());
             v.getContext().startActivity(intent);
         }
 
