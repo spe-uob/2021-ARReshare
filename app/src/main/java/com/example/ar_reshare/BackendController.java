@@ -532,25 +532,7 @@ public class BackendController {
                 .baseUrl(URL)
                 .build();
 
-        JSONObject json = new JSONObject();
-        json.put("title", title);
-        json.put("description", description);
-
-        JSONObject location = new JSONObject();
-        location.put("country", country);
-        location.put("region", region);
-        location.put("postcode", postcode);
-        json.put("location", location);
-
-        json.put("categoryID", categoryID);
-        json.put("condition", condition);
-        JSONArray pics = new JSONArray();
-        for (String pic : media) {
-            pics.put(pic);
-        }
-        json.put("media",pics);
-        String bodyString = json.toString();
-        System.out.println(bodyString);
+        String bodyString = addOrModifyJsonHelper(title, description, country, region, postcode, categoryID, condition, media);
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
         BackendService service = retrofit.create(BackendService.class);
         Call<ResponseBody> call = service.addProduct(JWT, body);
@@ -782,6 +764,72 @@ public class BackendController {
             System.out.println(e);
             callback.onBackendResult(false, "Failed to delete the product");
         }
+    }
+
+    public static void modifyListing(String title, String description, String country, String region, String postcode, Integer categoryID, String condition, List<String> media, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
+
+        String bodyString = addOrModifyJsonHelper(title, description, country, region, postcode, categoryID, condition, media);
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.modifyListing(JWT, body);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESSFUL_CREATION) {
+                        callback.onBackendResult(true, "Success");
+                    } else if (response.code() == INCORRECT_FORMAT){
+                        callback.onBackendResult(false,"The request was missing required parameters, or was formatted incorrectly");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The authentication token is missing or invalid");
+                    } else if(response.code() == RESOURCE_NOT_FOUND){
+                        callback.onBackendResult(false, "A requested auxiliary resource does not exist or is unavailable to you");
+                    } else if(response.code() == TYPE_NOT_SUPPORTED){
+                        callback.onBackendResult(false, "The media provided is not a supported file type");
+                    } else {
+                        callback.onBackendResult(false, "Failed");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to modify the product");
+
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+    }
+
+    //this is a helper method for addProduct/modifyListing to convert the request body into JSON
+    private static String addOrModifyJsonHelper(String title, String description, String country, String region, String postcode, Integer categoryID, String condition, List<String> media) throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("title", title);
+        json.put("description", description);
+
+        JSONObject location = new JSONObject();
+        location.put("country", country);
+        location.put("region", region);
+        location.put("postcode", postcode);
+        json.put("location", location);
+
+        json.put("categoryID", categoryID);
+        json.put("condition", condition);
+        JSONArray pics = new JSONArray();
+        for (String pic : media) {
+            pics.put(pic);
+        }
+        json.put("media",pics);
+
+        return json.toString();
     }
 }
 

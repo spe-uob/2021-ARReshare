@@ -1,10 +1,12 @@
 package com.example.ar_reshare;
 
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import androidx.annotation.Nullable;
@@ -21,10 +23,18 @@ public class ModifyProduct extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modify_product);
+        Intent intent = getIntent();
+        String productName = intent.getStringExtra("productName");
+        String productDescription = intent.getStringExtra("productDescription");
+        Integer categoryID = intent.getIntExtra("categoryID",1);
+        String condition = intent.getStringExtra("condition");
+        String postcode = intent.getStringExtra("postcode");
+
+        displayStringText(productName,productDescription,postcode);
         tickButton();
         uploadedImageView();
-        categoryDropdown();
-        conditionDropdown();
+        categoryDropdown(categoryID);
+        conditionDropdown(condition);
         returnListener();
     }
 
@@ -38,18 +48,31 @@ public class ModifyProduct extends AppCompatActivity {
 
     }
 
-    private void categoryDropdown(){
+    //display product's name, description and postcode
+    private void displayStringText(String name, String description, String postcode){
+        EditText productNameText = (EditText)findViewById(R.id.add_product_name);
+        productNameText.setText(name);
+        EditText productDescriptionText = findViewById(R.id.add_product_description);
+        productDescriptionText.setText(description);
+        EditText productPostcodeText = findViewById(R.id.add_product_postcode);
+        productPostcodeText.setText(postcode);
+    }
+
+    private void categoryDropdown(Integer categoryID){
         Spinner spinner = findViewById(R.id.category_dropdown);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.categories, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+        spinner.setSelection(categoryID - 1);
     }
 
-    private void conditionDropdown(){
+    private void conditionDropdown(String condition){
         Spinner spinner = findViewById(R.id.condition_dropdown);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.condition, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+        int spinnerPosition = adapter.getPosition(condition);
+        spinner.setSelection(spinnerPosition);
     }
 
     private void tickButton(){

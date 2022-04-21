@@ -74,4 +74,8 @@ public interface BackendService {
     @Headers("Content-Type: application/json")
     @PATCH("listing/close")
     Call<ResponseBody> closeListing(@Header("Authorization") String token, @Body RequestBody data);
+
+    @Headers("Content-Type: application/json")
+    @PATCH("listing/modify")
+    Call<ResponseBody> modifyListing(@Header("Authorization") String token, @Body RequestBody data);
 }

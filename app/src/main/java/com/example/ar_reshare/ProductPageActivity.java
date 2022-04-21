@@ -101,7 +101,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
 
     private void displayInfo(){
         //edit button
-        //showEditIfUser(contributor,user);
+        showEditIfUser();
 
         displayProductCondition(product);
         displayProductCategory(product);
@@ -165,7 +165,13 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getTitle().toString()){
                             case "Edit":
+                                item.setEnabled(false);
                                 Intent intent = new Intent(ProductPageActivity.this, ModifyProduct.class);
+                                intent.putExtra("productName", product.getName());
+                                intent.putExtra("productDescription", product.getDescription());
+                                intent.putExtra("categoryID",product.getCategoryID());
+                                intent.putExtra("condition",product.getCondition());
+                                intent.putExtra("postcode", product.getPostcode());
                                 startActivity(intent);
                                 return true;
                             case "Delete":
@@ -207,22 +213,8 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
 
     private void displayProductCategory(Product product){
         ImageView category_pic = findViewById(R.id.category_pic);
-        switch (product.getCategoryID()){
-            case 1:
-                category_pic.setImageResource(Category.OTHER.getCategoryIcon());
-            case 2:
-                category_pic.setImageResource(Category.CLOTHING.getCategoryIcon());
-            case 3:
-                category_pic.setImageResource(Category.ACCESSORIES.getCategoryIcon());
-            case 4:
-                category_pic.setImageResource(Category.ELECTRONICS.getCategoryIcon());
-            case 5:
-                category_pic.setImageResource(Category.BOOKS.getCategoryIcon());
-            case 6:
-                category_pic.setImageResource(Category.HOUSEHOLD.getCategoryIcon());
-            default:
-                category_pic.setImageResource(Category.OTHER.getCategoryIcon());
-        }
+        Integer categoryIcon = Category.getCategoryById(product.getCategoryID()).getCategoryIcon();
+        category_pic.setImageResource(categoryIcon);
     }
 
     // navbar at the top to display the product name
