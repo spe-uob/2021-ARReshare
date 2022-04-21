@@ -252,15 +252,15 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                     System.out.println("conversation created");
                     Integer conversationId = Integer.valueOf(message);
                     intent.putExtra("conversationId", conversationId);
+                    intent.putExtra("listingId", product.getId());
+                    intent.putExtra("currentUserId", BackendController.getLoggedInUserID());
+                    intent.putExtra("contributorId", product.getContributorID());
+                    v.getContext().startActivity(intent);
                 } else {
                     System.out.println(message);
                     System.out.println("conversation creation failed");
                 }
             });
-            intent.putExtra("listingId", product.getId());
-            intent.putExtra("currentUserId", BackendController.getLoggedInUserID());
-            intent.putExtra("contributorId", product.getContributorID());
-            v.getContext().startActivity(intent);
         }
     }
 }
