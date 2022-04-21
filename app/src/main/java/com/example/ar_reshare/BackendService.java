@@ -70,4 +70,9 @@ public interface BackendService {
 
     @GET("listing/view")
     Call<Product> getListingByID(@Query("listingID") int listingID);
+
+    @Headers("Content-Type: application/json")
+    @POST("account/saved-listings/create")
+    Call<ResponseBody> createSavedListing(@Header("Authorization") String token,
+                                          @Query("listingID") int listingID);
 }

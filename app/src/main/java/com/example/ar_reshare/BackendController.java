@@ -659,6 +659,39 @@ public class BackendController {
         }
     }
 
+    public static boolean createSavedListings(int listingID, BackendCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.createSavedListing(JWT, listingID);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(
+                                true, "Listing with id " + listingID + " was saved");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to save listing");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+        return false;
+    }
+
     // Helper method of searchListings()
     // Waits until all products have had their main photo downloaded and postcode converted into coordinates
     private static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {

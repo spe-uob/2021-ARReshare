@@ -37,6 +37,8 @@ public class Product implements Parcelable {
     private String mimetype;
     @SerializedName("url")
     private String mainPicURL;
+    @SerializedName("saved")
+    private boolean savedByUser;
 
     private Bitmap mainPic;
 
@@ -179,6 +181,14 @@ public class Product implements Parcelable {
 
     public List<Integer> getImages() {
         return new ArrayList<Integer>();
+    }
+
+    public boolean isSavedByUser() {
+        return savedByUser;
+    }
+
+    public void setSavedByUser(boolean savedByUser) {
+        this.savedByUser = savedByUser;
     }
 
     public void findCoordinates(CountDownLatch latch) {

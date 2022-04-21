@@ -87,7 +87,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         distanceValueHelper(holder, product);
 
         // Bookmark button logic
-        bookmarkToggleHelper(holder);
+        bookmarkToggleHelper(holder, product);
     }
 
     public void productValueHelper(ViewHolder holder, Product product) {
@@ -147,12 +147,24 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         locationReady = true;
     }
 
-    public void bookmarkToggleHelper(ViewHolder holder) {
-        holder.bookmarkButton.setTag(0);
+    public void bookmarkToggleHelper(ViewHolder holder, Product product) {
+        if (product.isSavedByUser()) {
+            holder.bookmarkButton.setTag(1);
+        } else {
+            holder.bookmarkButton.setTag(0);
+        }
         holder.bookmarkButton.setOnClickListener(v -> {
             if (holder.bookmarkButton.getTag().equals(0)) {
-                holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
-                holder.bookmarkButton.setTag(1);
+                System.out.println("The tag is " + holder.bookmarkButton.getTag());
+                BackendController.createSavedListings(product.getId(), (success, message) -> {
+                    if (success) {
+                        System.out.println("createSavedListings callback success");
+                    } else {
+                        System.out.println("createSavedListings callback failed");
+                    }
+                    holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
+                    holder.bookmarkButton.setTag(1);
+                });
             } else {
                 holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
                 holder.bookmarkButton.setTag(0);
@@ -226,7 +238,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         // Sends information to the profile page
         public void profileClick(View v) {
             Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-            intent.putExtra("userId", product.getContributorID());
+            intent.putExtra("userID", product.getContributorID());
             v.getContext().startActivity(intent);
         }
 
