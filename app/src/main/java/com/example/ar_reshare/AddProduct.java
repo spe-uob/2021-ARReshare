@@ -45,9 +45,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
     private final String GALLERY = "gallery";
     private ActivityResultLauncher<Intent> cameraActivityResultLauncher;
     private ActivityResultLauncher<String> galleryActivityResultLauncher;
-    private File storageDir;
     private Uri photoUri;
-    private File photoFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +64,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                         if(result.getResultCode() == RESULT_OK){
                             adapter.addItem(photoUri);
                         }else{
-                            photoFile.delete();//delete the file if failed
+                            CameraHelper.deleteImageFile();//delete the file if failed
                         }
                     }
                 }
@@ -81,7 +79,6 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                 }
         );
 
-        storageDir = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         confirmListener();
         returnListener();
     }
@@ -245,47 +242,10 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
     @Override
     public void onDialogActionClick(DialogFragment dialog, String action) {
         if(action == CAMERA){
-            takePicture();
+            photoUri = CameraHelper.takePicture(getApplicationContext(),cameraActivityResultLauncher);
         }else if(action == GALLERY){
-            accessGallery();
+            galleryActivityResultLauncher.launch("image/*");
         }
-    }
-
-    private void accessGallery(){
-        galleryActivityResultLauncher.launch("image/*");
-    }
-
-    private void takePicture(){
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        try {
-            photoFile = createImageFile();
-        } catch (IOException ex) {
-            // Error occurred while creating the File
-            ex.printStackTrace();
-        }
-        // Continue only if the File was successfully created
-        if (photoFile != null) {
-            photoUri = FileProvider.getUriForFile(getApplicationContext(),
-                    "com.example.ar_reshare.fileprovider",
-                    photoFile);
-
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-        }
-
-        cameraActivityResultLauncher.launch(intent);
-    }
-
-    //creates a local photo path to store the pics taken by user
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-        return image;
     }
 
     @Override
