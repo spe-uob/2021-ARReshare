@@ -439,6 +439,7 @@ public class MapsActivity extends FragmentActivity implements
         intent.putExtra("lat", product.getCoordinates().latitude);
         intent.putExtra("lng",product.getCoordinates().longitude);
         intent.putExtra("categoryID",product.getCategoryID());
+        intent.putExtra("postcode",product.getPostcode());
 
         startActivity(intent);
 

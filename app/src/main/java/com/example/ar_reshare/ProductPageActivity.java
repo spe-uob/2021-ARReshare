@@ -40,6 +40,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
 
     private ImageView[] dots;
     private Product product;
+    private String postcode;
     private User userProfile;
     private ArrayList<Bitmap> picList = new ArrayList<>();
     private ProductPicsSliderAdapter adapter;
@@ -57,7 +58,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         Integer contributorID = i.getIntExtra("contributorID",1);
         Double lat = i.getDoubleExtra("lat",0);
         Double lng = i.getDoubleExtra("lng",0);
-
+        postcode = i.getStringExtra("postcode");
         latch = new CountDownLatch(2); // wait until it gets the product and the user information from the backend
         BackendController.getListingByID(productID,ProductPageActivity.this);
         BackendController.getProfileByID(0,1,contributorID,ProductPageActivity.this);
@@ -171,7 +172,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
                                 intent.putExtra("productDescription", product.getDescription());
                                 intent.putExtra("categoryID",product.getCategoryID());
                                 intent.putExtra("condition",product.getCondition());
-                                intent.putExtra("postcode", product.getPostcode());
+                                intent.putExtra("postcode", postcode);
                                 startActivity(intent);
                                 return true;
                             case "Delete":
