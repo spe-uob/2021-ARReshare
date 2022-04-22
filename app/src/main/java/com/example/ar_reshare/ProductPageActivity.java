@@ -1,15 +1,24 @@
 package com.example.ar_reshare;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,6 +35,7 @@ import com.google.android.gms.maps.model.Circle;
 
 import org.json.JSONException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -39,6 +49,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         BackendController.BackendProfileResultCallback{
 
     private ImageView[] dots;
+    private String[] imageUriList;
     private Product product;
     private String postcode;
     private User userProfile;
@@ -152,6 +163,14 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         }).start();
     }
 
+    //convert the image bitmap to URI for passing to ModifyProduct page
+    private Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
     //TODO: only show these buttons if user's own product
     private void showEditIfUser(){
         ImageView edit = findViewById(R.id.edit);
@@ -161,38 +180,35 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
                 PopupMenu popupMenu = new PopupMenu(getApplicationContext(),v);
                 MenuInflater inflater = popupMenu.getMenuInflater();
                 inflater.inflate(R.menu.product_setting, popupMenu.getMenu());
+                MenuItem delete = popupMenu.getMenu().getItem(1);
+                SpannableString spannable = new SpannableString("Delete");
+                spannable.setSpan(new ForegroundColorSpan(Color.RED),0,spannable.length(),0);
+                delete.setTitle(spannable);
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getTitle().toString()){
                             case "Edit":
                                 item.setEnabled(false);
+                                int picCount = product.getPictures().size();
+                                imageUriList = new String[picCount];
+                                for (int i = 0; i < picCount; i++) {
+                                    imageUriList[i] = getImageUri(getApplicationContext(),product.getPictures().get(i)).toString();
+                                }
                                 Intent intent = new Intent(ProductPageActivity.this, ModifyProduct.class);
+                                intent.putExtra("productID", product.getId());
                                 intent.putExtra("productName", product.getName());
                                 intent.putExtra("productDescription", product.getDescription());
                                 intent.putExtra("categoryID",product.getCategoryID());
                                 intent.putExtra("condition",product.getCondition());
                                 intent.putExtra("postcode", postcode);
+                                intent.putExtra("images",imageUriList);
                                 startActivity(intent);
                                 return true;
                             case "Delete":
                                 item.setEnabled(false);
-                                try {
-                                    BackendController.closeListing(product.getId(), new BackendController.BackendCallback() {
-                                        @Override
-                                        public void onBackendResult(boolean success, String message) {
-                                            if(success){
-                                                Toast.makeText(getApplicationContext(),
-                                                        "Product deleted successfully!",
-                                                        Toast.LENGTH_LONG).show();
-                                                onBackPressed();
-                                            }
-                                        }
-                                    });
-                                    return true;
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
+                                confirmToDelete();
+                                return true;
                             default:
                                 return false;
                         }
@@ -203,7 +219,39 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         });
     }
 
-
+    private void confirmToDelete(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Do you want to delete this product?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        try {
+                            BackendController.closeListing(product.getId(), new BackendController.BackendCallback() {
+                                @Override
+                                public void onBackendResult(boolean success, String message) {
+                                    if(success){
+                                        Toast.makeText(getApplicationContext(),
+                                                "Product deleted successfully!",
+                                                Toast.LENGTH_LONG).show();
+                                        onBackPressed();
+                                    }
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.setTitle("Delete product");
+        alertDialog.show();
+    }
 
     private void displayProductCondition(Product product){
         TextView conditionView = findViewById(R.id.condition);

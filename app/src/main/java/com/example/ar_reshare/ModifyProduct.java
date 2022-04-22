@@ -1,9 +1,12 @@
 package com.example.ar_reshare;
 
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -14,31 +17,74 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 
-public class ModifyProduct extends AppCompatActivity implements BackendController.BackendCallback {
+public class ModifyProduct extends AppCompatActivity implements addPhotoDialog.NoticeDialogListener,BackendController.BackendCallback {
 
     private ArrayList<Uri> uploadedImages = new ArrayList<>();
-    private UploadImageAdapter adapter = new UploadImageAdapter(uploadedImages);
+    private UploadImageAdapter adapter;
+    private Integer productID;
+    private final String CAMERA = "camera";
+    private final String GALLERY = "gallery";
+    private ActivityResultLauncher<Intent> cameraActivityResultLauncher;
+    private ActivityResultLauncher<String> galleryActivityResultLauncher;
+    private Uri photoUri;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modify_product);
         Intent intent = getIntent();
+        productID = intent.getIntExtra("productID",1);
         String productName = intent.getStringExtra("productName");
         String productDescription = intent.getStringExtra("productDescription");
         Integer categoryID = intent.getIntExtra("categoryID",1);
         String condition = intent.getStringExtra("condition");
         String postcode = intent.getStringExtra("postcode");
+        //get all the previous images of the product
+        String[] images = intent.getStringArrayExtra("images");
+        for (String image : images) {
+            uploadedImages.add(Uri.parse(image));
+        }
+        adapter = new UploadImageAdapter(uploadedImages);
+
+        //Camera intent launcher, add the picture to the product pics list once finished
+        cameraActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if(result.getResultCode() == RESULT_OK){
+                            adapter.addItem(photoUri);
+                        }else{
+                            CameraHelper.deleteImageFile();//delete the file if failed
+                        }
+                    }
+                }
+        );
+
+        //Gallery intent launcher, allowing users to select multiple pictures at a time
+        galleryActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.GetMultipleContents(), new ActivityResultCallback<List<Uri>>() {
+                    @Override
+                    public void onActivityResult(List<Uri> uri) {
+                        adapter.addAllItems(uri);
+                    }
+                }
+        );
 
         displayStringText(productName,productDescription,postcode);
+        addImageListener();
         confirmListener();
         uploadedImageView();
         categoryDropdown(categoryID);
@@ -46,12 +92,13 @@ public class ModifyProduct extends AppCompatActivity implements BackendControlle
         returnListener();
     }
 
+
+
     // used a recycler view to display the images chosen by users
     private void uploadedImageView(){
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false);
         RecyclerView uploaded_image_list = findViewById(R.id.uploaded_image_list);
         uploaded_image_list.setLayoutManager(layoutManager);
-        UploadImageAdapter adapter = new UploadImageAdapter(uploadedImages);
         uploaded_image_list.setAdapter(adapter);
 
     }
@@ -119,7 +166,7 @@ public class ModifyProduct extends AppCompatActivity implements BackendControlle
                         ArrayList<String> dataURIList;
                         dataURIList = convertToDataURI(adapter.uploadedImages);
                         media.addAll(dataURIList);
-                        BackendController.modifyListing(productName,productDescription,"UK","Bristol",productPostcode,category,condition, media, ModifyProduct.this);
+                        BackendController.modifyListing(productID,productName,productDescription,"UK","Bristol",productPostcode,category,condition, media, ModifyProduct.this);
                         Toast toast = Toast.makeText(getApplicationContext(), "Modified Successfully!", Toast.LENGTH_LONG);
                         toast.show();
                         onBackPressed();
@@ -201,8 +248,28 @@ public class ModifyProduct extends AppCompatActivity implements BackendControlle
         }
     }
 
+    private void addImageListener(){
+        Button add_image = findViewById(R.id.add_image);
+        add_image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment add_image_popup = new addPhotoDialog();
+                add_image_popup.show(getSupportFragmentManager(), "add_image_popup");
+            }
+        });
+    }
+
+    @Override
+    public void onDialogActionClick(DialogFragment dialog, String action) {
+        if(action == CAMERA){
+            photoUri = CameraHelper.takePicture(getApplicationContext(),cameraActivityResultLauncher);
+        }else if(action == GALLERY){
+            galleryActivityResultLauncher.launch("image/*");
+        }
+    }
+
     @Override
     public void onBackendResult(boolean success, String message) {
-        System.out.println(message);
+        System.out.println("modify listing " + message);
     }
 }

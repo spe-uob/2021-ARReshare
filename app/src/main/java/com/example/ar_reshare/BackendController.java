@@ -532,7 +532,7 @@ public class BackendController {
                 .baseUrl(URL)
                 .build();
 
-        String bodyString = addOrModifyJsonHelper(title, description, country, region, postcode, categoryID, condition, media);
+        String bodyString = addOrModifyJsonHelper(null, title, description, country, region, postcode, categoryID, condition, media);
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
         BackendService service = retrofit.create(BackendService.class);
         Call<ResponseBody> call = service.addProduct(JWT, body);
@@ -766,12 +766,12 @@ public class BackendController {
         }
     }
 
-    public static void modifyListing(String title, String description, String country, String region, String postcode, Integer categoryID, String condition, List<String> media, BackendCallback callback) throws JSONException {
+    public static void modifyListing(Integer productID,String title, String description, String country, String region, String postcode, Integer categoryID, String condition, List<String> media, BackendCallback callback) throws JSONException {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .build();
 
-        String bodyString = addOrModifyJsonHelper(title, description, country, region, postcode, categoryID, condition, media);
+        String bodyString = addOrModifyJsonHelper(productID, title, description, country, region, postcode, categoryID, condition, media);
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
         BackendService service = retrofit.create(BackendService.class);
         Call<ResponseBody> call = service.modifyListing(JWT, body);
@@ -780,8 +780,8 @@ public class BackendController {
             call.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    System.out.println(response.code());
-                    if (response.code() == SUCCESSFUL_CREATION) {
+                    System.out.println("modifylisting code "+ response.code());
+                    if (response.code() == SUCCESS) {
                         callback.onBackendResult(true, "Success");
                     } else if (response.code() == INCORRECT_FORMAT){
                         callback.onBackendResult(false,"The request was missing required parameters, or was formatted incorrectly");
@@ -810,8 +810,12 @@ public class BackendController {
     }
 
     //this is a helper method for addProduct/modifyListing to convert the request body into JSON
-    private static String addOrModifyJsonHelper(String title, String description, String country, String region, String postcode, Integer categoryID, String condition, List<String> media) throws JSONException {
+    private static String addOrModifyJsonHelper(Integer productID, String title, String description, String country, String region, String postcode, Integer categoryID, String condition, List<String> media) throws JSONException {
         JSONObject json = new JSONObject();
+        // for Modify listing, we need to add the productID to the beginning of JSON String
+        if (productID != null){
+            json.put("listingID",productID);
+        }
         json.put("title", title);
         json.put("description", description);
 
