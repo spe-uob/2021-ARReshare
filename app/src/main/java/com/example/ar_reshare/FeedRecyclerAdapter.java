@@ -157,6 +157,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             System.out.println("The tag is " + holder.bookmarkButton.getTag());
             if (holder.bookmarkButton.getTag().equals(0)) {
                 BackendController.createSavedListing((Integer) product.getId(), (success, message) -> {
+                    System.out.println(message);
                     if (success) {
                         System.out.println("createSavedListing callback success");
                     } else {

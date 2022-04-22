@@ -74,5 +74,5 @@ public interface BackendService {
     @Headers("Content-Type: application/json")
     @POST("account/saved-listings/create")
     Call<ResponseBody> createSavedListing(@Header("Authorization") String token,
-                                          @Query("listingID") int listingID);
+                                          @Query("listingID") Integer listingID);
 }
