@@ -154,18 +154,19 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             holder.bookmarkButton.setTag(0);
         }
         holder.bookmarkButton.setOnClickListener(v -> {
+            System.out.println("The tag is " + holder.bookmarkButton.getTag());
             if (holder.bookmarkButton.getTag().equals(0)) {
-                System.out.println("The tag is " + holder.bookmarkButton.getTag());
-                BackendController.createSavedListings(product.getId(), (success, message) -> {
+                BackendController.createSavedListing((Integer) product.getId(), (success, message) -> {
                     if (success) {
-                        System.out.println("createSavedListings callback success");
+                        System.out.println("createSavedListing callback success");
                     } else {
-                        System.out.println("createSavedListings callback failed");
+                        System.out.println("createSavedListing callback failed");
                     }
                     holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
                     holder.bookmarkButton.setTag(1);
                 });
             } else {
+                System.out.println("else condition");
                 holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
                 holder.bookmarkButton.setTag(0);
             }

@@ -659,7 +659,7 @@ public class BackendController {
         }
     }
 
-    public static boolean createSavedListings(int listingID, BackendCallback callback) {
+    public static boolean createSavedListing(Integer listingID, BackendCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -676,6 +676,9 @@ public class BackendController {
                     if (response.code() == SUCCESS) {
                         callback.onBackendResult(
                                 true, "Listing with id " + listingID + " was saved");
+                    } else {
+                        callback.onBackendResult(
+                                false, "Unsuccessful response code");
                     }
                 }
 
