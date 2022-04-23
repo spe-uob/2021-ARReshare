@@ -75,4 +75,9 @@ public interface BackendService {
     @POST("account/saved-listings/create")
     Call<ResponseBody> createSavedListing(@Header("Authorization") String token,
                                           @Body RequestBody data);
+
+    @Headers("Content-Type: application/json")
+    @POST("account/saved-listings/delete")
+    Call<ResponseBody> deleteSavedListing(@Header("Authorization") String token,
+                                          @Body RequestBody data);
 }

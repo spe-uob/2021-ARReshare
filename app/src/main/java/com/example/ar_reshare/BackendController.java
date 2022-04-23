@@ -699,6 +699,48 @@ public class BackendController {
         }
     }
 
+    public static void deleteSavedListing(int listingID, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("listingID", listingID);
+        String bodyString = jsonObject.toString();
+
+        RequestBody body =
+                RequestBody.create(MediaType.parse("application/json"), bodyString);
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.deleteSavedListing(JWT, body);
+        System.out.println("Printing JWT " + JWT + " and listingID " + listingID);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(
+                                true, "Listing with id " + listingID + " was deleted");
+                    } else {
+                        callback.onBackendResult(
+                                false, "Unsuccessful response code");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to delete listing");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
     // Helper method of searchListings()
     // Waits until all products have had their main photo downloaded and postcode converted into coordinates
     private static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {

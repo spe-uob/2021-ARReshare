@@ -174,9 +174,20 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                     e.printStackTrace();
                 }
             } else {
-                System.out.println("else condition");
-                holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
-                holder.bookmarkButton.setTag(0);
+                try {
+                    BackendController.deleteSavedListing(product.getId(), (success, message) -> {
+                        System.out.println(message);
+                        if (success) {
+                            System.out.println("deleteSavedListing callback success");
+                        } else {
+                            System.out.println("deleteSavedListing callback failed");
+                        }
+                        holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
+                        holder.bookmarkButton.setTag(0);
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
