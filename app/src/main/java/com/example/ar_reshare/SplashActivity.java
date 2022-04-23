@@ -19,8 +19,11 @@ public class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if(getSupportActionBar()!=null)
+            getSupportActionBar().hide();
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
         super.onCreate(savedInstanceState);
-        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         // Check if user is logged in
         Optional<Account> account = AuthenticationService.isLoggedIn(getApplicationContext());
@@ -52,7 +55,7 @@ public class SplashActivity extends AppCompatActivity {
                 Intent intent = new Intent(SplashActivity.this, LoginSignupActivity.class);
                 startActivity(intent);
             }
-        }, 3500);
+        }, 3000);
     }
 
     private void proceed() {
@@ -63,6 +66,6 @@ public class SplashActivity extends AppCompatActivity {
                 Intent intent = new Intent(SplashActivity.this, ARActivity.class);
                 startActivity(intent);
             }
-        }, 3500);
+        }, 3000);
     }
 }
