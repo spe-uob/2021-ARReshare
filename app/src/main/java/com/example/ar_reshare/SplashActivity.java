@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.accounts.Account;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -19,9 +20,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.splash_page);
-
-        Intent intent = new Intent(SplashActivity.this, ARActivity.class);
+        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         // Check if user is logged in
         Optional<Account> account = AuthenticationService.isLoggedIn(getApplicationContext());
@@ -31,16 +30,18 @@ public class SplashActivity extends AppCompatActivity {
             AuthenticationService.loginUser(getApplicationContext(), account.get(), new BackendController.BackendCallback() {
                 @Override
                 public void onBackendResult(boolean success, String message) {
-                    if (success) proceed();
+                    if (success) {
+                        proceed();
+                    }
                     else forceLogin();
                 }
             });
         } else forceLogin();
 
-        ImageView appIcon = findViewById(R.id.appIcon);
-        appIcon.animate().rotationBy(720).translationY(-400).setDuration(2000).start();
-        TextView splashText = findViewById(R.id.splashText);
-        splashText.animate().translationY(-700).setDuration(3000).start();
+//        ImageView appIcon = findViewById(R.id.appIcon);
+//        appIcon.animate().rotationBy(720).translationY(-400).setDuration(2000).start();
+//        TextView splashText = findViewById(R.id.splashText);
+//        splashText.animate().translationY(-700).setDuration(3000).start();
     }
 
     private void forceLogin() {
