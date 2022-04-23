@@ -66,13 +66,13 @@ public interface BackendService {
 
     @PUT("listing/create")
     Call<ResponseBody> addProduct(@Header("Authorization") String token, @Body RequestBody data);
-    @Headers("Content-Type: application/json")
 
+    @Headers("Content-Type: application/json")
     @GET("listing/view")
     Call<Product> getListingByID(@Query("listingID") int listingID);
 
     @Headers("Content-Type: application/json")
     @POST("account/saved-listings/create")
     Call<ResponseBody> createSavedListing(@Header("Authorization") String token,
-                                          @Query("listingID") Integer listingID);
+                                          @Body RequestBody data);
 }

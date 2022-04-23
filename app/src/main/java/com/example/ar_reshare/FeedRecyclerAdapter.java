@@ -149,23 +149,30 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
     public void bookmarkToggleHelper(ViewHolder holder, Product product) {
         if (product.isSavedByUser()) {
+            System.out.println("This product has been saved by the user");
             holder.bookmarkButton.setTag(1);
+            holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
         } else {
             holder.bookmarkButton.setTag(0);
+            holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
         }
         holder.bookmarkButton.setOnClickListener(v -> {
             System.out.println("The tag is " + holder.bookmarkButton.getTag());
             if (holder.bookmarkButton.getTag().equals(0)) {
-                BackendController.createSavedListing((Integer) product.getId(), (success, message) -> {
-                    System.out.println(message);
-                    if (success) {
-                        System.out.println("createSavedListing callback success");
-                    } else {
-                        System.out.println("createSavedListing callback failed");
-                    }
-                    holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
-                    holder.bookmarkButton.setTag(1);
-                });
+                try {
+                    BackendController.createSavedListing(product.getId(), (success, message) -> {
+                        System.out.println(message);
+                        if (success) {
+                            System.out.println("createSavedListing callback success");
+                        } else {
+                            System.out.println("createSavedListing callback failed");
+                        }
+                        holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
+                        holder.bookmarkButton.setTag(1);
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             } else {
                 System.out.println("else condition");
                 holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);

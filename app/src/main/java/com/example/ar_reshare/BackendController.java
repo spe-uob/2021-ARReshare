@@ -1,7 +1,6 @@
 package com.example.ar_reshare;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import org.json.JSONArray;
@@ -14,7 +13,6 @@ import java.util.Optional;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -659,14 +657,22 @@ public class BackendController {
         }
     }
 
-    public static boolean createSavedListing(Integer listingID, BackendCallback callback) {
+    public static void createSavedListing(int listingID, BackendCallback callback) throws JSONException {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("listingID", listingID);
+        String bodyString = jsonObject.toString();
+
+        RequestBody body =
+                RequestBody.create(MediaType.parse("application/json"), bodyString);
+
         BackendService service = retrofit.create(BackendService.class);
-        Call<ResponseBody> call = service.createSavedListing(JWT, listingID);
+        Call<ResponseBody> call = service.createSavedListing(JWT, body);
+        System.out.println("Printing JWT " + JWT + " and listingID " + listingID);
 
         try {
             call.enqueue(new Callback<ResponseBody>() {
@@ -690,9 +696,7 @@ public class BackendController {
             });
         } catch (Exception e) {
             System.out.println(e);
-            return false;
         }
-        return false;
     }
 
     // Helper method of searchListings()
