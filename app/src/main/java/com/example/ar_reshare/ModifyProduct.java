@@ -169,7 +169,7 @@ public class ModifyProduct extends AppCompatActivity implements addPhotoDialog.N
                         BackendController.modifyListing(productID,productName,productDescription,"UK","Bristol",productPostcode,category,condition, media, ModifyProduct.this);
                         Toast toast = Toast.makeText(getApplicationContext(), "Modified Successfully!", Toast.LENGTH_LONG);
                         toast.show();
-                        onBackPressed();
+                        startActivity(new Intent(ModifyProduct.this,ARActivity.class));
                     } catch (Exception e) {
                         Toast toast = Toast.makeText(getApplicationContext(), "Failed to modify the product", Toast.LENGTH_LONG);
                         toast.show();

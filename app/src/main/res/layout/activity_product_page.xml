@@ -112,7 +112,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/addedtime" />
+                app:layout_constraintTop_toBottomOf="@+id/time" />
 
             <TextView
                 android:id="@+id/productName"
@@ -210,7 +210,7 @@
                 app:layout_constraintStart_toStartOf="parent"></LinearLayout>
 
             <TextView
-                android:id="@+id/addedtime"
+                android:id="@+id/time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ems="10"

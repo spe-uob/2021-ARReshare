@@ -3,7 +3,6 @@ package com.example.ar_reshare;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
@@ -12,11 +11,9 @@ import android.content.Intent;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.MenuInflater;
@@ -30,16 +27,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.android.gms.maps.model.Circle;
 
 import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -121,9 +113,17 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         //display contributor's information
         displayProductContributor();
 
-        // display product added time
-        TextView addedTime = findViewById(R.id.addedtime);
-        addedTime.setText(product.getDate() + "  added  ");
+        // display product added time or modified time
+        if(product.getModificationDate() == null){
+            System.out.println(product.getModificationDate());
+            TextView addedTime = findViewById(R.id.time);
+            String[] time = MessagingActivity.convertDate(product.getCreationDate());
+            addedTime.setText(time[3] + " " + time[2] + "-" + time[1] + " " +time[5] +"  added ");
+        } else {
+            TextView modifiedTime = findViewById(R.id.time);
+            String[] time = MessagingActivity.convertDate(product.getModificationDate());
+            modifiedTime.setText(time[3] + " " + time[2] + "-" + time[1] + " " +time[5] + "  modified ");
+        }
 
         //display product pics using slider
         picList.addAll(product.getPictures());
@@ -233,7 +233,8 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
                                         Toast.makeText(getApplicationContext(),
                                                 "Product deleted successfully!",
                                                 Toast.LENGTH_LONG).show();
-                                        onBackPressed();
+                                        // go back to the main page when finished
+                                        startActivity(new Intent(ProductPageActivity.this, ARActivity.class));
                                     }
                                 }
                             });
