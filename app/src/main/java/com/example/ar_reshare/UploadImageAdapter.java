@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UploadImageAdapter extends RecyclerView.Adapter<UploadImageAdapter.ViewHolder>{
-
     public SortedList<Uri> uploadedImages;
 
     public UploadImageAdapter(ArrayList<Uri> images) {
