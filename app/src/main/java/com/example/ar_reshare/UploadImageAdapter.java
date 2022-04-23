@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UploadImageAdapter extends RecyclerView.Adapter<UploadImageAdapter.ViewHolder>{
+    
     public SortedList<Uri> uploadedImages;
 
     public UploadImageAdapter(ArrayList<Uri> images) {
-
         uploadedImages = new SortedList<>(Uri.class, new SortedList.Callback<Uri>() {
             @Override
             public int compare(Uri o1, Uri o2) {
