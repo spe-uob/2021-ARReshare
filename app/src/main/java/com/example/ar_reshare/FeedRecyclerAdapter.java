@@ -1,5 +1,7 @@
 package com.example.ar_reshare;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.view.LayoutInflater;
@@ -11,15 +13,22 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONException;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.ViewHolder> {
 
-    private static final int PROFILE_LINK = 0;
-    private static final int PRODUCT_LINK = 1;
-    private static final int MESSAGE_LINK = 2;
+    Map<Integer, Category> intToCat = new HashMap<>();
+
+    private static final int PROFILE_LINK = 100;
+    private static final int PRODUCT_LINK = 101;
+    private static final int MESSAGE_LINK = 102;
 
     private final List<Product> productList;
     public ArrayList<ViewHolder> cards = new ArrayList<>();
@@ -27,14 +36,23 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     private Location userLocation;
     private boolean locationReady = false;
 
+    private Context context;
+
     public FeedRecyclerAdapter(List<Product> productList){
         this.productList = productList;
+        intToCat.put(1, Category.OTHER);
+        intToCat.put(2, Category.CLOTHING);
+        intToCat.put(3, Category.ACCESSORIES);
+        intToCat.put(4, Category.ELECTRONICS);
+        intToCat.put(5, Category.BOOKS);
+        intToCat.put(6, Category.HOUSEHOLD);
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        context = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.item_view,parent, false);
         return new ViewHolder(view);
     }
@@ -69,14 +87,29 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         distanceValueHelper(holder, product);
 
         // Bookmark button logic
-        bookmarkToggleHelper(holder);
+        bookmarkToggleHelper(holder, product);
     }
 
     public void productValueHelper(ViewHolder holder, Product product) {
-        holder.profileIcon.setImageResource(product.getContributor().getProfileIcon());
-        holder.categoryIcon.setImageResource(product.getCategory().getCategoryIcon());
-        holder.contributor.setText(product.getContributor().getName());
-        holder.productImage.setImageResource(product.getImages().get(0));
+        BackendController.getProfileByID(0, 100,
+                product.getContributorID(), (success, userProfile) -> {
+                    if (success) {
+                        ((Activity) context).runOnUiThread(() -> {
+                            if (userProfile.getProfilePic() == null) {
+                                holder.profileIcon.setImageResource(R.mipmap.ic_launcher_round);
+                            } else {
+                                holder.profileIcon.setImageBitmap(userProfile.getProfilePic());
+                            }
+                            holder.contributor.setText(userProfile.getName());
+                        });
+                    }
+                    else {
+                        System.out.println("getProfileByID callback failed");
+                    }
+                });
+        holder.categoryIcon.setImageResource(Objects.requireNonNull(
+                intToCat.get(product.getCategoryID())).getCategoryIcon());
+        holder.productImage.setImageBitmap(product.getMainPic());
         holder.productTitle.setText(product.getName());
         holder.productDescription.setText(product.getDescription());
     }
@@ -84,8 +117,8 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     public void distanceValueHelper(ViewHolder holder, Product product) {
         if (locationReady) {
             Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(product.getLocation().latitude);
-            productLocation.setLongitude(product.getLocation().longitude);
+            productLocation.setLatitude(product.getCoordinates().latitude);
+            productLocation.setLongitude(product.getCoordinates().longitude);
             float dist = userLocation.distanceTo(productLocation);
             int roundedDist = Math.round(dist);
             holder.location.setText(MessageFormat.format("{0}m", roundedDist));
@@ -96,13 +129,14 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
     // Grabs userLocation from FeedActivity and uses it to show distance to products created
     public void updateDistances(Location location) {
+        System.out.println(location);
         // Update the location text of already created cards
         for (int i=0; i < cards.size(); i++) {
             ViewHolder card = cards.get(i);
             Product product = productList.get(i);
             Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(product.getLocation().latitude);
-            productLocation.setLongitude(product.getLocation().longitude);
+            productLocation.setLatitude(product.getCoordinates().latitude);
+            productLocation.setLongitude(product.getCoordinates().longitude);
             float dist = location.distanceTo(productLocation);
             int roundedDist = Math.round(dist);
             card.location.setText(MessageFormat.format("{0}m", roundedDist));
@@ -113,15 +147,47 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         locationReady = true;
     }
 
-    public void bookmarkToggleHelper(ViewHolder holder) {
-        holder.bookmarkButton.setTag(0);
+    public void bookmarkToggleHelper(ViewHolder holder, Product product) {
+        if (product.isSavedByUser()) {
+            System.out.println("This product has been saved by the user");
+            holder.bookmarkButton.setTag(1);
+            holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
+        } else {
+            holder.bookmarkButton.setTag(0);
+            holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
+        }
         holder.bookmarkButton.setOnClickListener(v -> {
+            System.out.println("The tag is " + holder.bookmarkButton.getTag());
             if (holder.bookmarkButton.getTag().equals(0)) {
-                holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
-                holder.bookmarkButton.setTag(1);
+                try {
+                    BackendController.createSavedListing(product.getId(), (success, message) -> {
+                        System.out.println(message);
+                        if (success) {
+                            System.out.println("createSavedListing callback success");
+                        } else {
+                            System.out.println("createSavedListing callback failed");
+                        }
+                        holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
+                        holder.bookmarkButton.setTag(1);
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             } else {
-                holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
-                holder.bookmarkButton.setTag(0);
+                try {
+                    BackendController.deleteSavedListing(product.getId(), (success, message) -> {
+                        System.out.println(message);
+                        if (success) {
+                            System.out.println("deleteSavedListing callback success");
+                        } else {
+                            System.out.println("deleteSavedListing callback failed");
+                        }
+                        holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
+                        holder.bookmarkButton.setTag(0);
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -181,16 +247,18 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                 productClick(v);
             }
             if (type == MESSAGE_LINK) {
-                messageClick(v);
+                try {
+                    messageClick(v);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
         // Sends information to the profile page
         public void profileClick(View v) {
             Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-            intent.putExtra("contributor", product.getContributor());
-            intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
-            intent.putExtra("bio", product.getContributor().getBio());
+            intent.putExtra("userID", product.getContributorID());
             v.getContext().startActivity(intent);
         }
 
@@ -198,20 +266,32 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         public void productClick(View v) {
             Intent intent = new Intent(v.getContext(), ProductPageActivity.class);
             intent.putExtra("product", product);
-            intent.putExtra("contributor", product.getContributor());
-            intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
-            intent.putExtra("productPicId", (ArrayList<Integer>) product.getImages());
+            intent.putExtra("contributorID", product.getContributorID());
+            intent.putExtra("productID",product.getId());
+            intent.putExtra("lat", product.getCoordinates().latitude);
+            intent.putExtra("lng",product.getCoordinates().longitude);
+            intent.putExtra("categoryID",product.getCategoryID());
+            intent.putExtra("postcode",product.getPostcode());
             v.getContext().startActivity(intent);
         }
 
         // Sends information to the messaging page
-        public void messageClick(View v) {
+        public void messageClick(View v) throws JSONException {
             Intent intent = new Intent(v.getContext(), MessagingActivity.class);
-            intent.putExtra("product", product);
-            intent.putExtra("contributor", product.getContributor());
-            intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
-            intent.putExtra("user", ExampleData.getUsers().get(0));
-            v.getContext().startActivity(intent);
+            BackendController.createConversation(product.getId(), (success, message) -> {
+                if (success) {
+                    System.out.println("conversation created");
+                    Integer conversationId = Integer.valueOf(message);
+                    intent.putExtra("conversationId", conversationId);
+                    intent.putExtra("listingId", product.getId());
+                    intent.putExtra("currentUserId", BackendController.getLoggedInUserID());
+                    intent.putExtra("contributorId", product.getContributorID());
+                    v.getContext().startActivity(intent);
+                } else {
+                    System.out.println(message);
+                    System.out.println("conversation creation failed");
+                }
+            });
         }
     }
 }

@@ -13,9 +13,9 @@ public enum Category {
             R.drawable.electronics_icon),   // CYAN
     BOOKS(Color.RED,"models/pawn.obj","models/pink.png",
             R.drawable.books_icon),         // RED
-    FOOD(Color.GREEN,"models/burger.obj","models/burger.png",
-            R.drawable.food_icon),          // GREEN
-    OTHER(Color.rgb(30, 19, 34),"models/cup.obj","models/pink.png",
+    HOUSEHOLD(Color.GREEN,"models/burger.obj","models/burger.png",
+            R.drawable.household_icon),          // GREEN
+    OTHER(Color.rgb(204, 136, 128),"models/cup.obj","models/pink.png",
             R.drawable.other_icon);          // PURPLE
 
     private final int hueColour;
@@ -40,5 +40,18 @@ public enum Category {
 
     public int getCategoryIcon() {
         return this.categoryIcon;
+    }
+
+    // Given a category id returns the corresponding category
+    public static Category getCategoryById(int id) {
+        switch (id) {
+            case 1: return Category.OTHER;
+            case 2: return Category.CLOTHING;
+            case 3: return Category.ACCESSORIES;
+            case 4: return Category.ELECTRONICS;
+            case 5: return Category.BOOKS;
+            case 6: return Category.HOUSEHOLD;
+            default: return Category.OTHER;
+        }
     }
 }
