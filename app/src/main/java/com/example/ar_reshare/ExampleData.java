@@ -17,13 +17,11 @@ public class ExampleData {
         products = new ArrayList<>();
         chats = new ArrayList<>();
 
-
-
         User user0 = new User("John","", 0);
         users.add(user0);
+        user0.setBio("Hellllo, Welcome to my page!");
         products.add(new Product("Fancy Cup", "This is a really nice fancy cup. Feel free to message me to arrange a pickup.", user0, Category.OTHER,51.45120306024447, -2.5869936269149303));
         user0.setProfileIcon(R.drawable.jon);
-
 //
 //        User user1 = new User("Artur","", 1);
 //        user1.setProfileIcon(R.drawable.artur_profile_icon);
@@ -114,7 +112,6 @@ public class ExampleData {
 //        messages2.add(message4);
 //        Chat chat2 = new Chat(user0,user2,messages2,products.get(2));
 //        chats.add(chat2);
-
     }
 
     public static List<User> getUsers() {
