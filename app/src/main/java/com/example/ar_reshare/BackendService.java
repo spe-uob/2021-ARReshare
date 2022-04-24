@@ -38,7 +38,6 @@ public interface BackendService {
                                      @Query("startResults") int startResults,
                                      @Query("userID") int userID);
 
-
     @Headers("Content-Type: application/json")
     @PUT("token/regeneration")
     Call<ResponseBody> requestRegeneratedToken(@Header("Authorization") String token);
@@ -81,4 +80,11 @@ public interface BackendService {
     @POST("account/saved-listings/delete")
     Call<ResponseBody> deleteSavedListing(@Header("Authorization") String token,
                                           @Body RequestBody data);
+
+    @PATCH("listing/close")
+    Call<ResponseBody> closeListing(@Header("Authorization") String token, @Body RequestBody data);
+
+    @Headers("Content-Type: application/json")
+    @PATCH("listing/modify")
+    Call<ResponseBody> modifyListing(@Header("Authorization") String token, @Body RequestBody data);
 }
