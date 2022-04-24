@@ -57,6 +57,7 @@ public class ExampleData {
 //        products.add(new Product("PCs For Dummies", "Helped me", user5, Category.BOOKS, 51.459040571152514, -2.6022736036387366));
 //        products.get(5).addImages(R.drawable.book);
 //
+
 //        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
 //        List<Message> messages1 = new ArrayList<>();
 //        Message message1 = new Message("hello!!!", user1, simpleDateFormat.format(new Date()));

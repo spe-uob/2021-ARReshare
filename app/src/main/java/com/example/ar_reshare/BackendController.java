@@ -59,6 +59,15 @@ public class BackendController {
         void onBackendResult(boolean success, String message);
     }
 
+
+    public interface ChatBackendCallback {
+        void onBackendResult(boolean success, String message, int loggedInUserID, Chat.ConversationsResult conversations);
+    }
+
+    public interface MessageBackendCallback {
+        void onBackendResult(boolean success, String message, int loggedInUserID, Message.MessageResult messageResult);
+    }
+
     // Interface for callback handlers to receive response from the request
     public interface BackendSearchResultCallback {
         void onBackendSearchResult(boolean success, List<Product> searchResults);
@@ -71,6 +80,14 @@ public class BackendController {
     // Interface for callback handlers to receive response from the request
     public interface BackendProfileResultCallback {
         void onBackendProfileResult(boolean success, User userProfile);
+    }
+
+    public interface BackendSearchListingsResultCallback {
+        void onBackendSearchListingsResult(boolean success, List<Product> ListingSearchResult);
+    }
+
+    public interface BackendSearchSavedListingsResultCallback {
+        void onBackendSearchSavedListingsResult(boolean success, List<Product> savedListingSearchResult);
     }
 
     private static void initialise() {
@@ -282,6 +299,242 @@ public class BackendController {
         return false;
     }
 
+
+    public static boolean createConversation(Integer listingID, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("listingID", listingID);
+        String bodyString = jsonObject.toString();
+
+        RequestBody body =
+                RequestBody.create(MediaType.parse("application/json"), bodyString);
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.createConversation(JWT,body);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+
+                    if (response.code() == SUCCESSFUL_CREATION) {
+                        try {
+                            String string = response.body().string();
+                            String regex = "[^0-9]";
+                            Pattern p = Pattern.compile(regex);
+                            Matcher m = p.matcher(string);
+                            int conversationId = Integer.valueOf(m.replaceAll("").trim());
+                            callback.onBackendResult(true, String.valueOf(conversationId));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (response.code() == INCORRECT_FORMAT) {
+                        callback.onBackendResult(false, "The request was missing required parameters, or was formatted incorrectly");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The authentication token was missing or invalid");
+                    } else if (response.code() == RESOURCE_NOT_FOUND){
+                        callback.onBackendResult(false, "The requested resource does not exist or is unavailable to you");
+                    } else {
+                        System.out.println("response"+response.message());
+                        callback.onBackendResult(false, "That resource already exists");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to create new conversation");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+        return false;
+    }
+
+    public static boolean getConversationDescriptors(ChatBackendCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Chat.ConversationsResult> call = service.getConversationDescriptors(JWT,10,0);
+
+        try {
+            call.enqueue(new Callback<Chat.ConversationsResult>() {
+                @Override
+                public void onResponse(Call<Chat.ConversationsResult> call, Response<Chat.ConversationsResult> response) {
+                    System.out.println(response.code());
+                    Chat.ConversationsResult conversations = response.body();
+                    System.out.println("conversations : " + conversations.getChats().size());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "Success", loggedInUserID, conversations);
+                    } else if (response.code() == INCORRECT_FORMAT) {
+                        callback.onBackendResult(false, "The getConversationDescriptors was missing required parameters", loggedInUserID, conversations);
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The authentication token was missing or invalid", loggedInUserID, conversations);
+                    }
+                }
+                @Override
+                public void onFailure(Call<Chat.ConversationsResult> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to create new conversation", loggedInUserID, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+        return false;
+    }
+
+    public static boolean getConversationByID(Integer conversationID, MessageBackendCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Message.MessageResult> call = service.getConversationByID(JWT,10,0, conversationID);
+
+        try {
+            call.enqueue(new Callback<Message.MessageResult>() {
+                @Override
+                public void onResponse(Call<Message.MessageResult> call, Response<Message.MessageResult> response) {
+                    System.out.println(response.code());
+                    Message.MessageResult messageResult = response.body();
+                    System.out.println("url is " + messageResult.getUrl());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "Success", loggedInUserID,messageResult);
+                    } else if (response.code() == INCORRECT_FORMAT) {
+                        callback.onBackendResult(false,"The getConversationDescriptors was missing required parameters", loggedInUserID,null);
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The authentication token was missing or invalid",loggedInUserID,null);
+                    }else if (response.code() == MEDIA_NOT_SUPPORT) {
+                        callback.onBackendResult(false, "The requested resource does not exist or is unavailable to you", loggedInUserID,null);
+                    }
+                }
+                @Override
+                public void onFailure(Call<Message.MessageResult> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to create new conversation", loggedInUserID,null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+        return false;
+    }
+
+    public static boolean sendConversationMessage(Integer conversationID, String textContent, String mediaContent, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("conversationID", conversationID);
+        jsonObject.put("textContent", textContent);
+        jsonObject.put("mediaContent", mediaContent);
+        String bodyString = jsonObject.toString();
+
+        System.out.println(JWT);
+
+        RequestBody body =
+                RequestBody.create(MediaType.parse("application/json"), bodyString);
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.sendConversationMessage(JWT, body);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "Success");
+                    } else if (response.code() == INCORRECT_FORMAT) {
+                        callback.onBackendResult(false, "The request was missing required parameters, or was formatted incorrectly");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The authentication token was missing or invalid");
+                    } else if (response.code() == RESOURCE_NOT_FOUND) {
+                        callback.onBackendResult(false, "The requested resource does not exist or is unavailable to you");
+                    } else if (response.code() == MEDIA_NOT_SUPPORT) {
+                        callback.onBackendResult(false, "The media provided is not a supported file type");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to create new conversation");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+        return false;
+    }
+
+    public static boolean closeConversation(Integer conversationID, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
+
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("conversationID", conversationID);
+        String bodyString = jsonObject.toString();
+
+        RequestBody body =
+                RequestBody.create(MediaType.parse("application/json"), bodyString);
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.closeConversation(JWT, body);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "Success close");
+                    } else if (response.code() == INCORRECT_FORMAT) {
+                        callback.onBackendResult(false, "The request was missing required parameters, or was formatted incorrectly");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The authentication token was missing or invalid");
+                    } else if (response.code() == RESOURCE_NOT_FOUND) {
+                        callback.onBackendResult(false, "The requested resource does not exist or is unavailable to you");
+                    } else if (response.code() == CONVERSATION_ALREADY_CLOSED) {
+                        callback.onBackendResult(false, "That resource is already closed");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to close conversation");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+        return false;
+    }
+
     public static boolean addProduct(String title, String description, String country, String region, String postcode, Integer categoryID, String condition, List<String> media, BackendCallback callback) throws JSONException {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
@@ -450,6 +703,128 @@ public class BackendController {
             }
         }).start();
 
+    }
+
+    public static void getListingByID(Integer listingID, BackendGetListingResultCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product> call = service.getListingByID(listingID);
+
+        try {
+            call.enqueue(new Callback<Product>() {
+                @Override
+                public void onResponse(Call<Product> call, Response<Product> response) {
+                    if (response.code() == SUCCESS) {
+                        System.out.println("get listing success");
+                        initialiseProduct(response.body(), callback);
+                    } else {
+                        callback.onBackendGetListingResult(false, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Product> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendGetListingResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    //helper method of getListingByID
+    //wait until the product has all of its images downloaded
+    private static void initialiseProduct(Product product, BackendGetListingResultCallback callback) {
+        final int NUMBER_OF_IMAGES = product.getProductMedia().size();
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(NUMBER_OF_IMAGES);
+        product.downloadAllPictures(latch);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                callback.onBackendGetListingResult(true, product);
+            }
+        }).start();
+
+
+    }
+
+    public static void searchAccountListings(int startResults, int maxResults, int categoryID,
+                                      BackendSearchListingsResultCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
+
+        try {
+            call.enqueue(new Callback<Product.SearchResults>() {
+                @Override
+                public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendSearchListingsResult(true, response.body().getSearchedProducts());
+                    } else {
+                        callback.onBackendSearchListingsResult(false, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendSearchListingsResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println("Encountered error. " + e);
+            callback.onBackendSearchListingsResult(false, null);
+        }
+    }
+
+    public static void searchSavedListings(int startResults, int maxResults, int categoryID, int region,
+                                             BackendSearchSavedListingsResultCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
+
+        try {
+            call.enqueue(new Callback<Product.SearchResults>() {
+                @Override
+                public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendSearchSavedListingsResult(true, response.body().getSearchedProducts());
+                    } else {
+                        callback.onBackendSearchSavedListingsResult(false, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendSearchSavedListingsResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println("Encountered error. " + e);
+            callback.onBackendSearchSavedListingsResult(false, null);
+        }
     }
 
 }

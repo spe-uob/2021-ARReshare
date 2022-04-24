@@ -471,7 +471,7 @@ public class SignUpFragment extends Fragment {
         try {
             Button button = addPhotoWindow.findViewById(R.id.signupPictureCamera);
             button.setText("Uploading...");
-            String sourceURI = ToDataURI.TranslateToDataURI(getContext(), profilePictureURI);
+            String sourceURI = DataURIHelper.TranslateToDataURI(getContext(), profilePictureURI);
             Map<String, String> changes = new HashMap<>();
             changes.put("picture", sourceURI);
             BackendController.modifyAccount(getContext(), changes, new BackendController.BackendCallback() {
