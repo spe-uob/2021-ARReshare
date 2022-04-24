@@ -9,6 +9,12 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+                    android:maxSdkVersion="18" />
 
     <uses-feature android:name="android.hardware.camera" />
 
@@ -20,8 +26,23 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ARReshare">
         <activity
+            android:name=".SettingActivity"
+            android:exported="true">
+        </activity>
+        <activity
             android:name=".ARActivity"
             android:exported="true" />
+
+        <activity
+            android:name=".AddProduct">
+
+        </activity>
+        <activity
+            android:name=".LoginSignupActivity"
+            android:exported="true" />
+
+        <activity
+            android:name= ".ModifyProduct"/>
 
         <activity
             android:name=".SplashActivity"
@@ -32,14 +53,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ChatListActivity"
             android:exported="true" />
-
         <activity
             android:name=".ProfileActivity"
             android:exported="true" />
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -59,7 +79,6 @@
         <activity
             android:name=".FeedActivity"
             android:exported="true" />
-
         <activity
             android:name=".MessagingActivity"
             android:configChanges="orientation"
@@ -67,8 +86,9 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".FallbackActivity"
             android:exported="true">
+
         </activity>
 
         <activity
@@ -79,12 +99,33 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
         <!--
- "AR Optional" app, contains non-AR features that can be used when
+        "AR Optional" app, contains non-AR features that can be used when
          "Google Play Services for AR" (ARCore) is not available.
         -->
         <meta-data
             android:name="com.google.ar.core"
             android:value="optional" />
+
+        <service android:name="com.example.ar_reshare.AuthenticationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.ar_reshare.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths">
+            </meta-data>
+        </provider>
     </application>
 
 </manifest>

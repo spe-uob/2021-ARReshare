@@ -53,7 +53,16 @@ public class ProfileActivity extends AppCompatActivity {
                 currentProduct = product;
             }
         }
-        productImage.setImageResource(currentProduct.getImages().get(0));
+        //productImage.setImageResource(currentProduct.getImages().get(0));
+
+        Button settingButton = (Button) findViewById(R.id.btS);
+        settingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, SettingActivity.class);
+                startActivity(intent);
+            }
+        });
 
         Button messageButton = (Button) findViewById(R.id.btM);
         messageButton.setOnClickListener(new View.OnClickListener() {
@@ -68,12 +77,29 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+        Button profileaddButton = (Button) findViewById(R.id.profileadd);
+        profileaddButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, AddProduct.class);
+                startActivity(intent);
+            }
+        });
+
+        if(contributor.getName() == "John"){
+            profilePicId = contributor.getProfileIcon();
+        } else {
+            messageButton.setVisibility(View.GONE);
+            settingButton.setVisibility(View.GONE);
+            profileaddButton.setVisibility(View.GONE);
+        }
+
         ImageButton backButton = (ImageButton) findViewById(R.id.back);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
-                startActivity(intent);
+                onBackPressed();
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             }
         });
 
@@ -88,5 +114,11 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 }
