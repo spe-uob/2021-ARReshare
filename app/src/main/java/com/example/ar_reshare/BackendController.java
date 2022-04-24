@@ -597,7 +597,7 @@ public class BackendController {
                 .build();
 
         BackendService service = retrofit.create(BackendService.class);
-        Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
+        Call<Product.SearchResults> call = service.searchListings(JWT, maxResults, startResults);
 
         try {
             call.enqueue(new Callback<Product.SearchResults>() {

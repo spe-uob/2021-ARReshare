@@ -28,7 +28,8 @@ public interface BackendService {
 
     @Headers("Content-Type: application/json")
     @GET("listings/search")
-    Call<Product.SearchResults> searchListings(@Query("maxResults") int maxResults,
+    Call<Product.SearchResults> searchListings(@Header("Authorization") String token,
+                                               @Query("maxResults") int maxResults,
                                                @Query("startResults") int startResults);
 
     @Headers("Content-Type: application/json")
