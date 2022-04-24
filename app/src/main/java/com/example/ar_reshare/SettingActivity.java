@@ -15,7 +15,29 @@ import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
+import org.json.JSONException;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class SettingActivity extends AppCompatActivity {
+
+    public void modifyAccount(String password){
+        Map<String, String> changes = new HashMap<>();
+        changes.put("password", password);
+        try {
+            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if(success){
+
+                    }else{
+
+                    }
+                }
+            });
+        } catch (JSONException e){
+    }}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -760,7 +760,7 @@ public class BackendController {
     }
 
     public static void searchAccountListings(int startResults, int maxResults, int categoryID,
-                                      BackendSearchListingsResultCallback callback) {
+                                      BackendSearchResultCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -775,26 +775,26 @@ public class BackendController {
                 public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
                     System.out.println(response.code());
                     if (response.code() == SUCCESS) {
-                        callback.onBackendSearchListingsResult(true, response.body().getSearchedProducts());
+                        initialiseProducts(response.body().getSearchedProducts(), callback);
                     } else {
-                        callback.onBackendSearchListingsResult(false, null);
+                        callback.onBackendSearchResult(false, null);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Product.SearchResults> call, Throwable t) {
                     System.out.println("Failure");
-                    callback.onBackendSearchListingsResult(false, null);
+                    callback.onBackendSearchResult(false, null);
                 }
             });
         } catch (Exception e) {
             System.out.println("Encountered error. " + e);
-            callback.onBackendSearchListingsResult(false, null);
+            callback.onBackendSearchResult(false, null);
         }
     }
 
     public static void searchSavedListings(int startResults, int maxResults, int categoryID, int region,
-                                             BackendSearchSavedListingsResultCallback callback) {
+                                             BackendSearchResultCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -809,21 +809,21 @@ public class BackendController {
                 public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
                     System.out.println(response.code());
                     if (response.code() == SUCCESS) {
-                        callback.onBackendSearchSavedListingsResult(true, response.body().getSearchedProducts());
+                        initialiseProducts(response.body().getSearchedProducts(), callback);
                     } else {
-                        callback.onBackendSearchSavedListingsResult(false, null);
+                        callback.onBackendSearchResult(false, null);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Product.SearchResults> call, Throwable t) {
                     System.out.println("Failure");
-                    callback.onBackendSearchSavedListingsResult(false, null);
+                    callback.onBackendSearchResult(false, null);
                 }
             });
         } catch (Exception e) {
             System.out.println("Encountered error. " + e);
-            callback.onBackendSearchSavedListingsResult(false, null);
+            callback.onBackendSearchResult(false, null);
         }
     }
 

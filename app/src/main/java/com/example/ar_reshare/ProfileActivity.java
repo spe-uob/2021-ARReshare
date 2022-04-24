@@ -32,7 +32,7 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
 
         Intent i = getIntent();
-        userID = i.getIntExtra("userID", 37);
+        userID = i.getIntExtra("userID", BackendController.loggedInUserID);
 
         System.out.println("The current userID is :" + userID );
         if (userID == BackendController.loggedInUserID) {
@@ -60,89 +60,104 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onBackendProfileResult(boolean success, User userProfile) {
                 if(success){
-
-                    TextView name = findViewById(R.id.username);
-                    name.setText(userProfile.getName());
-
-                    TextView bioText = findViewById(R.id.description);
-                    bioText.setText(userProfile.getBio());
-
-                    ImageView profileIcon = findViewById(R.id.avatar);
-                    profileIcon.setImageResource(userProfile.getProfileIcon());
-
-                    currentProduct1 = userProfile.getListings().get(0);
-                    ImageButton productImage1 = findViewById(R.id.shared1);
-
-                    productImage1.setOnClickListener(new View.OnClickListener() {
+                    runOnUiThread(new Runnable() {
                         @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
-                            intent.putExtra("product", currentProduct1);
-                            intent.putExtra("contributor", currentProduct1.getContributor());
-                            intent.putExtra("profilePicId", currentProduct1.getContributor().getProfilePic());
-                            intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct1.getImages());
-                            startActivity(intent);
+                        public void run() {
+                            TextView name = findViewById(R.id.username);
+                            name.setText(userProfile.getName());
+
+                            TextView bioText = findViewById(R.id.description);
+                            bioText.setText(userProfile.getBio());
+
+                            ImageView profileIcon = findViewById(R.id.avatar);
+                            profileIcon.setImageBitmap(userProfile.getProfilePic());
+
+                            Button settingsButton = (Button) findViewById(R.id.btS);
+                            settingsButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(ProfileActivity.this, SettingActivity.class);
+                                    startActivity((intent));
+                                }
+                            });
+
+                            Button messageButton1 = (Button) findViewById(R.id.btM);
+                            messageButton1.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(ProfileActivity.this, ChatListActivity.class);
+                                    startActivity(intent);
+                                }
+                            });
                         }
                     });
 
-                    currentProduct2 = userProfile.getListings().get(1);
-                    ImageButton productImage2 = findViewById(R.id.shared2);
-
-                    productImage2.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
-                            intent.putExtra("product", currentProduct2);
-                            intent.putExtra("contributor", currentProduct2.getContributor());
-                            intent.putExtra("profilePicId", currentProduct2.getContributor().getProfileIcon());
-                            intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct2.getImages());
-                            startActivity(intent);
-                        }
-                    });
-
-                    currentProduct3 = userProfile.getListings().get(2);
-                    ImageButton productImage3 = findViewById(R.id.shared3);
-
-
-                    productImage3.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
-                            intent.putExtra("product", currentProduct3);
-                            intent.putExtra("contributor", currentProduct3.getContributor());
-                            intent.putExtra("profilePicId", currentProduct3.getContributor().getProfileIcon());
-                            intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct3.getImages());
-                            startActivity(intent);
-                        }
-                    });
-
-                    Button messageButton1 = (Button) findViewById(R.id.btM);
-                    messageButton1.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(v.getContext(), ChatListActivity.class);
-                            intent.putExtra("product", currentProduct1);
-                            intent.putExtra("contributor", currentProduct1.getContributor());
-                            intent.putExtra("profilePicId", currentProduct1.getContributor().getProfileIcon());
-                            intent.putExtra("user", userProfile.getName());
-                            v.getContext().startActivity(intent);
-                        }
-                    });
-
-                    Button settingsButton = (Button) findViewById(R.id.btS);
-                    settingsButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(ProfileActivity.this, SettingActivity.class);
-                            startActivity((intent));
-                        }
-                    });
 
                 } else{
                     System.out.println("Failed to get profile");
                 }
             }
         });
+    }
+
+    private void showSharedProduct(List<Product> productsList){
+        if(productsList.size() >= 1) {
+            currentProduct1 = productsList.get(0);
+            ImageButton productImage1 = findViewById(R.id.shared1);
+
+            productImage1.setImageBitmap(currentProduct1.getMainPic());
+
+            productImage1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
+                    intent.putExtra("product", currentProduct1);
+                    intent.putExtra("contributor", currentProduct1.getContributor());
+                    intent.putExtra("profilePicId", currentProduct1.getContributor().getProfilePic());
+                    intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct1.getImages());
+                    startActivity(intent);
+                }
+            });
+        }
+
+        if(productsList.size() >= 2) {
+            currentProduct2 = productsList.get(1);
+            ImageButton productImage2 = findViewById(R.id.shared2);
+
+            productImage2.setImageBitmap(currentProduct2.getMainPic());
+
+
+            productImage2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
+                    intent.putExtra("product", currentProduct2);
+                    intent.putExtra("contributor", currentProduct2.getContributor());
+                    intent.putExtra("profilePicId", currentProduct2.getContributor().getProfileIcon());
+                    intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct2.getImages());
+                    startActivity(intent);
+                }
+            });
+        }
+
+        if(productsList.size() >= 3) {
+            currentProduct3 = productsList.get(2);
+            ImageButton productImage3 = findViewById(R.id.shared3);
+
+            productImage3.setImageBitmap(currentProduct3.getMainPic());
+
+            productImage3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
+                    intent.putExtra("product", currentProduct3);
+                    intent.putExtra("contributor", currentProduct3.getContributor());
+                    intent.putExtra("profilePicId", currentProduct3.getContributor().getProfileIcon());
+                    intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct3.getImages());
+                    startActivity(intent);
+                }
+            });
+        }
     }
 
     private void getProfileById2(int userID){
@@ -150,112 +165,52 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onBackendProfileResult(boolean success, User userProfile) {
                 if(success){
-
-                    System.out.println("33333333333333333");
-
-                    TextView name = findViewById(R.id.username);
-                    name.setText(userProfile.getName());
-
-                    TextView bioText = findViewById(R.id.description);
-                    bioText.setText(userProfile.getBio());
-
-                    ImageView profilePic = findViewById(R.id.avatar);
-                    profilePic.setImageResource(userProfile.getProfileIcon());
-
-                    currentProduct1 = userProfile.getListings().get(0);
-                    ImageButton productImage1 = findViewById(R.id.shared1);
-
-                    productImage1.setOnClickListener(new View.OnClickListener() {
+                    runOnUiThread(new Runnable() {
                         @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
-                            intent.putExtra("product", currentProduct1);
-                            intent.putExtra("contributor", currentProduct1.getContributor());
-                            intent.putExtra("profilePicId", currentProduct1.getContributor().getProfileIcon());
-                            intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct1.getImages());
-                            startActivity(intent);
+                        public void run() {
+                            TextView name = findViewById(R.id.username);
+                            name.setText(userProfile.getName());
+
+                            TextView bioText = findViewById(R.id.description);
+                            bioText.setText(userProfile.getBio());
+
+                            ImageView profileIcon = findViewById(R.id.avatar);
+                            profileIcon.setImageBitmap(userProfile.getProfilePic());
+
+                            Button settingsButton = (Button) findViewById(R.id.btS);
+                            settingsButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(ProfileActivity.this, SettingActivity.class);
+                                    startActivity((intent));
+                                }
+                            });
+
+                            Button messageButton1 = (Button) findViewById(R.id.btM);
+                            messageButton1.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(ProfileActivity.this, ChatListActivity.class);
+                                    startActivity(intent);
+                                }
+                            });
                         }
                     });
 
-                    currentProduct2 = userProfile.getListings().get(1);
-                    ImageButton productImage2 = findViewById(R.id.shared2);
-
-                    productImage2.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
-                            intent.putExtra("product", currentProduct2);
-                            intent.putExtra("contributor", currentProduct2.getContributor());
-                            intent.putExtra("profilePicId", currentProduct2.getContributor().getProfileIcon());
-                            intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct2.getImages());
-                            startActivity(intent);
-                        }
-                    });
-
-                    currentProduct3 = userProfile.getListings().get(2);
-                    ImageButton productImage3 = findViewById(R.id.shared3);
-
-                    productImage3.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
-                            intent.putExtra("product", currentProduct3);
-                            intent.putExtra("contributor", currentProduct3.getContributor());
-                            intent.putExtra("profilePicId", currentProduct3.getContributor().getProfileIcon());
-                            intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct3.getImages());
-                            startActivity(intent);
-                        }
-                    });
-
-                    Button messageButton1 = (Button) findViewById(R.id.btM);
-                    messageButton1.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(v.getContext(), ChatListActivity.class);
-                            intent.putExtra("product", currentProduct1);
-                            intent.putExtra("contributor", currentProduct1.getContributor());
-                            intent.putExtra("profilePicId", currentProduct1.getContributor().getProfileIcon());
-                            intent.putExtra("user", userProfile.getName());
-                            v.getContext().startActivity(intent);
-                        }
-                    });
-
-                    Button settingsButton = (Button) findViewById(R.id.btS);
-                    settingsButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(ProfileActivity.this, SettingActivity.class);
-                            startActivity((intent));
-                        }
-                    });
 
                 } else{
-                    System.out.println("4444444444444444");
-
                     System.out.println("Failed to get profile");
                 }
             }
         });
     }
 
-    public static void downloadImage(String url) {
-        DownloadImageHelper.downloadImage(url, new DownloadImageHelper.ImageDownloadCallback() {
-            @Override
-            public void onImageDownloaded(boolean success, Bitmap image) {
-                if (success) {
-
-                }
-            }
-        });
-    }
-
     public void searchAccountListing(){
-        BackendController.searchAccountListings(0, 3, 1, new BackendController.BackendSearchListingsResultCallback() {
+        BackendController.searchAccountListings(0, 3, 1, new BackendController.BackendSearchResultCallback() {
             @Override
-            public void onBackendSearchListingsResult(boolean success, List<Product> ListingSearchResult) {
+            public void onBackendSearchResult(boolean success, List<Product> ListingSearchResult) {
                 if(success){
                     String product1 = ListingSearchResult.get(0).getMainPicURL();
-                    downloadImage(product1);
                 } else{
                     System.out.println("Failed to get Account Listing");
                 }
@@ -264,9 +219,9 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     public void searchSavedListings(){
-        BackendController.searchSavedListings(0, 3, 1, 1, new BackendController.BackendSearchSavedListingsResultCallback() {
+        BackendController.searchSavedListings(0, 3, 1, 1, new BackendController.BackendSearchResultCallback() {
             @Override
-            public void onBackendSearchSavedListingsResult(boolean success, List<Product> savedListingSearchResult) {
+            public void onBackendSearchResult(boolean success, List<Product> savedListingSearchResult) {
                     if(success){
 
                     } else{

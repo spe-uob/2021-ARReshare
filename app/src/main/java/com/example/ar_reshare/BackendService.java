@@ -80,7 +80,8 @@ public interface BackendService {
 
     @Headers("Content-Type: application/json")
     @GET("account/listings/search")
-    Call<Product> searchSavedListings(  @Query("maxResults") int maxResults,
+    Call<Product> searchSavedListings(  @Header("Authorization") String token,
+                                        @Query("maxResults") int maxResults,
                                         @Query("startResults") int startResults,
                                         @Query("categoryID") int categoryID,
                                         @Query("region") int region);
