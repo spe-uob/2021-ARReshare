@@ -71,4 +71,11 @@ public interface BackendService {
     @GET("listing/view")
     Call<Product> getListingByID(@Query("listingID") int listingID);
 
+    @Headers("Content-Type: application/json")
+    @PATCH("listing/close")
+    Call<ResponseBody> closeListing(@Header("Authorization") String token, @Body RequestBody data);
+
+    @Headers("Content-Type: application/json")
+    @PATCH("listing/modify")
+    Call<ResponseBody> modifyListing(@Header("Authorization") String token, @Body RequestBody data);
 }

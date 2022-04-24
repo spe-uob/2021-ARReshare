@@ -1135,6 +1135,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                         intent.putExtra("lat", product.getCoordinates().latitude);
                         intent.putExtra("lng",product.getCoordinates().longitude);
                         intent.putExtra("categoryID",product.getCategoryID());
+                        intent.putExtra("postcode",product.getPostcode());
                         startActivity(intent);
                     }
                 });

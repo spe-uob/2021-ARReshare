@@ -86,7 +86,6 @@ public class MapsActivity extends FragmentActivity implements
     private CountDownLatch readyLatch;
     private int TIMEOUT_IN_SECONDS = 5;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -437,8 +436,10 @@ public class MapsActivity extends FragmentActivity implements
         intent.putExtra("lat", product.getCoordinates().latitude);
         intent.putExtra("lng",product.getCoordinates().longitude);
         intent.putExtra("categoryID",product.getCategoryID());
+        intent.putExtra("postcode",product.getPostcode());
 
         startActivity(intent);
+
     }
 
 

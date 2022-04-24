@@ -1,30 +1,37 @@
 package com.example.ar_reshare;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.android.gms.maps.model.Circle;
 
-import java.io.InputStream;
-import java.net.URL;
+import org.json.JSONException;
+
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +41,9 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         BackendController.BackendProfileResultCallback{
 
     private ImageView[] dots;
+    private String[] imageUriList;
     private Product product;
+    private String postcode;
     private User userProfile;
     private ArrayList<Bitmap> picList = new ArrayList<>();
     private ProductPicsSliderAdapter adapter;
@@ -45,7 +54,6 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_page);
-
         // getting the stuff we need from previous page
         Intent i = getIntent();
         Product product = i.getParcelableExtra("product");
@@ -53,7 +61,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         Integer contributorID = i.getIntExtra("contributorID",1);
         Double lat = i.getDoubleExtra("lat",0);
         Double lng = i.getDoubleExtra("lng",0);
-
+        postcode = i.getStringExtra("postcode");
         latch = new CountDownLatch(2); // wait until it gets the product and the user information from the backend
         BackendController.getListingByID(productID,ProductPageActivity.this);
         BackendController.getProfileByID(0,1,contributorID,ProductPageActivity.this);
@@ -97,7 +105,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
 
     private void displayInfo(){
         //edit button
-        //showEditIfUser(contributor,user);
+        showEditIfUser();
 
         displayProductCondition(product);
         displayProductCategory(product);
@@ -105,9 +113,17 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         //display contributor's information
         displayProductContributor();
 
-        // display product added time
-        TextView addedTime = findViewById(R.id.addedtime);
-        addedTime.setText(product.getDate() + "  added  ");
+        // display product added time or modified time
+        if(product.getModificationDate() == null){
+            System.out.println(product.getModificationDate());
+            TextView addedTime = findViewById(R.id.time);
+            String[] time = MessagingActivity.convertDate(product.getCreationDate());
+            addedTime.setText(time[3] + " " + time[2] + "-" + time[1] + " " +time[5] +"  added ");
+        } else {
+            TextView modifiedTime = findViewById(R.id.time);
+            String[] time = MessagingActivity.convertDate(product.getModificationDate());
+            modifiedTime.setText(time[3] + " " + time[2] + "-" + time[1] + " " +time[5] + "  modified ");
+        }
 
         //display product pics using slider
         picList.addAll(product.getPictures());
@@ -147,19 +163,95 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         }).start();
     }
 
-    private void showEditIfUser(User contributor, User user){
-        if(contributor.getName().equals(user.getName())){
-            ImageView edit = findViewById(R.id.edit);
-            edit.setVisibility(View.VISIBLE);
+    //convert the image bitmap to URI for passing to ModifyProduct page
+    private Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
 
-            edit.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(ProductPageActivity.this, ModifyProduct.class);
-                    startActivity(intent);
-                }
-            });
-        }
+    //TODO: only show these buttons if user's own product
+    private void showEditIfUser(){
+        ImageView edit = findViewById(R.id.edit);
+        edit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(getApplicationContext(),v);
+                MenuInflater inflater = popupMenu.getMenuInflater();
+                inflater.inflate(R.menu.product_setting, popupMenu.getMenu());
+                MenuItem delete = popupMenu.getMenu().getItem(1);
+                SpannableString spannable = new SpannableString("Delete");
+                spannable.setSpan(new ForegroundColorSpan(Color.RED),0,spannable.length(),0);
+                delete.setTitle(spannable);
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getTitle().toString()){
+                            case "Edit":
+                                item.setEnabled(false);
+                                int picCount = product.getPictures().size();
+                                imageUriList = new String[picCount];
+                                for (int i = 0; i < picCount; i++) {
+                                    imageUriList[i] = getImageUri(getApplicationContext(),product.getPictures().get(i)).toString();
+                                }
+                                Intent intent = new Intent(ProductPageActivity.this, ModifyProduct.class);
+                                intent.putExtra("productID", product.getId());
+                                intent.putExtra("productName", product.getName());
+                                intent.putExtra("productDescription", product.getDescription());
+                                intent.putExtra("categoryID",product.getCategoryID());
+                                intent.putExtra("condition",product.getCondition());
+                                intent.putExtra("postcode", postcode);
+                                intent.putExtra("images",imageUriList);
+                                startActivity(intent);
+                                return true;
+                            case "Delete":
+                                item.setEnabled(false);
+                                confirmToDelete();
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                });
+                popupMenu.show();
+            }
+        });
+    }
+
+    private void confirmToDelete(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Do you want to delete this product?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        try {
+                            BackendController.closeListing(product.getId(), new BackendController.BackendCallback() {
+                                @Override
+                                public void onBackendResult(boolean success, String message) {
+                                    if(success){
+                                        Toast.makeText(getApplicationContext(),
+                                                "Product deleted successfully!",
+                                                Toast.LENGTH_LONG).show();
+                                        // go back to the main page when finished
+                                        startActivity(new Intent(ProductPageActivity.this, ARActivity.class));
+                                    }
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.setTitle("Delete product");
+        alertDialog.show();
     }
 
     private void displayProductCondition(Product product){
@@ -171,22 +263,8 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
 
     private void displayProductCategory(Product product){
         ImageView category_pic = findViewById(R.id.category_pic);
-        switch (product.getCategoryID()){
-            case 1:
-                category_pic.setImageResource(Category.OTHER.getCategoryIcon());
-            case 2:
-                category_pic.setImageResource(Category.CLOTHING.getCategoryIcon());
-            case 3:
-                category_pic.setImageResource(Category.ACCESSORIES.getCategoryIcon());
-            case 4:
-                category_pic.setImageResource(Category.ELECTRONICS.getCategoryIcon());
-            case 5:
-                category_pic.setImageResource(Category.BOOKS.getCategoryIcon());
-            case 6:
-                category_pic.setImageResource(Category.HOUSEHOLD.getCategoryIcon());
-            default:
-                category_pic.setImageResource(Category.OTHER.getCategoryIcon());
-        }
+        Integer categoryIcon = Category.getCategoryById(product.getCategoryID()).getCategoryIcon();
+        category_pic.setImageResource(categoryIcon);
     }
 
     // navbar at the top to display the product name
@@ -307,7 +385,5 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
                 "&zoom=15&size=400x400&markers=color:red|"+ lat + ","+ lng + "&key=" + getString(R.string.STATIC_MAP_KEY);
         Glide.with(this).load(url).into(mapView);
     }
-
-
 
 }
