@@ -13,6 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONException;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,26 +87,26 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         distanceValueHelper(holder, product);
 
         // Bookmark button logic
-        bookmarkToggleHelper(holder);
+        bookmarkToggleHelper(holder, product);
     }
 
     public void productValueHelper(ViewHolder holder, Product product) {
         BackendController.getProfileByID(0, 100,
                 product.getContributorID(), (success, userProfile) -> {
-            if (success) {
-                ((Activity) context).runOnUiThread(() -> {
-                    if (userProfile.getProfilePic() == null) {
-                        holder.profileIcon.setImageResource(R.mipmap.ic_launcher_round);
-                    } else {
-                        holder.profileIcon.setImageBitmap(userProfile.getProfilePic());
-                        holder.contributor.setText(userProfile.getName());
+                    if (success) {
+                        ((Activity) context).runOnUiThread(() -> {
+                            if (userProfile.getProfilePic() == null) {
+                                holder.profileIcon.setImageResource(R.mipmap.ic_launcher_round);
+                            } else {
+                                holder.profileIcon.setImageBitmap(userProfile.getProfilePic());
+                            }
+                            holder.contributor.setText(userProfile.getName());
+                        });
+                    }
+                    else {
+                        System.out.println("getProfileByID callback failed");
                     }
                 });
-            }
-            else {
-                System.out.println("getProfileByID callback failed");
-            }
-        });
         holder.categoryIcon.setImageResource(Objects.requireNonNull(
                 intToCat.get(product.getCategoryID())).getCategoryIcon());
         holder.productImage.setImageBitmap(product.getMainPic());
@@ -145,15 +147,47 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         locationReady = true;
     }
 
-    public void bookmarkToggleHelper(ViewHolder holder) {
-        holder.bookmarkButton.setTag(0);
+    public void bookmarkToggleHelper(ViewHolder holder, Product product) {
+        if (product.isSavedByUser()) {
+            System.out.println("This product has been saved by the user");
+            holder.bookmarkButton.setTag(1);
+            holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
+        } else {
+            holder.bookmarkButton.setTag(0);
+            holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
+        }
         holder.bookmarkButton.setOnClickListener(v -> {
+            System.out.println("The tag is " + holder.bookmarkButton.getTag());
             if (holder.bookmarkButton.getTag().equals(0)) {
-                holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
-                holder.bookmarkButton.setTag(1);
+                try {
+                    BackendController.createSavedListing(product.getId(), (success, message) -> {
+                        System.out.println(message);
+                        if (success) {
+                            System.out.println("createSavedListing callback success");
+                        } else {
+                            System.out.println("createSavedListing callback failed");
+                        }
+                        holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
+                        holder.bookmarkButton.setTag(1);
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             } else {
-                holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
-                holder.bookmarkButton.setTag(0);
+                try {
+                    BackendController.deleteSavedListing(product.getId(), (success, message) -> {
+                        System.out.println(message);
+                        if (success) {
+                            System.out.println("deleteSavedListing callback success");
+                        } else {
+                            System.out.println("deleteSavedListing callback failed");
+                        }
+                        holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
+                        holder.bookmarkButton.setTag(0);
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -213,16 +247,18 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                 productClick(v);
             }
             if (type == MESSAGE_LINK) {
-                messageClick(v);
+                try {
+                    messageClick(v);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
         // Sends information to the profile page
         public void profileClick(View v) {
             Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-            intent.putExtra("contributor", product.getContributor());
-            intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
-            intent.putExtra("bio", product.getContributor().getBio());
+            intent.putExtra("userID", product.getContributorID());
             v.getContext().startActivity(intent);
         }
 
@@ -240,13 +276,22 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         }
 
         // Sends information to the messaging page
-        public void messageClick(View v) {
+        public void messageClick(View v) throws JSONException {
             Intent intent = new Intent(v.getContext(), MessagingActivity.class);
-            intent.putExtra("product", product);
-            intent.putExtra("contributor", product.getContributor());
-            intent.putExtra("profilePicId", product.getContributor().getProfileIcon());
-            intent.putExtra("user", ExampleData.getUsers().get(0));
-            v.getContext().startActivity(intent);
+            BackendController.createConversation(product.getId(), (success, message) -> {
+                if (success) {
+                    System.out.println("conversation created");
+                    Integer conversationId = Integer.valueOf(message);
+                    intent.putExtra("conversationId", conversationId);
+                    intent.putExtra("listingId", product.getId());
+                    intent.putExtra("currentUserId", BackendController.getLoggedInUserID());
+                    intent.putExtra("contributorId", product.getContributorID());
+                    v.getContext().startActivity(intent);
+                } else {
+                    System.out.println(message);
+                    System.out.println("conversation creation failed");
+                }
+            });
         }
     }
 }

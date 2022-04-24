@@ -148,6 +148,7 @@ public class ChatListActivity extends AppCompatActivity {
             public void onBackendResult(boolean success, String message) {
                 if (success) {
                     System.out.println("conversation created");
+                    Integer conversationId = Integer.valueOf(message);
                    // Intent intent = new Intent(, MessagingActivity.class);
                 } else {
                     System.out.println(message);
@@ -189,12 +190,8 @@ public class ChatListActivity extends AppCompatActivity {
             public void onBackendProfileResult(boolean success, User userProfile) {
                 if (success) {
                     System.out.println("successfully get profile icon");
-                    //chat.setProfilePicUrl(userProfile.getProfilePicUrl());
                     chat.setProfilerUrl(userProfile.getProfilePicUrl());
                     downloadImage(userProfile.getProfilePicUrl(),chat);
-                    //addChat(chat.getConversationID(), chat);
-//                    mChatList.add(chat);
-//                    recyclerView.getAdapter().notifyDataSetChanged();
                 }else {
                     System.out.println("fail to get profile icon in chats");
                 }

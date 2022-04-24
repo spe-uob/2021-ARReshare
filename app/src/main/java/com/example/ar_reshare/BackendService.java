@@ -28,7 +28,8 @@ public interface BackendService {
 
     @Headers("Content-Type: application/json")
     @GET("listings/search")
-    Call<Product.SearchResults> searchListings(@Query("maxResults") int maxResults,
+    Call<Product.SearchResults> searchListings(@Header("Authorization") String token,
+                                               @Query("maxResults") int maxResults,
                                                @Query("startResults") int startResults);
 
     @Headers("Content-Type: application/json")
@@ -36,7 +37,6 @@ public interface BackendService {
     Call<User> getProfileByID(@Query("maxResults") int maxResults,
                                      @Query("startResults") int startResults,
                                      @Query("userID") int userID);
-
 
     @Headers("Content-Type: application/json")
     @PUT("token/regeneration")
@@ -72,6 +72,15 @@ public interface BackendService {
     Call<Product> getListingByID(@Query("listingID") int listingID);
 
     @Headers("Content-Type: application/json")
+    @POST("account/saved-listings/create")
+    Call<ResponseBody> createSavedListing(@Header("Authorization") String token,
+                                          @Body RequestBody data);
+
+    @Headers("Content-Type: application/json")
+    @POST("account/saved-listings/delete")
+    Call<ResponseBody> deleteSavedListing(@Header("Authorization") String token,
+                                          @Body RequestBody data);
+
     @PATCH("listing/close")
     Call<ResponseBody> closeListing(@Header("Authorization") String token, @Body RequestBody data);
 

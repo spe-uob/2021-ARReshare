@@ -1,7 +1,6 @@
 package com.example.ar_reshare;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import org.json.JSONArray;
@@ -14,7 +13,6 @@ import java.util.Optional;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -60,7 +58,6 @@ public class BackendController {
         void onBackendResult(boolean success, String message);
     }
 
-
     public interface ChatBackendCallback {
         void onBackendResult(boolean success, String message, int loggedInUserID, Chat.ConversationsResult conversations);
     }
@@ -81,6 +78,10 @@ public class BackendController {
     // Interface for callback handlers to receive response from the request
     public interface BackendProfileResultCallback {
         void onBackendProfileResult(boolean success, User userProfile);
+    }
+
+    public static int getLoggedInUserID() {
+        return loggedInUserID;
     }
 
     private static void initialise() {
@@ -578,7 +579,7 @@ public class BackendController {
                 .build();
 
         BackendService service = retrofit.create(BackendService.class);
-        Call<Product.SearchResults> call = service.searchListings(maxResults, startResults);
+        Call<Product.SearchResults> call = service.searchListings(JWT, maxResults, startResults);
 
         try {
             call.enqueue(new Callback<Product.SearchResults>() {
@@ -638,20 +639,88 @@ public class BackendController {
         }
     }
 
-    // Helper method of getProfileById()
-    // Waits until the user has had their profile photo downloaded
-    private static void initialiseProfilePic(User user, BackendProfileResultCallback callback) {
-        // Initialise the latch to wait for callbacks
-        CountDownLatch latch = new CountDownLatch(1);
-        user.downloadProfilePicture(latch);
-        new Thread(() -> {
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            callback.onBackendProfileResult(true, user);
-        }).start();
+    public static void createSavedListing(int listingID, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("listingID", listingID);
+        String bodyString = jsonObject.toString();
+
+        RequestBody body =
+                RequestBody.create(MediaType.parse("application/json"), bodyString);
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.createSavedListing(JWT, body);
+        System.out.println("Printing JWT " + JWT + " and listingID " + listingID);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(
+                                true, "Listing with id " + listingID + " was saved");
+                    } else {
+                        callback.onBackendResult(
+                                false, "Unsuccessful response code");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to save listing");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public static void deleteSavedListing(int listingID, BackendCallback callback) throws JSONException {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("listingID", listingID);
+        String bodyString = jsonObject.toString();
+
+        RequestBody body =
+                RequestBody.create(MediaType.parse("application/json"), bodyString);
+
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.deleteSavedListing(JWT, body);
+        System.out.println("Printing JWT " + JWT + " and listingID " + listingID);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(
+                                true, "Listing with id " + listingID + " was deleted");
+                    } else {
+                        callback.onBackendResult(
+                                false, "Unsuccessful response code");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to delete listing");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     // Helper method of searchListings()
@@ -677,6 +746,22 @@ public class BackendController {
             }
         }).start();
 
+    }
+
+    // Helper method of getProfileById()
+    // Waits until the user has had their profile photo downloaded
+    private static void initialiseProfilePic(User user, BackendProfileResultCallback callback) {
+        // Initialise the latch to wait for callbacks
+        CountDownLatch latch = new CountDownLatch(1);
+        user.downloadProfilePicture(latch);
+        new Thread(() -> {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            callback.onBackendProfileResult(true, user);
+        }).start();
     }
 
     public static void getListingByID(Integer listingID, BackendGetListingResultCallback callback) {
@@ -729,8 +814,6 @@ public class BackendController {
                 callback.onBackendGetListingResult(true, product);
             }
         }).start();
-
-
     }
 
     public static void closeListing(Integer listingID, BackendCallback callback) throws JSONException {
