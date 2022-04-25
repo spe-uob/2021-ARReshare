@@ -59,11 +59,11 @@ public class ChatListActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(chatListAdapter);
 
-//        try {
-//            createConversation(61);
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            createConversation(61);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 
