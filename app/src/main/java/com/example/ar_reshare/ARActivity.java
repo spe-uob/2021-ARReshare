@@ -1158,10 +1158,18 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private void rotateCompass(double angle) {
         // Convert angle from radians to degrees
         float angleDeg = (float) (angle * 180/Math.PI);
+
+        // Prevent jumping compass animation
+        if (angleDeg > 340 && lastCompassButtonAngle < 20) {
+            angleDeg = - (360 - angleDeg);
+        }
+
+        float finalAngleDeg = angleDeg;
+
         runOnUiThread(() -> {
             View compassButton = findViewById(R.id.regenerate_button);
-            ObjectAnimator.ofFloat(compassButton, "rotation", (float) lastCompassButtonAngle, angleDeg).start();
-            lastCompassButtonAngle = angleDeg;
+            ObjectAnimator.ofFloat(compassButton, "rotation", (float) lastCompassButtonAngle, finalAngleDeg).start();
+            lastCompassButtonAngle = finalAngleDeg;
         });
     }
 
