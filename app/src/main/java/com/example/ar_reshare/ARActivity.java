@@ -958,6 +958,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         session.configure(config);
     }
 
+    // TODO: Spawn products again
     // If it is concluded that a user is currently pointing at a product, and a product should
     // be spawned, pass the camera, the relevant product and the current angle to north to this
     // method to spawn a product in a virtual space
@@ -1028,6 +1029,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
     }
 
+    // TODO: Convert all to positive degrees
     // Prepare products for display by finding the required angle for each product
     private void populateProducts() {
         for (Product product : this.products) {
@@ -1052,12 +1054,17 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         for (int i = 0; i < n; i++) {
             productObjects.remove(0);
         }
+        resetScrollView();
     }
 
     private void resetScrollView() {
-        currentlyPointedProducts.clear();
-        LinearLayout scrollView = findViewById(R.id.ARScrollLayout);
-        scrollView.removeAllViewsInLayout();
+        runOnUiThread(() -> {
+            currentlyPointedProducts.clear();
+            LinearLayout scrollView = findViewById(R.id.ARScrollLayout);
+            scrollView.removeAllViewsInLayout();
+            TextView textView = findViewById(R.id.productsFoundText);
+            textView.setText("No products found");
+        });
     }
 
     // Returns a product if the user is currently pointing at it
@@ -1115,8 +1122,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         return toAdd;
     }
 
+
+    // TODO: Fix duplicating product boxes when going in opposite direction
     private void prepareProductBoxes(List<Product> products) {
         LinearLayout scrollView = findViewById(R.id.ARScrollLayout);
+        final List<Product> allProducts = products;
 
         // If all products are already displayed skip
         if (this.currentlyPointedProducts.containsAll(products)) return;
@@ -1149,6 +1159,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                     renderProductBox(product, contributorMap.get(product), scrollView);
                     this.currentlyPointedProducts.add(product);
                 }
+
+                runOnUiThread(() -> {
+                    TextView textView = findViewById(R.id.productsFoundText);
+                    textView.setText(this.currentlyPointedProducts.size() + " product(s) found");
+                });
             } catch (InterruptedException e) {}
         }).start();
     }
