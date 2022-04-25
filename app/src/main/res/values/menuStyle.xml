@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="menuStyle">
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFamily">@font/montserrat</item>
+        <item name="android:listPreferredItemHeightSmall">50dp</item>
+        <item name="android:dropDownHorizontalOffset">-4dp</item>
+        <item name="android:dropDownVerticalOffset">4dp</item>
+    </style>
+</resources>
