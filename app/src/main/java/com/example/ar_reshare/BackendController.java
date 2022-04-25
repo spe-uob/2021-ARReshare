@@ -759,7 +759,7 @@ public class BackendController {
 
     }
 
-    public static void searchAccountListings(int startResults, int maxResults, int categoryID,
+    public static void searchAccountListings(int startResults, int maxResults,
                                       BackendSearchResultCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
