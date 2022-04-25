@@ -714,7 +714,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // 1. Get user's angle to the North (Compass)
         double angle = compass.getAngleToNorth();
         rotateCompass(angle);
-        System.out.println(angle*(180/Math.PI) + " degrees to north clockwise");
+        //System.out.println(angle*(180/Math.PI) + " degrees to north clockwise");
 
         // 2. Check if user is pointing at a product
         List<Product> pointingProducts = checkIfPointingAtProduct(angle);
@@ -723,18 +723,19 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         if (!pointingProducts.isEmpty()) {
             // If product is not already being displayed, spawn it
             if (!this.displayedProducts.contains(pointingProducts.get(0))) {
-                spawnProduct(camera, pointingProducts.get(0), angle);
+                //spawnProduct(camera, pointingProducts.get(0), angle);
                 // When ProductObject has been created, remove this product from the Set
                 this.displayedProducts.add(pointingProducts.get(0));
-                prepareProductBox(pointingProducts.get(0));
+                System.out.println("Prepare produt boxes");
+                prepareProductBoxes(pointingProducts);
             }
             // Else if the product is displayed, but the product box not, display it
             else if (productBoxHidden && this.displayedProducts.contains(pointingProducts.get(0))) {
-                prepareProductBox(pointingProducts.get(0));
+                prepareProductBoxes(pointingProducts);
             }
             // Else if the product box is displayed, but is showing other product's information, update it
             else if (productBoxProduct != pointingProducts.get(0) && this.displayedProducts.contains(pointingProducts.get(0))) {
-                prepareProductBox(pointingProducts.get(0));
+                prepareProductBoxes(pointingProducts);
             }
         } else {
             // Hide product box if currently not pointing at any product
@@ -1060,6 +1061,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             double angleDiff = Math.abs(userAngle - productAnglePair.getValue());
             if (angleDiff <= ANGLE_LIMIT) {
                 pointingAt.put(productAnglePair.getKey(), angleDiff);
+                System.out.println(productAnglePair.getKey().getName());
             }
         }
 
@@ -1070,36 +1072,60 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 .map(pair -> pair.getKey())
                 .collect(Collectors.toList());
 
+
+
         return closestProducts;
     }
 
     // Sends a request to the backend to get download the contributor of the product
-    private void prepareProductBox(Product product) {
+    private void prepareProductBox(Product product, CountDownLatch latch) {
         // This optimisation means that the user will be downloaded only once
         // The assumption made is that the contributor of a product will never change
         if (this.contributorMap.containsKey(product)) {
-            renderProductBox(product, this.contributorMap.get(product));
+            latch.countDown();
         } else {
             BackendController.getProfileByID(0, 1, product.getContributorID(), new BackendController.BackendProfileResultCallback() {
                 @Override
                 public void onBackendProfileResult(boolean success, User userProfile) {
                     System.out.println("NEW USER");
                     contributorMap.put(product, userProfile);
-                    renderProductBox(product, userProfile);
+                    latch.countDown();
                 }
             });
         }
     }
 
+    private void prepareProductBoxes(List<Product> products) {
+        new Thread(() -> {
+            CountDownLatch latch = new CountDownLatch(products.size());
+            for (Product product : products) {
+                prepareProductBox(product, latch);
+            }
+            try {
+                System.out.println(" Starting to wait");
+                latch.await();
+                System.out.println(" Finished waiting");
+                LinearLayout scrollView = findViewById(R.id.ARScrollLayout);
+                for (Product product : products) {
+                    renderProductBox(product, contributorMap.get(product), scrollView);
+                }
+            } catch (InterruptedException e) {}
+        }).start();
+    }
+
     // Given a product, render and display a product box
-    private void renderProductBox(Product product, User user) {
+    private void renderProductBox(Product product, User user, LinearLayout scrollView) {
         // runOnUiThread must be called because Android requires changes to UI to be done only by
         // the original thread that created the view hierarchy
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 // Make Product Box Visible
-                View productBox = findViewById(R.id.productBoxAR);
+                System.out.println(" Trying to inflate");
+                LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+                View productBoxParent = inflater.inflate(R.layout.ar_product_box, scrollView, false);
+
+                View productBox = productBoxParent.findViewById(R.id.productBoxAR);
                 productBox.setVisibility(View.VISIBLE);
 
                 // Set parameters depending on product
@@ -1136,6 +1162,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                         startActivity(intent);
                     }
                 });
+                scrollView.addView(productBoxParent);
+                System.out.println(" Added to list");
             }
         });
         productBoxHidden = false;
