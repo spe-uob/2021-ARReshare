@@ -50,7 +50,7 @@ public class MapsActivity extends FragmentActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnInfoWindowClickListener
-        {
+{
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
@@ -85,6 +85,7 @@ public class MapsActivity extends FragmentActivity implements
     private List<Product> products;
     private CountDownLatch readyLatch;
     private int TIMEOUT_IN_SECONDS = 5;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -230,6 +231,20 @@ public class MapsActivity extends FragmentActivity implements
         popupWindow.dismiss();
     }
 
+    // Unselect all filters
+    @SuppressWarnings("SuspiciousMethodCalls")
+    private void unselectFilter(ChipGroup allChips) {
+        List<Integer> chipsList = allChips.getCheckedChipIds();
+        for (Integer chipID : chipsList) {
+            Chip chip = allChips.findViewById(chipID);
+            chip.setChecked(false);
+            chip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
+            chip.setTextColor(DEFAULT_DARK_FONT);
+            //noinspection SuspiciousMethodCalls
+            tempCategories.remove(chip.getTag());
+        }
+    }
+
     // Setup category filtering UI
     private void setupCategoryChipGroup(View filterWindow) {
         ChipGroup filterCategories = filterWindow.findViewById(R.id.filterCategoryChipGroup);
@@ -277,6 +292,9 @@ public class MapsActivity extends FragmentActivity implements
             categoryChip.setTextSize(14);
             filterCategories.addView(categoryChip);
         }
+        Button filterUnselectButton = filterWindow.findViewById(R.id.filterUnselect);
+        filterUnselectButton.setOnClickListener(v ->
+                unselectFilter(filterWindow.findViewById(R.id.filterCategoryChipGroup)));
     }
 
     // Setup distance filtering UI
@@ -436,10 +454,8 @@ public class MapsActivity extends FragmentActivity implements
         intent.putExtra("lat", product.getCoordinates().latitude);
         intent.putExtra("lng",product.getCoordinates().longitude);
         intent.putExtra("categoryID",product.getCategoryID());
-        intent.putExtra("postcode",product.getPostcode());
 
         startActivity(intent);
-
     }
 
 
