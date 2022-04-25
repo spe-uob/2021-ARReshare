@@ -12,14 +12,15 @@
 
     <HorizontalScrollView
         android:layout_width="500dp"
-        android:layout_height="120dp"
-        android:background="@color/white">
+        android:layout_height="120dp">
 
         <LinearLayout
             android:id="@+id/ARScrollLayout"
             android:layout_width="500dp"
             android:layout_height="match_parent"
-            android:orientation="horizontal" />
+            android:orientation="horizontal"
+            android:paddingTop="15dp"
+            android:paddingLeft="15dp"/>
     </HorizontalScrollView>
 
     <ImageButton

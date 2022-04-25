@@ -190,6 +190,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     // The set of currently displayed products
     // This should be combined with productObjects in the future
     private final Set<Product> displayedProducts = new HashSet<>();
+    private final Set<Product> currentlyPointedProducts = new HashSet<>();
     private boolean productBoxHidden = true;
     private Product productBoxProduct;
     private Map<Product, User> contributorMap = new HashMap<>();
@@ -725,8 +726,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             if (!this.displayedProducts.contains(pointingProducts.get(0))) {
                 //spawnProduct(camera, pointingProducts.get(0), angle);
                 // When ProductObject has been created, remove this product from the Set
-                this.displayedProducts.add(pointingProducts.get(0));
-                System.out.println("Prepare produt boxes");
+                //this.displayedProducts.addAll(pointingProducts);
+                System.out.println("Prepare product boxes");
                 prepareProductBoxes(pointingProducts);
             }
             // Else if the product is displayed, but the product box not, display it
@@ -1096,6 +1097,9 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     }
 
     private void prepareProductBoxes(List<Product> products) {
+        LinearLayout scrollView = findViewById(R.id.ARScrollLayout);
+        // If products are already displayed skip
+        if (this.currentlyPointedProducts.containsAll(products)) return;
         new Thread(() -> {
             CountDownLatch latch = new CountDownLatch(products.size());
             for (Product product : products) {
@@ -1105,9 +1109,14 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 System.out.println(" Starting to wait");
                 latch.await();
                 System.out.println(" Finished waiting");
-                LinearLayout scrollView = findViewById(R.id.ARScrollLayout);
+
+                // Reset the viewed products and proceed to show new products
+                this.currentlyPointedProducts.clear();
+                scrollView.removeAllViewsInLayout();
+
                 for (Product product : products) {
                     renderProductBox(product, contributorMap.get(product), scrollView);
+                    this.currentlyPointedProducts.add(product);
                 }
             } catch (InterruptedException e) {}
         }).start();

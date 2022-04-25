@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/productBoxAR"
-    android:layout_width="360dp"
+    android:layout_width="340dp"
     android:layout_height="100dp"
     android:background="#FFFFFF"
     android:orientation="horizontal"
     android:layout_centerHorizontal="true"
-    android:visibility="invisible">
+    android:visibility="invisible"
+    android:layout_marginRight="10dp">
 
     <ImageView
         android:id="@+id/productimage"
