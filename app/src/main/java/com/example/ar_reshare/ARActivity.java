@@ -66,6 +66,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -74,6 +75,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class ARActivity extends AppCompatActivity implements SampleRender.Renderer {
 
@@ -715,24 +717,24 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         System.out.println(angle*(180/Math.PI) + " degrees to north clockwise");
 
         // 2. Check if user is pointing at a product
-        Optional<Product> pointingAt = checkIfPointingAtProduct(angle);
+        List<Product> pointingProducts = checkIfPointingAtProduct(angle);
 
         // 3. Spawn a product in front of the user if yes
-        if (pointingAt.isPresent()) {
+        if (!pointingProducts.isEmpty()) {
             // If product is not already being displayed, spawn it
-            if (!this.displayedProducts.contains(pointingAt.get())) {
-                spawnProduct(camera, pointingAt.get(), angle);
+            if (!this.displayedProducts.contains(pointingProducts.get(0))) {
+                spawnProduct(camera, pointingProducts.get(0), angle);
                 // When ProductObject has been created, remove this product from the Set
-                this.displayedProducts.add(pointingAt.get());
-                prepareProductBox(pointingAt.get());
+                this.displayedProducts.add(pointingProducts.get(0));
+                prepareProductBox(pointingProducts.get(0));
             }
             // Else if the product is displayed, but the product box not, display it
-            else if (productBoxHidden && this.displayedProducts.contains(pointingAt.get())) {
-                prepareProductBox(pointingAt.get());
+            else if (productBoxHidden && this.displayedProducts.contains(pointingProducts.get(0))) {
+                prepareProductBox(pointingProducts.get(0));
             }
             // Else if the product box is displayed, but is showing other product's information, update it
-            else if (productBoxProduct != pointingAt.get() && this.displayedProducts.contains(pointingAt.get())) {
-                prepareProductBox(pointingAt.get());
+            else if (productBoxProduct != pointingProducts.get(0) && this.displayedProducts.contains(pointingProducts.get(0))) {
+                prepareProductBox(pointingProducts.get(0));
             }
         } else {
             // Hide product box if currently not pointing at any product
@@ -1051,27 +1053,24 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     }
 
     // Returns a product if the user is currently pointing at it
-    private Optional<Product> checkIfPointingAtProduct(double userAngle) {
-        Map.Entry<Product, Double> closestPair = null;
+    private List<Product> checkIfPointingAtProduct(double userAngle) {
+        // A map of products being pointed at and the angle difference
+        Map<Product, Double> pointingAt = new HashMap<>();
         for (Map.Entry<Product, Double> productAnglePair : productAngles.entrySet()) {
             double angleDiff = Math.abs(userAngle - productAnglePair.getValue());
             if (angleDiff <= ANGLE_LIMIT) {
-                if (closestPair == null) closestPair = productAnglePair;
-                else {
-                    // If two products are close to each other, choose the closest angle
-                    double originalDiff = Math.abs(userAngle - closestPair.getValue());
-                    if (originalDiff > angleDiff) closestPair = productAnglePair;
-                }
+                pointingAt.put(productAnglePair.getKey(), angleDiff);
             }
         }
-        Optional<Product> target;
-        if (closestPair != null ) {
-            target = Optional.of(closestPair.getKey());
-        }
-        else {
-            target = Optional.empty();
-        }
-        return target;
+
+        List<Product> closestProducts = pointingAt.entrySet()
+                .stream()
+                .sorted(Comparator.comparingDouble(pair -> pair.getValue()))
+                .limit(3)
+                .map(pair -> pair.getKey())
+                .collect(Collectors.toList());
+
+        return closestProducts;
     }
 
     // Sends a request to the backend to get download the contributor of the product
