@@ -329,7 +329,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             }
 
             if (message != null) {
-                messageSnackbarHelper.showError(this, message);
+                //messageSnackbarHelper.showError(this, message);
                 //Log.e(TAG, "Exception creating session", exception);
                 return;
             }
@@ -346,7 +346,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             // https://developers.google.com/ar/develop/java/recording-and-playback
             session.resume();
         } catch (CameraNotAvailableException e) {
-            messageSnackbarHelper.showError(this, "Camera not available. Try restarting the app.");
+            //messageSnackbarHelper.showError(this, "Camera not available. Try restarting the app.");
             session = null;
             return;
         }
@@ -405,7 +405,6 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        FullScreenHelper.setFullScreenOnWindowFocusChanged(this, hasFocus);
     }
 
     @Override
@@ -596,7 +595,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             virtualObjectShader = hatShader; // default shader
         } catch (IOException e) {
             //Log.e(TAG, "Failed to read a required asset file", e);
-            messageSnackbarHelper.showError(this, "Failed to read a required asset file: " + e);
+            //messageSnackbarHelper.showError(this, "Failed to read a required asset file: " + e);
         }
     }
 
@@ -675,7 +674,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             frame = session.update();
         } catch (CameraNotAvailableException e) {
             //Log.e(TAG, "Camera not available during onDrawFrame", e);
-            messageSnackbarHelper.showError(this, "Camera not available. Try restarting the app.");
+            //messageSnackbarHelper.showError(this, "Camera not available. Try restarting the app.");
             return;
         }
 
@@ -688,7 +687,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             backgroundRenderer.setUseOcclusion(render, depthSettings.useDepthForOcclusion());
         } catch (IOException e) {
             //Log.e(TAG, "Failed to read a required asset file", e);
-            messageSnackbarHelper.showError(this, "Failed to read a required asset file: " + e);
+            //messageSnackbarHelper.showError(this, "Failed to read a required asset file: " + e);
             return;
         }
         // BackgroundRenderer.updateDisplayGeometry must be called every frame to update the coordinates
@@ -764,7 +763,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         if (message == null) {
             messageSnackbarHelper.hide(this);
         } else {
-            messageSnackbarHelper.showMessage(this, message);
+            //messageSnackbarHelper.showMessage(this, message);
         }
 
         // -- Draw background
