@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -58,7 +59,11 @@ public class ChatListActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(chatListAdapter);
 
-        //createConversation(61);
+//        try {
+//            createConversation(61);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
     }
 
 
@@ -149,7 +154,7 @@ public class ChatListActivity extends AppCompatActivity {
                 if (success) {
                     System.out.println("conversation created");
                     Integer conversationId = Integer.valueOf(message);
-                   // Intent intent = new Intent(, MessagingActivity.class);
+                    // Intent intent = new Intent(, MessagingActivity.class);
                 } else {
                     System.out.println(message);
                     System.out.println("conversation created failed");
@@ -194,6 +199,8 @@ public class ChatListActivity extends AppCompatActivity {
                     downloadImage(userProfile.getProfilePicUrl(),chat);
                 }else {
                     System.out.println("fail to get profile icon in chats");
+                    chat.setProfileIcon(BitmapFactory.decodeResource(null, R.mipmap.ic_launcher_round));
+                    addChat(chat.getConversationID(), chat);
                 }
             }
         });
@@ -235,7 +242,7 @@ public class ChatListActivity extends AppCompatActivity {
 
 
 
-    private void closeConversation(Integer conversationID) throws JSONException {
+    public static void closeConversation(Integer conversationID) throws JSONException {
         //int conversationID = 0;
 
         BackendController.closeConversation(conversationID, new BackendController.BackendCallback() {
