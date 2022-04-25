@@ -209,7 +209,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private Map<Product, Double> productAngles = new HashMap<>();
 
     // The acceptable limit of angle offset to product
-    private static final double ANGLE_LIMIT = 20 * Math.PI/180; // degrees converted to radians
+    private static final double ANGLE_LIMIT = 15 * Math.PI/180; // degrees converted to radians
 
     // Swiping gestures variables and constants
     private float x1, x2, y1, y2;
@@ -711,6 +711,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
         // 1. Get user's angle to the North (Compass)
         double angle = compass.getAngleToNorth();
+        rotateCompass(angle);
+        System.out.println(angle*(180/Math.PI) + " degrees to north clockwise");
 
         // 2. Check if user is pointing at a product
         Optional<Product> pointingAt = checkIfPointingAtProduct(angle);
@@ -723,23 +725,19 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 // When ProductObject has been created, remove this product from the Set
                 this.displayedProducts.add(pointingAt.get());
                 prepareProductBox(pointingAt.get());
-                rotateCompass(angle);
             }
             // Else if the product is displayed, but the product box not, display it
             else if (productBoxHidden && this.displayedProducts.contains(pointingAt.get())) {
                 prepareProductBox(pointingAt.get());
-                rotateCompass(angle);
             }
             // Else if the product box is displayed, but is showing other product's information, update it
             else if (productBoxProduct != pointingAt.get() && this.displayedProducts.contains(pointingAt.get())) {
                 prepareProductBox(pointingAt.get());
-                rotateCompass(angle);
             }
         } else {
             // Hide product box if currently not pointing at any product
             if (!productBoxHidden) {
                 hideProductBox();
-                rotateCompass(angle);
             }
 
         }
@@ -1032,6 +1030,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             productLocation.setLatitude(product.getCoordinates().latitude);
             productLocation.setLongitude(product.getCoordinates().longitude);
             double requiredAngle = lastKnownLocation.bearingTo(productLocation);
+            System.out.println("required angle = " + requiredAngle);
             requiredAngle = requiredAngle * Math.PI/180;
             productAngles.put(product, requiredAngle);
         }
@@ -1155,18 +1154,14 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         productBoxHidden = true;
     }
 
-    // Rotates compass to the specified angle to the north
+    // Rotates compass to the specified angle to the northß
     private void rotateCompass(double angle) {
-        // Convert angle to positive degrees
-        if (angle < 0) angle = angle + Math.PI;
+        // Convert angle from radians to degrees
         float angleDeg = (float) (angle * 180/Math.PI);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                View compassButton = findViewById(R.id.regenerate_button);
-                ObjectAnimator.ofFloat(compassButton, "rotation", (float) lastCompassButtonAngle, angleDeg).start();
-                lastCompassButtonAngle = angleDeg;
-            }
+        runOnUiThread(() -> {
+            View compassButton = findViewById(R.id.regenerate_button);
+            ObjectAnimator.ofFloat(compassButton, "rotation", (float) lastCompassButtonAngle, angleDeg).start();
+            lastCompassButtonAngle = angleDeg;
         });
     }
 

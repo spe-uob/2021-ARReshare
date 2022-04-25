@@ -38,6 +38,9 @@ public class Compass implements SensorEventListener {
     // You can call this method to get the latest recorder angle to north
     public double getAngleToNorth() {
         updateOrientationAngles();
+        if (angle < 0) {
+            return 2*Math.PI + angle;
+        }
         return angle;
     }
 
