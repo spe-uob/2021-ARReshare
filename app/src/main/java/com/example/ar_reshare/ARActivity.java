@@ -212,7 +212,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private Map<Product, Double> productAngles = new HashMap<>();
 
     // The acceptable limit of angle offset to product
-    private static final double ANGLE_LIMIT = 15 * Math.PI/180; // degrees converted to radians
+    private static final double ANGLE_LIMIT = 10 * Math.PI/180; // degrees converted to radians
 
     // Swiping gestures variables and constants
     private float x1, x2, y1, y2;
@@ -741,7 +741,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         } else {
             // Hide product box if currently not pointing at any product
             if (!productBoxHidden) {
-                hideProductBox();
+                //hideProductBox();
+                resetScrollView();
             }
 
         }
@@ -1051,7 +1052,12 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         for (int i = 0; i < n; i++) {
             productObjects.remove(0);
         }
+    }
 
+    private void resetScrollView() {
+        currentlyPointedProducts.clear();
+        LinearLayout scrollView = findViewById(R.id.ARScrollLayout);
+        scrollView.removeAllViewsInLayout();
     }
 
     // Returns a product if the user is currently pointing at it
@@ -1096,13 +1102,38 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
     }
 
+    private List<Product> setDifference(List<Product> products) {
+        List<Product> toAdd = new ArrayList<>();
+        Set<Product> toRemove = new HashSet<>(this.currentlyPointedProducts);
+        for (Product product : products) {
+            if (!this.currentlyPointedProducts.contains(product)) {
+                toAdd.add(product);
+            } else {
+                toRemove.remove(product);
+            }
+        }
+        return toAdd;
+    }
+
     private void prepareProductBoxes(List<Product> products) {
         LinearLayout scrollView = findViewById(R.id.ARScrollLayout);
-        // If products are already displayed skip
+
+        // If all products are already displayed skip
         if (this.currentlyPointedProducts.containsAll(products)) return;
+        else {
+            // If more items need to be added but no items need to be removed
+            if (products.containsAll(this.currentlyPointedProducts)) {
+                products = setDifference(products);
+                System.out.println("SET DIFFERENCE");
+            } else {
+                resetScrollView();
+            }
+        }
+        List<Product> finalProducts = products;
+
         new Thread(() -> {
-            CountDownLatch latch = new CountDownLatch(products.size());
-            for (Product product : products) {
+            CountDownLatch latch = new CountDownLatch(finalProducts.size());
+            for (Product product : finalProducts) {
                 prepareProductBox(product, latch);
             }
             try {
@@ -1111,10 +1142,10 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 System.out.println(" Finished waiting");
 
                 // Reset the viewed products and proceed to show new products
-                this.currentlyPointedProducts.clear();
-                scrollView.removeAllViewsInLayout();
+                //this.currentlyPointedProducts.clear();
 
-                for (Product product : products) {
+                for (Product product : finalProducts) {
+                    if (this.currentlyPointedProducts.contains(product)) continue;
                     renderProductBox(product, contributorMap.get(product), scrollView);
                     this.currentlyPointedProducts.add(product);
                 }
