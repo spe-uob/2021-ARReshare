@@ -79,14 +79,14 @@
 
     <ImageButton
         android:id="@+id/regenerate_button"
-        android:layout_width="141dp"
-        android:layout_height="124dp"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
         android:layout_marginBottom="20dp"
-        android:background="#00FFFFFF"
+        android:background="@null"
         android:scaleType="fitCenter"
-        android:src="@drawable/compass_graphic"/>
+        android:src="@drawable/compass_graphic" />
 
     <TextView
         android:id="@+id/swipingClue"
