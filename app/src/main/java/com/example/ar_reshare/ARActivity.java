@@ -212,7 +212,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private Map<Product, Double> productAngles = new HashMap<>();
 
     // The acceptable limit of angle offset to product
-    private static final double ANGLE_LIMIT = 10 * Math.PI/180; // degrees converted to radians
+    private static final double ANGLE_LIMIT = 20 * Math.PI/180; // degrees converted to radians
 
     // Swiping gestures variables and constants
     private float x1, x2, y1, y2;
@@ -742,7 +742,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             // Hide product box if currently not pointing at any product
             if (!productBoxHidden) {
                 //hideProductBox();
-                resetScrollView();
+                resetScrollView(null);
             }
 
         }
@@ -1037,8 +1037,9 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             productLocation.setLatitude(product.getCoordinates().latitude);
             productLocation.setLongitude(product.getCoordinates().longitude);
             double requiredAngle = lastKnownLocation.bearingTo(productLocation);
-            System.out.println("required angle = " + requiredAngle);
             requiredAngle = requiredAngle * Math.PI/180;
+            if (requiredAngle < 0) requiredAngle = 2*Math.PI + requiredAngle;
+            System.out.println("required angle = " + requiredAngle);
             productAngles.put(product, requiredAngle);
         }
     }
@@ -1054,16 +1055,17 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         for (int i = 0; i < n; i++) {
             productObjects.remove(0);
         }
-        resetScrollView();
+        resetScrollView(null);
     }
 
-    private void resetScrollView() {
+    private void resetScrollView(CountDownLatch latch) {
         runOnUiThread(() -> {
             currentlyPointedProducts.clear();
             LinearLayout scrollView = findViewById(R.id.ARScrollLayout);
             scrollView.removeAllViewsInLayout();
             TextView textView = findViewById(R.id.productsFoundText);
             textView.setText("No products found");
+            if (latch != null) latch.countDown();
         });
     }
 
@@ -1073,6 +1075,9 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         Map<Product, Double> pointingAt = new HashMap<>();
         for (Map.Entry<Product, Double> productAnglePair : productAngles.entrySet()) {
             double angleDiff = Math.abs(userAngle - productAnglePair.getValue());
+            System.out.println("userAngle " + userAngle);
+            System.out.println("productAngle " + productAnglePair.getValue());
+            System.out.println("diff " + angleDiff);
             if (angleDiff <= ANGLE_LIMIT) {
                 pointingAt.put(productAnglePair.getKey(), angleDiff);
                 System.out.println(productAnglePair.getKey().getName());
@@ -1129,14 +1134,20 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         final List<Product> allProducts = products;
 
         // If all products are already displayed skip
-        if (this.currentlyPointedProducts.containsAll(products)) return;
+        if (this.currentlyPointedProducts.containsAll(products) &&
+                this.currentlyPointedProducts.size() == products.size()) return;
         else {
             // If more items need to be added but no items need to be removed
             if (products.containsAll(this.currentlyPointedProducts)) {
                 products = setDifference(products);
                 System.out.println("SET DIFFERENCE");
             } else {
-                resetScrollView();
+                // Request reset of products and wait until complete
+                CountDownLatch latch = new CountDownLatch(1);
+                resetScrollView(latch);
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {}
             }
         }
         List<Product> finalProducts = products;
