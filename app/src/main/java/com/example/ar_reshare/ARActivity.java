@@ -66,12 +66,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -199,6 +202,12 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private Compass compass;
     // Compass animation
     private double lastCompassButtonAngle = 0;
+
+    // Used for stabilising compass readings
+    private final int MAX_COMPASS_READING_QUEUE_SIZE = 30;
+    private double[] compassReadingsArray = new double[MAX_COMPASS_READING_QUEUE_SIZE];
+    private int compassReadingSize = 0;
+    private int compassReadingIndex = 0;
 
     // Location related attributes:
     // Built-in class which provider current location
@@ -451,7 +460,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 if (success) {
                     products = searchResults;
                     readyLatch.countDown();
-                    System.out.println(readyLatch.getCount());
+                    //System.out.println(readyLatch.getCount());
                 }
             }
         });
@@ -715,7 +724,10 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         // 1. Get user's angle to the North (Compass)
         double angle = compass.getAngleToNorth();
         rotateCompass(angle);
-        //System.out.println(angle*(180/Math.PI) + " degrees to north clockwise");
+        // Stabilise compass reading
+        angle = stabiliseCompassReading(angle);
+        System.out.println("median " + angle*(180/Math.PI) + " degrees to north clockwise");
+
 
         // 2. Check if user is pointing at a product
         List<Product> pointingProducts = checkIfPointingAtProduct(angle);
@@ -727,7 +739,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                 //spawnProduct(camera, pointingProducts.get(0), angle);
                 // When ProductObject has been created, remove this product from the Set
                 //this.displayedProducts.addAll(pointingProducts);
-                System.out.println("Prepare product boxes");
+                //System.out.println("Prepare product boxes");
                 prepareProductBoxes(pointingProducts);
             }
             // Else if the product is displayed, but the product box not, display it
@@ -1038,7 +1050,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             double requiredAngle = lastKnownLocation.bearingTo(productLocation);
             requiredAngle = requiredAngle * Math.PI/180;
             if (requiredAngle < 0) requiredAngle = 2*Math.PI + requiredAngle;
-            System.out.println("required angle = " + requiredAngle);
+            //System.out.println("required angle = " + requiredAngle);
             productAngles.put(product, requiredAngle);
         }
     }
@@ -1074,12 +1086,12 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         Map<Product, Double> pointingAt = new HashMap<>();
         for (Map.Entry<Product, Double> productAnglePair : productAngles.entrySet()) {
             double angleDiff = Math.abs(userAngle - productAnglePair.getValue());
-            System.out.println("userAngle " + userAngle);
-            System.out.println("productAngle " + productAnglePair.getValue());
-            System.out.println("diff " + angleDiff);
+            //System.out.println("userAngle " + userAngle);
+            //System.out.println("productAngle " + productAnglePair.getValue());
+            //System.out.println("diff " + angleDiff);
             if (angleDiff <= ANGLE_LIMIT) {
                 pointingAt.put(productAnglePair.getKey(), angleDiff);
-                System.out.println(productAnglePair.getKey().getName());
+                //System.out.println(productAnglePair.getKey().getName());
             }
         }
 
@@ -1139,7 +1151,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             // If more items need to be added but no items need to be removed
             if (products.containsAll(this.currentlyPointedProducts)) {
                 products = setDifference(products);
-                System.out.println("SET DIFFERENCE");
+                //System.out.println("SET DIFFERENCE");
             } else {
                 // Request reset of products and wait until complete
                 CountDownLatch latch = new CountDownLatch(1);
@@ -1244,6 +1256,34 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             }
         });
         productBoxHidden = true;
+    }
+
+    // Takes a median of the last set of compass readings to filter out anomalies
+    // Self-developed efficient median algorithm
+    private double stabiliseCompassReading(double reading) {
+        if (compassReadingSize < MAX_COMPASS_READING_QUEUE_SIZE) {
+            compassReadingSize += 1;
+        }
+
+        // Insert new reading
+        compassReadingsArray[compassReadingIndex] = reading;
+
+        // Find the middle index of the array
+        int mid = Math.floorDiv(compassReadingSize, 2);
+        int skipCount; // Number of elements to skip
+        if (mid > 0) skipCount = mid-1;
+        else skipCount = 0;
+
+        double median = Arrays.stream(compassReadingsArray).sorted().skip(skipCount).findFirst().getAsDouble();
+
+        // Reset index to zero when end of array has been reached
+        if (compassReadingIndex == MAX_COMPASS_READING_QUEUE_SIZE-1) {
+            compassReadingIndex = 0;
+        } else {
+            compassReadingIndex += 1;
+        }
+
+        return median;
     }
 
     // Rotates compass to the specified angle to the northß
