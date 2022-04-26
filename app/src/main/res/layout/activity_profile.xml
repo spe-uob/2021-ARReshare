@@ -32,11 +32,6 @@
 
     </LinearLayout>
 
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -47,179 +42,179 @@
                 android:layout_height="100dp"
                 android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginBottom="5dp"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp">
 
-                            <ImageView
-                                android:id="@+id/avatar"
-                                android:layout_width="120dp"
-                                android:layout_height="match_parent"
-                                android:layout_gravity="center_vertical"
-                                android:background="@drawable/image_circle"
-                                android:scaleType="centerCrop">
-                            </ImageView>
-                    </LinearLayout>
+                    <ImageView
+                        android:id="@+id/avatar"
+                        android:layout_width="120dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/image_circle"
+                        android:scaleType="centerCrop">
+                    </ImageView>
+                </LinearLayout>
 
-                    <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical">
-                            <TextView
-                                android:id="@+id/username"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:textColor="@color/black"
-                                android:gravity="center_horizontal"
-                                android:layout_gravity="center_vertical">
-                            </TextView>
-
-                            <TextView
-                                android:id="@+id/description"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:textColor="@color/black"
-                                android:gravity="center_horizontal"
-                                android:layout_gravity="center_vertical">
-                            </TextView>
-                        </LinearLayout>
-            </LinearLayout>
-
-                    <LinearLayout
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/username"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Shared"
-                            android:textColor="@color/black"
-                            android:textSize="30sp">
-                        </TextView>
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp">
+                        android:textColor="@color/black"
+                        android:gravity="center_horizontal"
+                        android:layout_gravity="center_vertical">
+                    </TextView>
 
-                            <ImageButton
-                                android:id="@+id/shared1"
-                                android:layout_width="40dp"
-                                android:layout_height="120dp"
-                                android:layout_weight="1"
-                                android:background="@color/white"
-                                android:scaleType="centerCrop">
-                            </ImageButton>
-
-                            <ImageButton
-                                android:id="@+id/shared2"
-                                android:layout_width="40dp"
-                                android:layout_height="120dp"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginRight="5dp"
-                                android:layout_weight="1"
-                                android:background="#C0C0C0"
-                                android:scaleType="centerCrop">
-                            </ImageButton>
-
-                            <ImageButton
-                                android:id="@+id/shared3"
-                                android:layout_width="40dp"
-                                android:layout_height="120dp"
-                                android:layout_weight="1"
-                                android:scaleType="centerCrop"
-                                android:background="#C0C0C0">
-                            </ImageButton>
-                        </LinearLayout>
-
-
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="Saved"
-                                android:textColor="@color/black"
-                                android:textSize="30sp">
-                            </TextView>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp">
-
-                            <ImageButton
-                                android:id="@+id/saved1"
-                                android:layout_width="40dp"
-                                android:layout_height="120dp"
-                                android:layout_weight="1"
-                                android:background="#C0C0C0"
-                                android:scaleType="centerCrop">
-                            </ImageButton>
-
-                            <ImageButton
-                                android:id="@+id/saved2"
-                                android:layout_width="40dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginRight="5dp"
-                                android:background="#C0C0C0"
-                                android:scaleType="centerCrop">
-                            </ImageButton>
-
-                            <ImageButton
-                                android:id="@+id/saved3"
-                                android:layout_width="40dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:background="#C0C0C0"
-                                android:scaleType="centerCrop">
-                            </ImageButton>
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/description"
                         android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:background="@color/black">
-                        <Button
-                            android:id="@+id/btS"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Settings"
-                            android:textColor="@color/white"
-                            android:background="@color/black"
-                            android:layout_weight="1">
-                        </Button>
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:textColor="@color/black"
+                        android:gravity="center_horizontal"
+                        android:layout_gravity="center_vertical">
+                    </TextView>
+                </LinearLayout>
+            </LinearLayout>
 
-                        <Button
-                            android:id="@+id/btM"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1.5"
-                            android:background="@color/black"
-                            android:text="Messages"
-                            android:textColor="@color/white">
-                        </Button>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Shared"
+                    android:textColor="@color/black"
+                    android:textSize="30sp">
+                </TextView>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp">
+
+                    <ImageButton
+                        android:id="@+id/shared1"
+                        android:layout_width="40dp"
+                        android:layout_height="120dp"
+                        android:layout_weight="1"
+                        android:background="@color/white"
+                        android:scaleType="centerCrop">
+                    </ImageButton>
+
+                    <ImageButton
+                        android:id="@+id/shared2"
+                        android:layout_width="40dp"
+                        android:layout_height="120dp"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="1"
+                        android:background="#C0C0C0"
+                        android:scaleType="centerCrop">
+                    </ImageButton>
+
+                    <ImageButton
+                        android:id="@+id/shared3"
+                        android:layout_width="40dp"
+                        android:layout_height="120dp"
+                        android:layout_weight="1"
+                        android:scaleType="centerCrop"
+                        android:background="#C0C0C0">
+                    </ImageButton>
+                </LinearLayout>
+
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Saved"
+                        android:textColor="@color/black"
+                        android:textSize="30sp">
+                    </TextView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp">
+
+                    <ImageButton
+                        android:id="@+id/saved1"
+                        android:layout_width="40dp"
+                        android:layout_height="120dp"
+                        android:layout_weight="1"
+                        android:background="#C0C0C0"
+                        android:scaleType="centerCrop">
+                    </ImageButton>
+
+                    <ImageButton
+                        android:id="@+id/saved2"
+                        android:layout_width="40dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="#C0C0C0"
+                        android:scaleType="centerCrop">
+                    </ImageButton>
+
+                    <ImageButton
+                        android:id="@+id/saved3"
+                        android:layout_width="40dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#C0C0C0"
+                        android:scaleType="centerCrop">
+                    </ImageButton>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:background="@color/black">
+                <Button
+                    android:id="@+id/btS"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Settings"
+                    android:textColor="@color/white"
+                    android:background="@color/black"
+                    android:layout_weight="1">
+                </Button>
+
+                <Button
+                    android:id="@+id/btM"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.5"
+                    android:background="@color/black"
+                    android:text="Messages"
+                    android:textColor="@color/white">
+                </Button>
 
             </LinearLayout>
         </LinearLayout>
-    </ScrollView>
+
 </LinearLayout>

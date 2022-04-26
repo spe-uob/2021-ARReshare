@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
@@ -46,7 +47,7 @@ public class MessagingActivity extends AppCompatActivity{
     Integer conversationId;
     Integer currentUserId;
     Integer listingId;
-    String profileUrl;
+    Integer contributorId;
     Product product;
     Handler handler;
     Runnable refresh;
@@ -63,13 +64,13 @@ public class MessagingActivity extends AppCompatActivity{
         listingId = i.getIntExtra("listingId", -1);
         conversationId = i.getIntExtra("conversationId", -1);
         currentUserId = i.getIntExtra("currentUserId", -1);
-        profileUrl = i.getStringExtra("profileUrl");
+        contributorId = i.getIntExtra("contributorId", -1);
 
         chatTextView = (EditText)findViewById(R.id.text_chatbox);
         recyclerView = findViewById(R.id.reyclerview_message_list);
 
-        if (profileUrl != "" && conversationId != -1 && currentUserId != -1){
-            downloadImage(profileUrl, conversationId);
+        if (conversationId != -1 && currentUserId != -1){
+            getProfileById(conversationId, contributorId);
         }
 
         setLayOutChangeListener();
@@ -127,6 +128,19 @@ public class MessagingActivity extends AppCompatActivity{
         });
     }
 
+    private void getProfileById(Integer conversationId, Integer contributorId) {
+
+        BackendController.getProfileByID(0, 1, contributorId, new BackendController.BackendProfileResultCallback() {
+            @Override
+            public void onBackendProfileResult(boolean success, User userProfile) {
+                if (success) {
+                    downloadImage(userProfile.getProfilePicUrl(), conversationId);
+                }else {
+                    System.out.println("fail to get user profile");
+                }
+            }
+        });
+    }
 
     private void getConversationByID(Integer conversationID, Bitmap image){
 
@@ -137,24 +151,24 @@ public class MessagingActivity extends AppCompatActivity{
                 if (success) {
                     System.out.println("get conversations successful");
                     System.out.println(message);
-                    messageListAdapter.setMessageResult(messageResult, loggedInUserID);
-                    mMessageList.clear();
-                    int resSize = messageResult.getMessages().size();
-                    int mSize = mMessageList.size();
-                    if (resSize > mSize){
-                        int offset = resSize-mSize;
-                        List<Message> messages = new ArrayList<>();
-                        for (int i = resSize - 1;i>=(resSize-offset);i--){
-                            messageResult.getMessages().get(i).setProfileIcon(image);
-                            mMessageList.add(messageResult.getMessages().get(i));
-                            messageListAdapter.notifyDataSetChanged();
-                        }
-                    }
-                    recyclerView.setAdapter(messageListAdapter);
                 }else {
                     System.out.println(message);
                     System.out.println("fail to get conversations");
                 }
+                messageListAdapter.setMessageResult(messageResult, loggedInUserID);
+                mMessageList.clear();
+                int resSize = messageResult.getMessages().size();
+                int mSize = mMessageList.size();
+                if (resSize > mSize){
+                    int offset = resSize-mSize;
+                    List<Message> messages = new ArrayList<>();
+                    for (int i = resSize - 1;i>=(resSize-offset);i--){
+                        messageResult.getMessages().get(i).setProfileIcon(image);
+                        mMessageList.add(messageResult.getMessages().get(i));
+                        messageListAdapter.notifyDataSetChanged();
+                    }
+                }
+                recyclerView.setAdapter(messageListAdapter);
             }
         });
     }
@@ -180,7 +194,19 @@ public class MessagingActivity extends AppCompatActivity{
                     handler.post(refresh);
                 }else {
                     System.out.println("fail to get message profile icon image");
+                    getConversationByID(conversationId, BitmapFactory.decodeResource(null, R.mipmap.ic_launcher_round));
+                    refresh = new Runnable() {
+                        public void run() {
+                            // Do something
+                            System.out.println("refresh");
+                            getConversationByID(conversationId, BitmapFactory.decodeResource(null, R.mipmap.ic_launcher_round));
+                            messageListAdapter.notifyDataSetChanged();
+                            handler.postDelayed(refresh,500);
+                        }
+                    };
+                    handler.post(refresh);
                 }
+
             }
         });
     }
@@ -208,7 +234,7 @@ public class MessagingActivity extends AppCompatActivity{
     }
 
 
-//    convert to date as follows
+    //    convert to date as follows
 //    dates[0] day name(Mon, Tue, etc)
 //    dates[1] Month name
 //    dates[2] day number
@@ -230,4 +256,3 @@ public class MessagingActivity extends AppCompatActivity{
 
 
 }
-

@@ -24,7 +24,9 @@ public class Product implements Parcelable {
     private User contributor;
     private Category category;
     @SerializedName("creationDate")
-    private String date;
+    private String creationDate;
+    @SerializedName("modificationDate")
+    private String modificationDate;
     @SerializedName("postcode")
     private String postcode;
 
@@ -37,6 +39,8 @@ public class Product implements Parcelable {
     private String mimetype;
     @SerializedName("url")
     private String mainPicURL;
+    @SerializedName("saved")
+    private boolean savedByUser;
 
     private Bitmap mainPic;
 
@@ -60,7 +64,7 @@ public class Product implements Parcelable {
         this.description = description;
         this.contributor = contributor;
         this.category = category;
-        this.date = new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Calendar.getInstance().getTime());
+        this.creationDate = new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Calendar.getInstance().getTime());
         this.location = new LatLng(lat,lng);
         this.productMedia = new ArrayList<>();
     }
@@ -68,7 +72,7 @@ public class Product implements Parcelable {
     protected Product(Parcel in) {
         name = in.readString();
         description = in.readString();
-        date = in.readString();
+        creationDate = in.readString();
         location = in.readParcelable(LatLng.class.getClassLoader());
     }
 
@@ -121,12 +125,20 @@ public class Product implements Parcelable {
 
     public void setCategory(Category category) {this.category = category;}
 
-    public String getDate() {
-        return date;
+    public String getCreationDate() {
+        return creationDate;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setCreationDate(String creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public String getModificationDate() {
+        return modificationDate;
+    }
+
+    public void setModificationDate(String modificationDate) {
+        this.modificationDate = modificationDate;
     }
 
     public LatLng getLocation() {
@@ -179,6 +191,14 @@ public class Product implements Parcelable {
 
     public List<Integer> getImages() {
         return new ArrayList<Integer>();
+    }
+
+    public boolean isSavedByUser() {
+        return savedByUser;
+    }
+
+    public void setSavedByUser(boolean savedByUser) {
+        this.savedByUser = savedByUser;
     }
 
     public void findCoordinates(CountDownLatch latch) {
@@ -246,7 +266,7 @@ public class Product implements Parcelable {
 
         dest.writeString(name);
         dest.writeString(description);
-        dest.writeString(date);
+        dest.writeString(creationDate);
         dest.writeParcelable(location, flags);
     }
 

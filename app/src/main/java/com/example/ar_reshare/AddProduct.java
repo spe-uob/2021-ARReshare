@@ -19,13 +19,13 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,9 +45,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
     private final String GALLERY = "gallery";
     private ActivityResultLauncher<Intent> cameraActivityResultLauncher;
     private ActivityResultLauncher<String> galleryActivityResultLauncher;
-    private File storageDir;
     private Uri photoUri;
-    private File photoFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +64,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                         if(result.getResultCode() == RESULT_OK){
                             adapter.addItem(photoUri);
                         }else{
-                            photoFile.delete();//delete the file if failed
+                            CameraHelper.deleteImageFile();//delete the file if failed
                         }
                     }
                 }
@@ -81,7 +79,6 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                 }
         );
 
-        storageDir = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         confirmListener();
         returnListener();
     }
@@ -148,6 +145,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                 Integer category = categoryDropdown.getSelectedItemPosition() + 1;
                 Spinner conditionDropdown = findViewById(R.id.condition_dropdown);
                 String condition = conditionDropdown.getSelectedItem().toString().toLowerCase();
+
                 EditText productPostcodeText = findViewById(R.id.add_product_postcode);
                 String productPostcode = productPostcodeText.getText().toString();
 
@@ -161,7 +159,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                         BackendController.addProduct(productName,productDescription,"UK","Bristol",productPostcode,category,condition, media, AddProduct.this);
                         Toast toast = Toast.makeText(getApplicationContext(), "Added Successfully!", Toast.LENGTH_LONG);
                         toast.show();
-                        onBackPressed();
+                        startActivity(new Intent(AddProduct.this,ARActivity.class));
                     } catch (Exception e) {
                         Toast toast = Toast.makeText(getApplicationContext(), "Failed to add products", Toast.LENGTH_LONG);
                         toast.show();
@@ -171,6 +169,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
             }
         });
     }
+
 
     //convert the pictures uploaded by user to DataURI
     private ArrayList<String> convertToDataURI(SortedList<Uri> uriList) throws FileNotFoundException {
@@ -243,47 +242,10 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
     @Override
     public void onDialogActionClick(DialogFragment dialog, String action) {
         if(action == CAMERA){
-            takePicture();
+            photoUri = CameraHelper.takePicture(getApplicationContext(),cameraActivityResultLauncher);
         }else if(action == GALLERY){
-            accessGallery();
+            galleryActivityResultLauncher.launch("image/*");
         }
-    }
-
-    private void accessGallery(){
-        galleryActivityResultLauncher.launch("image/*");
-    }
-
-    private void takePicture(){
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        try {
-            photoFile = createImageFile();
-        } catch (IOException ex) {
-            // Error occurred while creating the File
-            ex.printStackTrace();
-        }
-        // Continue only if the File was successfully created
-        if (photoFile != null) {
-            photoUri = FileProvider.getUriForFile(getApplicationContext(),
-                    "com.example.ar_reshare.fileprovider",
-                    photoFile);
-
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-        }
-
-        cameraActivityResultLauncher.launch(intent);
-    }
-
-    //creates a local photo path to store the pics taken by user
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-        return image;
     }
 
     @Override

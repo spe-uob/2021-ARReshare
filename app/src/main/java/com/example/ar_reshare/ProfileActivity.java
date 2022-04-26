@@ -37,7 +37,7 @@ public class ProfileActivity extends AppCompatActivity {
         Intent i = getIntent();
         userID = i.getIntExtra("userID", BackendController.loggedInUserID);
 
-        System.out.println("The current userID is :" + userID );
+        System.out.println("The current userID is :" + userID);
         if (userID == BackendController.loggedInUserID) {
             System.out.println("111111111111");
             getProfileById(userID);
@@ -58,11 +58,11 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-    private void getProfileById(int userID){
+    private void getProfileById(int userID) {
         BackendController.getProfileByID(0, 3, userID, new BackendController.BackendProfileResultCallback() {
             @Override
             public void onBackendProfileResult(boolean success, User userProfile) {
-                if(success){
+                if (success) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -97,12 +97,14 @@ public class ProfileActivity extends AppCompatActivity {
                         }
                     });
 
-                } else{
+                } else {
                     System.out.println("Failed to get profile");
                 }
             }
         });
     }
+
+    //productImage.setImageResource(currentProduct.getImages().get(0));
 
     private void getProfileById2(int userID){
         BackendController.getProfileByID(0, 1, userID, new BackendController.BackendProfileResultCallback() {
@@ -151,11 +153,9 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     public void searchAccountListing(){
-        BackendController.searchAccountListings(0, 3, new BackendController.BackendSearchResultCallback() {
-            @Override
+        BackendController.searchAccountListings(0, 3, 1, new BackendController.BackendSearchResultCallback() {
             public void onBackendSearchResult(boolean success, List<Product> ListingSearchResult) {
                 if(success){
-
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -170,9 +170,12 @@ public class ProfileActivity extends AppCompatActivity {
                                     public void onClick(View v) {
                                         Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
                                         intent.putExtra("product", currentProduct1);
-                                        intent.putExtra("contributor", currentProduct1.getContributor());
-                                        intent.putExtra("profilePicId", currentProduct1.getContributor().getProfilePic());
-                                        intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct1.getImages());
+                                        intent.putExtra("contributorID", currentProduct1.getContributorID());
+                                        intent.putExtra("productID", currentProduct1.getId());
+                                        intent.putExtra("lat", currentProduct1.getCoordinates().latitude);
+                                        intent.putExtra("lat", currentProduct1.getCoordinates().longitude);
+                                        intent.putExtra("categoryID", currentProduct1.getCategoryID());
+                                        intent.putExtra("postcode", currentProduct1.getPostcode());
                                         startActivity(intent);
                                     }
                                 });
@@ -190,9 +193,12 @@ public class ProfileActivity extends AppCompatActivity {
                                     public void onClick(View v) {
                                         Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
                                         intent.putExtra("product", currentProduct2);
-                                        intent.putExtra("contributor", currentProduct2.getContributor());
-                                        intent.putExtra("profilePicId", currentProduct2.getContributor().getProfileIcon());
-                                        intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct2.getImages());
+                                        intent.putExtra("contributorID", currentProduct2.getContributorID());
+                                        intent.putExtra("productID", currentProduct2.getId());
+                                        intent.putExtra("lat", currentProduct2.getCoordinates().latitude);
+                                        intent.putExtra("lat", currentProduct2.getCoordinates().longitude);
+                                        intent.putExtra("categoryID", currentProduct2.getCategoryID());
+                                        intent.putExtra("postcode", currentProduct2.getPostcode());
                                         startActivity(intent);
                                     }
                                 });
@@ -209,9 +215,12 @@ public class ProfileActivity extends AppCompatActivity {
                                     public void onClick(View v) {
                                         Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
                                         intent.putExtra("product", currentProduct3);
-                                        intent.putExtra("contributor", currentProduct3.getContributor());
-                                        intent.putExtra("profilePicId", currentProduct3.getContributor().getProfileIcon());
-                                        intent.putExtra("productPicId", (ArrayList<Integer>) currentProduct3.getImages());
+                                        intent.putExtra("contributorID", currentProduct3.getContributorID());
+                                        intent.putExtra("productID", currentProduct3.getId());
+                                        intent.putExtra("lat", currentProduct3.getCoordinates().latitude);
+                                        intent.putExtra("lat", currentProduct3.getCoordinates().longitude);
+                                        intent.putExtra("categoryID", currentProduct3.getCategoryID());
+                                        intent.putExtra("postcode", currentProduct3.getPostcode());
                                         startActivity(intent);
                                     }
                                 });
@@ -222,18 +231,87 @@ public class ProfileActivity extends AppCompatActivity {
                 } else{
                     System.out.println("Failed to get Account Listing");
                 }
-            }
-        });
-    }
+            }});
+        };
 
     public void searchSavedListings(){
         BackendController.searchSavedListings(0, 3, 1, 1, new BackendController.BackendSearchResultCallback() {
             @Override
             public void onBackendSearchResult(boolean success, List<Product> savedListingSearchResult) {
                     if(success){
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(savedListingSearchResult.size() >= 1) {
+                                    savedProduct1 = savedListingSearchResult.get(0);
+                                    ImageButton productImage1 = findViewById(R.id.saved1);
+
+                                    productImage1.setImageBitmap(savedProduct1.getMainPic());
+
+                                    productImage1.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
+                                            intent.putExtra("product", savedProduct1);
+                                            intent.putExtra("contributorID", savedProduct1.getContributorID());
+                                            intent.putExtra("productID", savedProduct1.getId());
+                                            intent.putExtra("lat", savedProduct1.getCoordinates().latitude);
+                                            intent.putExtra("lat", savedProduct1.getCoordinates().longitude);
+                                            intent.putExtra("categoryID", savedProduct1.getCategoryID());
+                                            intent.putExtra("postcode", savedProduct1.getPostcode());
+                                            startActivity(intent);
+                                        }
+                                    });
+                                }
+
+                                if(savedListingSearchResult.size() >= 2) {
+                                    savedProduct1 = savedListingSearchResult.get(1);
+                                    ImageButton productImage1 = findViewById(R.id.saved2);
+
+                                    productImage1.setImageBitmap(savedProduct2.getMainPic());
+
+                                    productImage1.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
+                                            intent.putExtra("product", savedProduct2);
+                                            intent.putExtra("contributorID", savedProduct2.getContributorID());
+                                            intent.putExtra("productID", savedProduct2.getId());
+                                            intent.putExtra("lat", savedProduct2.getCoordinates().latitude);
+                                            intent.putExtra("lat", savedProduct2.getCoordinates().longitude);
+                                            intent.putExtra("categoryID", savedProduct2.getCategoryID());
+                                            intent.putExtra("postcode", savedProduct2.getPostcode());
+                                            startActivity(intent);
+                                        }
+                                    });
+                                }
+
+                                if(savedListingSearchResult.size() >= 3) {
+                                    savedProduct1 = savedListingSearchResult.get(2);
+                                    ImageButton productImage1 = findViewById(R.id.saved3);
+
+                                    productImage1.setImageBitmap(savedProduct3.getMainPic());
+
+                                    productImage1.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
+                                            intent.putExtra("product", savedProduct3);
+                                            intent.putExtra("contributorID", savedProduct3.getContributorID());
+                                            intent.putExtra("productID", savedProduct3.getId());
+                                            intent.putExtra("lat", savedProduct3.getCoordinates().latitude);
+                                            intent.putExtra("lat", savedProduct3.getCoordinates().longitude);
+                                            intent.putExtra("categoryID", savedProduct3.getCategoryID());
+                                            intent.putExtra("postcode", savedProduct3.getPostcode());
+                                            startActivity(intent);
+                                        }
+                                    });
+                                }
+                            }
+                        });
 
                     } else{
-
+                        System.out.println("Failed to get Saved Listing");
                     }
             }
         });

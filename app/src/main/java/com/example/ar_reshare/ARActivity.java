@@ -604,11 +604,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         Texture texture = null;
         try {
             texture =
-            Texture.createFromAsset(
-                    render,
-                    textureLocation,
-                    Texture.WrapMode.CLAMP_TO_EDGE,
-                    Texture.ColorFormat.SRGB);
+                    Texture.createFromAsset(
+                            render,
+                            textureLocation,
+                            Texture.WrapMode.CLAMP_TO_EDGE,
+                            Texture.ColorFormat.SRGB);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -1135,6 +1135,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                         intent.putExtra("lat", product.getCoordinates().latitude);
                         intent.putExtra("lng",product.getCoordinates().longitude);
                         intent.putExtra("categoryID",product.getCategoryID());
+                        intent.putExtra("postcode",product.getPostcode());
                         startActivity(intent);
                     }
                 });

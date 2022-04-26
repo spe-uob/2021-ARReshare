@@ -50,7 +50,7 @@ public class MapsActivity extends FragmentActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnInfoWindowClickListener
-        {
+{
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
@@ -85,7 +85,6 @@ public class MapsActivity extends FragmentActivity implements
     private List<Product> products;
     private CountDownLatch readyLatch;
     private int TIMEOUT_IN_SECONDS = 5;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -437,8 +436,10 @@ public class MapsActivity extends FragmentActivity implements
         intent.putExtra("lat", product.getCoordinates().latitude);
         intent.putExtra("lng",product.getCoordinates().longitude);
         intent.putExtra("categoryID",product.getCategoryID());
+        intent.putExtra("postcode",product.getPostcode());
 
         startActivity(intent);
+
     }
 
 

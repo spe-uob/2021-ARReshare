@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -58,7 +59,11 @@ public class ChatListActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(chatListAdapter);
 
-        //createConversation(61);
+//        try {
+//            createConversation(61);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
     }
 
 
@@ -148,7 +153,8 @@ public class ChatListActivity extends AppCompatActivity {
             public void onBackendResult(boolean success, String message) {
                 if (success) {
                     System.out.println("conversation created");
-                   // Intent intent = new Intent(, MessagingActivity.class);
+                    Integer conversationId = Integer.valueOf(message);
+                    // Intent intent = new Intent(, MessagingActivity.class);
                 } else {
                     System.out.println(message);
                     System.out.println("conversation created failed");
@@ -189,14 +195,12 @@ public class ChatListActivity extends AppCompatActivity {
             public void onBackendProfileResult(boolean success, User userProfile) {
                 if (success) {
                     System.out.println("successfully get profile icon");
-                    //chat.setProfilePicUrl(userProfile.getProfilePicUrl());
                     chat.setProfilerUrl(userProfile.getProfilePicUrl());
                     downloadImage(userProfile.getProfilePicUrl(),chat);
-                    //addChat(chat.getConversationID(), chat);
-//                    mChatList.add(chat);
-//                    recyclerView.getAdapter().notifyDataSetChanged();
                 }else {
                     System.out.println("fail to get profile icon in chats");
+                    chat.setProfileIcon(BitmapFactory.decodeResource(null, R.mipmap.ic_launcher_round));
+                    addChat(chat.getConversationID(), chat);
                 }
             }
         });
@@ -238,7 +242,7 @@ public class ChatListActivity extends AppCompatActivity {
 
 
 
-    private void closeConversation(Integer conversationID) throws JSONException {
+    public static void closeConversation(Integer conversationID) throws JSONException {
         //int conversationID = 0;
 
         BackendController.closeConversation(conversationID, new BackendController.BackendCallback() {
