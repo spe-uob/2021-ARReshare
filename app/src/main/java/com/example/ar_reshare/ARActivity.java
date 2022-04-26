@@ -1029,7 +1029,6 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
     }
 
-    // TODO: Convert all to positive degrees
     // Prepare products for display by finding the required angle for each product
     private void populateProducts() {
         for (Product product : this.products) {
@@ -1251,6 +1250,9 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private void rotateCompass(double angle) {
         // Convert angle from radians to degrees
         float angleDeg = (float) (angle * 180/Math.PI);
+
+        // The compass must rotate in the opposite direction to the direction of actual rotation
+        angleDeg = 360 - angleDeg;
 
         // Prevent jumping compass animation
         if (angleDeg > 340 && lastCompassButtonAngle < 20) {
