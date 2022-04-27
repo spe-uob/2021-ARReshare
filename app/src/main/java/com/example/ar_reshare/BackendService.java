@@ -78,12 +78,10 @@ public interface BackendService {
                                                       @Query("startResults") int startResults);
 
     @Headers("Content-Type: application/json")
-    @GET("account/listings/search")
-    Call<Product> searchSavedListings(  @Header("Authorization") String token,
+    @GET("account/saved-listings/search")
+    Call<Product.SearchResults> searchSavedListings(  @Header("Authorization") String token,
                                         @Query("maxResults") int maxResults,
-                                        @Query("startResults") int startResults,
-                                        @Query("categoryID") int categoryID,
-                                        @Query("region") int region);
+                                        @Query("startResults") int startResults);
 
     @Headers("Content-Type: application/json")
     @PATCH("account/close")
