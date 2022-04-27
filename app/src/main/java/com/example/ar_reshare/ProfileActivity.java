@@ -121,24 +121,15 @@ public class ProfileActivity extends AppCompatActivity {
                             profileIcon.setImageBitmap(userProfile.getProfilePic());
 
                             Button settingsButton = (Button) findViewById(R.id.btS);
-                            settingsButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent intent = new Intent(ProfileActivity.this, SettingActivity.class);
-                                    startActivity((intent));
-                                }
-                            });
+
+                            settingsButton.setVisibility(View.GONE);
 
                             Button messageButton1 = (Button) findViewById(R.id.btM);
-                            messageButton1.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent intent = new Intent(ProfileActivity.this, ChatListActivity.class);
-                                    startActivity(intent);
-                                }
-                            });
-                            searchAccountListing();
-                            searchSavedListings();
+
+                            messageButton1.setVisibility(View.GONE);
+
+                            //searchAccountListing();
+                            searchOtherProfileListings(userProfile);
                         }
                     });
 
@@ -231,6 +222,57 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             }});
         };
+
+    public void searchOtherProfileListings(User user){
+        List<Product> userProduct = user.getListings();
+
+            BackendController.initialiseProducts(userProduct, new BackendController.BackendSearchResultCallback() {
+                @Override
+                public void onBackendSearchResult(boolean success, List<Product> searchResults) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(searchResults.size() >= 1){
+                                ImageButton shared1 = (ImageButton) findViewById(R.id.shared1);
+                                sharedProductShow(shared1, searchResults.get(0));
+                            }
+
+                            if (searchResults.size() >= 2){
+                                ImageButton shared2 = (ImageButton) findViewById(R.id.shared2);
+                                sharedProductShow(shared2, searchResults.get(1));
+                            }
+
+                            if (searchResults.size() >= 3){
+                                ImageButton shared3 = (ImageButton) findViewById(R.id.shared3);
+                                sharedProductShow(shared3, searchResults.get(2));
+                            }
+                        }
+                    });
+                }
+            });
+    }
+
+
+    private void sharedProductShow(ImageButton shared, Product product){
+
+        shared.setImageBitmap(product.getMainPic());
+
+        shared.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
+                intent.putExtra("product", product);
+                intent.putExtra("contributorID", product.getContributorID());
+                intent.putExtra("productID", product.getId());
+                intent.putExtra("lat", product.getCoordinates().latitude);
+                intent.putExtra("lat", product.getCoordinates().longitude);
+                intent.putExtra("categoryID", product.getCategoryID());
+                intent.putExtra("postcode", product.getPostcode());
+                startActivity(intent);
+            }
+        });
+    }
+
 
     public void searchSavedListings(){
         BackendController.searchSavedListings(0, 3, new BackendController.BackendSearchResultCallback() {

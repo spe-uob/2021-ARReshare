@@ -733,7 +733,7 @@ public class BackendController {
 
     // Helper method of searchListings()
     // Waits until all products have had their main photo downloaded and postcode converted into coordinates
-    private static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {
+    public static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {
         final int NUMBER_OF_REQUESTS_PER_PRODUCT = 2;
 
         // Initialise the latch to wait for callbacks
