@@ -75,8 +75,7 @@ public interface BackendService {
     @GET("account/listings/search")
     Call<Product.SearchResults> searchAccountListings(@Header("Authorization") String token,
                                                       @Query("maxResults") int maxResults,
-                                                      @Query("startResults") int startResults,
-                                                      @Query("categoryID") int categoryID);
+                                                      @Query("startResults") int startResults);
 
     @Headers("Content-Type: application/json")
     @GET("account/listings/search")

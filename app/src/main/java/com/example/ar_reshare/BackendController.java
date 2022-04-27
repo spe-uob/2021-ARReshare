@@ -934,7 +934,7 @@ public class BackendController {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         BackendService service = retrofit.create(BackendService.class);
-        Call<Product.SearchResults> call = service.searchListings(JWT, maxResults, startResults);
+        Call<Product.SearchResults> call = service.searchAccountListings(JWT, maxResults, startResults);
         try {
             call.enqueue(new Callback<Product.SearchResults>() {
                 @Override
@@ -959,7 +959,7 @@ public class BackendController {
         }
     }
 
-    public static void searchSavedListings(int startResults, int maxResults, int categoryID, int region,
+    public static void searchSavedListings(int startResults, int maxResults,
                                            BackendSearchResultCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)

@@ -40,10 +40,10 @@ public class ProfileActivity extends AppCompatActivity {
         System.out.println("The current userID is :" + userID);
         if (userID == BackendController.loggedInUserID) {
             System.out.println("111111111111");
-            getProfileById(userID);
+            getCurrentUserProfile(userID);
         } else {
             System.out.println("222222222222222");
-            getProfileById2(userID);
+            getOtherUserProfile(userID);
         }
 
         //productImage.setImageResource(currentProduct.getImages().get(0));
@@ -58,7 +58,7 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-    private void getProfileById(int userID) {
+    private void getCurrentUserProfile(int userID) {
         BackendController.getProfileByID(0, 3, userID, new BackendController.BackendProfileResultCallback() {
             @Override
             public void onBackendProfileResult(boolean success, User userProfile) {
@@ -68,9 +68,6 @@ public class ProfileActivity extends AppCompatActivity {
                         public void run() {
                             TextView name = findViewById(R.id.username);
                             name.setText(userProfile.getName());
-
-                            TextView bioText = findViewById(R.id.description);
-                            bioText.setText(userProfile.getBio());
 
                             ImageView profileIcon = findViewById(R.id.avatar);
                             profileIcon.setImageBitmap(userProfile.getProfilePic());
@@ -92,8 +89,8 @@ public class ProfileActivity extends AppCompatActivity {
                                     startActivity(intent);
                                 }
                             });
-
                             searchAccountListing();
+                            searchSavedListings();
                         }
                     });
 
@@ -106,7 +103,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     //productImage.setImageResource(currentProduct.getImages().get(0));
 
-    private void getProfileById2(int userID){
+    private void getOtherUserProfile(int userID){
         BackendController.getProfileByID(0, 1, userID, new BackendController.BackendProfileResultCallback() {
             @Override
             public void onBackendProfileResult(boolean success, User userProfile) {
@@ -141,6 +138,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 }
                             });
                             searchAccountListing();
+                            searchSavedListings();
                         }
                     });
 
@@ -235,7 +233,7 @@ public class ProfileActivity extends AppCompatActivity {
         };
 
     public void searchSavedListings(){
-        BackendController.searchSavedListings(0, 3, 1, 1, new BackendController.BackendSearchResultCallback() {
+        BackendController.searchSavedListings(0, 3, new BackendController.BackendSearchResultCallback() {
             @Override
             public void onBackendSearchResult(boolean success, List<Product> savedListingSearchResult) {
                     if(success){
@@ -265,12 +263,12 @@ public class ProfileActivity extends AppCompatActivity {
                                 }
 
                                 if(savedListingSearchResult.size() >= 2) {
-                                    savedProduct1 = savedListingSearchResult.get(1);
-                                    ImageButton productImage1 = findViewById(R.id.saved2);
+                                    savedProduct2 = savedListingSearchResult.get(1);
+                                    ImageButton productImage2 = findViewById(R.id.saved2);
 
-                                    productImage1.setImageBitmap(savedProduct2.getMainPic());
+                                    productImage2.setImageBitmap(savedProduct2.getMainPic());
 
-                                    productImage1.setOnClickListener(new View.OnClickListener() {
+                                    productImage2.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
                                             Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
@@ -287,12 +285,12 @@ public class ProfileActivity extends AppCompatActivity {
                                 }
 
                                 if(savedListingSearchResult.size() >= 3) {
-                                    savedProduct1 = savedListingSearchResult.get(2);
-                                    ImageButton productImage1 = findViewById(R.id.saved3);
+                                    savedProduct3 = savedListingSearchResult.get(2);
+                                    ImageButton productImage3 = findViewById(R.id.saved3);
 
-                                    productImage1.setImageBitmap(savedProduct3.getMainPic());
+                                    productImage3.setImageBitmap(savedProduct3.getMainPic());
 
-                                    productImage1.setOnClickListener(new View.OnClickListener() {
+                                    productImage3.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
                                             Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
