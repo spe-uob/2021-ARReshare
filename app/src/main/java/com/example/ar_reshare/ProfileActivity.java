@@ -130,6 +130,19 @@ public class ProfileActivity extends AppCompatActivity {
 
                             //searchAccountListing();
                             searchOtherProfileListings(userProfile);
+
+                            TextView savedTitle = findViewById(R.id.savedTitle);
+                            savedTitle.setVisibility(View.GONE);
+
+                            ImageButton saved1 = findViewById(R.id.saved1);
+                            saved1.setVisibility(View.GONE);
+
+                            ImageButton saved2 = findViewById(R.id.saved2);
+                            saved2.setVisibility(View.GONE);
+
+                            ImageButton saved3 =findViewById(R.id.saved3);
+                            saved3.setVisibility(View.GONE);
+
                         }
                     });
 
@@ -229,23 +242,20 @@ public class ProfileActivity extends AppCompatActivity {
             BackendController.initialiseProducts(userProduct, new BackendController.BackendSearchResultCallback() {
                 @Override
                 public void onBackendSearchResult(boolean success, List<Product> searchResults) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(searchResults.size() >= 1){
-                                ImageButton shared1 = (ImageButton) findViewById(R.id.shared1);
-                                sharedProductShow(shared1, searchResults.get(0));
-                            }
+                    runOnUiThread(() -> {
+                        if(searchResults.size() >= 1){
+                            ImageButton shared1 = (ImageButton) findViewById(R.id.shared1);
+                            sharedProductShow(shared1, searchResults.get(0));
+                        }
 
-                            if (searchResults.size() >= 2){
-                                ImageButton shared2 = (ImageButton) findViewById(R.id.shared2);
-                                sharedProductShow(shared2, searchResults.get(1));
-                            }
+                        if (searchResults.size() >= 2){
+                            ImageButton shared2 = (ImageButton) findViewById(R.id.shared2);
+                            sharedProductShow(shared2, searchResults.get(1));
+                        }
 
-                            if (searchResults.size() >= 3){
-                                ImageButton shared3 = (ImageButton) findViewById(R.id.shared3);
-                                sharedProductShow(shared3, searchResults.get(2));
-                            }
+                        if (searchResults.size() >= 3){
+                            ImageButton shared3 = (ImageButton) findViewById(R.id.shared3);
+                            sharedProductShow(shared3, searchResults.get(2));
                         }
                     });
                 }
