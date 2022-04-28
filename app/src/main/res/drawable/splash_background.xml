@@ -4,6 +4,6 @@
         android:drawable="@drawable/bg_gradient"></item>
     <item>
         <bitmap android:gravity="center"
-            android:src="@drawable/splash222"/>
+            android:src="@drawable/badger"/>
     </item>
 </layer-list>
