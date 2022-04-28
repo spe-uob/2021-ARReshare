@@ -1,5 +1,6 @@
 package com.example.ar_reshare;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -16,6 +17,7 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -39,6 +41,7 @@ import com.example.ar_reshare.samplerender.arcore.SpecularCubemapFilter;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.navigation.NavigationBarView;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
@@ -61,6 +64,7 @@ import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,7 +79,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class ARActivity extends AppCompatActivity implements SampleRender.Renderer {
+public class ARActivity extends AppCompatActivity implements SampleRender.Renderer, NavigationBarView.OnItemSelectedListener{
 
     private static final String SEARCHING_PLANE_MESSAGE = "Searching for surfaces...";
     private static final String USER_MOVED_MESSAGE = "You have left your origin. Please regenerate.";
@@ -1246,6 +1250,35 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         return false;
     }
 
+    MapsActivity mapsActivity = new MapsActivity();
+    FeedActivity feedActivity = new FeedActivity();
+    ARActivity arActivity = this;
+    ProfileActivity profileActivity = new ProfileActivity();
+    ChatListActivity chatListActivity = new ChatListActivity();
+
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        Intent intent;
+        switch (item.getItemId()) {
+            case R.id.map_menu_item:
+                intent = new Intent(ARActivity.this, MapsActivity.class);
+                startActivity(intent);
+                //getSupportFragmentManager().beginTransaction().replace(R.id.container, mapsActivity).commit();
+                return true;
+
+            case R.id.feed_menu_item:
+                intent = new Intent(ARActivity.this, FeedActivity.class);
+                startActivity(intent);
+                //getSupportFragmentManager().beginTransaction().replace(R.id.container, secondFragment).commit();
+                return true;
+
+            case R.id.ar_menu_item:
+                //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
+                return true;
+        }
+        return false;
+    }
 }
 
 // A class to represent the objects in AR showing the direction to products

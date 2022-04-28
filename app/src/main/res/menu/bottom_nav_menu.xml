@@ -4,12 +4,13 @@
     <item
         android:id="@+id/map_menu_item"
         android:title="Map"
-        android:icon="@drawable/message_icon"/>
+        android:icon="@drawable/message_icon" />
 
     <item
         android:id="@+id/feed_menu_item"
         android:title="Feed"
-        android:icon="@drawable/message_icon"/>
+        android:enabled="true"
+        android:icon="@drawable/feed_filter_icon"/>
 
     <item
         android:id="@+id/ar_menu_item"

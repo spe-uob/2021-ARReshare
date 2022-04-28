@@ -16,6 +16,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
@@ -30,8 +31,10 @@ import android.widget.Toast;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.navigation.NavigationBarView;
 
 import java.text.MessageFormat;
 import java.util.HashSet;
@@ -41,7 +44,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class FeedActivity extends AppCompatActivity {
+public class FeedActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
 
     // Lists to initialise products
     List<Product> allProducts;
@@ -49,6 +52,8 @@ public class FeedActivity extends AppCompatActivity {
 
     // Global Recycler View
     RecyclerView recyclerView;
+
+    BottomNavigationView bottomNavigationView;
 
     // CountDownLatch to ensure thread only works after results have been received from backend
     private CountDownLatch readyLatch;
@@ -84,6 +89,10 @@ public class FeedActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
+
+        bottomNavigationView = findViewById(R.id.bottom_navigation_bar);
+        //frameLayout = view.findViewById(R.id.frameLayout_wrapper);
+        bottomNavigationView.setOnItemSelectedListener(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -369,5 +378,30 @@ public class FeedActivity extends AppCompatActivity {
         // Colour constants for accessibility needs - changing font colour based on contrast
         float MIN_CONTRAST_RATIO = 4.5f;
         return ratio < MIN_CONTRAST_RATIO;
+    }
+
+    ChatListActivity chatListActivity = new ChatListActivity();
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        Intent intent;
+        switch (item.getItemId()) {
+            case R.id.map_menu_item:
+
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, chatListActivity).commit();
+                //getSupportFragmentManager().beginTransaction().replace(R.id.container, mapsActivity).commit();
+                return true;
+
+            case R.id.feed_menu_item:
+                intent = new Intent(FeedActivity.this, ProfileActivity.class);
+                startActivity(intent);
+                //getSupportFragmentManager().beginTransaction().replace(R.id.container, secondFragment).commit();
+                return true;
+//
+//            case R.id.ar_menu_item:
+//                //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
+//                return true;
+        }
+        return false;
     }
 }

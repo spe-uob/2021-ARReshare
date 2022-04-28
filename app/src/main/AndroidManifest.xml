@@ -25,6 +25,7 @@
         android:roundIcon="@drawable/app_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.ARReshare">
+
         <activity
             android:name=".SettingActivity"
             android:exported="true">

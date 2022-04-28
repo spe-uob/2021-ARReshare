@@ -68,7 +68,7 @@ public class ProfileActivity extends AppCompatActivity {
         messageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), ChatListActivity.class);
+                Intent intent = new Intent(ProfileActivity.this, ChatListActivity.class);
                 intent.putExtra("product", currentProduct);
                 intent.putExtra("contributor", currentProduct.getContributor());
                 intent.putExtra("profilePicId", currentProduct.getContributor().getProfileIcon());

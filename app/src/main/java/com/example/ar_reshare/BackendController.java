@@ -368,7 +368,7 @@ public class BackendController {
                 public void onResponse(Call<Chat.ConversationsResult> call, Response<Chat.ConversationsResult> response) {
                     System.out.println(response.code());
                     Chat.ConversationsResult conversations = response.body();
-                    System.out.println("conversations : " + conversations.getChats().size());
+                    //System.out.println("conversations : " + conversations.getChats().size());
                     if (response.code() == SUCCESS) {
                         callback.onBackendResult(true, "Success", loggedInUserID, conversations);
                     } else if (response.code() == INCORRECT_FORMAT) {
