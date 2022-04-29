@@ -114,16 +114,6 @@ public class MapsActivity extends Fragment implements
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        // Set the return arrow button on click event
-        ImageButton returnArrow = view.findViewById(R.id.returnToMainArrow);
-        returnArrow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getActivity().onBackPressed();
-                getActivity().overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom);
-            }
-        });
-
         ImageButton filterButton = view.findViewById(R.id.filterMapButton);
         setupFilterWindow(filterButton);
 

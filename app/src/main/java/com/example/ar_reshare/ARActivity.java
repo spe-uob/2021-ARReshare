@@ -217,13 +217,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     // The acceptable limit of angle offset to product
     private static final double ANGLE_LIMIT = 20 * Math.PI/180; // degrees converted to radians
 
-    // Swiping gestures variables and constants
-    private float x1, x2, y1, y2;
-    private final int TOUCH_OFFSET = 100;
-    private final int TAP_OFFSET = 10;
-    private boolean touchedDown = false;
-    private boolean moved = false;
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -756,13 +749,13 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         String message = null;
         if (camera.getTrackingState() == TrackingState.PAUSED) {
             if (camera.getTrackingFailureReason() == TrackingFailureReason.NONE) {
-                message = SEARCHING_PLANE_MESSAGE;
+                //message = SEARCHING_PLANE_MESSAGE;
             } else {
-                message = TrackingStateHelper.getTrackingFailureReasonString(camera);
+                //message = TrackingStateHelper.getTrackingFailureReasonString(camera);
             }
         } else if (hasTrackingPlane()) {
         } else {
-            message = SEARCHING_PLANE_MESSAGE;
+            //message = SEARCHING_PLANE_MESSAGE;
         }
         if (message == null) {
             messageSnackbarHelper.hide(getActivity());
@@ -992,7 +985,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     // Get the most recent location of the device
     private void getDeviceLocation() {
-        System.out.println("   GETTING LOCATION ONCREATE");
         SwipeActivity parent = (SwipeActivity) getActivity();
         try {
             if (parent.locationPermissionGranted) {
@@ -1003,7 +995,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                                 // Got last known location. In some rare situations this can be null.
                                 if (location != null) {
                                     // Logic to handle location object
-                                    System.out.println("   SUCCESS LOCATION ONCREATE");
                                     lastKnownLocation = location;
                                     readyLatch.countDown();
                                 }
