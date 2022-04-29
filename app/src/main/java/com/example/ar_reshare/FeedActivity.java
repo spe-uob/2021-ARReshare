@@ -390,12 +390,12 @@ public class FeedActivity extends AppCompatActivity implements NavigationBarView
         switch (item.getItemId()) {
             case R.id.map_menu_item:
 
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, chatListActivity).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, chatListActivity).addToBackStack(null).commit();
                 //getSupportFragmentManager().beginTransaction().replace(R.id.container, mapsActivity).commit();
                 return true;
 
             case R.id.feed_menu_item:
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, mapsActivity).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, mapsActivity).addToBackStack(null).commit();
                 //getSupportFragmentManager().beginTransaction().replace(R.id.container, secondFragment).commit();
                 return true;
 //
@@ -403,12 +403,12 @@ public class FeedActivity extends AppCompatActivity implements NavigationBarView
                 //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
                 return true;
             case R.id.profile_menu_item:
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileActivity).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileActivity).addToBackStack(null).commit();
                 //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
                 return true;
             case R.id.message_menu_item:
                 //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, chatListActivity).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, chatListActivity).addToBackStack(null).commit();
                 return true;
         }
         return false;

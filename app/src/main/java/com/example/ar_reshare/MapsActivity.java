@@ -99,7 +99,6 @@ public class MapsActivity extends Fragment implements
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //View view = inflater.inflate(R.layout.activity_maps, container, false);
         // Make the map wait on the following three conditions
         // 1. Device location is ready
         // 2. Products have been received from backend
@@ -107,11 +106,11 @@ public class MapsActivity extends Fragment implements
         // Once these conditions are met the map can proceed to be populated
         readyLatch = new CountDownLatch(3);
         getLatestProducts();
-        binding = ActivityMapsBinding.inflate(getActivity().getLayoutInflater(),container,false);
-        View view = binding.getRoot();
-        //getActivity().setContentView(binding.getRoot());
+        View view = inflater.inflate(R.layout.activity_maps, container, false);
+//        binding = ActivityMapsBinding.inflate(getActivity().getLayoutInflater(),container,false);
+//        View view = binding.getRoot();
         // Obtain the SupportMapFragment and get notified when the map is ready to be used
-        SupportMapFragment mapFragment = (SupportMapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         // Set the return arrow button on click event
