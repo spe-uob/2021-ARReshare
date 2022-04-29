@@ -39,6 +39,8 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     private Context context;
 
     public FeedRecyclerAdapter(List<Product> productList){
+        System.out.println("ADAPTER CREATED");
+        System.out.println("SIZE OF THE LIST" + productList.size());
         this.productList = productList;
         intToCat.put(1, Category.OTHER);
         intToCat.put(2, Category.CLOTHING);
@@ -89,6 +91,8 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         // Bookmark button logic
         bookmarkToggleHelper(holder, product);
     }
+
+
 
     public void productValueHelper(ViewHolder holder, Product product) {
         BackendController.getProfileByID(0, 100,

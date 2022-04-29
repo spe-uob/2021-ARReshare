@@ -99,11 +99,14 @@ public class FeedActivity extends Fragment {
 
         readyLatch = new CountDownLatch(1);
         currentProductList = new ArrayList<>();
+
         adapterCreator();
+
         BackendController.searchListings(0, 100, (success, searchResults) -> {
             if (success) {
                 currentProductList.addAll(searchResults);
                 getActivity().runOnUiThread(new Runnable() {
+                    @SuppressLint("NotifyDataSetChanged")
                     @Override
                     public void run() {
                         feedRecyclerAdapter.notifyDataSetChanged();
