@@ -291,6 +291,20 @@ public class FeedActivity extends AppCompatActivity {
         popupWindow.dismiss();
     }
 
+    // Unselect all filters
+    @SuppressWarnings("SuspiciousMethodCalls")
+    private void unselectFilter(ChipGroup allChips) {
+        List<Integer> chipsList = allChips.getCheckedChipIds();
+        for (Integer chipID : chipsList) {
+            Chip chip = allChips.findViewById(chipID);
+            chip.setChecked(false);
+            chip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
+            chip.setTextColor(DEFAULT_DARK_FONT);
+            //noinspection SuspiciousMethodCalls
+            tempCategories.remove(chip.getTag());
+        }
+    }
+
     // Setup category filtering UI
     private void setupCategoryChipGroup(View filterWindow) {
         ChipGroup filterCategories = filterWindow.findViewById(R.id.filterCategoryChipGroup);
@@ -336,6 +350,9 @@ public class FeedActivity extends AppCompatActivity {
             categoryChip.setTextSize(14);
             filterCategories.addView(categoryChip);
         }
+        Button filterUnselectButton = filterWindow.findViewById(R.id.filterUnselect);
+        filterUnselectButton.setOnClickListener(v ->
+                unselectFilter(filterWindow.findViewById(R.id.filterCategoryChipGroup)));
     }
 
     // Setup distance filtering UI
