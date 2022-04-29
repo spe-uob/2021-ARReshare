@@ -210,8 +210,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private FusedLocationProviderClient fusedLocationClient;
     // The users last known location
     private Location lastKnownLocation;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private boolean locationPermissionGranted;
 
     // Map to store the required angle for each product
     private Map<Product, Double> productAngles = new HashMap<>();
@@ -226,18 +224,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private boolean touchedDown = false;
     private boolean moved = false;
 
-    private void checkIfARAvailable() {
-        ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(getActivity());
-        if (!availability.isSupported()) {
-            Intent intent = new Intent(getActivity(), FallbackActivity.class);
-            startActivity(intent);
-        }
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        checkIfARAvailable();
 
         View view = inflater.inflate(R.layout.activity_aractivity, container, false);
         //setContentView(R.layout.activity_aractivity);
@@ -273,10 +262,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         // Start the compass
         compass = new Compass(getActivity());
 
-        // Request location permissions if needed and get latest location
-        getLocationPermission();
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
         getDeviceLocation();
+
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -320,13 +307,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                         return;
                     case INSTALLED:
                         break;
-                }
-
-                // ARCore requires camera permissions to operate. If we did not yet obtain runtime
-                // permission on Android M and above, now is a good time to ask the user for it.
-                if (!CameraPermissionHelper.hasCameraPermission(getActivity())) {
-                    CameraPermissionHelper.requestCameraPermission(getActivity());
-                    return;
                 }
 
                 // Create the session.
@@ -396,32 +376,32 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
-        super.onRequestPermissionsResult(requestCode, permissions, results);
-        if (!CameraPermissionHelper.hasCameraPermission(getActivity())) {
-            // Use toast instead of snackbar here since the activity will exit.
-            Toast.makeText(getActivity(), "Camera permission is needed to run this application", Toast.LENGTH_LONG)
-                    .show();
-            if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(getActivity())) {
-                // Permission denied with checking "Do not ask again".
-                CameraPermissionHelper.launchPermissionSettings(getActivity());
-            }
-            getActivity().finish();
-        }
-        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            // If request is cancelled, the grantResults array will be empty
-            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
-                // Location permission has been granted
-                locationPermissionGranted = true;
-                System.out.println("Location has been granted");
-            } else {
-                // TODO: Explain to user that the feature is unavailable because
-                //  the permissions have not been granted
-            }
-            return;
-        }
-    }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+//        super.onRequestPermissionsResult(requestCode, permissions, results);
+//        if (!CameraPermissionHelper.hasCameraPermission(getActivity())) {
+//            // Use toast instead of snackbar here since the activity will exit.
+//            Toast.makeText(getActivity(), "Camera permission is needed to run this application", Toast.LENGTH_LONG)
+//                    .show();
+//            if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(getActivity())) {
+//                // Permission denied with checking "Do not ask again".
+//                CameraPermissionHelper.launchPermissionSettings(getActivity());
+//            }
+//            getActivity().finish();
+//        }
+//        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+//            // If request is cancelled, the grantResults array will be empty
+//            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+//                // Location permission has been granted
+//                locationPermissionGranted = true;
+//                System.out.println("Location has been granted");
+//            } else {
+//                // TODO: Explain to user that the feature is unavailable because
+//                //  the permissions have not been granted
+//            }
+//            return;
+//        }
+//    }
 
 //    @Override
 //    public void onWindowFocusChanged(boolean hasFocus) {
@@ -1006,30 +986,14 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         }
     }
 
-    // Request location permissions from the device. We will receive a callback
-    // to onRequestPermissionsResult with the results.
-    private void getLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this.getActivity().getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            // Location permission has already been granted previously
-            locationPermissionGranted = true;
-        } else if (shouldShowRequestPermissionRationale("FINE_LOCATION")) {
-            // TODO: Explain to the user why the location permission is needed
-        } else {
-            // If the location permission has not been granted already,
-            // open a window requesting this permission
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-    }
+
 
     // Get the most recent location of the device
     private void getDeviceLocation() {
+        SwipeActivity parent = (SwipeActivity) getActivity();
         try {
-            if (locationPermissionGranted) {
-                fusedLocationClient.getLastLocation()
+            if (parent.locationPermissionGranted) {
+                parent.fusedLocationClient.getLastLocation()
                         .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
                             @Override
                             public void onSuccess(Location location) {
