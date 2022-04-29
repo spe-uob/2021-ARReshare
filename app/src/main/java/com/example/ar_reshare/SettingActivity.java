@@ -56,6 +56,58 @@ public class SettingActivity extends AppCompatActivity {
         } catch (JSONException e){
         }}
 
+    public void changeDOB(String DOB){
+        Map<String, String> changes = new HashMap<>();
+        changes.put("DOB", DOB);
+        try {
+            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if(success){
+                        System.out.println("Your date of birth changed correctly");
+                    }else{
+                        System.out.println("Error");
+                    }
+                }
+            });
+        } catch (JSONException e){
+        }}
+
+
+    public void changeEmail(String Email){
+        Map<String, String> changes = new HashMap<>();
+        changes.put("Email", Email);
+        try {
+            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if(success){
+                        System.out.println("Your Email address changed correctly");
+                    }else{
+                        System.out.println("Error");
+                    }
+                }
+            });
+        } catch (JSONException e){
+        }}
+
+    public void changeHomeAddress(String Address){
+        Map<String, String> changes = new HashMap<>();
+        changes.put("Address", Address);
+        try {
+            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if(success){
+                        System.out.println("Your home address changed correctly");
+                    }else{
+                        System.out.println("Error");
+                    }
+                }
+            });
+        } catch (JSONException e){
+        }}
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,6 +194,8 @@ public class SettingActivity extends AppCompatActivity {
                         String b = month.getText().toString().trim();
                         String c = day.getText().toString().trim();
 
+                        String d = a + b + c;
+                        changeDOB(d);
                         Toast.makeText(v.getContext(), "New Birthday:" + a +"_"+ b + "_" + c, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -234,7 +288,7 @@ public class SettingActivity extends AppCompatActivity {
                    @Override
                    public void onClick(DialogInterface dialog, int which) {
                        String a = postcode.getText().toString().trim();
-
+                       changeHomeAddress(a);
                        Toast.makeText(v.getContext(), "New Postcode:" + a, Toast.LENGTH_SHORT).show();
                    }
                });

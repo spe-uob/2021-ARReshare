@@ -49,6 +49,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
     private ProductPicsSliderAdapter adapter;
     private CountDownLatch latch;
     private int TIMEOUT_IN_SECONDS = 5;
+    private Integer contributorID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +59,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         Intent i = getIntent();
         Product product = i.getParcelableExtra("product");
         Integer productID = i.getIntExtra("productID",1);
-        Integer contributorID = i.getIntExtra("contributorID",1);
+        contributorID = i.getIntExtra("contributorID",1);
         Double lat = i.getDoubleExtra("lat",0);
         Double lng = i.getDoubleExtra("lng",0);
         postcode = i.getStringExtra("postcode");
@@ -288,6 +289,14 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
     public void displayProductContributor(){
         TextView contributorName = findViewById(R.id.contributorName);
         CircleImageView contributorIcon = findViewById(R.id.circle);
+        contributorIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProductPageActivity.this, ProfileActivity.class);
+                intent.putExtra("userID", contributorID);
+                startActivity((intent));
+            }
+        });
         contributorName.setText(userProfile.getName());
         if (userProfile.getProfilePic() == null) {
             contributorIcon.setImageResource(R.mipmap.ic_launcher_round);
