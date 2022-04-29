@@ -36,10 +36,19 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
     private boolean touchedDown = false;
     private boolean moved = false;
 
+    Fragment chatListActivity = new ChatListActivity();
+    Fragment mapsActivity = new MapsActivity();
+    Fragment profileActivity = new ProfileActivity();
+    Fragment arActivity = new ARActivity();
+    Fragment feedActivity = new FeedActivity();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_swipe);
+
+        // Check permissions
+        checkIfARAvailable();
 
         bottomNavigationView = findViewById(R.id.bottom_navigation_bar);
         //frameLayout = view.findViewById(R.id.frameLayout_wrapper);
@@ -47,8 +56,6 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
         bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
         getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, arActivity).addToBackStack(null).commit();
 
-        // Check permissions
-        checkIfARAvailable();
 
         // Request location permissions if needed and get latest location
         getLocationPermission();
@@ -68,11 +75,7 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
         // TODO: Add on request permission result check
     }
 
-    Fragment chatListActivity = new ChatListActivity();
-    Fragment mapsActivity = new MapsActivity();
-    Fragment profileActivity = new ProfileActivity();
-    Fragment arActivity = new ARActivity();
-    Fragment feedActivity = new FeedActivity();
+
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
