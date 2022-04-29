@@ -56,6 +56,7 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
     MapsActivity mapsActivity = new MapsActivity();
     ProfileActivity profileActivity = new ProfileActivity();
     ARActivity arActivity = new ARActivity();
+    FeedActivity feedActivity = new FeedActivity();
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -67,10 +68,10 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
                 //getSupportFragmentManager().beginTransaction().replace(R.id.container, mapsActivity).commit();
                 return true;
 
-//            case R.id.feed_menu_item:
-//                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, mapsActivity).addToBackStack(null).commit();
-//                //getSupportFragmentManager().beginTransaction().replace(R.id.container, secondFragment).commit();
-//                return true;
+            case R.id.feed_menu_item:
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, feedActivity).addToBackStack(null).commit();
+                //getSupportFragmentManager().beginTransaction().replace(R.id.container, secondFragment).commit();
+                return true;
 //
             case R.id.ar_menu_item:
                 getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, arActivity).addToBackStack(null).commit();
