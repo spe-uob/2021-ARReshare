@@ -1,6 +1,9 @@
 package com.example.ar_reshare;
 
+import static android.content.Context.LAYOUT_INFLATER_SERVICE;
+
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -11,6 +14,7 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -20,8 +24,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import com.example.ar_reshare.databinding.ActivityMapsBinding;
@@ -39,13 +46,15 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
+import org.xmlpull.v1.XmlPullParser;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class MapsActivity extends FragmentActivity implements
+public class MapsActivity extends Fragment implements
         OnMapReadyCallback,
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMarkerClickListener,
@@ -86,10 +95,11 @@ public class MapsActivity extends FragmentActivity implements
     private CountDownLatch readyLatch;
     private int TIMEOUT_IN_SECONDS = 5;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        //View view = inflater.inflate(R.layout.activity_maps, container, false);
         // Make the map wait on the following three conditions
         // 1. Device location is ready
         // 2. Products have been received from backend
@@ -97,32 +107,35 @@ public class MapsActivity extends FragmentActivity implements
         // Once these conditions are met the map can proceed to be populated
         readyLatch = new CountDownLatch(3);
         getLatestProducts();
-
-        binding = ActivityMapsBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        binding = ActivityMapsBinding.inflate(getActivity().getLayoutInflater(),container,false);
+        View view = binding.getRoot();
+        //getActivity().setContentView(binding.getRoot());
         // Obtain the SupportMapFragment and get notified when the map is ready to be used
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         // Set the return arrow button on click event
-        ImageButton returnArrow = findViewById(R.id.returnToMainArrow);
+        ImageButton returnArrow = view.findViewById(R.id.returnToMainArrow);
         returnArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onBackPressed();
-                overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom);
+                getActivity().onBackPressed();
+                getActivity().overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom);
             }
         });
 
-        ImageButton filterButton = findViewById(R.id.filterMapButton);
+        ImageButton filterButton = view.findViewById(R.id.filterMapButton);
         setupFilterWindow(filterButton);
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
         getLocationPermission();
 
         // Wait to populate the map until conditions are fulfilled
         waitOnConditions();
+        return view;
     }
+
+
 
     private void getLatestProducts() {
         BackendController.searchListings(0, 100, new BackendController.BackendSearchResultCallback() {
@@ -146,17 +159,17 @@ public class MapsActivity extends FragmentActivity implements
                     boolean success = readyLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
                     if (success) {
                         // Any UI changes must be run on the UI Thread
-                        runOnUiThread(new Runnable() {
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 populateMap(mMap);
                             }
                         });
                     } else {
-                        runOnUiThread(new Runnable() {
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(getApplicationContext(),
+                                Toast.makeText(getActivity().getApplicationContext(),
                                         "Failed to fetch your location or the products from the server. Please ensure you have access to an internet connection.",
                                         Toast.LENGTH_LONG).show();
                             }
@@ -174,7 +187,7 @@ public class MapsActivity extends FragmentActivity implements
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE);
                 View filterWindow = inflater.inflate(R.layout.filter_popup, null);
                 int width = LinearLayout.LayoutParams.WRAP_CONTENT;
                 int height = LinearLayout.LayoutParams.WRAP_CONTENT;
@@ -236,7 +249,7 @@ public class MapsActivity extends FragmentActivity implements
 
         List<Category> categories = Category.getCategories();
         for (Category category : categories) {
-            Chip categoryChip = new Chip(MapsActivity.this);
+            Chip categoryChip = new Chip(getActivity());
             categoryChip.setTag(category);
             categoryChip.setCheckable(true);
             if (categoriesSelected.contains(category)) {
@@ -306,11 +319,16 @@ public class MapsActivity extends FragmentActivity implements
         });
     }
 
-    // When leaving the Map Activity always animate sliding down
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        finish();
+    }
+// When leaving the Map Activity always animate sliding down
+
     public void finish() {
-        super.finish();
-        overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom);
+        super.getActivity().finish();
+        getActivity().overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom);
     }
 
     // When map is loaded, checks for location permissions and configures the initial
@@ -341,7 +359,7 @@ public class MapsActivity extends FragmentActivity implements
 
     // May not need to check for permissions if only called after checking locationPermissionGranted
     private void enableMyLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (mMap != null) {
                 mMap.setMyLocationEnabled(true);
                 mMap.setOnMyLocationButtonClickListener(this);
@@ -351,11 +369,13 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
+
     @Override
     public boolean onMyLocationButtonClick() {
         getDeviceLocation();
         return false;
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
@@ -378,7 +398,7 @@ public class MapsActivity extends FragmentActivity implements
     // Request location permissions from the device. We will receive a callback
     // to onRequestPermissionsResult with the results.
     private void getLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+        if (ContextCompat.checkSelfPermission(this.getActivity().getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             // Location permission has already been granted previously
@@ -389,7 +409,7 @@ public class MapsActivity extends FragmentActivity implements
         } else {
             // If the location permission has not been granted already,
             // open a window requesting this permission
-            ActivityCompat.requestPermissions(this,
+            ActivityCompat.requestPermissions(getActivity(),
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
@@ -400,7 +420,7 @@ public class MapsActivity extends FragmentActivity implements
         try {
             if (locationPermissionGranted) {
                 fusedLocationClient.getLastLocation()
-                        .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                        .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
                             @Override
                             public void onSuccess(Location location) {
                                 // Got last known location. In some rare situations this can be null.
@@ -430,7 +450,7 @@ public class MapsActivity extends FragmentActivity implements
     public void onInfoWindowClick(Marker marker) {
         Product product = (Product)marker.getTag();
 
-        Intent intent = new Intent(this, ProductPageActivity.class);
+        Intent intent = new Intent(getActivity(), ProductPageActivity.class);
         intent.putExtra("product", product);
         intent.putExtra("productID",product.getId());
         intent.putExtra("lat", product.getCoordinates().latitude);
@@ -461,7 +481,7 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public void onBackendProfileResult(boolean success, User userProfile) {
                 product.setContributor(userProfile);
-                runOnUiThread(() -> addMarker(product));
+                getActivity().runOnUiThread(() -> addMarker(product));
             }
         });
     }

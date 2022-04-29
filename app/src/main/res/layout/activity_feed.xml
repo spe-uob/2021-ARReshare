@@ -71,7 +71,6 @@ tools:context=".FeedActivity">
         android:layout_alignParentBottom="true"
         app:layout_constraintBottom_toBottomOf="parent"
         android:background="?android:attr/windowBackground"
-        app:labelVisibilityMode="unlabeled"
         app:menu="@menu/bottom_nav_menu">
 
     </com.google.android.material.bottomnavigation.BottomNavigationView>

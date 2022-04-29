@@ -381,6 +381,8 @@ public class FeedActivity extends AppCompatActivity implements NavigationBarView
     }
 
     ChatListActivity chatListActivity = new ChatListActivity();
+    MapsActivity mapsActivity = new MapsActivity();
+    ProfileActivity profileActivity = new ProfileActivity();
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -393,15 +395,24 @@ public class FeedActivity extends AppCompatActivity implements NavigationBarView
                 return true;
 
             case R.id.feed_menu_item:
-                intent = new Intent(FeedActivity.this, ProfileActivity.class);
-                startActivity(intent);
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, mapsActivity).commit();
                 //getSupportFragmentManager().beginTransaction().replace(R.id.container, secondFragment).commit();
                 return true;
 //
-//            case R.id.ar_menu_item:
-//                //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
-//                return true;
+            case R.id.ar_menu_item:
+                //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
+                return true;
+            case R.id.profile_menu_item:
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileActivity).commit();
+                //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
+                return true;
+            case R.id.message_menu_item:
+                //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, chatListActivity).commit();
+                return true;
         }
         return false;
     }
+
+
 }

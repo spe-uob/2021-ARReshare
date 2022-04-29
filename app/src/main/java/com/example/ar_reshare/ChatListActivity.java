@@ -62,6 +62,7 @@ public class ChatListActivity extends Fragment implements NavigationBarView.OnIt
         chatTitle = view.findViewById(R.id.chat_title);
         chatBody = view.findViewById(R.id.chat_body);
 
+        mChatList.clear();
         getConversationDescriptors();
 
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);

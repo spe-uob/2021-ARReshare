@@ -4,23 +4,24 @@
     <item
         android:id="@+id/map_menu_item"
         android:title="Map"
-        android:icon="@drawable/message_icon" />
+        android:enabled="true"
+        android:icon="@drawable/map_icon_image_unchecked" />
 
     <item
         android:id="@+id/feed_menu_item"
         android:title="Feed"
         android:enabled="true"
-        android:icon="@drawable/feed_filter_icon"/>
+        android:icon="@drawable/feed_icon_image_checked"/>
 
     <item
         android:id="@+id/ar_menu_item"
         android:title="AR"
-        android:icon="@drawable/message_icon"/>
+        android:icon="@drawable/ar_icon_image_unchecked"/>
 
     <item
         android:id="@+id/profile_menu_item"
         android:title="profile"
-        android:icon="@drawable/message_icon"/>
+        android:icon="@drawable/profile_icon_image_unchecked"/>
 
     <item
         android:id="@+id/message_menu_item"
