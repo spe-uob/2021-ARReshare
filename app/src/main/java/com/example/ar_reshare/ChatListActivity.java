@@ -1,7 +1,11 @@
 package com.example.ar_reshare;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,9 +19,16 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 import org.json.JSONException;
 
@@ -27,44 +38,43 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-public class ChatListActivity extends AppCompatActivity {
+public class ChatListActivity extends Fragment implements NavigationBarView.OnItemSelectedListener {
 
     MultiChatsAdapter chatListAdapter;
     RecyclerView recyclerView;
     TextView chatTitle;
     TextView chatBody;
     List<Chat> mChatList = new ArrayList<>();
+    BottomNavigationView bottomNavigationView;
+    FrameLayout frameLayout;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat_list);
-        recyclerView = findViewById(R.id.recyclerView_chats_list);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.activity_chat_list, container, false);
+        recyclerView = view.findViewById(R.id.recyclerView_chats_list);
         recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 recyclerView.scrollToPosition(mChatList.size() - 1);
             }
         });
+        chatTitle = view.findViewById(R.id.chat_title);
+        chatBody = view.findViewById(R.id.chat_body);
 
-        chatTitle = findViewById(R.id.chat_title);
-        chatBody = findViewById(R.id.chat_body);
-
+        mChatList.clear();
         getConversationDescriptors();
 
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
 
-        chatListAdapter = new MultiChatsAdapter(this, mChatList);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        chatListAdapter = new MultiChatsAdapter(getActivity(), mChatList);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(chatListAdapter);
-
-//        try {
-//            createConversation(61);
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
+        return view;
     }
+
+
 
 
     ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
@@ -83,7 +93,7 @@ public class ChatListActivity extends AppCompatActivity {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Toast.makeText(ChatListActivity.this, "Deleted ", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "Deleted ", Toast.LENGTH_SHORT).show();
                             //Remove swiped item from list and notify the RecyclerView
                             int position = viewHolder.getAdapterPosition();
                             try {
@@ -111,7 +121,7 @@ public class ChatListActivity extends AppCompatActivity {
             // view the background view
             super.onChildDraw(c, recyclerView, viewHolder, dX,
                     dY, actionState, isCurrentlyActive);
-            Drawable icon = getDrawable(R.drawable.delete_garbage_rubbish_trash_icon);
+            Drawable icon = getResources().getDrawable(R.drawable.delete_garbage_rubbish_trash_icon, null);
             ColorDrawable background = new ColorDrawable(Color.RED);
             int backgroundCornerOffset = 20;
             float translationX = dX;
@@ -259,6 +269,28 @@ public class ChatListActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        Intent intent;
+        switch (item.getItemId()) {
+            case R.id.map_menu_item:
 
+                System.out.println("in map");
+                intent = new Intent(getActivity(), MapsActivity.class);
+                startActivity(intent);
+                //getSupportFragmentManager().beginTransaction().replace(R.id.container, mapsActivity).commit();
+                return true;
 
+            case R.id.feed_menu_item:
+                intent = new Intent(getActivity(), FeedActivity.class);
+                startActivity(intent);
+                //getSupportFragmentManager().beginTransaction().replace(R.id.container, secondFragment).commit();
+                return true;
+
+            case R.id.ar_menu_item:
+                //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
+                return true;
+        }
+        return false;
+    }
 }
