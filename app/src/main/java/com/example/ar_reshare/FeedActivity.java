@@ -44,7 +44,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class FeedActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
+public class FeedActivity extends AppCompatActivity  {
 
     // Lists to initialise products
     List<Product> allProducts;
@@ -53,7 +53,6 @@ public class FeedActivity extends AppCompatActivity implements NavigationBarView
     // Global Recycler View
     RecyclerView recyclerView;
 
-    BottomNavigationView bottomNavigationView;
 
     // CountDownLatch to ensure thread only works after results have been received from backend
     private CountDownLatch readyLatch;
@@ -90,9 +89,6 @@ public class FeedActivity extends AppCompatActivity implements NavigationBarView
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
 
-        bottomNavigationView = findViewById(R.id.bottom_navigation_bar);
-        //frameLayout = view.findViewById(R.id.frameLayout_wrapper);
-        bottomNavigationView.setOnItemSelectedListener(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -380,39 +376,7 @@ public class FeedActivity extends AppCompatActivity implements NavigationBarView
         return ratio < MIN_CONTRAST_RATIO;
     }
 
-    ChatListActivity chatListActivity = new ChatListActivity();
-    MapsActivity mapsActivity = new MapsActivity();
-    ProfileActivity profileActivity = new ProfileActivity();
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Intent intent;
-        switch (item.getItemId()) {
-            case R.id.map_menu_item:
-
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, chatListActivity).addToBackStack(null).commit();
-                //getSupportFragmentManager().beginTransaction().replace(R.id.container, mapsActivity).commit();
-                return true;
-
-            case R.id.feed_menu_item:
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, mapsActivity).addToBackStack(null).commit();
-                //getSupportFragmentManager().beginTransaction().replace(R.id.container, secondFragment).commit();
-                return true;
-//
-            case R.id.ar_menu_item:
-                //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
-                return true;
-            case R.id.profile_menu_item:
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileActivity).addToBackStack(null).commit();
-                //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
-                return true;
-            case R.id.message_menu_item:
-                //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, chatListActivity).addToBackStack(null).commit();
-                return true;
-        }
-        return false;
-    }
 
 
 }

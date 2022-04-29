@@ -9,7 +9,8 @@
         android:id="@+id/surfaceview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_gravity="top" />
+        android:layout_gravity="top"
+        android:layout_marginBottom="50dp"/>
 
     <LinearLayout
         android:id="@+id/productBoxAR"
@@ -84,7 +85,7 @@
         android:layout_height="124dp"
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="70dp"
         android:background="#00FFFFFF"
         android:scaleType="fitCenter"
         android:src="@drawable/compass_graphic"/>
@@ -100,6 +101,24 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:visibility="invisible" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation_bar"
+        android:id="@+id/frameLayout_wrapper">
+    </FrameLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation_bar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:background="?android:attr/windowBackground"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:menu="@menu/bottom_nav_menu">
+
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
 
 
 </RelativeLayout>

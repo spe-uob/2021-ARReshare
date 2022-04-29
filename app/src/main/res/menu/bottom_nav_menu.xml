@@ -20,7 +20,7 @@
 
     <item
         android:id="@+id/profile_menu_item"
-        android:title="profile"
+        android:title="Profile"
         android:icon="@drawable/profile_icon_image_unchecked"/>
 
     <item

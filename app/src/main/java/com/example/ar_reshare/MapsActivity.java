@@ -4,6 +4,7 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -375,24 +376,24 @@ public class MapsActivity extends Fragment implements
         return false;
     }
 
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
-                // If request is cancelled, the grantResults array will be empty
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Location permission has been granted
-                    locationPermissionGranted = true;
-                } else {
-                    // TODO: Explain to user that the feature is unavailable because
-                    //  the permissions have not been granted
-                }
-                return;
-        }
-    }
+//
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//                                           int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        switch (requestCode) {
+//            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
+//                // If request is cancelled, the grantResults array will be empty
+//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    // Location permission has been granted
+//                    locationPermissionGranted = true;
+//                } else {
+//                    // TODO: Explain to user that the feature is unavailable because
+//                    //  the permissions have not been granted
+//                }
+//                return;
+//        }
+//    }
 
     // Request location permissions from the device. We will receive a callback
     // to onRequestPermissionsResult with the results.
