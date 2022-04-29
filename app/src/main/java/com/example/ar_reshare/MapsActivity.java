@@ -94,7 +94,7 @@ public class MapsActivity extends Fragment implements
     // The list of products
     private List<Product> products;
     private CountDownLatch readyLatch;
-    private int TIMEOUT_IN_SECONDS = 5;
+    private int TIMEOUT_IN_SECONDS = 10;
 
 
 
