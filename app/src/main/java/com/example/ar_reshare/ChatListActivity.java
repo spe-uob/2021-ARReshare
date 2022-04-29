@@ -76,19 +76,6 @@ public class ChatListActivity extends Fragment implements NavigationBarView.OnIt
 
 
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-
-//
-//        try {
-//            createConversation(61);
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-    }
-
 
     ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
         @Override
