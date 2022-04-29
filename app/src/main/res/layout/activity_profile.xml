@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -12,7 +13,10 @@
         android:layout_height="60dp"
         android:background="@color/black"
         android:orientation="horizontal">
-
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_weight="0.2">
         <ImageButton
             android:id="@+id/back"
             android:layout_width="wrap_content"
@@ -21,14 +25,20 @@
             android:background="@color/black"
             android:src="@drawable/gobackarrow">
         </ImageButton>
-
-        <TextView
+</LinearLayout>
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Profile"
-            android:textAlignment="textEnd"
-            android:textColor="@color/white"
-            android:textSize="40sp"></TextView>
+            android:layout_weight="1">
+        <ImageButton
+            android:id="@+id/btS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/filter_icon"
+            android:scaleType="fitEnd"
+            android:layout_weight="1">
+        </ImageButton>
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -44,20 +54,18 @@
 
                 <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp">
 
-                    <ImageView
+                    <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/avatar"
-                        android:layout_width="120dp"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center_vertical"
-                        android:background="@drawable/image_circle"
-                        android:scaleType="centerCrop">
-                    </ImageView>
+                        android:layout_width="60dp"
+                        android:layout_height="80dp"
+                        android:layout_marginStart="10dp"
+                        android:contentDescription="@string/profile_icon"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -71,16 +79,9 @@
                         android:layout_weight="1"
                         android:textColor="@color/black"
                         android:gravity="center_horizontal"
-                        android:layout_gravity="center_vertical">
-                    </TextView>
-
-                    <TextView
-                        android:id="@+id/description"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:textColor="@color/black"
-                        android:gravity="center_horizontal"
+                        android:layout_marginTop="30sp"
+                        android:textSize="30sp"
+                        android:hint="12312"
                         android:layout_gravity="center_vertical">
                     </TextView>
                 </LinearLayout>
@@ -88,16 +89,26 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical">
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Shared"
+                    android:background="@drawable/underline_blue"
                     android:textColor="@color/black"
-                    android:textSize="30sp">
-                </TextView>
+                    android:textSize="30sp"></TextView>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -111,7 +122,7 @@
                         android:layout_width="40dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
-                        android:background="@color/white"
+                        android:background="@drawable/underline_shineyellow"
                         android:scaleType="centerCrop">
                     </ImageButton>
 
@@ -122,7 +133,7 @@
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="5dp"
                         android:layout_weight="1"
-                        android:background="@color/white"
+                        android:background="@drawable/underline_shineyellow"
                         android:scaleType="centerCrop">
                     </ImageButton>
 
@@ -132,7 +143,7 @@
                         android:layout_height="120dp"
                         android:layout_weight="1"
                         android:scaleType="centerCrop"
-                        android:background="@color/white">
+                        android:background="@drawable/underline_shineyellow">
                     </ImageButton>
                 </LinearLayout>
 
@@ -146,6 +157,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Saved"
+                        android:background="@drawable/underline_blue"
                         android:textColor="@color/black"
                         android:textSize="30sp">
                     </TextView>
@@ -164,7 +176,7 @@
                         android:layout_width="40dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
-                        android:background="@color/white"
+                        android:background="@drawable/underline_green"
                         android:scaleType="centerCrop">
                     </ImageButton>
 
@@ -175,7 +187,7 @@
                         android:layout_weight="1"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="5dp"
-                        android:background="@color/white"
+                        android:background="@drawable/underline_green"
                         android:scaleType="centerCrop">
                     </ImageButton>
 
@@ -184,38 +196,14 @@
                         android:layout_width="40dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:background="@color/white"
+                        android:background="@drawable/underline_green"
                         android:scaleType="centerCrop">
                     </ImageButton>
                 </LinearLayout>
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:background="@color/black">
-                <Button
-                    android:id="@+id/btS"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Settings"
-                    android:textColor="@color/white"
-                    android:background="@color/black"
-                    android:layout_weight="1">
-                </Button>
 
-                <Button
-                    android:id="@+id/btM"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1.5"
-                    android:background="@color/black"
-                    android:text="Messages"
-                    android:textColor="@color/white">
-                </Button>
-
-            </LinearLayout>
         </LinearLayout>
 
 </LinearLayout>

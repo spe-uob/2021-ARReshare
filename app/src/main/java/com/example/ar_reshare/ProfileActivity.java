@@ -35,14 +35,12 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
 
         Intent i = getIntent();
-        userID = i.getIntExtra("userID", BackendController.loggedInUserID);
+        userID = i.getIntExtra("userID", 0);
 
         System.out.println("The current userID is :" + userID);
         if (userID == BackendController.loggedInUserID) {
-            System.out.println("111111111111");
             getCurrentUserProfile(userID);
         } else {
-            System.out.println("222222222222222");
             getOtherUserProfile(userID);
         }
 
@@ -72,7 +70,7 @@ public class ProfileActivity extends AppCompatActivity {
                             ImageView profileIcon = findViewById(R.id.avatar);
                             profileIcon.setImageBitmap(userProfile.getProfilePic());
 
-                            Button settingsButton = (Button) findViewById(R.id.btS);
+                            ImageButton settingsButton = (ImageButton) findViewById(R.id.btS);
                             settingsButton.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -81,14 +79,6 @@ public class ProfileActivity extends AppCompatActivity {
                                 }
                             });
 
-                            Button messageButton1 = (Button) findViewById(R.id.btM);
-                            messageButton1.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent intent = new Intent(ProfileActivity.this, ChatListActivity.class);
-                                    startActivity(intent);
-                                }
-                            });
                             searchAccountListing();
                             searchSavedListings();
                         }
@@ -114,19 +104,12 @@ public class ProfileActivity extends AppCompatActivity {
                             TextView name = findViewById(R.id.username);
                             name.setText(userProfile.getName());
 
-                            TextView bioText = findViewById(R.id.description);
-                            bioText.setText(userProfile.getBio());
-
                             ImageView profileIcon = findViewById(R.id.avatar);
                             profileIcon.setImageBitmap(userProfile.getProfilePic());
 
-                            Button settingsButton = (Button) findViewById(R.id.btS);
+                            ImageButton settingsButton = (ImageButton) findViewById(R.id.btS);
 
                             settingsButton.setVisibility(View.GONE);
-
-                            Button messageButton1 = (Button) findViewById(R.id.btM);
-
-                            messageButton1.setVisibility(View.GONE);
 
                             //searchAccountListing();
                             searchOtherProfileListings(userProfile);
