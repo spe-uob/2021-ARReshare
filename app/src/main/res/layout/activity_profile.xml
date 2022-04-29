@@ -81,7 +81,6 @@
                         android:gravity="center_horizontal"
                         android:layout_marginTop="30sp"
                         android:textSize="30sp"
-                        android:hint="12312"
                         android:layout_gravity="center_vertical">
                     </TextView>
                 </LinearLayout>
@@ -106,7 +105,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Shared"
-                    android:background="@drawable/underline_blue"
+                    android:background="@drawable/underlineboxtop"
                     android:textColor="@color/black"
                     android:textSize="30sp"></TextView>
                 <LinearLayout
@@ -157,7 +156,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Saved"
-                        android:background="@drawable/underline_blue"
+                        android:background="@drawable/underlineboxtop"
                         android:textColor="@color/black"
                         android:textSize="30sp">
                     </TextView>
@@ -176,7 +175,7 @@
                         android:layout_width="40dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
-                        android:background="@drawable/underline_green"
+                        android:background="@drawable/underline_shineyellow"
                         android:scaleType="centerCrop">
                     </ImageButton>
 
@@ -187,7 +186,7 @@
                         android:layout_weight="1"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="5dp"
-                        android:background="@drawable/underline_green"
+                        android:background="@drawable/underline_shineyellow"
                         android:scaleType="centerCrop">
                     </ImageButton>
 
@@ -196,7 +195,7 @@
                         android:layout_width="40dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:background="@drawable/underline_green"
+                        android:background="@drawable/underline_shineyellow"
                         android:scaleType="centerCrop">
                     </ImageButton>
                 </LinearLayout>

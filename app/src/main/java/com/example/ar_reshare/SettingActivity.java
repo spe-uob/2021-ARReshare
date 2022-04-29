@@ -22,9 +22,10 @@ import java.util.Map;
 
 public class SettingActivity extends AppCompatActivity {
 
-    public void changePassord(String password){
+    public void changePassword(String oldPassword, String newpassword){
         Map<String, String> changes = new HashMap<>();
-        changes.put("password", password);
+        changes.put("password", oldPassword);
+        changes.put("newPassword", newpassword);
         try {
             BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
                 @Override
@@ -39,9 +40,9 @@ public class SettingActivity extends AppCompatActivity {
         } catch (JSONException e){
     }}
 
-    public void changeNickname(String nickname){
+    public void changeNickname(String name){
         Map<String, String> changes = new HashMap<>();
-        changes.put("nickname", nickname);
+        changes.put("name", name);
         try {
             BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
                 @Override
@@ -56,9 +57,9 @@ public class SettingActivity extends AppCompatActivity {
         } catch (JSONException e){
         }}
 
-    public void changeDOB(String DOB){
+    public void changeDOB(String dob){
         Map<String, String> changes = new HashMap<>();
-        changes.put("DOB", DOB);
+        changes.put("dob", dob);
         try {
             BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
                 @Override
@@ -194,7 +195,7 @@ public class SettingActivity extends AppCompatActivity {
                         String b = month.getText().toString().trim();
                         String c = day.getText().toString().trim();
 
-                        String d = a + b + c;
+                        String d = a + "-"+  b + "-" + c;
                         changeDOB(d);
                         Toast.makeText(v.getContext(), "New Birthday:" + a +"_"+ b + "_" + c, Toast.LENGTH_SHORT).show();
                     }
@@ -220,13 +221,16 @@ public class SettingActivity extends AppCompatActivity {
                 View view = LayoutInflater.from(v.getContext()).inflate(R.layout.pwd_dialog, null);
                 dialog4.setView(view);
 
-                final EditText pwd = (EditText) view.findViewById(R.id.pwd);
+                final EditText oldpwd = (EditText) view.findViewById(R.id.oldpwd);
+                final EditText newpwd = (EditText) view.findViewById(R.id.newpwd);
 
                 dialog4.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String a = pwd.getText().toString().trim();
-                        changePassord(a);
+                        String a = oldpwd.getText().toString().trim();
+                        String b = newpwd.getText().toString().trim();
+
+                        changePassword(a, b);
                         Toast.makeText(v.getContext(), "Your password has been changed", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -257,7 +261,7 @@ public class SettingActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String a = email.getText().toString().trim();
-
+                        changeDOB(a);
                         Toast.makeText(v.getContext(), "New Email Address:" + a, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -311,7 +315,9 @@ public class SettingActivity extends AppCompatActivity {
                 dialog7.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        Intent intent = new Intent(SettingActivity.this, LoginSignupActivity.class);
+                        AuthenticationService.removeAccounts(getApplicationContext());
+                        startActivity((intent));
                     }
                 });
                 dialog7.setNegativeButton("Cancel", null);
