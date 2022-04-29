@@ -1,10 +1,15 @@
 package com.example.ar_reshare;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -13,16 +18,15 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends Fragment {
     public int profilePicId;
     private Product currentProduct;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
-
-        Intent i = getIntent();
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.activity_profile, container, false);
+        Intent i = getActivity().getIntent();
         User contributor = i.getParcelableExtra("contributor");
         String bio;
         if (contributor == null) {
@@ -38,16 +42,16 @@ public class ProfileActivity extends AppCompatActivity {
 
         List<Product> products = ExampleData.getProducts();
 
-        TextView name = findViewById(R.id.username);
+        TextView name = view.findViewById(R.id.username);
         name.setText(contributor.getName());
 
-        TextView bioText = findViewById(R.id.description);
+        TextView bioText = view.findViewById(R.id.description);
         bioText.setText(contributor.getBio());
 
-        ImageView profileIcon = findViewById(R.id.avatar);
+        ImageView profileIcon = view.findViewById(R.id.avatar);
         profileIcon.setImageResource(contributor.getProfileIcon());
 
-        ImageButton productImage = findViewById(R.id.shared1);
+        ImageButton productImage = view.findViewById(R.id.shared1);
         for (Product product : products) {
             if(product.getContributor().getName().equals(contributor.getName())){
                 currentProduct = product;
@@ -55,20 +59,20 @@ public class ProfileActivity extends AppCompatActivity {
         }
         //productImage.setImageResource(currentProduct.getImages().get(0));
 
-        Button settingButton = (Button) findViewById(R.id.btS);
+        Button settingButton = (Button) view.findViewById(R.id.btS);
         settingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ProfileActivity.this, SettingActivity.class);
+                Intent intent = new Intent(getActivity(), SettingActivity.class);
                 startActivity(intent);
             }
         });
 
-        Button messageButton = (Button) findViewById(R.id.btM);
+        Button messageButton = (Button) view.findViewById(R.id.btM);
         messageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), ChatListActivity.class);
+                Intent intent = new Intent(getActivity(), ChatListActivity.class);
                 intent.putExtra("product", currentProduct);
                 intent.putExtra("contributor", currentProduct.getContributor());
                 intent.putExtra("profilePicId", currentProduct.getContributor().getProfileIcon());
@@ -77,11 +81,11 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        Button profileaddButton = (Button) findViewById(R.id.profileadd);
+        Button profileaddButton = (Button) view.findViewById(R.id.profileadd);
         profileaddButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ProfileActivity.this, AddProduct.class);
+                Intent intent = new Intent(getActivity(), AddProduct.class);
                 startActivity(intent);
             }
         });
@@ -94,19 +98,19 @@ public class ProfileActivity extends AppCompatActivity {
             profileaddButton.setVisibility(View.GONE);
         }
 
-        ImageButton backButton = (ImageButton) findViewById(R.id.back);
+        ImageButton backButton = (ImageButton) view.findViewById(R.id.back);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                getActivity().onBackPressed();
+                getActivity().overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             }
         });
 
         productImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ProfileActivity.this, ProductPageActivity.class);
+                Intent intent = new Intent(getActivity(), ProductPageActivity.class);
                 intent.putExtra("product", currentProduct);
                 intent.putExtra("contributor", currentProduct.getContributor());
                 intent.putExtra("profilePicId", currentProduct.getContributor().getProfileIcon());
@@ -114,11 +118,20 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        return view;
     }
 
     @Override
-    public void finish() {
-        super.finish();
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //setContentView(R.layout.activity_profile);
+
+
     }
+
+//    @Override
+//    public void finish() {
+//        super.finish();
+//        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+//    }
 }

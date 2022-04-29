@@ -1,10 +1,14 @@
 package com.example.ar_reshare;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -16,8 +20,10 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -39,6 +45,7 @@ import com.example.ar_reshare.samplerender.arcore.SpecularCubemapFilter;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.navigation.NavigationBarView;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
@@ -61,6 +68,7 @@ import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,7 +88,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class ARActivity extends AppCompatActivity implements SampleRender.Renderer {
+public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     private static final String SEARCHING_PLANE_MESSAGE = "Searching for surfaces...";
     private static final String USER_MOVED_MESSAGE = "You have left your origin. Please regenerate.";
@@ -113,7 +121,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private Session session;
     private final SnackbarHelper messageSnackbarHelper = new SnackbarHelper();
     private DisplayRotationHelper displayRotationHelper;
-    private final TrackingStateHelper trackingStateHelper = new TrackingStateHelper(this);
+    private final TrackingStateHelper trackingStateHelper = new TrackingStateHelper(getActivity());
     private TapHelper tapHelper;
     private SampleRender render;
 
@@ -214,8 +222,6 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private FusedLocationProviderClient fusedLocationClient;
     // The users last known location
     private Location lastKnownLocation;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private boolean locationPermissionGranted;
 
     // Map to store the required angle for each product
     private Map<Product, Double> productAngles = new HashMap<>();
@@ -223,39 +229,23 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     // The acceptable limit of angle offset to product
     private static final double ANGLE_LIMIT = 20 * Math.PI/180; // degrees converted to radians
 
-    // Swiping gestures variables and constants
-    private float x1, x2, y1, y2;
-    private final int TOUCH_OFFSET = 100;
-    private final int TAP_OFFSET = 10;
-    private boolean touchedDown = false;
-    private boolean moved = false;
-
-    private void checkIfARAvailable() {
-        ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(this);
-        if (!availability.isSupported()) {
-            Intent intent = new Intent(ARActivity.this, FallbackActivity.class);
-            startActivity(intent);
-        }
-    }
-
-
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        checkIfARAvailable();
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        setContentView(R.layout.activity_aractivity);
+        View view = inflater.inflate(R.layout.activity_aractivity, container, false);
+        //setContentView(R.layout.activity_aractivity);
 
-        surfaceView = findViewById(R.id.surfaceview);
-        displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
+        surfaceView = view.findViewById(R.id.surfaceview);
+        displayRotationHelper = new DisplayRotationHelper(/*context=*/ getActivity());
 
         // Set up renderer.
-        render = new SampleRender(surfaceView, this, getAssets());
+        render = new SampleRender(surfaceView, this, getActivity().getAssets());
 
         installRequested = false;
 
-        depthSettings.onCreate(this);
-        instantPlacementSettings.onCreate(this);
+        depthSettings.onCreate(getActivity());
+        instantPlacementSettings.onCreate(getActivity());
 
         // Make the AR wait on the following two conditions
         // 1. Device location is ready
@@ -266,7 +256,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         getLatestProducts();
 
         // Define the onclick event for compass (regenerate) button
-        ImageButton regenerate_button = findViewById(R.id.regenerate_button);
+        ImageButton regenerate_button = view.findViewById(R.id.regenerate_button);
         regenerate_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -275,16 +265,29 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         });
 
         // Start the compass
-        compass = new Compass(this);
+        compass = new Compass(getActivity());
 
-        // Request location permissions if needed and get latest location
-        getLocationPermission();
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getDeviceLocation();
+
+        System.out.println("   FINISHED ONCREATE");
+        return view;
     }
 
     @Override
-    protected void onDestroy() {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        System.out.println("  VIEW CREATED HAAHHAHA");
+        //showInstructions();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
+
+    @Override
+    public void onDestroy() {
         if (session != null) {
             // Explicitly close ARCore Session to release native resources.
             // Review the API reference for important considerations before calling close() in apps with
@@ -298,14 +301,14 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
 
         if (session == null) {
             Exception exception = null;
             String message = null;
             try {
-                switch (ArCoreApk.getInstance().requestInstall(this, !installRequested)) {
+                switch (ArCoreApk.getInstance().requestInstall(getActivity(), !installRequested)) {
                     case INSTALL_REQUESTED:
                         installRequested = true;
                         return;
@@ -313,15 +316,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                         break;
                 }
 
-                // ARCore requires camera permissions to operate. If we did not yet obtain runtime
-                // permission on Android M and above, now is a good time to ask the user for it.
-                if (!CameraPermissionHelper.hasCameraPermission(this)) {
-                    CameraPermissionHelper.requestCameraPermission(this);
-                    return;
-                }
-
                 // Create the session.
-                session = new Session(/* context= */ this);
+                session = new Session(/* context= */ getActivity());
             } catch (UnavailableArcoreNotInstalledException
                     | UnavailableUserDeclinedInstallationException e) {
                 message = "Please install ARCore";
@@ -368,7 +364,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
 
         //showInstructions();
@@ -387,45 +383,35 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
-        super.onRequestPermissionsResult(requestCode, permissions, results);
-        if (!CameraPermissionHelper.hasCameraPermission(this)) {
-            // Use toast instead of snackbar here since the activity will exit.
-            Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
-                    .show();
-            if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
-                // Permission denied with checking "Do not ask again".
-                CameraPermissionHelper.launchPermissionSettings(this);
-            }
-            finish();
-        }
-        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            // If request is cancelled, the grantResults array will be empty
-            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
-                // Location permission has been granted
-                locationPermissionGranted = true;
-                System.out.println("Location has been granted");
-            } else {
-                // TODO: Explain to user that the feature is unavailable because
-                //  the permissions have not been granted
-            }
-            return;
-        }
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-    }
-
-    @Override
-    public void onAttachedToWindow() {
-        showInstructions();
-    }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+//        super.onRequestPermissionsResult(requestCode, permissions, results);
+//        if (!CameraPermissionHelper.hasCameraPermission(getActivity())) {
+//            // Use toast instead of snackbar here since the activity will exit.
+//            Toast.makeText(getActivity(), "Camera permission is needed to run this application", Toast.LENGTH_LONG)
+//                    .show();
+//            if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(getActivity())) {
+//                // Permission denied with checking "Do not ask again".
+//                CameraPermissionHelper.launchPermissionSettings(getActivity());
+//            }
+//            getActivity().finish();
+//        }
+//        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+//            // If request is cancelled, the grantResults array will be empty
+//            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+//                // Location permission has been granted
+//                locationPermissionGranted = true;
+//                System.out.println("Location has been granted");
+//            } else {
+//                // TODO: Explain to user that the feature is unavailable because
+//                //  the permissions have not been granted
+//            }
+//            return;
+//        }
+//    }
 
     private void showInstructions() {
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View instructionsWindow = inflater.inflate(R.layout.instructions_popup, null);
         int width = LinearLayout.LayoutParams.WRAP_CONTENT;
         int height = LinearLayout.LayoutParams.WRAP_CONTENT;
@@ -480,10 +466,10 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                         populateProducts();
                         return;
                     } else {
-                        runOnUiThread(new Runnable() {
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(getApplicationContext(),
+                                Toast.makeText(getActivity().getApplicationContext(),
                                         "Failed to fetch your location or the products from the server. Please ensure you have access to an internet connection.",
                                         Toast.LENGTH_LONG).show();
                             }
@@ -522,7 +508,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
             ByteBuffer buffer =
                     ByteBuffer.allocateDirect(dfgResolution * dfgResolution * dfgChannels * halfFloatSize);
-            try (InputStream is = getAssets().open("models/dfg.raw")) {
+            try (InputStream is = getActivity().getAssets().open("models/dfg.raw")) {
                 is.read(buffer.array());
             }
             // SampleRender abstraction leaks here.
@@ -607,7 +593,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             virtualObjectShader = hatShader; // default shader
         } catch (IOException e) {
             //Log.e(TAG, "Failed to read a required asset file", e);
-            //messageSnackbarHelper.showError(this, "Failed to read a required asset file: " + e);
+            messageSnackbarHelper.showError(getActivity(), "Failed to read a required asset file: " + e);
         }
     }
 
@@ -686,7 +672,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             frame = session.update();
         } catch (CameraNotAvailableException e) {
             //Log.e(TAG, "Camera not available during onDrawFrame", e);
-            //messageSnackbarHelper.showError(this, "Camera not available. Try restarting the app.");
+            //messageSnackbarHelper.showError(getActivity(), "Camera not available. Try restarting the app.");
             return;
         }
 
@@ -699,7 +685,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             backgroundRenderer.setUseOcclusion(render, depthSettings.useDepthForOcclusion());
         } catch (IOException e) {
             //Log.e(TAG, "Failed to read a required asset file", e);
-            //messageSnackbarHelper.showError(this, "Failed to read a required asset file: " + e);
+            //messageSnackbarHelper.showError(getActivity(), "Failed to read a required asset file: " + e);
             return;
         }
         // BackgroundRenderer.updateDisplayGeometry must be called every frame to update the coordinates
@@ -760,23 +746,23 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
 
         // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
-        trackingStateHelper.updateKeepScreenOnFlag(camera.getTrackingState());
+        //trackingStateHelper.updateKeepScreenOnFlag(camera.getTrackingState());
 
         // Show a message based on whether tracking has failed, if planes are detected, and if the user
         // has placed any objects.
         String message = null;
         if (camera.getTrackingState() == TrackingState.PAUSED) {
             if (camera.getTrackingFailureReason() == TrackingFailureReason.NONE) {
-                message = SEARCHING_PLANE_MESSAGE;
+                //message = SEARCHING_PLANE_MESSAGE;
             } else {
-                message = TrackingStateHelper.getTrackingFailureReasonString(camera);
+                //message = TrackingStateHelper.getTrackingFailureReasonString(camera);
             }
         } else if (hasTrackingPlane()) {
         } else {
-            message = SEARCHING_PLANE_MESSAGE;
+            //message = SEARCHING_PLANE_MESSAGE;
         }
         if (message == null) {
-            messageSnackbarHelper.hide(this);
+            messageSnackbarHelper.hide(getActivity());
         } else {
             //messageSnackbarHelper.showMessage(this, message);
         }
@@ -1000,31 +986,15 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
         }
     }
 
-    // Request location permissions from the device. We will receive a callback
-    // to onRequestPermissionsResult with the results.
-    private void getLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            // Location permission has already been granted previously
-            locationPermissionGranted = true;
-        } else if (shouldShowRequestPermissionRationale("FINE_LOCATION")) {
-            // TODO: Explain to the user why the location permission is needed
-        } else {
-            // If the location permission has not been granted already,
-            // open a window requesting this permission
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-    }
+
 
     // Get the most recent location of the device
     private void getDeviceLocation() {
+        SwipeActivity parent = (SwipeActivity) getActivity();
         try {
-            if (locationPermissionGranted) {
-                fusedLocationClient.getLastLocation()
-                        .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            if (parent.locationPermissionGranted) {
+                parent.fusedLocationClient.getLastLocation()
+                        .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
                             @Override
                             public void onSuccess(Location location) {
                                 // Got last known location. In some rare situations this can be null.
@@ -1038,6 +1008,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
             }
         } catch (SecurityException e)  {
             // TODO: Implement appropriate error catching
+            System.out.println("   FAIL LOCATION EXCEPTION");
+            System.out.println(e);
         }
     }
 
@@ -1070,11 +1042,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     }
 
     private void resetScrollView(CountDownLatch latch) {
-        runOnUiThread(() -> {
+        getActivity().runOnUiThread(() -> {
             currentlyPointedProducts.clear();
-            LinearLayout scrollView = findViewById(R.id.ARScrollLayout);
+            LinearLayout scrollView = getActivity().findViewById(R.id.ARScrollLayout);
             scrollView.removeAllViewsInLayout();
-            TextView textView = findViewById(R.id.productsFoundText);
+            TextView textView = getActivity().findViewById(R.id.productsFoundText);
             textView.setText("No products found");
             if (latch != null) latch.countDown();
         });
@@ -1141,7 +1113,7 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
     // TODO: Fix duplicating product boxes when going in opposite direction
     private void prepareProductBoxes(List<Product> products) {
-        LinearLayout scrollView = findViewById(R.id.ARScrollLayout);
+        LinearLayout scrollView = getActivity().findViewById(R.id.ARScrollLayout);
         final List<Product> allProducts = products;
 
         // If all products are already displayed skip
@@ -1182,8 +1154,8 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
                     this.currentlyPointedProducts.add(product);
                 }
 
-                runOnUiThread(() -> {
-                    TextView textView = findViewById(R.id.productsFoundText);
+                getActivity().runOnUiThread(() -> {
+                    TextView textView = getActivity().findViewById(R.id.productsFoundText);
                     textView.setText(this.currentlyPointedProducts.size() + " product(s) found");
                 });
             } catch (InterruptedException e) {}
@@ -1194,12 +1166,12 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
     private void renderProductBox(Product product, User user, LinearLayout scrollView) {
         // runOnUiThread must be called because Android requires changes to UI to be done only by
         // the original thread that created the view hierarchy
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 // Make Product Box Visible
                 System.out.println(" Trying to inflate");
-                LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+                LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
                 View productBoxParent = inflater.inflate(R.layout.ar_product_box, scrollView, false);
 
                 View productBox = productBoxParent.findViewById(R.id.productBoxAR);
@@ -1248,10 +1220,10 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
     // Hide the product box if not pointing at any product
     private void hideProductBox() {
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                View productBox = findViewById(R.id.productBoxAR);
+                View productBox = getActivity().findViewById(R.id.productBoxAR);
                 productBox.setVisibility(View.INVISIBLE);
             }
         });
@@ -1301,86 +1273,11 @@ public class ARActivity extends AppCompatActivity implements SampleRender.Render
 
         float finalAngleDeg = angleDeg;
 
-        runOnUiThread(() -> {
-            View compassButton = findViewById(R.id.regenerate_button);
+        getActivity().runOnUiThread(() -> {
+            View compassButton = getActivity().findViewById(R.id.regenerate_button);
             ObjectAnimator.ofFloat(compassButton, "rotation", (float) lastCompassButtonAngle, finalAngleDeg).start();
             lastCompassButtonAngle = finalAngleDeg;
         });
-    }
-
-    // TODO: Consider creating an abstract class SwipingActivity
-    // Logic for handling swiping gestures between activities
-    @Override
-    public boolean onTouchEvent(MotionEvent touchEvent){
-        TextView swipingClue = findViewById(R.id.swipingClue);
-        switch(touchEvent.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                touchedDown = true;
-                x1 = touchEvent.getX();
-                y1 = touchEvent.getY();
-                break;
-            case MotionEvent.ACTION_UP:
-                x2 = touchEvent.getX();
-                y2 = touchEvent.getY();
-                touchedDown = false;
-                if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
-                    Intent i = new Intent(ARActivity.this, FeedActivity.class);
-                    startActivity(i);
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-                } else if((Math.abs(x1) > Math.abs(x2)+ TOUCH_OFFSET)) {
-                    Intent i = new Intent(ARActivity.this, ProfileActivity.class);
-                    startActivity(i);
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                } else if ((y1 - y2 > TOUCH_OFFSET) || (Math.abs(x2-x1) < TAP_OFFSET && Math.abs(y2-y1) < TAP_OFFSET && !moved)) {
-                    Intent i = new Intent(ARActivity.this, MapsActivity.class);
-                    startActivity(i);
-                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top);
-                }
-                swipingClue.setVisibility(View.INVISIBLE);
-                moved = false;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                x2 = touchEvent.getX();
-                y2 = touchEvent.getY();
-                if (touchedDown) {
-                    if (Math.abs(x2 - x1) > TAP_OFFSET || Math.abs(y2 - y1) > TAP_OFFSET) {
-                        moved = true;
-                    }
-                    if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
-                        swipingClue.setText("Feed >>>");
-                        float diff = ((x2 - x1) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
-                        swipingClue.setPadding(Math.round(diff*TOUCH_OFFSET), 0, 0, 0);
-                        if (diff > 1) diff = 1.0f;
-                        else if (diff < 0.5) diff = 0.25f;
-                        swipingClue.setAlpha(diff);
-                        swipingClue.setVisibility(View.VISIBLE);
-                    } else if((Math.abs(x1) > Math.abs(x2)+ TOUCH_OFFSET)) {
-                        swipingClue.setText("<<< Profile");
-                        float diff = ((x1 - x2) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
-                        swipingClue.setPadding(0, 0, Math.round(diff*TOUCH_OFFSET), 0);
-                        if (diff > 1) diff = 1.0f;
-                        else if (diff < 0.5) diff = 0.25f;
-                        swipingClue.setAlpha(diff);
-                        swipingClue.setVisibility(View.VISIBLE);
-                    } else if (y1 - y2 > TOUCH_OFFSET) {
-                        swipingClue.setText("^ Map ^");
-                        swipingClue.setVisibility(View.VISIBLE);
-                        float diff = ((y1 - y2) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
-                        swipingClue.setPadding(0, 0, 0, Math.round(diff*TOUCH_OFFSET));
-                        if (diff > 1) diff = 1.0f;
-                        else if (diff < 0.5) diff = 0.25f;
-                        swipingClue.setAlpha(diff);
-                        swipingClue.setVisibility(View.VISIBLE);
-                    } else {
-                        swipingClue.setVisibility(View.INVISIBLE);
-                    }
-                } else {
-                    swipingClue.setVisibility(View.INVISIBLE);
-                    swipingClue.setText("");
-                }
-                break;
-        }
-        return false;
     }
 
 }
