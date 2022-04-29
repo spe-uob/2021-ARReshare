@@ -34,6 +34,8 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
         bottomNavigationView = findViewById(R.id.bottom_navigation_bar);
         //frameLayout = view.findViewById(R.id.frameLayout_wrapper);
         bottomNavigationView.setOnItemSelectedListener(this);
+        bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
+        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, arActivity).addToBackStack(null).commit();
 
         // Check permissions
         checkIfARAvailable();
@@ -60,7 +62,6 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Intent intent;
         switch (item.getItemId()) {
             case R.id.map_menu_item:
 
