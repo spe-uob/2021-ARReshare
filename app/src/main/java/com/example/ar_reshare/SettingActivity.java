@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class SettingActivity extends AppCompatActivity {
 
-    public void modifyAccount(String password){
+    public void changePassord(String password){
         Map<String, String> changes = new HashMap<>();
         changes.put("password", password);
         try {
@@ -30,14 +30,31 @@ public class SettingActivity extends AppCompatActivity {
                 @Override
                 public void onBackendResult(boolean success, String message) {
                     if(success){
-
+                        System.out.println("Your passward changed correctly");
                     }else{
-
+                        System.out.println("Error");
                     }
                 }
             });
         } catch (JSONException e){
     }}
+
+    public void changeNickname(String nickname){
+        Map<String, String> changes = new HashMap<>();
+        changes.put("nickname", nickname);
+        try {
+            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if(success){
+                        System.out.println("Your nickname have changed");
+                    }else{
+                        System.out.println("Error");
+                    }
+                }
+            });
+        } catch (JSONException e){
+        }}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +105,8 @@ public class SettingActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         String a = firstName.getText().toString().trim();
                         String b = lastName.getText().toString().trim();
-
+                        String c = a + " " + b;
+                        changeNickname(c);
                         Toast.makeText(v.getContext(), "New name:" + a +"_"+ b, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -154,7 +172,7 @@ public class SettingActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String a = pwd.getText().toString().trim();
-
+                        changePassord(a);
                         Toast.makeText(v.getContext(), "Your password has been changed", Toast.LENGTH_SHORT).show();
                     }
                 });

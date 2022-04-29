@@ -35,7 +35,7 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
 
         Intent i = getIntent();
-        userID = i.getIntExtra("userID", 0);
+        userID = i.getIntExtra("userID", BackendController.loggedInUserID);
 
         System.out.println("The current userID is :" + userID);
         if (userID == BackendController.loggedInUserID) {
@@ -54,10 +54,19 @@ public class ProfileActivity extends AppCompatActivity {
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             }
         });
+
+        ImageButton settingsButton = (ImageButton) findViewById(R.id.btS);
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, SettingActivity.class);
+                startActivity((intent));
+            }
+        });;
     }
 
     private void getCurrentUserProfile(int userID) {
-        BackendController.getProfileByID(0, 3, userID, new BackendController.BackendProfileResultCallback() {
+        BackendController.getProfileByID(0, 1, userID, new BackendController.BackendProfileResultCallback() {
             @Override
             public void onBackendProfileResult(boolean success, User userProfile) {
                 if (success) {
@@ -69,15 +78,6 @@ public class ProfileActivity extends AppCompatActivity {
 
                             ImageView profileIcon = findViewById(R.id.avatar);
                             profileIcon.setImageBitmap(userProfile.getProfilePic());
-
-                            ImageButton settingsButton = (ImageButton) findViewById(R.id.btS);
-                            settingsButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent intent = new Intent(ProfileActivity.this, SettingActivity.class);
-                                    startActivity((intent));
-                                }
-                            });
 
                             searchAccountListing();
                             searchSavedListings();
