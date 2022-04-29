@@ -45,9 +45,11 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
         // ARCore requires camera permissions to operate. If we did not yet obtain runtime
         // permission on Android M and above, now is a good time to ask the user for it.
         if (!CameraPermissionHelper.hasCameraPermission(this)) {
+            System.out.println("DONT HAVE CAMERA");
             CameraPermissionHelper.requestCameraPermission(this);
             return;
         }
+        System.out.println("HAVE CAMERA");
     }
 
     ChatListActivity chatListActivity = new ChatListActivity();

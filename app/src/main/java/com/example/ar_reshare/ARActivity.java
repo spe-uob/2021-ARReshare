@@ -264,13 +264,15 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
         getDeviceLocation();
 
-        return super.onCreateView(inflater, container, savedInstanceState);
+        System.out.println("   FINISHED ONCREATE");
+        return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        showInstructions();
+        System.out.println("  VIEW CREATED HAAHHAHA");
+        //showInstructions();
     }
 
     @Override
@@ -747,7 +749,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         }
 
         // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
-        trackingStateHelper.updateKeepScreenOnFlag(camera.getTrackingState());
+        //trackingStateHelper.updateKeepScreenOnFlag(camera.getTrackingState());
 
         // Show a message based on whether tracking has failed, if planes are detected, and if the user
         // has placed any objects.
@@ -990,6 +992,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     // Get the most recent location of the device
     private void getDeviceLocation() {
+        System.out.println("   GETTING LOCATION ONCREATE");
         SwipeActivity parent = (SwipeActivity) getActivity();
         try {
             if (parent.locationPermissionGranted) {
@@ -1000,6 +1003,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                                 // Got last known location. In some rare situations this can be null.
                                 if (location != null) {
                                     // Logic to handle location object
+                                    System.out.println("   SUCCESS LOCATION ONCREATE");
                                     lastKnownLocation = location;
                                     readyLatch.countDown();
                                 }
@@ -1008,6 +1012,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             }
         } catch (SecurityException e)  {
             // TODO: Implement appropriate error catching
+            System.out.println("   FAIL LOCATION EXCEPTION");
+            System.out.println(e);
         }
     }
 

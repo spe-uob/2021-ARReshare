@@ -9,8 +9,7 @@
         android:id="@+id/surfaceview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_gravity="top"
-        android:layout_marginBottom="0dp"/>
+        android:layout_gravity="top" />
 
     <LinearLayout
         android:id="@+id/productBoxAR"
@@ -85,7 +84,7 @@
         android:layout_height="124dp"
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="120dp"
         android:background="#00FFFFFF"
         android:scaleType="fitCenter"
         android:src="@drawable/compass_graphic" />

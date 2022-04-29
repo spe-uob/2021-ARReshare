@@ -91,7 +91,7 @@ public class LoginFragment extends Fragment implements BackendController.Backend
             }
         });
         dialog.show();
-        Intent intent = new Intent(getContext(), ARActivity.class);
+        Intent intent = new Intent(getContext(), SwipeActivity.class);
         startActivity(intent);
     }
 
