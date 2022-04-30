@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -168,8 +169,14 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                         System.out.println(message);
                         if (success) {
                             System.out.println("createSavedListing callback success");
+                            Toast toast = Toast.makeText(
+                                    context, "Successfully saved listing", Toast.LENGTH_SHORT);
+                            toast.show();
                         } else {
                             System.out.println("createSavedListing callback failed");
+                            Toast toast = Toast.makeText(
+                                    context, "Failed to save listing", Toast.LENGTH_SHORT);
+                            toast.show();
                         }
                         holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
                         holder.bookmarkButton.setTag(1);
@@ -183,8 +190,14 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                         System.out.println(message);
                         if (success) {
                             System.out.println("deleteSavedListing callback success");
+                            Toast toast = Toast.makeText(
+                                    context, "Successfully deleted listing", Toast.LENGTH_SHORT);
+                            toast.show();
                         } else {
                             System.out.println("deleteSavedListing callback failed");
+                            Toast toast = Toast.makeText(
+                                    context, "Failed to delete listing", Toast.LENGTH_SHORT);
+                            toast.show();
                         }
                         holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
                         holder.bookmarkButton.setTag(0);
