@@ -151,13 +151,14 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
             }
             if (chat.getLastMessage() == null) {
                 chatBody.setText(" ");
+                chatTime.setText(" ");
             }else {
                 chatBody.setText(chat.getLastMessage().getMessage());
+                String[] dates = MessagingActivity.convertDate(chat.getLastMessage().getCreatedTime());
+                chatTime.setText(dates[3]);
             }
             productInfo.setText(chat.getProductName());
             icon.setImageBitmap(chat.getProfileIcon());
-            String[] dates = MessagingActivity.convertDate(chat.getLastMessage().getCreatedTime());
-            chatTime.setText(dates[3]);
         }
     }
 
