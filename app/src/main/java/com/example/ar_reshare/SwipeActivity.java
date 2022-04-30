@@ -56,7 +56,6 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
         bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
         getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, arActivity).addToBackStack(null).commit();
 
-
         // Request location permissions if needed and get latest location
         getLocationPermission();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
