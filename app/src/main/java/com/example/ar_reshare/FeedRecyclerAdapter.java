@@ -156,10 +156,10 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         if (product.isSavedByUser()) {
             System.out.println("This product has been saved by the user");
             holder.bookmarkButton.setTag(1);
-            holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
+            holder.bookmarkButton.setImageResource(R.drawable.filled_black_bookmark);
         } else {
             holder.bookmarkButton.setTag(0);
-            holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
+            holder.bookmarkButton.setImageResource(R.drawable.black_bookmark);
         }
         holder.bookmarkButton.setOnClickListener(v -> {
             System.out.println("The tag is " + holder.bookmarkButton.getTag());
@@ -178,7 +178,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                                     context, "Failed to save listing", Toast.LENGTH_SHORT);
                             toast.show();
                         }
-                        holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
+                        holder.bookmarkButton.setImageResource(R.drawable.filled_black_bookmark);
                         holder.bookmarkButton.setTag(1);
                     });
                 } catch (JSONException e) {
@@ -199,7 +199,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                                     context, "Failed to delete listing", Toast.LENGTH_SHORT);
                             toast.show();
                         }
-                        holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
+                        holder.bookmarkButton.setImageResource(R.drawable.black_bookmark);
                         holder.bookmarkButton.setTag(0);
                     });
                 } catch (JSONException e) {
