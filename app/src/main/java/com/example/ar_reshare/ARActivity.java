@@ -2,15 +2,11 @@ package com.example.ar_reshare;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.media.Image;
@@ -20,8 +16,6 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -43,9 +37,7 @@ import com.example.ar_reshare.samplerender.arcore.BackgroundRenderer;
 import com.example.ar_reshare.samplerender.arcore.PlaneRenderer;
 import com.example.ar_reshare.samplerender.arcore.SpecularCubemapFilter;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.navigation.NavigationBarView;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
@@ -68,7 +60,6 @@ import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,11 +69,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -200,7 +188,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     // The set of currently displayed products
     // This should be combined with productObjects in the future
-    private final Set<Product> displayedProducts = new HashSet<>();
+    private final Set<Product> displayedProductObjects = new HashSet<>();
     private final Set<Product> currentlyPointedProducts = new HashSet<>();
     private boolean productBoxHidden = true;
     private Product productBoxProduct;
@@ -548,49 +536,68 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 //                            "models/pink.png",
 //                            Texture.WrapMode.CLAMP_TO_EDGE,
 //                            Texture.ColorFormat.SRGB);
+//            virtualObjectAlbedoInstantPlacementTexture =
+//                    Texture.createFromAsset(
+//                            render,
+//                            "models/grey.png",
+//                            Texture.WrapMode.CLAMP_TO_EDGE,
+//                            Texture.ColorFormat.SRGB);
+//            virtualObjectPbrTexture =
+//                    Texture.createFromAsset(
+//                            render,
+//                            "models/grey.png",
+//                            Texture.WrapMode.CLAMP_TO_EDGE,
+//                            Texture.ColorFormat.LINEAR);
+
+            virtualObjectAlbedoTexture =
+                    Texture.createFromAsset(
+                            render,
+                            "models/pawn_albedo.png",
+                            Texture.WrapMode.CLAMP_TO_EDGE,
+                            Texture.ColorFormat.SRGB);
             virtualObjectAlbedoInstantPlacementTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/grey.png",
+                            "models/pawn_albedo_instant_placement.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
-            virtualObjectPbrTexture =
+            Texture virtualObjectPbrTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/grey.png",
+                            "models/pawn_roughness_metallic_ao.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.LINEAR);
 
             virtualObjectMesh = Mesh.createFromAsset(render, "models/pawn.obj");
-            objectHat = Mesh.createFromAsset(render, "models/hat.obj");
-            hatShader = setObjectShader();
-            hatTexture = setObjectTexture("models/purple.png");
-            objectPhone = Mesh.createFromAsset(render, "models/phone.obj");
-            phoneShader = setObjectShader();
-            phoneTexture = setObjectTexture("models/grey.png");
-            objectBurger = Mesh.createFromAsset(render, "models/burger.obj");
-            burgerShader = setObjectShader();
-            burgerTexture = setObjectTexture("models/burger.png");
-            objectCup = Mesh.createFromAsset(render, "models/cup.obj");
-            cupShader = setObjectShader();
-            cupTexture = setObjectTexture("models/pink.png");
-//            virtualObjectShader =
-//                    Shader.createFromAssets(
-//                            render,
-//                            "shaders/environmental_hdr.vert",
-//                            "shaders/environmental_hdr.frag",
-//                            /*defines=*/ new HashMap<String, String>() {
-//                                {
-//                                    put(
-//                                            "NUMBER_OF_MIPMAP_LEVELS",
-//                                            Integer.toString(cubemapFilter.getNumberOfMipmapLevels()));
-//                                }
-//                            })
-//                            .setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture)
-//                            .setTexture("u_RoughnessMetallicAmbientOcclusionTexture", virtualObjectPbrTexture)
-//                            .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
-//                            .setTexture("u_DfgTexture", dfgTexture);
-            virtualObjectShader = hatShader; // default shader
+//            objectHat = Mesh.createFromAsset(render, "models/hat.obj");
+//            hatShader = setObjectShader();
+//            hatTexture = setObjectTexture("models/purple.png");
+//            objectPhone = Mesh.createFromAsset(render, "models/phone.obj");
+//            phoneShader = setObjectShader();
+//            phoneTexture = setObjectTexture("models/grey.png");
+//            objectBurger = Mesh.createFromAsset(render, "models/burger.obj");
+//            burgerShader = setObjectShader();
+//            burgerTexture = setObjectTexture("models/burger.png");
+//            objectCup = Mesh.createFromAsset(render, "models/cup.obj");
+//            cupShader = setObjectShader();
+//            cupTexture = setObjectTexture("models/pink.png");
+            virtualObjectShader =
+                    Shader.createFromAssets(
+                            render,
+                            "shaders/environmental_hdr.vert",
+                            "shaders/environmental_hdr.frag",
+                            /*defines=*/ new HashMap<String, String>() {
+                                {
+                                    put(
+                                            "NUMBER_OF_MIPMAP_LEVELS",
+                                            Integer.toString(cubemapFilter.getNumberOfMipmapLevels()));
+                                }
+                            })
+                            .setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture)
+                            .setTexture("u_RoughnessMetallicAmbientOcclusionTexture", virtualObjectPbrTexture)
+                            .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
+                            .setTexture("u_DfgTexture", dfgTexture);
+            //virtualObjectShader = hatShader; // default shader
         } catch (IOException e) {
             //Log.e(TAG, "Failed to read a required asset file", e);
             messageSnackbarHelper.showError(getActivity(), "Failed to read a required asset file: " + e);
@@ -712,7 +719,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         rotateCompass(angle);
         // Stabilise compass reading
         angle = stabiliseCompassReading(angle);
-        System.out.println("median " + angle*(180/Math.PI) + " degrees to north clockwise");
+        //System.out.println("median " + angle*(180/Math.PI) + " degrees to north clockwise");
 
 
         // 2. Check if user is pointing at a product
@@ -721,25 +728,26 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         // 3. Spawn a product in front of the user if yes
         if (!pointingProducts.isEmpty()) {
             // If product is not already being displayed, spawn it
-            if (!this.displayedProducts.contains(pointingProducts.get(0))) {
-                //spawnProduct(camera, pointingProducts.get(0), angle);
+            // Note: The product which is closest to the angle will be spawned, hence index zero
+            Product closestProduct = pointingProducts.get(0);
+            if (!this.displayedProductObjects.contains(closestProduct)) {
                 // When ProductObject has been created, remove this product from the Set
                 //this.displayedProducts.addAll(pointingProducts);
                 //System.out.println("Prepare product boxes");
-                prepareProductBoxes(pointingProducts);
+                spawnProduct(camera, pointingProducts.get(0), productAngles.get(pointingProducts.get(0)));
             }
+            prepareProductBoxes(pointingProducts);
             // Else if the product is displayed, but the product box not, display it
-            else if (productBoxHidden && this.displayedProducts.contains(pointingProducts.get(0))) {
-                prepareProductBoxes(pointingProducts);
-            }
-            // Else if the product box is displayed, but is showing other product's information, update it
-            else if (productBoxProduct != pointingProducts.get(0) && this.displayedProducts.contains(pointingProducts.get(0))) {
-                prepareProductBoxes(pointingProducts);
-            }
+//            else if (productBoxHidden && this.displayedProductObjects.contains(pointingProducts.get(0))) {
+//                prepareProductBoxes(pointingProducts);
+//            }
+//            // Else if the product box is displayed, but is showing other product's information, update it
+//            else if (productBoxProduct != pointingProducts.get(0) && this.displayedProductObjects.contains(pointingProducts.get(0))) {
+//                prepareProductBoxes(pointingProducts);
+//            }
         } else {
-            // Hide product box if currently not pointing at any product
+            // Hide product boxes if currently not pointing at any product
             if (!productBoxHidden) {
-                //hideProductBox();
                 resetScrollView(null);
             }
 
@@ -823,25 +831,25 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             Trackable trackable = obj.getTrackable();
 
             // Check object's category
-            // TODO: Change temporary hardcoded category
-            Category objCategory = Category.OTHER;
-            if (objCategory.equals(Category.CLOTHING)){
-                virtualObjectMesh = objectHat;
-                virtualObjectShader = hatShader;
-                virtualObjectAlbedoTexture = hatTexture;
-            }else if(objCategory.equals(Category.OTHER)){
-                virtualObjectMesh = objectCup;
-                virtualObjectShader = cupShader;
-                virtualObjectAlbedoTexture = cupTexture;
-            }else if(objCategory.equals(Category.ELECTRONICS)){
-                virtualObjectMesh = objectPhone;
-                virtualObjectShader = phoneShader;
-                virtualObjectAlbedoTexture = phoneTexture;
-            } else {
-                virtualObjectMesh = objectBurger;
-                virtualObjectShader = burgerShader;
-                virtualObjectAlbedoTexture = burgerTexture;
-            }
+//            // TODO: Change temporary hardcoded category
+//            Category objCategory = Category.OTHER;
+//            if (objCategory.equals(Category.CLOTHING)){
+//                virtualObjectMesh = objectHat;
+//                virtualObjectShader = hatShader;
+//                virtualObjectAlbedoTexture = hatTexture;
+//            }else if(objCategory.equals(Category.OTHER)){
+//                virtualObjectMesh = objectCup;
+//                virtualObjectShader = cupShader;
+//                virtualObjectAlbedoTexture = cupTexture;
+//            }else if(objCategory.equals(Category.ELECTRONICS)){
+//                virtualObjectMesh = objectPhone;
+//                virtualObjectShader = phoneShader;
+//                virtualObjectAlbedoTexture = phoneTexture;
+//            } else {
+//                virtualObjectMesh = objectBurger;
+//                virtualObjectShader = burgerShader;
+//                virtualObjectAlbedoTexture = burgerTexture;
+//            }
 
             // Get the current pose of an Anchor in world space. The Anchor pose is updated
             // during calls to session.update() as ARCore refines its estimate of the world.
@@ -854,15 +862,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             // Update shader properties and draw
             virtualObjectShader.setMat4("u_ModelView", modelViewMatrix);
             virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-
-            if (trackable instanceof InstantPlacementPoint
-                    && ((InstantPlacementPoint) trackable).getTrackingMethod()
-                    == InstantPlacementPoint.TrackingMethod.SCREENSPACE_WITH_APPROXIMATE_DISTANCE) {
-                virtualObjectShader.setTexture(
-                        "u_AlbedoTexture", virtualObjectAlbedoInstantPlacementTexture);
-            } else {
-                virtualObjectShader.setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture);
-            }
 
             render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
         }
@@ -961,11 +960,13 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     // be spawned, pass the camera, the relevant product and the current angle to north to this
     // method to spawn a product in a virtual space
     private void spawnProduct(Camera camera, Product product, double angleToNorth) {
+        System.out.println("    SPAWN PRODUCT CALLED    ");
         if (true) {
             // If the angle (in radians) is negative convert to positive
-            if (angleToNorth < 0) {
-                angleToNorth = (angleToNorth * -1) + Math.PI;
-            }
+//            if (angleToNorth < 0) {
+//                angleToNorth = (angleToNorth * -1) + Math.PI;
+//            }
+            System.out.println("    ANGLE TO NORTH = " + angleToNorth);
 
             // Current position of the user
             Pose cameraPose = camera.getDisplayOrientedPose();
@@ -983,6 +984,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             Anchor newAnchor = session.createAnchor(anchorPose);
             ProductObject newObject = new ProductObject(newAnchor, null, product);
             this.productObjects.add(newObject);
+            this.displayedProductObjects.add(product);
         }
     }
 
@@ -1032,7 +1034,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         for (ProductObject productObject : productObjects) {
             productObject.getAnchor().detach();
         }
-        displayedProducts.removeAll(productAngles.keySet());
+        displayedProductObjects.removeAll(productAngles.keySet());
         contributorMap.clear();
         int n = productObjects.size();
         for (int i = 0; i < n; i++) {
@@ -1074,8 +1076,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                 .map(pair -> pair.getKey())
                 .collect(Collectors.toList());
 
-
-
         return closestProducts;
     }
 
@@ -1111,7 +1111,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     }
 
 
-    // TODO: Fix duplicating product boxes when going in opposite direction
     private void prepareProductBoxes(List<Product> products) {
         LinearLayout scrollView = getActivity().findViewById(R.id.ARScrollLayout);
         final List<Product> allProducts = products;
