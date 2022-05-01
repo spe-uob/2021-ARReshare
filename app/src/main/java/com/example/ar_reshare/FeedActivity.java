@@ -95,6 +95,7 @@ public class FeedActivity extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         view = inflater.inflate(R.layout.activity_feed, container, false);
+
         //fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
         readyLatch = new CountDownLatch(1);

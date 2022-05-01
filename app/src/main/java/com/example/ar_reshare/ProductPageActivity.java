@@ -71,6 +71,9 @@ public class ProductPageActivity extends Fragment implements BackendController.B
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.activity_product_page, container, false);
+        //hide the bottom navigation bar
+        SwipeActivity activity = (SwipeActivity) getActivity();
+        activity.setNavigationVisibility(false);
         // getting all the stuff we need from previous page
         Integer productID = getArguments().getInt("productID", 1);
         String productName = getArguments().getString("productName");
@@ -300,7 +303,8 @@ public class ProductPageActivity extends Fragment implements BackendController.B
             @Override
             public void onClick(View v) {
                 getActivity().getSupportFragmentManager().popBackStack();
-
+                SwipeActivity activity = (SwipeActivity) getActivity();
+                activity.setNavigationVisibility(true);
             }
         });
     }
