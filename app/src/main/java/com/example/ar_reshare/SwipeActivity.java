@@ -80,19 +80,19 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.map_menu_item:
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, mapsActivity).addToBackStack(null).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new MapsActivity()).addToBackStack(null).commit();
                 return true;
             case R.id.feed_menu_item:
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, feedActivity).addToBackStack(null).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new FeedActivity()).addToBackStack(null).commit();
                 return true;
             case R.id.ar_menu_item:
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, arActivity).addToBackStack(null).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ARActivity()).addToBackStack(null).commit();
                 return true;
             case R.id.profile_menu_item:
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileActivity).addToBackStack(null).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ProfileActivity()).addToBackStack(null).commit();
                 return true;
             case R.id.message_menu_item:
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, chatListActivity).addToBackStack(null).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ChatListActivity()).addToBackStack(null).commit();
                 return true;
         }
         return false;
@@ -142,11 +142,11 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
                 if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
                     switch (currentId) {
                         case R.id.feed_menu_item:
-                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, mapsActivity).addToBackStack(null).commit();
+                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new MapsActivity()).addToBackStack(null).commit();
                             bottomNavigationView.setSelectedItemId(R.id.map_menu_item);
                             break;
                         case R.id.ar_menu_item:
-                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, feedActivity).addToBackStack(null).commit();
+                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new FeedActivity()).addToBackStack(null).commit();
                             bottomNavigationView.setSelectedItemId(R.id.feed_menu_item);
                             break;
                         case R.id.profile_menu_item:
@@ -154,7 +154,7 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
                             bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
                             break;
                         case R.id.message_menu_item:
-                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileActivity).addToBackStack(null).commit();
+                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ProfileActivity()).addToBackStack(null).commit();
                             bottomNavigationView.setSelectedItemId(R.id.profile_menu_item);
                             break;
                     }
@@ -162,7 +162,7 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
                 } else if((Math.abs(x1) > Math.abs(x2)+ TOUCH_OFFSET)) {
                     switch (currentId) {
                         case R.id.map_menu_item:
-                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, feedActivity).addToBackStack(null).commit();
+                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new FeedActivity()).addToBackStack(null).commit();
                             bottomNavigationView.setSelectedItemId(R.id.feed_menu_item);
                             break;
                         case R.id.feed_menu_item:
@@ -170,11 +170,11 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
                             bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
                             break;
                         case R.id.ar_menu_item:
-                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileActivity).addToBackStack(null).commit();
+                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ProfileActivity()).addToBackStack(null).commit();
                             bottomNavigationView.setSelectedItemId(R.id.profile_menu_item);
                             break;
                         case R.id.profile_menu_item:
-                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, chatListActivity).addToBackStack(null).commit();
+                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ChatListActivity()).addToBackStack(null).commit();
                             bottomNavigationView.setSelectedItemId(R.id.message_menu_item);
                             break;
                     }
