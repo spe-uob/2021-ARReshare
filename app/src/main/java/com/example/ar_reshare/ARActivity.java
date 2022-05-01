@@ -43,7 +43,6 @@ import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
-import com.google.ar.core.InstantPlacementPoint;
 import com.google.ar.core.LightEstimate;
 import com.google.ar.core.Plane;
 import com.google.ar.core.PointCloud;
@@ -149,7 +148,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private Mesh objectCup;
 
     private Shader virtualObjectShader;
-    private Texture virtualObjectAlbedoTexture;
+    private Texture productObjectTexture;
     private Texture virtualObjectAlbedoInstantPlacementTexture;
     private Texture virtualObjectPbrTexture;
 
@@ -548,25 +547,18 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 //                            "models/grey.png",
 //                            Texture.WrapMode.CLAMP_TO_EDGE,
 //                            Texture.ColorFormat.LINEAR);
-
-            virtualObjectAlbedoTexture =
-                    Texture.createFromAsset(
-                            render,
-                            "models/pawn_albedo.png",
-                            Texture.WrapMode.CLAMP_TO_EDGE,
-                            Texture.ColorFormat.SRGB);
-            virtualObjectAlbedoInstantPlacementTexture =
-                    Texture.createFromAsset(
-                            render,
-                            "models/pawn_albedo_instant_placement.png",
-                            Texture.WrapMode.CLAMP_TO_EDGE,
-                            Texture.ColorFormat.SRGB);
-            Texture virtualObjectPbrTexture =
-                    Texture.createFromAsset(
-                            render,
-                            "models/pawn_roughness_metallic_ao.png",
-                            Texture.WrapMode.CLAMP_TO_EDGE,
-                            Texture.ColorFormat.LINEAR);
+//            virtualObjectAlbedoInstantPlacementTexture =
+//                    Texture.createFromAsset(
+//                            render,
+//                            "models/pawn_albedo_instant_placement.png",
+//                            Texture.WrapMode.CLAMP_TO_EDGE,
+//                            Texture.ColorFormat.SRGB);
+//            Texture virtualObjectPbrTexture =
+//                    Texture.createFromAsset(
+//                            render,
+//                            "models/pawn_roughness_metallic_ao.png",
+//                            Texture.WrapMode.CLAMP_TO_EDGE,
+//                            Texture.ColorFormat.LINEAR);
 
             virtualObjectMesh = Mesh.createFromAsset(render, "models/pawn.obj");
 //            objectHat = Mesh.createFromAsset(render, "models/hat.obj");
@@ -581,6 +573,17 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 //            objectCup = Mesh.createFromAsset(render, "models/cup.obj");
 //            cupShader = setObjectShader();
 //            cupTexture = setObjectTexture("models/pink.png");
+            //virtualObjectShader = hatShader; // default shader
+
+            // Default Texture
+            Texture texture =
+                    Texture.createFromAsset(
+                            render,
+                            "models/others_colours.png",
+                            Texture.WrapMode.CLAMP_TO_EDGE,
+                            Texture.ColorFormat.SRGB);
+
+
             virtualObjectShader =
                     Shader.createFromAssets(
                             render,
@@ -593,11 +596,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                                             Integer.toString(cubemapFilter.getNumberOfMipmapLevels()));
                                 }
                             })
-                            .setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture)
-                            .setTexture("u_RoughnessMetallicAmbientOcclusionTexture", virtualObjectPbrTexture)
+                            .setTexture("u_AlbedoTexture", texture)
                             .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
                             .setTexture("u_DfgTexture", dfgTexture);
-            //virtualObjectShader = hatShader; // default shader
         } catch (IOException e) {
             //Log.e(TAG, "Failed to read a required asset file", e);
             messageSnackbarHelper.showError(getActivity(), "Failed to read a required asset file: " + e);
@@ -634,7 +635,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                                             Integer.toString(cubemapFilter.getNumberOfMipmapLevels()));
                                 }
                             })
-                            .setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture)
+                            .setTexture("u_AlbedoTexture", productObjectTexture)
                             .setTexture("u_RoughnessMetallicAmbientOcclusionTexture", virtualObjectPbrTexture)
                             .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
                             .setTexture("u_DfgTexture", dfgTexture);
@@ -831,25 +832,27 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             Trackable trackable = obj.getTrackable();
 
             // Check object's category
-//            // TODO: Change temporary hardcoded category
-//            Category objCategory = Category.OTHER;
-//            if (objCategory.equals(Category.CLOTHING)){
-//                virtualObjectMesh = objectHat;
-//                virtualObjectShader = hatShader;
-//                virtualObjectAlbedoTexture = hatTexture;
-//            }else if(objCategory.equals(Category.OTHER)){
-//                virtualObjectMesh = objectCup;
-//                virtualObjectShader = cupShader;
-//                virtualObjectAlbedoTexture = cupTexture;
-//            }else if(objCategory.equals(Category.ELECTRONICS)){
-//                virtualObjectMesh = objectPhone;
-//                virtualObjectShader = phoneShader;
-//                virtualObjectAlbedoTexture = phoneTexture;
-//            } else {
-//                virtualObjectMesh = objectBurger;
-//                virtualObjectShader = burgerShader;
-//                virtualObjectAlbedoTexture = burgerTexture;
-//            }
+            Texture texture = getCategoryTexture(obj.getProduct());
+
+            // Create the virtual shader
+            try {
+                virtualObjectShader =
+                        Shader.createFromAssets(
+                                render,
+                                "shaders/environmental_hdr.vert",
+                                "shaders/environmental_hdr.frag",
+                                /*defines=*/ new HashMap<String, String>() {
+                                    {
+                                        put(
+                                                "NUMBER_OF_MIPMAP_LEVELS",
+                                                Integer.toString(cubemapFilter.getNumberOfMipmapLevels()));
+                                    }
+                                })
+                                .setTexture("u_AlbedoTexture", texture)
+                                .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
+                                .setTexture("u_DfgTexture", dfgTexture);
+            } catch (IOException e) {}
+
 
             // Get the current pose of an Anchor in world space. The Anchor pose is updated
             // during calls to session.update() as ARCore refines its estimate of the world.
@@ -868,6 +871,44 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
         // Compose the virtual scene with the background.
         backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
+    }
+
+
+    private Texture getCategoryTexture(Product product) {
+        Category category = Category.getCategoryById(product.getCategoryID());
+        String categoryTextureFile = "";
+        switch (category) {
+            case CLOTHING:
+                categoryTextureFile = "models/clothing_colours.png";
+                break;
+            case ACCESSORIES:
+                categoryTextureFile = "models/accessory_colours.png";
+                break;
+            case BOOKS:
+                categoryTextureFile = "models/books_colours.png";
+                break;
+            case ELECTRONICS:
+                categoryTextureFile = "models/electronics_colours.png";
+                break;
+            case HOUSEHOLD:
+                categoryTextureFile = "models/household_colours.png";
+                break;
+            default:
+                categoryTextureFile = "models/others_colours.png";
+                break;
+        }
+        Texture texture = null;
+        try {
+             texture =
+                    Texture.createFromAsset(
+                            render,
+                            categoryTextureFile,
+                            Texture.WrapMode.CLAMP_TO_EDGE,
+                            Texture.ColorFormat.SRGB);
+        } catch (IOException e) {
+            System.out.println("EXCEPTION WHEN CREATING TEXTURE " + e);
+        }
+        return texture;
     }
 
     /** Checks if we detected at least one plane. */
@@ -962,19 +1003,14 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private void spawnProduct(Camera camera, Product product, double angleToNorth) {
         System.out.println("    SPAWN PRODUCT CALLED    ");
         if (true) {
-            // If the angle (in radians) is negative convert to positive
-//            if (angleToNorth < 0) {
-//                angleToNorth = (angleToNorth * -1) + Math.PI;
-//            }
-            System.out.println("    ANGLE TO NORTH = " + angleToNorth);
 
             // Current position of the user
             Pose cameraPose = camera.getDisplayOrientedPose();
             float[] coords = cameraPose.getTranslation();
 
-            // Get new coordinates two meters in front of the user
+            // Get new coordinates set distance in meters in front of the user
             // Using Trigonometry
-            double distance = 2; // 2 metres away
+            double distance = 1.5; // metres away
             float deltaX = (float) (Math.sin(angleToNorth) * distance);
             float deltaZ = (float) (Math.cos(angleToNorth) * distance);
             float[] objectCoords = new float[]{coords[0] + deltaX, coords[1], coords[2] + deltaZ};
