@@ -77,9 +77,6 @@ import java.util.stream.Collectors;
 
 public class ARActivity extends Fragment implements SampleRender.Renderer{
 
-    private static final String SEARCHING_PLANE_MESSAGE = "Searching for surfaces...";
-    private static final String USER_MOVED_MESSAGE = "You have left your origin. Please regenerate.";
-
     // See the definition of updateSphericalHarmonicsCoefficients for an explanation of these
     // constants.
     private static final float[] sphericalHarmonicFactors = {
@@ -109,7 +106,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private final SnackbarHelper messageSnackbarHelper = new SnackbarHelper();
     private DisplayRotationHelper displayRotationHelper;
     private final TrackingStateHelper trackingStateHelper = new TrackingStateHelper(getActivity());
-    private TapHelper tapHelper;
     private SampleRender render;
 
     private PlaneRenderer planeRenderer;
@@ -118,18 +114,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private boolean hasSetTextureNames = false;
 
     private final DepthSettings depthSettings = new DepthSettings();
-    private boolean[] depthSettingsMenuDialogCheckboxes = new boolean[2];
 
     private final InstantPlacementSettings instantPlacementSettings = new InstantPlacementSettings();
-    private boolean[] instantPlacementSettingsMenuDialogCheckboxes = new boolean[1];
-    // Assumed distance from the device camera to the surface on which user will try to place objects.
-    // This value affects the apparent scale of objects while the tracking method of the
-    // Instant Placement point is SCREENSPACE_WITH_APPROXIMATE_DISTANCE.
-    // Values in the [0.2, 2.0] meter range are a good choice for most AR experiences. Use lower
-    // values for AR experiences where users are expected to place objects on surfaces close to the
-    // camera. Use larger values for experiences where the user will likely be standing and trying to
-    // place an object on the ground or floor in front of them.
-    private static final float APPROXIMATE_DISTANCE_METERS = 2.0f;
 
     // Point Cloud
     private VertexBuffer pointCloudVertexBuffer;
@@ -141,26 +127,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     // Virtual object (ARCore pawn)
     private Mesh virtualObjectMesh;
-
-    private Mesh objectHat;
-    private Mesh objectPhone;
-    private Mesh objectBurger;
-    private Mesh objectCup;
-
     private Shader virtualObjectShader;
-    private Texture productObjectTexture;
-    private Texture virtualObjectAlbedoInstantPlacementTexture;
-    private Texture virtualObjectPbrTexture;
-
-    private Texture burgerTexture;
-    private Texture hatTexture;
-    private Texture phoneTexture;
-    private Texture cupTexture;
-    private Shader burgerShader;
-    private Shader hatShader;
-    private Shader phoneShader;
-    private Shader cupShader;
-
 
     // Environmental HDR
     private Texture dfgTexture;
@@ -190,7 +157,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private final Set<Product> displayedProductObjects = new HashSet<>();
     private final Set<Product> currentlyPointedProducts = new HashSet<>();
     private boolean productBoxHidden = true;
-    private Product productBoxProduct;
     private Map<Product, User> contributorMap = new HashMap<>();
 
     // Compass object
@@ -528,52 +494,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                     new Mesh(
                             render, Mesh.PrimitiveMode.POINTS, /*indexBuffer=*/ null, pointCloudVertexBuffers);
 
-            // Virtual object to render (ARCore pawn)
-//            virtualObjectAlbedoTexture =
-//                    Texture.createFromAsset(
-//                            render,
-//                            "models/pink.png",
-//                            Texture.WrapMode.CLAMP_TO_EDGE,
-//                            Texture.ColorFormat.SRGB);
-//            virtualObjectAlbedoInstantPlacementTexture =
-//                    Texture.createFromAsset(
-//                            render,
-//                            "models/grey.png",
-//                            Texture.WrapMode.CLAMP_TO_EDGE,
-//                            Texture.ColorFormat.SRGB);
-//            virtualObjectPbrTexture =
-//                    Texture.createFromAsset(
-//                            render,
-//                            "models/grey.png",
-//                            Texture.WrapMode.CLAMP_TO_EDGE,
-//                            Texture.ColorFormat.LINEAR);
-//            virtualObjectAlbedoInstantPlacementTexture =
-//                    Texture.createFromAsset(
-//                            render,
-//                            "models/pawn_albedo_instant_placement.png",
-//                            Texture.WrapMode.CLAMP_TO_EDGE,
-//                            Texture.ColorFormat.SRGB);
-//            Texture virtualObjectPbrTexture =
-//                    Texture.createFromAsset(
-//                            render,
-//                            "models/pawn_roughness_metallic_ao.png",
-//                            Texture.WrapMode.CLAMP_TO_EDGE,
-//                            Texture.ColorFormat.LINEAR);
-
             virtualObjectMesh = Mesh.createFromAsset(render, "models/pawn.obj");
-//            objectHat = Mesh.createFromAsset(render, "models/hat.obj");
-//            hatShader = setObjectShader();
-//            hatTexture = setObjectTexture("models/purple.png");
-//            objectPhone = Mesh.createFromAsset(render, "models/phone.obj");
-//            phoneShader = setObjectShader();
-//            phoneTexture = setObjectTexture("models/grey.png");
-//            objectBurger = Mesh.createFromAsset(render, "models/burger.obj");
-//            burgerShader = setObjectShader();
-//            burgerTexture = setObjectTexture("models/burger.png");
-//            objectCup = Mesh.createFromAsset(render, "models/cup.obj");
-//            cupShader = setObjectShader();
-//            cupTexture = setObjectTexture("models/pink.png");
-            //virtualObjectShader = hatShader; // default shader
 
             // Default Texture
             Texture texture =
@@ -603,46 +524,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             //Log.e(TAG, "Failed to read a required asset file", e);
             messageSnackbarHelper.showError(getActivity(), "Failed to read a required asset file: " + e);
         }
-    }
-
-    public Texture setObjectTexture(String textureLocation){
-        Texture texture = null;
-        try {
-            texture =
-            Texture.createFromAsset(
-                    render,
-                    textureLocation,
-                    Texture.WrapMode.CLAMP_TO_EDGE,
-                    Texture.ColorFormat.SRGB);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return texture;
-    }
-
-    public Shader setObjectShader(){
-        Shader shader = null;
-        try {
-            shader =
-                    Shader.createFromAssets(
-                            render,
-                            "shaders/environmental_hdr.vert",
-                            "shaders/environmental_hdr.frag",
-                            /*defines=*/ new HashMap<String, String>() {
-                                {
-                                    put(
-                                            "NUMBER_OF_MIPMAP_LEVELS",
-                                            Integer.toString(cubemapFilter.getNumberOfMipmapLevels()));
-                                }
-                            })
-                            .setTexture("u_AlbedoTexture", productObjectTexture)
-                            .setTexture("u_RoughnessMetallicAmbientOcclusionTexture", virtualObjectPbrTexture)
-                            .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
-                            .setTexture("u_DfgTexture", dfgTexture);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return shader;
     }
 
     @Override
@@ -720,8 +601,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         rotateCompass(angle);
         // Stabilise compass reading
         angle = stabiliseCompassReading(angle);
-        //System.out.println("median " + angle*(180/Math.PI) + " degrees to north clockwise");
-
+        System.out.println("median " + angle*(180/Math.PI) + " degrees to north clockwise");
+        float[] pose = camera.getDisplayOrientedPose().getTranslation();
+        System.out.println("x=" + pose[0] + " z=" + pose[2]);
 
         // 2. Check if user is pointing at a product
         List<Product> pointingProducts = checkIfPointingAtProduct(angle);
@@ -732,20 +614,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             // Note: The product which is closest to the angle will be spawned, hence index zero
             Product closestProduct = pointingProducts.get(0);
             if (!this.displayedProductObjects.contains(closestProduct)) {
-                // When ProductObject has been created, remove this product from the Set
-                //this.displayedProducts.addAll(pointingProducts);
-                //System.out.println("Prepare product boxes");
                 spawnProduct(camera, pointingProducts.get(0), productAngles.get(pointingProducts.get(0)));
             }
             prepareProductBoxes(pointingProducts);
-            // Else if the product is displayed, but the product box not, display it
-//            else if (productBoxHidden && this.displayedProductObjects.contains(pointingProducts.get(0))) {
-//                prepareProductBoxes(pointingProducts);
-//            }
-//            // Else if the product box is displayed, but is showing other product's information, update it
-//            else if (productBoxProduct != pointingProducts.get(0) && this.displayedProductObjects.contains(pointingProducts.get(0))) {
-//                prepareProductBoxes(pointingProducts);
-//            }
         } else {
             // Hide product boxes if currently not pointing at any product
             if (!productBoxHidden) {
