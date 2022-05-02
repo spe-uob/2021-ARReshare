@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -457,15 +458,19 @@ public class MapsActivity extends Fragment implements
     @Override
     public void onInfoWindowClick(Marker marker) {
         Product product = (Product)marker.getTag();
-
-        Intent intent = new Intent(getActivity(), ProductPageActivity.class);
-        intent.putExtra("product", product);
-        intent.putExtra("productID",product.getId());
-        intent.putExtra("lat", product.getCoordinates().latitude);
-        intent.putExtra("lng",product.getCoordinates().longitude);
-        intent.putExtra("categoryID",product.getCategoryID());
-
-        startActivity(intent);
+        Bundle bundle = new Bundle();
+        bundle.putInt("contributorID",product.getContributorID());
+        bundle.putString("productName",product.getName());
+        bundle.putString("productDescription",product.getDescription());
+        bundle.putInt("productID",product.getId());
+        bundle.putDouble("lat", product.getCoordinates().latitude);
+        bundle.putDouble("lng",product.getCoordinates().longitude);
+        bundle.putString("postcode",product.getPostcode());
+        bundle.putBoolean("isSaved", product.isSavedByUser());
+        ProductPageActivity productFragment = new ProductPageActivity();
+        productFragment.setArguments(bundle);
+        productFragment.setIsFromFeed(false);
+        getActivity().getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
     }
 
 
