@@ -80,9 +80,6 @@
             android:configChanges="orientation"
             android:exported="true"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".ProductPageActivity"
-            android:exported="true" />
 
         <meta-data
             android:name="preloaded_fonts"
