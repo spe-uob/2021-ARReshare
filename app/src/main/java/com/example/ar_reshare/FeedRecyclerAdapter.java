@@ -100,10 +100,26 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                 activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
             }
         };
+
+
         holder.productImage.setOnClickListener(productOnClickListener);
         holder.productTitle.setOnClickListener(productOnClickListener);
         holder.productDescription.setOnClickListener(productOnClickListener);
 
+
+        View.OnClickListener profileOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle bundle = new Bundle();
+                bundle.putInt("userID",product.getContributorID());
+                ProfileActivity profileFragment = new ProfileActivity();
+                profileFragment.setArguments(bundle);
+                AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,profileFragment).addToBackStack(null).commit();
+            }
+        };
+
+        holder.profileIcon.setOnClickListener(profileOnClickListener);
         // Handle click to message the contributor
         ClickHandler messageClickHandler = new ClickHandler(product, MESSAGE_LINK);
         holder.messageButton.setOnClickListener(messageClickHandler);
