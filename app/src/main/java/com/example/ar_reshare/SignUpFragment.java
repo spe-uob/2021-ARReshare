@@ -2,45 +2,75 @@ package com.example.ar_reshare;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.icu.util.Calendar;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class SignUpFragment extends Fragment {
 
+    private final int DIALOG_TIME = 3000; // milliseconds
     private final int GREEN_COLOUR = Color.parseColor("#32a852");
+    private final int GREEN_BACKGROUND_COLOR = Color.parseColor("#198235");
     private final int RED_COLOUR = Color.parseColor("#ab2a1f");
     private final int DEFAULT_TEXT_COLOUR = Color.parseColor("#363636");
+    private final int BLUE_BACKGROUND_COLOUR = Color.parseColor("#4C62DC");
     private final int CLICKABLE_COLOUR = Color.parseColor("#4C62DC");
     private final int NOT_CLICKABLE_COLOUR = Color.parseColor("#7080db");
 
     private final List<Character> SPECIAL_CHARACTERS = Arrays.asList('@', '!', '?', '%', '+', '-', '\\', '/', '\'', '$', '#', '^', ':', ';', '(', ')', '[', ']', '{', '}', '~', '_', '.');
 
     private final long MINIMUM_AGE_REQUIRED = 18L;
+    private final int RESULT_OK = -1;
+
+    private File profilePicture = null;
+    private Uri profilePictureURI = null;
+
+    private View addPhotoWindow;
+    private ActivityResultLauncher cameraLauncher;
+    private ActivityResultLauncher galleryLauncher;
 
     public SignUpFragment() {
         // Required empty public constructor
@@ -49,6 +79,30 @@ public class SignUpFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == RESULT_OK) {
+                    ImageView profilePictureView = addPhotoWindow.findViewById(R.id.signupProfilePicture);
+                    profilePictureView.setImageURI(profilePictureURI);
+                    onProfilePictureChanged();
+                } else {
+                    profilePicture.delete();
+                }
+            }
+        });
+
+        // Gallery intent launcher, allowing users to select multiple pictures at a time
+        galleryLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), new ActivityResultCallback<Uri>() {
+            @Override
+            public void onActivityResult(Uri result) {
+                profilePictureURI = result;
+                ImageView profilePictureView = addPhotoWindow.findViewById(R.id.signupProfilePicture);
+                profilePictureView.setImageURI(profilePictureURI);
+                onProfilePictureChanged();
+            }
+        });
     }
 
     @Override
@@ -206,7 +260,7 @@ public class SignUpFragment extends Fragment {
         EditText postcodeText = getView().findViewById(R.id.signUpPostCode);
         String postcode = postcodeText.getText().toString();
         if (postcode.contains(" ")) {
-            postcode = postcode.replaceFirst(" ", "");
+            postcode = postcode.replace(" ", "");
             postcodeText.setText(postcode);
         }
         if (postcode.length() > 7 || postcode.length() < 5) {
@@ -262,11 +316,20 @@ public class SignUpFragment extends Fragment {
                     BackendController.loginAccount(email, password, new BackendController.BackendCallback() {
                         @Override
                         public void onBackendResult(boolean success, String message) {
-                            if (success) displaySuccess();
-                            else displayFailure();
+                            if (success) {
+                                // Add this AR-Reshare account to account manager
+                                Pair<byte[], byte[]> encryptedPair = Crypto.encrypt(password);
+                                AuthenticationService.addAccount(getContext(), email, encryptedPair.first, encryptedPair.second);
+                                displaySuccess();
+                            }
+                            else {
+                                signUpButton.setEnabled(true);
+                                displayFailure();
+                            }
                         }
                     });
                 } else {
+                    signUpButton.setEnabled(true);
                     displayFailure();
                 }
             }
@@ -274,29 +337,30 @@ public class SignUpFragment extends Fragment {
     }
 
     private void displaySuccess() {
-        AlertDialog.Builder successful = new AlertDialog.Builder(getContext());
-        successful.setTitle("Registration Successful!");
-        successful.setMessage("Your account has been successfully registered");
-        AlertDialog dialog = successful.create();
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+        AlertDialog dialog = createDialog("Registration Successful!",
+                "Your account has been successfully registered");
+        dialog.setOnShowListener(dialog1 -> new CountDownTimer(DIALOG_TIME, 100) {
             @Override
-            public void onShow(DialogInterface dialog) {
-                new CountDownTimer(3000, 100) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                    }
-                    @Override
-                    public void onFinish() {
-                        if (((AlertDialog) dialog).isShowing()) {
-                            dialog.dismiss();
-                            Intent intent = new Intent(getContext(), ARActivity.class);
-                            startActivity(intent);
-                        }
-                    }
-                }.start();
+            public void onTick(long millisUntilFinished) {
             }
-        });
+            @Override
+            public void onFinish() {
+                if (((AlertDialog) dialog1).isShowing()) {
+                    dialog1.dismiss();
+                    askForProfilePicture();
+                }
+            }
+        }.start());
         dialog.show();
+    }
+
+    private AlertDialog createDialog(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setCancelable(false);
+        AlertDialog dialog = builder.create();
+        return dialog;
     }
 
     private void displayFailure() {
@@ -306,6 +370,148 @@ public class SignUpFragment extends Fragment {
         // Change button text to default
         Button signUpButton = getView().findViewById(R.id.signUpButton);
         signUpButton.setText("Sign Up");
+    }
+
+    // Inflates a popup window asking the user to upload a profile picture
+    private void askForProfilePicture() {
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        addPhotoWindow = inflater.inflate(R.layout.add_user_photo, null);
+        int width = LinearLayout.LayoutParams.MATCH_PARENT;
+        int height = LinearLayout.LayoutParams.MATCH_PARENT;
+
+        // Get user's name
+        EditText firstNameText = getView().findViewById(R.id.signUpFirstName);
+        EditText lastNameText = getView().findViewById(R.id.signUpLastName);
+        String name = firstNameText.getText().toString() + " " + lastNameText.getText().toString();
+
+        // Allows to tap outside the popup to dismiss it
+        boolean focusable = false;
+        final PopupWindow popupWindow = new PopupWindow(addPhotoWindow, width, height, focusable);
+
+        TextView nameText = addPhotoWindow.findViewById(R.id.signupPictureName);
+        nameText.setText(name);
+
+        Button cameraButton = addPhotoWindow.findViewById(R.id.signupPictureCamera);
+        Button galleryButton = addPhotoWindow.findViewById(R.id.signupPictureGallery);
+        Button skipButton = addPhotoWindow.findViewById(R.id.signupPictureCancel);
+        cameraButton.setOnClickListener(v -> takePhoto());
+        galleryButton.setOnClickListener(v -> chooseFromGallery());
+        skipButton.setOnClickListener(v -> proceed());
+
+        popupWindow.showAtLocation(addPhotoWindow, Gravity.CENTER, 0, 0);
+    }
+
+    private void takePhoto() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        try {
+            profilePicture = createImageFile();
+        } catch (IOException ex) {
+            // Error occurred while creating the file
+            ex.printStackTrace();
+        }
+        // Continue only if the file was successfully created
+        if (profilePicture != null) {
+            profilePictureURI =
+                    FileProvider.getUriForFile(getContext(), "com.example.ar_reshare.fileprovider", profilePicture);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, profilePictureURI);
+        }
+
+        cameraLauncher.launch(intent);
+    }
+
+    // Creates a local photo path to store the picture taken by user
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+        return image;
+    }
+
+    // Allows the user to choose a photo from the photo gallery
+    private void chooseFromGallery() {
+        galleryLauncher.launch("image/*");
+    }
+
+    // Changes button text and colours when a picture has been chosen
+    private void onProfilePictureChanged() {
+        Button cameraButton = addPhotoWindow.findViewById(R.id.signupPictureCamera);
+        Button galleryButton = addPhotoWindow.findViewById(R.id.signupPictureGallery);
+        Button skipButton = addPhotoWindow.findViewById(R.id.signupPictureCancel);
+        cameraButton.setText("Confirm ✓");
+        cameraButton.setBackgroundColor(GREEN_BACKGROUND_COLOR);
+        galleryButton.setText("Choose a new photo");
+        galleryButton.setBackgroundColor(RED_COLOUR);
+        skipButton.setText("Cancel and Skip");
+
+        galleryButton.setOnClickListener(v -> defaultButtons());
+        cameraButton.setOnClickListener(v -> uploadProfilePicture());
+    }
+
+    // Resets button text and colours to default
+    private void defaultButtons() {
+        Button cameraButton = addPhotoWindow.findViewById(R.id.signupPictureCamera);
+        Button galleryButton = addPhotoWindow.findViewById(R.id.signupPictureGallery);
+        Button skipButton = addPhotoWindow.findViewById(R.id.signupPictureCancel);
+        cameraButton.setText(getResources().getText(R.string.signupProfileCameraText));
+        cameraButton.setBackgroundColor(BLUE_BACKGROUND_COLOUR);
+        galleryButton.setText(getResources().getText(R.string.signupProfileGalleryText));
+        galleryButton.setBackgroundColor(BLUE_BACKGROUND_COLOUR);
+        skipButton.setText(getResources().getText(R.string.signupProfileCancelText));
+        galleryButton.setOnClickListener(v -> chooseFromGallery());
+        cameraButton.setOnClickListener(v -> takePhoto());
+    }
+
+    private void uploadProfilePicture() {
+        try {
+            Button button = addPhotoWindow.findViewById(R.id.signupPictureCamera);
+            button.setText("Uploading...");
+            String sourceURI = DataURIHelper.TranslateToDataURI(getContext(), profilePictureURI);
+            Map<String, String> changes = new HashMap<>();
+            changes.put("picture", sourceURI);
+            BackendController.modifyAccount(getContext(), changes, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if (success) {
+                        AlertDialog successful = createDialog("Success!", "Your profile picture has been uploaded.");
+                        successful.setOnShowListener(dialog -> {
+                            new CountDownTimer(DIALOG_TIME, 100) {
+                            @Override
+                            public void onTick(long millisUntilFinished) {
+                            }
+                            @Override
+                            public void onFinish() {
+                                if (((AlertDialog) dialog).isShowing()) {
+                                    dialog.dismiss();
+                                }
+                            }
+                            }.start();
+                        });
+                        successful.show();
+                        proceed();
+                    }
+                    else {
+                        defaultButtons();
+                        Toast unsuccessful = Toast.makeText(getContext(), "Failed to upload the picture", Toast.LENGTH_LONG);
+                        unsuccessful.show();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            defaultButtons();
+            Toast unsuccessful = Toast.makeText(getContext(), "Failed to upload the picture", Toast.LENGTH_LONG);
+            unsuccessful.show();
+        }
+    }
+
+    private void proceed() {
+        Intent intent = new Intent(getContext(), ARActivity.class);
+        startActivity(intent);
     }
 
     public class textChangedListener implements TextWatcher {
@@ -362,8 +568,13 @@ public class SignUpFragment extends Fragment {
     private class signUpButtonListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
+            // Disable button while request is sent
+            getView().findViewById(R.id.signUpButton).setEnabled(false);
             if (verifyAllInputs()) {
                 registerUser();
+            } else {
+                // Enable the button if verification failed
+                getView().findViewById(R.id.signUpButton).setEnabled(true);
             }
         }
     }

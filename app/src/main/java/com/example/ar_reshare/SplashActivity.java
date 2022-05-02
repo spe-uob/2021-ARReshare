@@ -40,11 +40,6 @@ public class SplashActivity extends AppCompatActivity {
                 }
             });
         } else forceLogin();
-
-//        ImageView appIcon = findViewById(R.id.appIcon);
-//        appIcon.animate().rotationBy(720).translationY(-400).setDuration(2000).start();
-//        TextView splashText = findViewById(R.id.splashText);
-//        splashText.animate().translationY(-700).setDuration(3000).start();
     }
 
     private void forceLogin() {
@@ -63,7 +58,7 @@ public class SplashActivity extends AppCompatActivity {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Intent intent = new Intent(SplashActivity.this, ARActivity.class);
+                Intent intent = new Intent(SplashActivity.this, SwipeActivity.class);
                 startActivity(intent);
             }
         }, 3000);

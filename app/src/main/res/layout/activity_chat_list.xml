@@ -15,7 +15,8 @@
         tools:layout_editor_absoluteX="16dp"
         android:paddingBottom="50dp"
         android:clickable="true"
-        android:focusableInTouchMode="true">
+        android:focusableInTouchMode="true"
+        >
 
     </androidx.recyclerview.widget.RecyclerView>
 

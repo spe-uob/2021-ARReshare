@@ -10,6 +10,10 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -22,11 +26,15 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
     private Context mContext;
     private List<Message> mMessageList;
+    private Message.MessageResult messageResult;
+    int loggedInUserID;
+    SimpleDateFormat simpleDateFormat= new SimpleDateFormat("HH:mm");
 
     public MessageListAdapter(Context context, List<Message> messageList) {
         mContext = context;
         mMessageList = messageList;
     }
+
 
     @Override
     public int getItemCount() {
@@ -37,8 +45,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         Message message = (Message) mMessageList.get(position);
-
-        if (message.getSender().getMessengerType() == 0) {
+        if (message.getSenderID() == loggedInUserID) {
             // If the current user is the sender of the message
             return VIEW_TYPE_MESSAGE_SENT;
         } else {
@@ -90,8 +97,10 @@ public class MessageListAdapter extends RecyclerView.Adapter {
         }
 
         void bind(Message message) {
+            System.out.println("binding");
             messageText.setText(message.getMessage());
-            timeText.setText(message.getCreatedTime());
+            //String[] dates = MessagingActivity.convertDate(message.getCreatedTime());\
+            timeText.setText(simpleDateFormat.format(new Date()));
         }
     }
 
@@ -112,24 +121,34 @@ public class MessageListAdapter extends RecyclerView.Adapter {
             messageText.setText(message.getMessage());
 
             // Format the stored timestamp into a readable String using method.
-            timeText.setText(message.getCreatedTime());
+            String[] dates = MessagingActivity.convertDate(message.getCreatedTime());
 
-            nameText.setText(message.getSender().getName());
+            timeText.setText(dates[3]);
+
+            if (messageResult.getContributorID() == loggedInUserID) {
+                nameText.setText(messageResult.getReceiverName());
+            }else {
+                nameText.setText(messageResult.getContributorName());
+            }
+
+
+            profileImage.setImageBitmap(message.getProfileIcon());
 
             // Insert the profile image from the URL into the ImageView.
-            profileImage.setImageResource(message.getSender().getProfileIcon());
+            //profileImage.setImageResource(message.getSender().getProfileIcon());
             profileImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-                    intent.putExtra("contributor", message.getSender());
-                    intent.putExtra("profilePicId", message.getSender().getProfileIcon());
                     mContext.startActivity(intent);
                 }
             });
         }
     }
 
+    public void setMessageResult(Message.MessageResult messageResult, int loggedInUserID){
+        this.messageResult = messageResult;
+        this.loggedInUserID = loggedInUserID;
+    }
+
 }
-
-

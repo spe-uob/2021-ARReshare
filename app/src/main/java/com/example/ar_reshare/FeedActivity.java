@@ -1,13 +1,16 @@
 package com.example.ar_reshare;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -16,7 +19,9 @@ import android.location.Location;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.Button;
@@ -25,33 +30,51 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.navigation.NavigationBarView;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class FeedActivity extends AppCompatActivity {
+public class FeedActivity extends Fragment {
 
-    // Array to initialise products
-    List<Product> productList =
-            ExampleData.getProducts().subList(1, ExampleData.getProducts().size());
+    // Lists to initialise products
+    List<Product> allProducts;
+    List<Product> currentProductList;
+
+    // Global Recycler View
+    RecyclerView recyclerView;
+
+
+    // CountDownLatch to ensure thread only works after results have been received from backend
+    private CountDownLatch readyLatch;
+
+    private final int TIMEOUT_IN_SECONDS = 10;
+
+    FusedLocationProviderClient fusedLocationClient;
 
     // Location related attributes
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted = false;
     // Built-in class which provides current location
-    private FusedLocationProviderClient fusedLocationClient;
     private Location userLocation;
 
     // Reference to adapter
     FeedRecyclerAdapter feedRecyclerAdapter;
+    View view;
 
     // Distance Filtering
     private final int MIN_DISTANCE = 500; // metres
@@ -67,26 +90,39 @@ public class FeedActivity extends AppCompatActivity {
 
     private final int DEFAULT_DARK_FONT = Color.parseColor("#363636");
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feed);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        // Allows different products to be displayed as individual cards
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        feedRecyclerAdapter = new FeedRecyclerAdapter(productList);
-        recyclerView.setAdapter(feedRecyclerAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        view = inflater.inflate(R.layout.activity_feed, container, false);
 
-        // Request location permissions if needed and get latest location
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        getLocationPermission();
-        getDeviceLocation();
+        //fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
+        readyLatch = new CountDownLatch(1);
+        currentProductList = new ArrayList<>();
+
+        adapterCreator();
+
+        BackendController.searchListings(0, 100, (success, searchResults) -> {
+            if (success) {
+                currentProductList.addAll(searchResults);
+                getActivity().runOnUiThread(new Runnable() {
+                    @SuppressLint("NotifyDataSetChanged")
+                    @Override
+                    public void run() {
+                        feedRecyclerAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+            else {
+                System.out.println("searchListings callback failed");
+            }
+        });
 
         // Link to Add Product page
-        ImageView addProductButton = findViewById(R.id.feedAddProduct);
+        ImageView addProductButton = view.findViewById(R.id.feedAddProduct);
         addProductButton.setOnClickListener(v -> {
-            Intent intent = new Intent(FeedActivity.this, AddProduct.class);
+            Intent intent = new Intent(getActivity(), AddProduct.class);
             startActivity(intent);
         });
 
@@ -96,70 +132,76 @@ public class FeedActivity extends AppCompatActivity {
                 0.5f);
         spinningAnim.setRepeatCount(0);
         spinningAnim.setDuration(500);
-        ImageView refreshButton = findViewById(R.id.feedRefreshButton);
+        ImageView refreshButton = view.findViewById(R.id.feedRefreshButton);
         refreshButton.setOnClickListener(v -> {
             refreshButton.startAnimation(spinningAnim);
+            productListRecall();
             recyclerView.scrollToPosition(0);
         });
 
         // Filter according to user preferences
-        ImageView filterButton = findViewById(R.id.feedFilterButton);
+        ImageView filterButton = view.findViewById(R.id.feedFilterButton);
         setupFilterWindow(filterButton);
+        waitOnAdapterCreation();
+        return view;
     }
 
-    @Override
-    public void finish() {
-        super.finish();
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-    }
+
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            // If request is cancelled, the grantResults array will be empty
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Location permission has been granted
-                locationPermissionGranted = true;
-                System.out.println("Location has been granted");
-            } else {
-                // Explain to user that the feature is unavailable because
-                // the permissions have not been granted
-                System.out.println("Feature unavailable due to lack of permissions");
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //setContentView(R.layout.activity_feed);
+
+    }
+
+    public void adapterCreator() {
+        // Allows different products to be displayed as individual cards
+        recyclerView = view.findViewById(R.id.recyclerView);
+        feedRecyclerAdapter = new FeedRecyclerAdapter(currentProductList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(feedRecyclerAdapter);
+        readyLatch.countDown();
+    }
+
+    private void waitOnAdapterCreation() {
+        // Create a new thread to wait for the conditions
+        new Thread(() -> {
+            try {
+                boolean success = readyLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+                if (success) {
+                    // Any UI changes must be run on the UI Thread
+                    getActivity().runOnUiThread(() -> {
+                        getDeviceLocation();
+                    });
+                } else {
+                    getActivity().runOnUiThread(() -> Toast.makeText(getActivity().getApplicationContext(),
+                            "Failed to fetch your location or the products from the server. " +
+                                    "Please ensure you have access to an internet connection.",
+                            Toast.LENGTH_LONG).show());
+                }
+            } catch (InterruptedException e) {
+                System.out.println("CRASH");
             }
-        }
+        }).start();
     }
 
-    // Request location permissions from the device. We will receive a callback
-    // to onRequestPermissionsResult with the results.
-    private void getLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            // Location permission has already been granted previously
-            locationPermissionGranted = true;
-        } else if (shouldShowRequestPermissionRationale("FINE_LOCATION")) {
-            // Explain to the user why the location permission is needed
-            System.out.println("Please enable location to use our app");
-        } else {
-            // If the location permission has not been granted already,
-            // open a window requesting this permission
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        getActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     // Get the most recent location of the device
     private void getDeviceLocation() {
+        SwipeActivity parent = (SwipeActivity) getActivity();
         try {
-            if (locationPermissionGranted) {
-                fusedLocationClient.getLastLocation()
-                        .addOnSuccessListener(this, location -> {
+            if (parent.locationPermissionGranted) {
+                parent.fusedLocationClient.getLastLocation()
+                        .addOnSuccessListener(getActivity(), location -> {
                             // Got last known location. In some rare situations this can be null.
                             if (location != null) {
-
                                 // Logic to handle location object
                                 userLocation = location;
                                 feedRecyclerAdapter.updateDistances(location);
@@ -173,26 +215,38 @@ public class FeedActivity extends AppCompatActivity {
     }
 
     // Filters page according to selected distance and categories
+    private void productListRecall() {
+        BackendController.searchListings(0, 100, (success, searchResults) -> {
+            if (success) {
+                allProducts = searchResults;
+                getActivity().runOnUiThread(() -> constructNewPage(allProducts));
+            }
+            else {
+                System.out.println("searchListings filter callback failed");
+            }
+        });
+    }
+
     @SuppressLint("NotifyDataSetChanged")
-    private void filterPage() {
-        List<Product> allProducts = ExampleData.getProducts()
-                .subList(1, ExampleData.getProducts().size());
+    private void constructNewPage(List<Product> allProducts){
         List<Product> filteredList = allProducts.stream().filter(x -> {
+            LatLng coordinates = x.getCoordinates();
             Location productLocation = new Location("ManualProvider");
-            productLocation.setLatitude(x.getLocation().latitude);
-            productLocation.setLongitude(x.getLocation().longitude);
+            productLocation.setLatitude(coordinates.latitude);
+            productLocation.setLongitude(coordinates.longitude);
             float dist = userLocation.distanceTo(productLocation);
-            return dist <= maxDistanceRange && categoriesSelected.contains(x.getCategory());
+            Category productCategory = Category.getCategoryById(x.getCategoryID());
+            return dist <= maxDistanceRange && categoriesSelected.contains(productCategory);
         }).collect(Collectors.toList());
-        productList.clear();
-        productList.addAll(filteredList);
+        currentProductList.clear();
+        currentProductList.addAll(filteredList);
         feedRecyclerAdapter.notifyDataSetChanged();
     }
 
     // Setup filter results window
     private void setupFilterWindow(ImageView filterButton) {
         filterButton.setOnClickListener(v -> {
-            LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             @SuppressLint("InflateParams") View filterWindow = inflater.inflate(R.layout.filter_popup, null);
             int width = LinearLayout.LayoutParams.WRAP_CONTENT;
             int height = LinearLayout.LayoutParams.WRAP_CONTENT;
@@ -203,10 +257,10 @@ public class FeedActivity extends AppCompatActivity {
             popupWindow.setOnDismissListener(() -> cancelFilter(popupWindow));
 
             Button cancelFilterButton = filterWindow.findViewById(R.id.filterCancel);
-            cancelFilterButton.setOnClickListener(v1 -> cancelFilter(popupWindow));
+            cancelFilterButton.setOnClickListener(cancel -> cancelFilter(popupWindow));
 
             Button confirmFilterButton = filterWindow.findViewById(R.id.filterConfirm);
-            confirmFilterButton.setOnClickListener(v12 -> confirmFilter(popupWindow));
+            confirmFilterButton.setOnClickListener(confirm -> confirmFilter(popupWindow));
 
             setupCategoryChipGroup(filterWindow);
             setupDistanceSeekbar(filterWindow);
@@ -219,7 +273,7 @@ public class FeedActivity extends AppCompatActivity {
         categoriesSelected = tempCategories;
         tempCategories = new HashSet<>(categoriesSelected);
         popupWindow.dismiss();
-        filterPage();
+        productListRecall();
     }
 
     // Cancel filter changes
@@ -229,13 +283,27 @@ public class FeedActivity extends AppCompatActivity {
         popupWindow.dismiss();
     }
 
+    // Unselect all filters
+    @SuppressWarnings("SuspiciousMethodCalls")
+    private void unselectFilter(ChipGroup allChips) {
+        List<Integer> chipsList = allChips.getCheckedChipIds();
+        for (Integer chipID : chipsList) {
+            Chip chip = allChips.findViewById(chipID);
+            chip.setChecked(false);
+            chip.setChipBackgroundColor(ColorStateList.valueOf(UNCHECKED_CHIP_COLOUR));
+            chip.setTextColor(DEFAULT_DARK_FONT);
+            //noinspection SuspiciousMethodCalls
+            tempCategories.remove(chip.getTag());
+        }
+    }
+
     // Setup category filtering UI
     private void setupCategoryChipGroup(View filterWindow) {
         ChipGroup filterCategories = filterWindow.findViewById(R.id.filterCategoryChipGroup);
 
         List<Category> categories = Category.getCategories();
         for (Category category : categories) {
-            Chip categoryChip = new Chip(FeedActivity.this);
+            Chip categoryChip = new Chip(getActivity());
             categoryChip.setTag(category);
             categoryChip.setCheckable(true);
             if (categoriesSelected.contains(category)) {
@@ -274,6 +342,9 @@ public class FeedActivity extends AppCompatActivity {
             categoryChip.setTextSize(14);
             filterCategories.addView(categoryChip);
         }
+        Button filterUnselectButton = filterWindow.findViewById(R.id.filterUnselect);
+        filterUnselectButton.setOnClickListener(v ->
+                unselectFilter(filterWindow.findViewById(R.id.filterCategoryChipGroup)));
     }
 
     // Setup distance filtering UI
@@ -308,4 +379,8 @@ public class FeedActivity extends AppCompatActivity {
         float MIN_CONTRAST_RATIO = 4.5f;
         return ratio < MIN_CONTRAST_RATIO;
     }
+
+
+
+
 }

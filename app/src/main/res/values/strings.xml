@@ -12,21 +12,27 @@
     <string name="STATIC_MAP_KEY">AIzaSyAFWHH-yjENxp6a7kQUeFfLjWcbGBuuM6Y</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="thanks_message">You added this product,\nthank you for sharing!</string>
+    <string name="app_description">An augmented-reality enabled application allowing people to share the goods and gifts they no longer need or want.</string>
+
+    <!-- Used for SignUp Fragment -->
+    <string name="signupProfileCameraText">Take a Selfie!</string>
+    <string name="signupProfileGalleryText">Choose From Gallery!</string>
+    <string name="signupProfileCancelText">No Thanks, Skip For Now</string>
 
 <!-- used for addProduct page dropdown   -->
     <string-array name="categories">
-        <item>Clothes</item>
+        <item>Other</item>
+        <item>Clothing</item>
         <item>Accessories</item>
         <item>Electronics</item>
         <item>Books</item>
-        <item>Food</item>
-        <item>Other</item>
+        <item>Household</item>
     </string-array>
     <string-array name="condition">
-        <item>Brand-new</item>
-        <item>Used-Very Good</item>
-        <item>Used-Good</item>
-        <item>Used-Acceptable</item>
+        <item>New</item>
+        <item>Good</item>
+        <item>Average</item>
+        <item>Poor</item>
     </string-array>
     <array name="add_image_popup">
         <item>Camera</item>
@@ -39,4 +45,13 @@
     <string name="add_product">Add Product</string>
     <string name="refresh">Refresh</string>
     <string name="filter">Filter</string>
+    <string name="title_activity_swipe">SwipeActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 </resources>
