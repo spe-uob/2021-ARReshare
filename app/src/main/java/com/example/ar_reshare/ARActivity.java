@@ -233,6 +233,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         //showInstructions();
     }
 
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -336,7 +338,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         }
     }
 
-//    @Override
+
+
+    //    @Override
 //    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
 //        super.onRequestPermissionsResult(requestCode, permissions, results);
 //        if (!CameraPermissionHelper.hasCameraPermission(getActivity())) {
@@ -365,16 +369,18 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     private void showInstructions() {
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
         View instructionsWindow = inflater.inflate(R.layout.instructions_popup, null);
-        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        //View popupView = LayoutInflater.from(getActivity()).inflate(R.layout.instructions_popup, null);
+        int width = LinearLayout.LayoutParams.MATCH_PARENT;
+        int height = LinearLayout.LayoutParams.MATCH_PARENT;
 
         // Allows to tap outside the popup to dismiss it
         boolean focusable = true;
 
         final PopupWindow popupWindow = new PopupWindow(instructionsWindow, width, height, focusable);
 
-        popupWindow.showAtLocation(instructionsWindow, Gravity.CENTER, 0, -100);
+        popupWindow.showAtLocation(instructionsWindow, Gravity.TOP, 0, 0);
 
         popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
@@ -406,6 +412,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     }
 
     private void onCompassButtonPressed(View view) {
+        showInstructions();
         // Rotation animation
         ObjectAnimator.ofFloat(view, "rotation", (float) lastCompassButtonAngle, (float) lastCompassButtonAngle+360).start();
         new Thread(new Runnable() {
@@ -437,6 +444,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     @Override
     public void onSurfaceCreated(SampleRender render) {
+        getActivity().runOnUiThread(() -> showInstructions());
+
         // Prepare the rendering objects. This involves reading shaders and 3D model files, so may throw
         // an IOException.
         try {

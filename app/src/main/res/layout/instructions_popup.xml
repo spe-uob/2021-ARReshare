@@ -1,136 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_marginBottom="50dp">
 
     <LinearLayout
-        android:layout_width="330dp"
-        android:layout_height="480dp"
-        android:orientation="vertical"
-        android:background="@color/white">
+        android:layout_width="match_parent"
+        android:layout_height="145dp"
+        android:background="#80000000">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Here's a quick guide"
-            android:layout_gravity="top"
-            android:padding="20dp"
-            android:textSize="20dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="320dp"
+        android:background="#80000000"
+        android:gravity="center">
 
         <LinearLayout
-            android:layout_width="290dp"
+            android:layout_width="330dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|center"
             android:orientation="vertical"
-            android:layout_marginBottom="10dp">
+            android:background="@color/white">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="How to use the AR "
-                android:textSize="16dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="10dp"/>
-
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:text="Three simple steps:"
-                android:paddingBottom="5dp"/>
+                android:orientation="horizontal"
+                android:gravity="left">
 
-            <TextView
-                android:id="@+id/step1AR"
+                <LinearLayout
+                    android:layout_width="230dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="5dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Justin Beaver"
+                        android:layout_gravity="top"
+                        android:padding="5dp"
+                        android:paddingStart="20dp"
+                        android:textSize="13dp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Hey, I'm Justin Beaver. I'm here how to show you how to use this app! Are you ready?"
+                        android:layout_gravity="top"
+                        android:padding="5dp"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="10dp"
+                        android:textSize="14dp"/>
+
+                </LinearLayout>
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/signupProfilePicture"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/justin_beaver"
+                    android:layout_gravity="left|top" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
+                android:layout_gravity="top"
                 android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:text="1: Scan the ground or the floor  ✓"
-                android:textStyle="bold"
-                android:padding="5dp"/>
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="10dp">
 
-            <TextView
-                android:id="@+id/step2AR"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:text="2. Press the compass button for objects to start appearing around you ✓"
-                android:textStyle="bold"
-                android:padding="5dp"/>
+                <Button
+                    android:id="@+id/instructionsCancel"
+                    android:layout_width="165dp"
+                    android:layout_height="40dp"
+                    android:text="Cancel"
+                    android:textSize="13dp"
+                    android:background="#4C62DC"
+                    android:textColor="#FFFFFF"/>
 
-            <TextView
-                android:id="@+id/step3AR"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:text="3. Look around! You will see AR objects appearing around you as you rotate your phone ✓ "
-                android:textStyle="bold"
-                android:padding="5dp"/>
+                <Button
+                    android:id="@+id/instructionsConfirm"
+                    android:layout_width="165dp"
+                    android:layout_height="40dp"
+                    android:text="I'm ready!"
+                    android:textSize="13dp"
+                    android:background="#4C62DC"
+                    android:textColor="#FFFFFF"/>
 
+            </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="290dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|center"
-            android:orientation="vertical">
+    </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="How to navigate the app "
-                android:textSize="16dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="10dp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:text="Swipe left for Feed"
-                android:textStyle="bold"
-                android:padding="5dp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:text="Swipe right for Profile"
-                android:textStyle="bold"
-                android:padding="5dp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:text="Swipe up for Map"
-                android:textStyle="bold"
-                android:padding="5dp"/>
-
-        </LinearLayout>
-
-
-
-        <LinearLayout
-            android:layout_width="290dp"
-            android:layout_gravity="center|bottom"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginTop="20dp">
-
-            <Button
-                android:id="@+id/instructionsConfirm"
-                android:layout_width="132dp"
-                android:layout_height="40dp"
-                android:text="I'm ready!"
-                android:textSize="14dp"
-                android:background="#4C62DC"
-                android:textColor="#FFFFFF"/>
-
-        </LinearLayout>
-
-
-
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:background="#80000000"
+        android:id="@+id/compassSection"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom"
+        android:gravity="bottom">
 
     </LinearLayout>
 
