@@ -35,7 +35,7 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
     private final int TAP_OFFSET = 10;
     private boolean touchedDown = false;
     private boolean moved = false;
-    private boolean isArSupported=false;
+    private static boolean isArSupported=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
