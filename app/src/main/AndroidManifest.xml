@@ -38,8 +38,8 @@
 <!--        <activity-->
 <!--            android:name=".ARActivity"-->
 <!--            android:exported="true" />-->
-<!--        <activity android:name=".AddProduct" >-->
-<!--        </activity>-->
+        <activity android:name=".AddProduct" >
+        </activity>
         <activity
             android:name=".LoginSignupActivity"
             android:exported="true" />
