@@ -19,6 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -147,7 +149,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     // The list of products fetched from the backend
     private List<Product> products;
     private CountDownLatch readyLatch;
-    private int TIMEOUT_IN_SECONDS = 3;
+    private int TIMEOUT_IN_SECONDS = 10;
 
     // The list of currently displayed Product Objects
     private final List<ProductObject> productObjects = new ArrayList<>();
@@ -185,7 +187,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     // Instructions
     private int instructionProgress = 0;
     private final int INSTRUCTIONS_NUMBER = 5;
-    private boolean instructionsShowing = false;
+    private static boolean instructionsShowing = false;
+    private static boolean hideInstructions = false;
 
     @Nullable
     @Override
@@ -227,7 +230,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         instructions_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!instructionsShowing) showInstructions();
+                showInstructions();
             }
         });
 
@@ -378,6 +381,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 //    }
 
     private void showInstructions() {
+        if (instructionsShowing) return;
+
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View instructionsWindow = inflater.inflate(R.layout.instructions_popup, null);
@@ -414,6 +419,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         TextView messageText = instructionsWindow.findViewById(R.id.beaverMessage);
         Button button = instructionsWindow.findViewById(R.id.instructionsConfirm);
         Button cancelButton = instructionsWindow.findViewById(R.id.instructionsCancel);
+        LinearLayout hideSetting = instructionsWindow.findViewById(R.id.hideInstructions);
+        CheckBox hideCheckBox = instructionsWindow.findViewById(R.id.hideCheckBox);
         String message = "";
         switch (instructionProgress) {
             case 0:
@@ -435,8 +442,12 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             case 4:
                 message = "If you ever forget, these instructions, just click on the information icon, in the bottom right, and I will be back!";
                 button.setText("Thanks!");
+                hideSetting.setVisibility(View.VISIBLE);
+                hideInstructions = hideCheckBox.isChecked();
+                hideCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> hideInstructions = isChecked);
                 break;
             default:
+                hideSetting.setVisibility(View.INVISIBLE);
                 popupWindow.dismiss();
                 instructionsShowing = false;
         }
@@ -489,7 +500,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     @Override
     public void onSurfaceCreated(SampleRender render) {
-        getActivity().runOnUiThread(() -> showInstructions());
+        if (!hideInstructions) getActivity().runOnUiThread(() -> showInstructions());
 
         // Prepare the rendering objects. This involves reading shaders and 3D model files, so may throw
         // an IOException.
@@ -646,39 +657,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             }
         }
 
-        // MAIN FUNCTIONALITY
-        // On each frame update:
-        // TODO 0. Check user has not moved -> Reset objects if needed
-
-        // 1. Get user's angle to the North (Compass)
-        double angle = compass.getAngleToNorth();
-        rotateCompass(angle);
-        // Stabilise compass reading
-        angle = stabiliseCompassReading(angle);
-        System.out.println("median " + angle*(180/Math.PI) + " degrees to north clockwise");
-        float[] pose = camera.getDisplayOrientedPose().getTranslation();
-        System.out.println("x=" + pose[0] + " z=" + pose[2]);
-
-        // 2. Check if user is pointing at a product
-        List<Product> pointingProducts = checkIfPointingAtProduct(angle);
-
-        // 3. Spawn a product in front of the user if yes
-        if (!pointingProducts.isEmpty()) {
-            // If product is not already being displayed, spawn it
-            // Note: The product which is closest to the angle will be spawned, hence index zero
-            Product closestProduct = pointingProducts.get(0);
-            if (!this.displayedProductObjects.contains(closestProduct)) {
-                spawnProduct(camera, pointingProducts.get(0), productAngles.get(pointingProducts.get(0)));
-            }
-            prepareProductBoxes(pointingProducts);
-        } else {
-            // Hide product boxes if currently not pointing at any product
-            if (!productBoxHidden) {
-                resetScrollView(null);
-            }
-
-        }
-
         // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
         //trackingStateHelper.updateKeepScreenOnFlag(camera.getTrackingState());
 
@@ -701,7 +679,43 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             //messageSnackbarHelper.showMessage(this, message);
         }
 
-        // -- Draw background
+
+        // MAIN FUNCTIONALITY
+        // On each frame update:
+        // TODO 0. Check user has not moved -> Reset objects if needed
+
+        // 1. Get user's angle to the North (Compass)
+        double angle = compass.getAngleToNorth();
+        rotateCompass(angle);
+        // Stabilise compass reading
+        angle = stabiliseCompassReading(angle);
+        //System.out.println("median " + angle*(180/Math.PI) + " degrees to north clockwise");
+        float[] pose = camera.getDisplayOrientedPose().getTranslation();
+        //System.out.println("x=" + pose[0] + " z=" + pose[2]);
+
+        // 2. Check if user is pointing at a product
+        List<Product> pointingProducts = checkIfPointingAtProduct(angle);
+
+        // 3. Spawn a product in front of the user if yes
+        if (!pointingProducts.isEmpty()) {
+            // If product is not already being displayed, spawn it
+            // Note: The product which is closest to the angle will be spawned, hence index zero
+            Product closestProduct = pointingProducts.get(0);
+            if (!this.displayedProductObjects.contains(closestProduct)) {
+                // Check if ARCore is tracking
+                if (camera.getTrackingState() == TrackingState.TRACKING) {
+                    spawnProduct(camera, pointingProducts.get(0), productAngles.get(pointingProducts.get(0)));
+                }
+            }
+            prepareProductBoxes(pointingProducts);
+        } else {
+            // Hide product boxes if currently not pointing at any product
+            if (!productBoxHidden) {
+                resetScrollView(null);
+            }
+
+        }
+
 
         if (frame.getTimestamp() != 0) {
             // Suppress rendering if the camera did not produce the first frame yet. This is to avoid
@@ -941,7 +955,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             float[] objectCoords = new float[]{coords[0] + deltaX, coords[1], coords[2] + deltaZ};
             Pose anchorPose = new Pose(objectCoords, new float[]{0, 0, 0, 0});
 
-            // Create an anchor and a ProductObject associated with it
+
+            System.out.println(" ANCHORS PRESENT " + session.getAllAnchors().size());
             Anchor newAnchor = session.createAnchor(anchorPose);
             ProductObject newObject = new ProductObject(newAnchor, null, product);
             this.productObjects.add(newObject);
@@ -1021,12 +1036,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         Map<Product, Double> pointingAt = new HashMap<>();
         for (Map.Entry<Product, Double> productAnglePair : productAngles.entrySet()) {
             double angleDiff = Math.abs(userAngle - productAnglePair.getValue());
-            //System.out.println("userAngle " + userAngle);
-            //System.out.println("productAngle " + productAnglePair.getValue());
-            //System.out.println("diff " + angleDiff);
+
             if (angleDiff <= ANGLE_LIMIT) {
                 pointingAt.put(productAnglePair.getKey(), angleDiff);
-                //System.out.println(productAnglePair.getKey().getName());
             }
         }
 
@@ -1050,7 +1062,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             BackendController.getProfileByID(0, 1, product.getContributorID(), new BackendController.BackendProfileResultCallback() {
                 @Override
                 public void onBackendProfileResult(boolean success, User userProfile) {
-                    System.out.println("NEW USER");
                     contributorMap.put(product, userProfile);
                     latch.countDown();
                 }
@@ -1083,7 +1094,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             // If more items need to be added but no items need to be removed
             if (products.containsAll(this.currentlyPointedProducts)) {
                 products = setDifference(products);
-                //System.out.println("SET DIFFERENCE");
             } else {
                 // Request reset of products and wait until complete
                 CountDownLatch latch = new CountDownLatch(1);
@@ -1101,13 +1111,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                 prepareProductBox(product, latch);
             }
             try {
-                System.out.println(" Starting to wait");
                 latch.await();
-                System.out.println(" Finished waiting");
 
                 // Reset the viewed products and proceed to show new products
-                //this.currentlyPointedProducts.clear();
-
                 for (Product product : finalProducts) {
                     if (this.currentlyPointedProducts.contains(product)) continue;
                     renderProductBox(product, contributorMap.get(product), scrollView);
@@ -1130,7 +1136,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             @Override
             public void run() {
                 // Make Product Box Visible
-                System.out.println(" Trying to inflate");
                 LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
                 View productBoxParent = inflater.inflate(R.layout.ar_product_box, scrollView, false);
 
@@ -1176,18 +1181,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             }
         });
         productBoxHidden = false;
-    }
-
-    // Hide the product box if not pointing at any product
-    private void hideProductBox() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                View productBox = getActivity().findViewById(R.id.productBoxAR);
-                productBox.setVisibility(View.INVISIBLE);
-            }
-        });
-        productBoxHidden = true;
     }
 
     // Takes a median of the last set of compass readings to filter out anomalies
