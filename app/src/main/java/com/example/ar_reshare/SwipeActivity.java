@@ -37,7 +37,6 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
     private boolean moved = false;
     private boolean isArSupported=false;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +49,11 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
         //frameLayout = view.findViewById(R.id.frameLayout_wrapper);
         bottomNavigationView.setOnItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
-        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ARActivity()).addToBackStack(null).commit();
+        if (isArSupported) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ARActivity()).addToBackStack(null).commit();
+        } else {
+            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new FallbackActivity()).addToBackStack(null).commit();
+        }
 
         // Request location permissions if needed and get latest location
         getLocationPermission();
@@ -102,7 +105,6 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
         ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(this);
         if (!availability.isSupported()) {
             isArSupported = false;
-            //arActivity = new FallbackActivity();
         }else {
             isArSupported = true;
         }
