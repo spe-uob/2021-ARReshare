@@ -33,6 +33,19 @@ public interface BackendService {
                                                @Query("startResults") int startResults);
 
     @Headers("Content-Type: application/json")
+    @GET("account/listings/search")
+    Call<Product.SearchResults> searchAccountListings(@Header("Authorization") String token,
+                                                      @Query("maxResults") int maxResults,
+                                                      @Query("startResults") int startResults);
+
+    @Headers("Content-Type: application/json")
+    @GET("account/saved-listings/search")
+    Call<Product.SearchResults> searchSavedListings(  @Header("Authorization") String token,
+                                                      @Query("maxResults") int maxResults,
+                                                      @Query("startResults") int startResults);
+
+
+    @Headers("Content-Type: application/json")
     @GET("profile/view")
     Call<User> getProfileByID(@Query("maxResults") int maxResults,
                                      @Query("startResults") int startResults,

@@ -37,61 +37,131 @@
         android:orientation="vertical"
         android:layout_weight="0.5">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="    "
+            android:textSize="10dp">
+        </TextView>
+
         <Button
             android:id="@+id/avatar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change Profile Picture">
+            android:text="Change Profile Picture"
+            android:background="@drawable/underline_gray">
 
         </Button>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="    "
+            android:textSize="10dp">
+        </TextView>
 
         <Button
             android:id="@+id/nickname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change Name">
+            android:text="Change Name"
+            android:background="@drawable/underline_gray">
 
         </Button>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="    "
+            android:textSize="10dp">
+        </TextView>
 
         <Button
             android:id="@+id/birthday"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change Date of Birth">
+            android:text="Change Date of Birth"
+            android:background="@drawable/underline_gray">
 
         </Button>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="    "
+            android:textSize="10dp">
+        </TextView>
 
         <Button
             android:id="@+id/pwd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change Password">
+            android:text="Change Password"
+            android:background="@drawable/underline_gray">
 
         </Button>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="    "
+            android:textSize="10dp">
+        </TextView>
 
         <Button
             android:id="@+id/email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change Email Address">
+            android:text="Change Email Address"
+            android:background="@drawable/underline_gray">
 
         </Button>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="    "
+            android:textSize="10dp">
+        </TextView>
 
         <Button
             android:id="@+id/homeaddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change Postcode">
+            android:text="Change Postcode"
+            android:background="@drawable/underline_gray">
 
         </Button>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="    "
+            android:textSize="10dp">
+        </TextView>
 
         <Button
             android:id="@+id/logout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Log Out">
+            android:text="Log Out"
+            android:background="@drawable/underline_gray">
 
         </Button>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="    "
+            android:textSize="30dp">
+        </TextView>
 
         <Button
             android:id="@+id/detele"
