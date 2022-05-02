@@ -168,12 +168,18 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private Compass compass;
     // Compass animation
     private double lastCompassButtonAngle = 0;
+    private double lastMedianAngle = 0;
 
     // Used for stabilising compass readings
     private final int MAX_COMPASS_READING_QUEUE_SIZE = 30;
     private double[] compassReadingsArray = new double[MAX_COMPASS_READING_QUEUE_SIZE];
     private int compassReadingSize = 0;
     private int compassReadingIndex = 0;
+
+    private final int COMPASS_POLLING_RATE = 10; // Milliseconds
+    private boolean pauseCompass = false;
+    private final int COMPASS_MEDIAN_REFRESH_RATE = 10;
+    private int compassMedianCountdown = COMPASS_MEDIAN_REFRESH_RATE;
 
     // Location related attributes:
     // Built-in class which provider current location
@@ -238,7 +244,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         });
 
         // Start the compass
-        compass = new Compass(getActivity());
+        new Thread(() -> compass = new Compass(getActivity())).start();
 
         getDeviceLocation();
 
@@ -351,6 +357,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             displayRotationHelper.onPause();
             surfaceView.onPause();
             session.pause();
+            pauseCompass = true;
         }
     }
 
@@ -382,6 +389,23 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 //            return;
 //        }
 //    }
+
+    private void takeCompassReadings() {
+        new Thread(() -> {
+            while (!pauseCompass) {
+                double angle = compass.getAngleToNorth();
+                // Stabilise compass reading
+                angle = stabiliseCompassReading(angle);
+                lastMedianAngle = angle;
+                try {
+                    Thread.sleep(COMPASS_POLLING_RATE);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }).start();
+    }
 
     private void showInstructions() {
         if (instructionsShowing) return;
@@ -504,6 +528,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     @Override
     public void onSurfaceCreated(SampleRender render) {
         if (!hideInstructions) getActivity().runOnUiThread(() -> showInstructions());
+        takeCompassReadings();
 
         // Prepare the rendering objects. This involves reading shaders and 3D model files, so may throw
         // an IOException.
@@ -687,10 +712,11 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         // On each frame update:
 
         // 1. Get user's angle to the North (Compass)
-        double angle = compass.getAngleToNorth();
+        //double angle = compass.getAngleToNorth();
+        double angle = lastMedianAngle;
         rotateCompass(angle);
         // Stabilise compass reading
-        angle = stabiliseCompassReading(angle);
+        //angle = stabiliseCompassReading(angle);
         //System.out.println("median " + angle*(180/Math.PI) + " degrees to north clockwise");
         float[] pose = camera.getDisplayOrientedPose().getTranslation();
         //System.out.println("x=" + pose[0] + " z=" + pose[2]);
@@ -1214,13 +1240,20 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         // Insert new reading
         compassReadingsArray[compassReadingIndex] = reading;
 
-        // Find the middle index of the array
-        int mid = Math.floorDiv(compassReadingSize, 2);
-        int skipCount; // Number of elements to skip
-        if (mid > 0) skipCount = mid-1;
-        else skipCount = 0;
+        double median = lastMedianAngle;
+        if (compassMedianCountdown <= 0) {
+            // Find the middle index of the array
+            int mid = Math.floorDiv(compassReadingSize, 2);
+            int skipCount; // Number of elements to skip
+            if (mid > 0) skipCount = mid-1;
+            else skipCount = 0;
 
-        double median = Arrays.stream(compassReadingsArray).sorted().skip(skipCount).findFirst().getAsDouble();
+            median = Arrays.stream(compassReadingsArray).sorted().skip(skipCount).findFirst().getAsDouble();
+
+            compassMedianCountdown = COMPASS_MEDIAN_REFRESH_RATE;
+        } else {
+            compassMedianCountdown -= 1;
+        }
 
         // Reset index to zero when end of array has been reached
         if (compassReadingIndex == MAX_COMPASS_READING_QUEUE_SIZE-1) {
