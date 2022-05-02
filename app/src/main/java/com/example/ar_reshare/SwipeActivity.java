@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.example.ar_reshare.helpers.CameraPermissionHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -197,4 +198,11 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
         return false;
     }
 
+    public void setNavigationVisibility(boolean isVisible){
+        if(isVisible){
+            bottomNavigationView.setVisibility(View.VISIBLE);
+        }else{
+            bottomNavigationView.setVisibility(View.INVISIBLE);
+        }
+    }
 }
