@@ -1,9 +1,11 @@
 package com.example.ar_reshare;
 
 import android.app.Activity;
+import androidx.fragment.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONException;
@@ -74,6 +77,8 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         ClickHandler profileClickHandler = new ClickHandler(product, PROFILE_LINK);
         holder.profileIcon.setOnClickListener(profileClickHandler);
         holder.contributor.setOnClickListener(profileClickHandler);
+
+
 
         // Handle clicks to go to the product page
         ClickHandler productClickHandler = new ClickHandler(product, PRODUCT_LINK);
@@ -261,9 +266,12 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
         // Sends information to the profile page
         public void profileClick(View v) {
-            Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-            intent.putExtra("userID", product.getContributorID());
-            v.getContext().startActivity(intent);
+            Fragment profileActivity = new Fragment();
+            Bundle bundle = new Bundle();
+            bundle.putInt("userID", product.getCategoryID());
+            profileActivity.setArguments(bundle);
+            AppCompatActivity appCompatActivity = (AppCompatActivity)v.getContext();
+            appCompatActivity.getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileActivity).commit();
         }
 
         // Sends information to the product page
