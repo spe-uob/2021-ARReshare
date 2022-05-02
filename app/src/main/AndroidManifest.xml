@@ -38,8 +38,8 @@
 <!--        <activity-->
 <!--            android:name=".ARActivity"-->
 <!--            android:exported="true" />-->
-<!--        <activity android:name=".AddProduct" >-->
-<!--        </activity>-->
+        <activity android:name=".AddProduct" >
+        </activity>
         <activity
             android:name=".LoginSignupActivity"
             android:exported="true" />
@@ -80,9 +80,6 @@
             android:configChanges="orientation"
             android:exported="true"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".ProductPageActivity"
-            android:exported="true" />
 
         <meta-data
             android:name="preloaded_fonts"
