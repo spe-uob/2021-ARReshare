@@ -49,6 +49,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:id="@+id/beaverMessage"
                         android:text="Hey, I'm Justin Beaver. I'm here how to show you how to use this app! Are you ready?"
                         android:layout_gravity="top"
                         android:padding="5dp"

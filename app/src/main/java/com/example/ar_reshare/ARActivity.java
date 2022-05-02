@@ -182,6 +182,10 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     // The acceptable limit of angle offset to product
     private static final double ANGLE_LIMIT = 20 * Math.PI/180; // degrees converted to radians
 
+    // Instructions
+    private int instructionProgress = 0;
+    private final int INSTRUCTIONS_NUMBER = 5;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -376,26 +380,61 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         int height = LinearLayout.LayoutParams.MATCH_PARENT;
 
         // Allows to tap outside the popup to dismiss it
-        boolean focusable = true;
+        boolean focusable = false;
 
         final PopupWindow popupWindow = new PopupWindow(instructionsWindow, width, height, focusable);
 
         popupWindow.showAtLocation(instructionsWindow, Gravity.TOP, 0, 0);
 
-        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                popupWindow.dismiss();
-            }
-        });
-
-        Button button = instructionsWindow.findViewById(R.id.instructionsConfirm);
-        button.setOnClickListener(new View.OnClickListener() {
+        Button button1 = instructionsWindow.findViewById(R.id.instructionsCancel);
+        button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 popupWindow.dismiss();
             }
         });
+
+        Button button2 = instructionsWindow.findViewById(R.id.instructionsConfirm);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleInstructionProgress(instructionsWindow, popupWindow);
+            }
+        });
+    }
+
+    private void handleInstructionProgress(View instructionsWindow, PopupWindow popupWindow) {
+        TextView messageText = instructionsWindow.findViewById(R.id.beaverMessage);
+        Button button = instructionsWindow.findViewById(R.id.instructionsConfirm);
+        Button cancelButton = instructionsWindow.findViewById(R.id.instructionsCancel);
+        String message = "";
+        switch (instructionProgress) {
+            case 0:
+                message = "Great! First thing to know is that you are in the AR View. Here you can look around you to find local products currently being shared.";
+                button.setText("Cool!");
+                cancelButton.setText("Exit");
+                break;
+            case 1:
+                message = "Start by taking a step, forwards and backwards, and rotating your phone slowly 360 degrees to scan the floor. You will see the floor surface being detected on the screen.";
+                button.setText("Done!");
+                break;
+            case 2:
+                message = "Now, notice there is a big compass at the bottom of your screen which rotates as you move. Press it to start seeing products.";
+                break;
+            case 3:
+                message = "Now, rotate yourself slowly, and notice how products will start appearing in the section above. Press on a product to see more information.";
+                button.setText("I can see them!");
+                break;
+            case 4:
+                message = "If you ever forget, these instructions, just click on the question mark icon, in the bottom right, and I will be back!";
+                button.setText("Thanks!");
+                break;
+            default:
+                popupWindow.dismiss();
+        }
+        if (instructionProgress < INSTRUCTIONS_NUMBER) instructionProgress += 1;
+        else instructionProgress = 0;
+        messageText.setText(message);
     }
 
     private void getLatestProducts() {
