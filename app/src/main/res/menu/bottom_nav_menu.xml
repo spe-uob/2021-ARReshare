@@ -26,7 +26,7 @@
     <item
         android:id="@+id/message_menu_item"
         android:title="Messages"
-        android:icon="@drawable/message_icon"/>
+        android:icon="@drawable/message_icon_image_unchecked" />
 
 
 </menu>

@@ -81,10 +81,28 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
 
         // Handle clicks to go to the product page
-        ClickHandler productClickHandler = new ClickHandler(product, PRODUCT_LINK);
-        holder.productImage.setOnClickListener(productClickHandler);
-        holder.productTitle.setOnClickListener(productClickHandler);
-        holder.productDescription.setOnClickListener(productClickHandler);
+        View.OnClickListener productOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle bundle = new Bundle();
+                bundle.putInt("contributorID",product.getContributorID());
+                bundle.putString("productName",product.getName());
+                bundle.putString("productDescription",product.getDescription());
+                bundle.putInt("productID",product.getId());
+                bundle.putDouble("lat", product.getCoordinates().latitude);
+                bundle.putDouble("lng",product.getCoordinates().longitude);
+                bundle.putString("postcode",product.getPostcode());
+                ProductPageActivity productFragment = new ProductPageActivity();
+                productFragment.setArguments(bundle);
+                productFragment.setFeedBookmarkButton(holder.bookmarkButton);
+                productFragment.setIsFromFeed(true);
+                AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
+            }
+        };
+        holder.productImage.setOnClickListener(productOnClickListener);
+        holder.productTitle.setOnClickListener(productOnClickListener);
+        holder.productDescription.setOnClickListener(productOnClickListener);
 
         // Handle click to message the contributor
         ClickHandler messageClickHandler = new ClickHandler(product, MESSAGE_LINK);
@@ -252,9 +270,6 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             if (type == PROFILE_LINK) {
                 profileClick(v);
             }
-            if (type == PRODUCT_LINK) {
-                productClick(v);
-            }
             if (type == MESSAGE_LINK) {
                 try {
                     messageClick(v);
@@ -272,19 +287,6 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             profileActivity.setArguments(bundle);
             AppCompatActivity appCompatActivity = (AppCompatActivity)v.getContext();
             appCompatActivity.getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileActivity).commit();
-        }
-
-        // Sends information to the product page
-        public void productClick(View v) {
-            Intent intent = new Intent(v.getContext(), ProductPageActivity.class);
-            intent.putExtra("product", product);
-            intent.putExtra("contributorID", product.getContributorID());
-            intent.putExtra("productID",product.getId());
-            intent.putExtra("lat", product.getCoordinates().latitude);
-            intent.putExtra("lng",product.getCoordinates().longitude);
-            intent.putExtra("categoryID",product.getCategoryID());
-            intent.putExtra("postcode",product.getPostcode());
-            v.getContext().startActivity(intent);
         }
 
         // Sends information to the messaging page
