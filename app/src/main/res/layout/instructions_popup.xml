@@ -1,114 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="330dp"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_marginBottom="50dp">
+    android:background="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="145dp"
-        android:background="#80000000">
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="320dp"
-        android:background="#80000000"
-        android:gravity="center">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="left">
 
         <LinearLayout
-            android:layout_width="330dp"
+            android:layout_width="220dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@color/white">
+            android:layout_marginTop="5dp">
 
-            <LinearLayout
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="left">
-
-                <LinearLayout
-                    android:layout_width="230dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="5dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Justin Beaver"
-                        android:layout_gravity="top"
-                        android:padding="5dp"
-                        android:paddingStart="20dp"
-                        android:textSize="13dp"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/beaverMessage"
-                        android:text="Hey, I'm Justin Beaver. I'm here how to show you how to use this app! Are you ready?"
-                        android:layout_gravity="top"
-                        android:padding="5dp"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="10dp"
-                        android:textSize="14dp"/>
-
-                </LinearLayout>
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/signupProfilePicture"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/justin_beaver"
-                    android:layout_gravity="left|top" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
+                android:text="Justin Beaver"
                 android:layout_gravity="top"
+                android:padding="5dp"
+                android:paddingStart="20dp"
+                android:textSize="13dp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginTop="10dp">
+                android:id="@+id/beaverMessage"
+                android:text="Hey, I'm Justin Beaver. I'm here how to show you how to use this app! Are you ready?"
+                android:layout_gravity="top"
+                android:padding="5dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="10dp"
+                android:textSize="14dp"/>
 
-                <Button
-                    android:id="@+id/instructionsCancel"
-                    android:layout_width="165dp"
-                    android:layout_height="40dp"
-                    android:text="Cancel"
-                    android:textSize="13dp"
-                    android:background="#4C62DC"
-                    android:textColor="#FFFFFF"/>
-
-                <Button
-                    android:id="@+id/instructionsConfirm"
-                    android:layout_width="165dp"
-                    android:layout_height="40dp"
-                    android:text="I'm ready!"
-                    android:textSize="13dp"
-                    android:background="#4C62DC"
-                    android:textColor="#FFFFFF"/>
-
-            </LinearLayout>
         </LinearLayout>
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/signupProfilePicture"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/justin_beaver"
+            android:layout_gravity="left|top"
+            android:layout_margin="5dp"/>
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:background="#80000000"
-        android:id="@+id/compassSection"
+        android:layout_gravity="top"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_gravity="bottom"
-        android:gravity="bottom">
+        android:gravity="center"
+        android:layout_marginTop="10dp">
+
+        <Button
+            android:id="@+id/instructionsCancel"
+            android:layout_width="165dp"
+            android:layout_height="40dp"
+            android:text="Cancel"
+            android:textSize="13dp"
+            android:background="#4C62DC"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/instructionsConfirm"
+            android:layout_width="165dp"
+            android:layout_height="40dp"
+            android:text="I'm ready!"
+            android:textSize="13dp"
+            android:background="#4C62DC"
+            android:textColor="#FFFFFF"/>
 
     </LinearLayout>
-
 </LinearLayout>

@@ -185,6 +185,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     // Instructions
     private int instructionProgress = 0;
     private final int INSTRUCTIONS_NUMBER = 5;
+    private boolean instructionsShowing = false;
 
     @Nullable
     @Override
@@ -221,6 +222,15 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             }
         });
 
+        // Define the onclick event for instructions button
+        ImageButton instructions_button = view.findViewById(R.id.instructions_button);
+        instructions_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!instructionsShowing) showInstructions();
+            }
+        });
+
         // Start the compass
         compass = new Compass(getActivity());
 
@@ -233,8 +243,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        System.out.println("  VIEW CREATED HAAHHAHA");
-        //showInstructions();
     }
 
 
@@ -325,8 +333,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     @Override
     public void onStart() {
         super.onStart();
-
-        //showInstructions();
     }
 
     @Override
@@ -375,22 +381,23 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View instructionsWindow = inflater.inflate(R.layout.instructions_popup, null);
-        //View popupView = LayoutInflater.from(getActivity()).inflate(R.layout.instructions_popup, null);
-        int width = LinearLayout.LayoutParams.MATCH_PARENT;
-        int height = LinearLayout.LayoutParams.MATCH_PARENT;
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
 
         // Allows to tap outside the popup to dismiss it
         boolean focusable = false;
 
         final PopupWindow popupWindow = new PopupWindow(instructionsWindow, width, height, focusable);
 
-        popupWindow.showAtLocation(instructionsWindow, Gravity.TOP, 0, 0);
+        popupWindow.showAtLocation(instructionsWindow, Gravity.CENTER, 0, 0);
+        instructionsShowing = true;
 
         Button button1 = instructionsWindow.findViewById(R.id.instructionsCancel);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 popupWindow.dismiss();
+                instructionsShowing = false;
             }
         });
 
@@ -426,11 +433,12 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                 button.setText("I can see them!");
                 break;
             case 4:
-                message = "If you ever forget, these instructions, just click on the question mark icon, in the bottom right, and I will be back!";
+                message = "If you ever forget, these instructions, just click on the information icon, in the bottom right, and I will be back!";
                 button.setText("Thanks!");
                 break;
             default:
                 popupWindow.dismiss();
+                instructionsShowing = false;
         }
         if (instructionProgress < INSTRUCTIONS_NUMBER) instructionProgress += 1;
         else instructionProgress = 0;
@@ -444,14 +452,12 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                 if (success) {
                     products = searchResults;
                     readyLatch.countDown();
-                    //System.out.println(readyLatch.getCount());
                 }
             }
         });
     }
 
     private void onCompassButtonPressed(View view) {
-        showInstructions();
         // Rotation animation
         ObjectAnimator.ofFloat(view, "rotation", (float) lastCompassButtonAngle, (float) lastCompassButtonAngle+360).start();
         new Thread(new Runnable() {
