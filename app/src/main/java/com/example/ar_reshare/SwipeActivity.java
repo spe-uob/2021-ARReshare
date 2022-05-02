@@ -35,12 +35,8 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
     private final int TAP_OFFSET = 10;
     private boolean touchedDown = false;
     private boolean moved = false;
+    private boolean isArSupported=false;
 
-    Fragment chatListActivity = new ChatListActivity();
-    Fragment mapsActivity = new MapsActivity();
-    Fragment profileActivity = new ProfileActivity();
-    Fragment arActivity = new ARActivity();
-    Fragment feedActivity = new FeedActivity();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +50,7 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
         //frameLayout = view.findViewById(R.id.frameLayout_wrapper);
         bottomNavigationView.setOnItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
-        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, arActivity).addToBackStack(null).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ARActivity()).addToBackStack(null).commit();
 
         // Request location permissions if needed and get latest location
         getLocationPermission();
@@ -86,7 +82,11 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
                 getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new FeedActivity()).addToBackStack(null).commit();
                 return true;
             case R.id.ar_menu_item:
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ARActivity()).addToBackStack(null).commit();
+                if (isArSupported) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ARActivity()).addToBackStack(null).commit();
+                } else {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new FallbackActivity()).addToBackStack(null).commit();
+                }
                 return true;
             case R.id.profile_menu_item:
                 getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ProfileActivity()).addToBackStack(null).commit();
@@ -101,7 +101,10 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
     private void checkIfARAvailable() {
         ArCoreApk.Availability availability = ArCoreApk.getInstance().checkAvailability(this);
         if (!availability.isSupported()) {
-            arActivity = new FallbackActivity();
+            isArSupported = false;
+            //arActivity = new FallbackActivity();
+        }else {
+            isArSupported = true;
         }
     }
 
@@ -150,7 +153,11 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
                             bottomNavigationView.setSelectedItemId(R.id.feed_menu_item);
                             break;
                         case R.id.profile_menu_item:
-                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, arActivity).addToBackStack(null).commit();
+                            if (isArSupported) {
+                                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ARActivity()).addToBackStack(null).commit();
+                            } else {
+                                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new FallbackActivity()).addToBackStack(null).commit();
+                            }
                             bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
                             break;
                         case R.id.message_menu_item:
@@ -166,8 +173,11 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
                             bottomNavigationView.setSelectedItemId(R.id.feed_menu_item);
                             break;
                         case R.id.feed_menu_item:
-                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, arActivity).addToBackStack(null).commit();
-                            bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
+                            if (isArSupported) {
+                                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ARActivity()).addToBackStack(null).commit();
+                            } else {
+                                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new FallbackActivity()).addToBackStack(null).commit();
+                            }                            bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
                             break;
                         case R.id.ar_menu_item:
                             getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ProfileActivity()).addToBackStack(null).commit();
