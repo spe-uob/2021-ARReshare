@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -70,8 +69,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -98,6 +99,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     private static final int CUBEMAP_RESOLUTION = 16;
     private static final int CUBEMAP_NUMBER_OF_IMPORTANCE_SAMPLES = 32;
+    private static final int MAX_ANCHORED_PRODUCTS = 1;
 
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
@@ -152,11 +154,12 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private int TIMEOUT_IN_SECONDS = 10;
 
     // The list of currently displayed Product Objects
-    private final List<ProductObject> productObjects = new ArrayList<>();
+    private final Queue<ProductObject> productObjectQueue = new LinkedList<>();
+    private static final double DELETE_ANCHOR_ANGLE_BOUNDARY = 15 * Math.PI/180; // degrees
 
     // The set of currently displayed products
     // This should be combined with productObjects in the future
-    private final Set<Product> displayedProductObjects = new HashSet<>();
+    private final Set<Product> displayedProducts = new HashSet<>();
     private final Set<Product> currentlyPointedProducts = new HashSet<>();
     private boolean productBoxHidden = true;
     private Map<Product, User> contributorMap = new HashMap<>();
@@ -682,7 +685,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
         // MAIN FUNCTIONALITY
         // On each frame update:
-        // TODO 0. Check user has not moved -> Reset objects if needed
 
         // 1. Get user's angle to the North (Compass)
         double angle = compass.getAngleToNorth();
@@ -693,6 +695,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         float[] pose = camera.getDisplayOrientedPose().getTranslation();
         //System.out.println("x=" + pose[0] + " z=" + pose[2]);
 
+        detachAnchorIfMoved(angle);
+
         // 2. Check if user is pointing at a product
         List<Product> pointingProducts = checkIfPointingAtProduct(angle);
 
@@ -701,7 +705,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             // If product is not already being displayed, spawn it
             // Note: The product which is closest to the angle will be spawned, hence index zero
             Product closestProduct = pointingProducts.get(0);
-            if (!this.displayedProductObjects.contains(closestProduct)) {
+            if (!this.displayedProducts.contains(closestProduct)) {
                 // Check if ARCore is tracking
                 if (camera.getTrackingState() == TrackingState.TRACKING) {
                     spawnProduct(camera, pointingProducts.get(0), productAngles.get(pointingProducts.get(0)));
@@ -766,7 +770,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         // Iterates through existing anchors and draws them on each frame
         // TODO: Sometimes ConcurrentModificationException is raised when the regenerate button
         //  is pressed and (?) the frame is being drawn, detect the issue and resolve it
-        for (ProductObject obj : this.productObjects)  {
+        for (ProductObject obj : this.productObjectQueue)  {
             Anchor anchor = obj.getAnchor();
             Trackable trackable = obj.getTrackable();
 
@@ -955,16 +959,36 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             float[] objectCoords = new float[]{coords[0] + deltaX, coords[1], coords[2] + deltaZ};
             Pose anchorPose = new Pose(objectCoords, new float[]{0, 0, 0, 0});
 
-
             System.out.println(" ANCHORS PRESENT " + session.getAllAnchors().size());
+            System.out.println(" ANCHORS QUEUE SIZE " + this.productObjectQueue.size());
+
+            if (this.productObjectQueue.size() == MAX_ANCHORED_PRODUCTS) {
+                // If exceeded limit of tracked anchors, replace last one
+                ProductObject oldest = this.productObjectQueue.poll();
+                oldest.getAnchor().detach();
+                this.displayedProducts.remove(oldest.getProduct());
+
+            }
             Anchor newAnchor = session.createAnchor(anchorPose);
             ProductObject newObject = new ProductObject(newAnchor, null, product);
-            this.productObjects.add(newObject);
-            this.displayedProductObjects.add(product);
+            this.productObjectQueue.add(newObject);
+            this.displayedProducts.add(product);
         }
     }
 
-
+    // If user rotates by the boundary value, detach the anchor
+    private void detachAnchorIfMoved(double angle) {
+        if (this.productObjectQueue.size() > 0) {
+            ProductObject oldest = this.productObjectQueue.peek();
+            double requiredAngle = this.productAngles.get(oldest.getProduct());
+            if (Math.abs(requiredAngle - angle) > DELETE_ANCHOR_ANGLE_BOUNDARY) {
+                System.out.println("DETACH ANCHOR");
+                oldest.getAnchor().detach();
+                this.displayedProducts.remove(oldest.getProduct());
+                this.productObjectQueue.clear();
+            }
+        }
+    }
 
     // Get the most recent location of the device
     private void getDeviceLocation() {
@@ -1007,15 +1031,12 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     // Reset anchors in the AR space
     private void resetProductObjects() {
-        for (ProductObject productObject : productObjects) {
+        for (ProductObject productObject : productObjectQueue) {
             productObject.getAnchor().detach();
         }
-        displayedProductObjects.removeAll(productAngles.keySet());
+        displayedProducts.removeAll(productAngles.keySet());
         contributorMap.clear();
-        int n = productObjects.size();
-        for (int i = 0; i < n; i++) {
-            productObjects.remove(0);
-        }
+        productObjectQueue.clear();
         resetScrollView(null);
     }
 
