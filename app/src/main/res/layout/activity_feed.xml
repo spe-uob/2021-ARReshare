@@ -10,14 +10,16 @@ tools:context=".FeedActivity">
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#211f1f"
+        android:background="#FFFFFF"
+        android:paddingTop="2.5dp"
+        android:paddingBottom="52.5dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:paddingTop="2.5dp"
-        android:paddingBottom="2.5dp"
-        tools:ignore="RtlSymmetry"/>
+        app:layout_constraintVertical_bias="0.0"
+        tools:ignore="RtlSymmetry" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/sideNavigationView"

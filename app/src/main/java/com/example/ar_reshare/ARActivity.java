@@ -2,6 +2,7 @@ package com.example.ar_reshare;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import android.animation.ObjectAnimator;
@@ -1213,14 +1214,20 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                 productBox.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(v.getContext(), ProductPageActivity.class);
-                        intent.putExtra("product", product);
-                        intent.putExtra("productID",product.getId());
-                        intent.putExtra("lat", product.getCoordinates().latitude);
-                        intent.putExtra("lng",product.getCoordinates().longitude);
-                        intent.putExtra("categoryID",product.getCategoryID());
-                        intent.putExtra("postcode",product.getPostcode());
-                        startActivity(intent);
+                        Bundle bundle = new Bundle();
+                        bundle.putInt("contributorID",product.getContributorID());
+                        bundle.putString("productName",product.getName());
+                        bundle.putString("productDescription",product.getDescription());
+                        bundle.putInt("productID",product.getId());
+                        bundle.putDouble("lat", product.getCoordinates().latitude);
+                        bundle.putDouble("lng",product.getCoordinates().longitude);
+                        bundle.putString("postcode",product.getPostcode());
+                        bundle.putBoolean("isSaved", product.isSavedByUser());
+                        ProductPageActivity productFragment = new ProductPageActivity();
+                        productFragment.setArguments(bundle);
+                        productFragment.setIsFromFeed(false);
+                        AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                        activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
                     }
                 });
                 scrollView.addView(productBoxParent);

@@ -46,7 +46,7 @@ public class BackendController {
 
     private static final String URL = "https://ar-reshare.herokuapp.com/";
     private static String JWT; // Used for authentication
-    private static int loggedInUserID;
+    public static int loggedInUserID;
 
     private static boolean initialised = false;
     private static Context context;
@@ -78,6 +78,14 @@ public class BackendController {
     // Interface for callback handlers to receive response from the request
     public interface BackendProfileResultCallback {
         void onBackendProfileResult(boolean success, User userProfile);
+    }
+
+    public interface BackendSearchListingsResultCallback {
+        void onBackendSearchListingsResult(boolean success, List<Product> ListingSearchResult);
+    }
+
+    public interface BackendSearchSavedListingsResultCallback {
+        void onBackendSearchSavedListingsResult(boolean success, List<Product> savedListingSearchResult);
     }
 
     public static int getLoggedInUserID() {
@@ -725,7 +733,7 @@ public class BackendController {
 
     // Helper method of searchListings()
     // Waits until all products have had their main photo downloaded and postcode converted into coordinates
-    private static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {
+    public static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {
         final int NUMBER_OF_REQUESTS_PER_PRODUCT = 2;
 
         // Initialise the latch to wait for callbacks
@@ -917,6 +925,71 @@ public class BackendController {
         json.put("media",pics);
 
         return json.toString();
+    }
+
+    public static void searchAccountListings(int startResults, int maxResults, int categoryID,
+                                             BackendSearchResultCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product.SearchResults> call = service.searchAccountListings(JWT, maxResults, startResults);
+        try {
+            call.enqueue(new Callback<Product.SearchResults>() {
+                @Override
+                public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        initialiseProducts(response.body().getSearchedProducts(), callback);
+                    } else {
+                        callback.onBackendSearchResult(false, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendSearchResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println("Encountered error. " + e);
+            callback.onBackendSearchResult(false, null);
+        }
+    }
+
+    public static void searchSavedListings(int startResults, int maxResults,
+                                           BackendSearchResultCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product.SearchResults> call = service.searchSavedListings(JWT, maxResults, startResults);
+
+        try {
+            call.enqueue(new Callback<Product.SearchResults>() {
+                @Override
+                public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        initialiseProducts(response.body().getSearchedProducts(), callback);
+                    } else {
+                        callback.onBackendSearchResult(false, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendSearchResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println("Encountered error. " + e);
+            callback.onBackendSearchResult(false, null);
+        }
     }
 }
 

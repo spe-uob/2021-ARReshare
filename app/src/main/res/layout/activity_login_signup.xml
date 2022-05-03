@@ -13,7 +13,7 @@
         android:layout_width="184dp"
         android:layout_height="190dp"
         android:layout_gravity="top|center"
-        app:srcCompat="@drawable/splash111" />
+        app:srcCompat="@drawable/beaver" />
 
     <androidx.viewpager2.widget.ViewPager2
         xmlns:android="http://schemas.android.com/apk/res/android"
