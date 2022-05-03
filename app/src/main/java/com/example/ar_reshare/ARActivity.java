@@ -19,6 +19,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
@@ -191,7 +192,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private Map<Product, Double> productAngles = new HashMap<>();
 
     // The acceptable limit of angle offset to product
-    private static final double ANGLE_LIMIT = 20 * Math.PI/180; // degrees converted to radians
+    private static final double ANGLE_LIMIT = 15 * Math.PI/180; // degrees converted to radians
 
     // Instructions
     private int instructionProgress = 0;
@@ -691,13 +692,14 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         // On each frame update:
 
         // 1. Get user's angle to the North (Compass)
-        //double angle = compass.getAngleToNorth();
+
+        // Get the latest stable compass reading
         double angle = lastMedianAngle;
         rotateCompass(angle);
-        // Stabilise compass reading
+
         //angle = stabiliseCompassReading(angle);
         //System.out.println("median " + angle*(180/Math.PI) + " degrees to north clockwise");
-        float[] pose = camera.getDisplayOrientedPose().getTranslation();
+        //float[] pose = camera.getDisplayOrientedPose().getTranslation();
         //System.out.println("x=" + pose[0] + " z=" + pose[2]);
 
         //detachAnchorIfMoved(angle);
@@ -929,7 +931,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     // method to spawn a product in a virtual space
     private void spawnProduct(Camera camera, Product product, double angleToNorth) {
         System.out.println("    SPAWN PRODUCT CALLED    ");
-        float distance = 1.5f; // metres away
+        float distance = 1f; // metres away
         ProductObject displayedInAR = this.productObjectQueue.peek();
         // Only spawn products, if none are displayed or the displayed one is different
         if (this.productObjectQueue.size() == 0 || displayedInAR.getProduct() != product) {
@@ -941,10 +943,10 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             // Get new coordinates set distance in meters in front of the user
             // Using Trigonometry
 
-            angleToNorth = angleToNorth % Math.PI;
+            double modifiedAngleToNorth = angleToNorth % Math.PI/2;
 
-            float oppositeDelta = (float) (Math.sin(angleToNorth) * distance);
-            float adjacentDelta = (float) (Math.cos(angleToNorth) * distance);
+            float oppositeDelta = (float) (Math.sin(modifiedAngleToNorth) * distance);
+            float adjacentDelta = (float) (Math.cos(modifiedAngleToNorth) * distance);
 
             System.out.println("ANCHOR ANGLE" + angleToNorth);
 
