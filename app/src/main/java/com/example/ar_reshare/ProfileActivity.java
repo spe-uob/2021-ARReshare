@@ -108,7 +108,8 @@ public class ProfileActivity extends Fragment {
     }
 
     public View.OnClickListener clickListener(Product product, View view) {
-        return (View.OnClickListener) v -> {
+        return v -> {
+            Fragment productActivity = new Fragment();
             Bundle bundle = new Bundle();
             bundle.putInt("productID", product.getId());
             bundle.putString("productName", product.getName());
@@ -117,10 +118,9 @@ public class ProfileActivity extends Fragment {
             bundle.putDouble("lat", product.getCoordinates().latitude);
             bundle.putDouble("lng", product.getCoordinates().longitude);
             bundle.putString("postcode", product.getPostcode());
-            ProductPageActivity productFragment = new ProductPageActivity();
-            productFragment.setArguments(bundle);
+            productActivity.setArguments(bundle);
             AppCompatActivity activity = (AppCompatActivity) view.getContext();
-            activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper, productFragment).addToBackStack(null).commit();
+            activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper, productActivity).addToBackStack(null).commit();
         };
     }
 
@@ -152,12 +152,12 @@ public class ProfileActivity extends Fragment {
                         shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view));
                         shared2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
                         shared1.setOnClickListener(clickListener(ListingSearchResult.get(1), view));
-                        shared3.setVisibility(View.INVISIBLE);
+                        shared3.setVisibility(View.GONE);
                     } else if (ListingSearchResult.size() == 1) {
                         shared1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
                         shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view));
-                        shared2.setVisibility(View.INVISIBLE);
-                        shared3.setVisibility(View.INVISIBLE);
+                        shared2.setVisibility(View.GONE);
+                        shared3.setVisibility(View.GONE);
                     }
                     sharedStatus.setText(MessageFormat.format("{0} products shared.", ListingSearchResult.size()));
                 });
@@ -195,12 +195,12 @@ public class ProfileActivity extends Fragment {
                         saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view));
                         saved2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
                         saved1.setOnClickListener(clickListener(ListingSearchResult.get(1), view));
-                        saved3.setVisibility(View.INVISIBLE);
+                        saved3.setVisibility(View.GONE);
                     } else if (ListingSearchResult.size() == 1) {
                         saved1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
                         saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view));
-                        saved2.setVisibility(View.INVISIBLE);
-                        saved3.setVisibility(View.INVISIBLE);
+                        saved2.setVisibility(View.GONE);
+                        saved3.setVisibility(View.GONE);
                     }
                     savedStatus.setText(MessageFormat.format("{0} products saved.", ListingSearchResult.size()));
                 });

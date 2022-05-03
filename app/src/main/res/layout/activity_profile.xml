@@ -26,9 +26,10 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:background="#00FFFFFF"
-            android:layout_marginStart="360dp"
+            android:layout_marginStart="290dp"
             android:src="@drawable/filter_icon"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/backButton"
+
             app:layout_constraintTop_toTopOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -101,7 +102,7 @@
         <ImageView
             android:id="@+id/shared1"
             android:background="@drawable/custom_border"
-            android:layout_width="0dp"
+            android:layout_width="136dp"
             android:layout_height="150dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/shared2"
@@ -113,7 +114,7 @@
         <ImageView
             android:id="@+id/shared2"
             android:background="@drawable/custom_border"
-            android:layout_width="0dp"
+            android:layout_width="136dp"
             android:layout_height="150dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/shared3"
@@ -125,7 +126,7 @@
         <ImageView
             android:id="@+id/shared3"
             android:background="@drawable/custom_border"
-            android:layout_width="0dp"
+            android:layout_width="136dp"
             android:layout_height="150dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -181,7 +182,7 @@
         <ImageView
             android:id="@+id/saved1"
             android:background="@drawable/custom_border"
-            android:layout_width="0dp"
+            android:layout_width="136dp"
             android:layout_height="150dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/saved2"
@@ -193,7 +194,7 @@
         <ImageView
             android:id="@+id/saved2"
             android:background="@drawable/custom_border"
-            android:layout_width="0dp"
+            android:layout_width="136dp"
             android:layout_height="150dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/saved3"
@@ -205,7 +206,7 @@
         <ImageView
             android:id="@+id/saved3"
             android:background="@drawable/custom_border"
-            android:layout_width="0dp"
+            android:layout_width="136dp"
             android:layout_height="150dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

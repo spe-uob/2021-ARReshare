@@ -312,7 +312,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         public void profileClick(View v) {
             Fragment profileActivity = new Fragment();
             Bundle bundle = new Bundle();
-            bundle.putInt("userID", product.getCategoryID());
+            bundle.putInt("contributorID", product.getContributorID());
             profileActivity.setArguments(bundle);
             AppCompatActivity appCompatActivity = (AppCompatActivity)v.getContext();
             appCompatActivity.getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileActivity).commit();
