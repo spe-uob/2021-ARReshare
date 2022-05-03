@@ -315,6 +315,12 @@ public class ProfileActivity extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+
+                            if (savedListingSearchResult.size() <= 1) {
+                                ImageButton savedImage1 = getActivity().findViewById(R.id.saved1);
+                                savedImage1.setVisibility(View.GONE);
+                            }
+
                             if (savedListingSearchResult.size() >= 1) {
                                 savedProduct1 = savedListingSearchResult.get(0);
                                 ImageButton productImage1 = getActivity().findViewById(R.id.saved1);
@@ -337,6 +343,11 @@ public class ProfileActivity extends Fragment {
                                 });
                             }
 
+                            if (savedListingSearchResult.size() <= 2) {
+                                ImageButton savedImage2 = getActivity().findViewById(R.id.saved2);
+                                savedImage2.setVisibility(View.GONE);
+                            }
+
                             if (savedListingSearchResult.size() >= 2) {
                                 savedProduct2 = savedListingSearchResult.get(1);
                                 ImageButton productImage2 = getActivity().findViewById(R.id.saved2);
@@ -357,6 +368,11 @@ public class ProfileActivity extends Fragment {
                                         startActivity(intent);
                                     }
                                 });
+                            }
+
+                            if (savedListingSearchResult.size() <= 3) {
+                                ImageButton savedImage3 = getActivity().findViewById(R.id.saved3);
+                                savedImage3.setVisibility(View.GONE);
                             }
 
                             if (savedListingSearchResult.size() >= 3) {
