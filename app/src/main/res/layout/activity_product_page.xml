@@ -10,7 +10,7 @@
         android:id="@+id/nav_name"
         android:layout_width="0dp"
         android:layout_height="55dp"
-        android:background="@color/primary_green"
+        android:background="#E5EFC1"
         android:drawablePadding="20dp"
         android:fontFamily="@font/montserrat"
         android:gravity="center"
