@@ -240,7 +240,11 @@ public class ChatListActivity extends Fragment implements NavigationBarView.OnIt
                 if (success) {
                     System.out.println(message);
                     int size = messageResult.getMessages().size();
-                    chat.setLastMessage(messageResult.getMessages().get(0));
+                    if (messageResult.getMessages().size() > 0){
+                        chat.setLastMessage(messageResult.getMessages().get(0));
+                    } else {
+                        chat.setLastMessage(null);
+                    }
                     mChatList.add(chat);
                     recyclerView.getAdapter().notifyDataSetChanged();
                 }else {
