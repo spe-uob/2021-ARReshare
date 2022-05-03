@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.accounts.Account;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,10 +19,11 @@ public class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.splash_page);
+        if(getSupportActionBar()!=null)
+            getSupportActionBar().hide();
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
-        Intent intent = new Intent(SplashActivity.this, ARActivity.class);
+        super.onCreate(savedInstanceState);
 
         // Check if user is logged in
         Optional<Account> account = AuthenticationService.isLoggedIn(getApplicationContext());
@@ -31,16 +33,13 @@ public class SplashActivity extends AppCompatActivity {
             AuthenticationService.loginUser(getApplicationContext(), account.get(), new BackendController.BackendCallback() {
                 @Override
                 public void onBackendResult(boolean success, String message) {
-                    if (success) proceed();
+                    if (success) {
+                        proceed();
+                    }
                     else forceLogin();
                 }
             });
         } else forceLogin();
-
-        ImageView appIcon = findViewById(R.id.appIcon);
-        appIcon.animate().rotationBy(720).translationY(-400).setDuration(2000).start();
-        TextView splashText = findViewById(R.id.splashText);
-        splashText.animate().translationY(-700).setDuration(3000).start();
     }
 
     private void forceLogin() {
@@ -51,7 +50,7 @@ public class SplashActivity extends AppCompatActivity {
                 Intent intent = new Intent(SplashActivity.this, LoginSignupActivity.class);
                 startActivity(intent);
             }
-        }, 3500);
+        }, 3000);
     }
 
     private void proceed() {
@@ -62,6 +61,6 @@ public class SplashActivity extends AppCompatActivity {
                 Intent intent = new Intent(SplashActivity.this, SwipeActivity.class);
                 startActivity(intent);
             }
-        }, 3500);
+        }, 3000);
     }
 }

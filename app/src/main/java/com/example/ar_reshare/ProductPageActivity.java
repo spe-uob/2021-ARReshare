@@ -3,7 +3,6 @@ package com.example.ar_reshare;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
@@ -102,9 +101,6 @@ public class ProductPageActivity extends Fragment implements BackendController.B
         //top left return arrow
         returnListener();
 
-        //links to messaging page
-//      messageButton(product,contributor,user, profilePicId);
-
         waitOnConditions();
         return view;
     }
@@ -126,6 +122,8 @@ public class ProductPageActivity extends Fragment implements BackendController.B
     }
 
     private void displayInfo(){
+        //links to messaging page
+        messageButton();
         //edit button
         showEditIfUser();
 
@@ -399,26 +397,38 @@ public class ProductPageActivity extends Fragment implements BackendController.B
         });
     }
 
-    public void messageButton(Product product, User contributor, User user,Integer profilePicId){
+    public void messageButton(){
 
         Button message = view.findViewById(R.id.messageButton);
 
         message.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent intent = new Intent(ProductPageActivity.this ,MessagingActivity.class);
-//                intent.putExtra("product", product);
-//                intent.putExtra("contributor", contributor);
-//                intent.putExtra("user",user);
-//                intent.putExtra("profilePicId", profilePicId);
-//                startActivity(intent);
+                Intent intent = new Intent(v.getContext(), MessagingActivity.class);
+                try {
+                    BackendController.createConversation(product.getId(), (success, message) -> {
+                        if (success) {
+                            System.out.println("conversation created");
+                            Integer conversationId = Integer.valueOf(message);
+                            intent.putExtra("conversationId", conversationId);
+                            intent.putExtra("listingId", product.getId());
+                            intent.putExtra("currentUserId", BackendController.getLoggedInUserID());
+                            intent.putExtra("contributorId", product.getContributorID());
+                            v.getContext().startActivity(intent);
+                        } else {
+                            System.out.println(message);
+                            System.out.println("conversation creation failed");
+                        }
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
-        if(user.getName().equals(contributor.getName())){ // check if the product's contributor is the user
+        if(product.getContributorID() == BackendController.getLoggedInUserID()){ // check if the product's contributor is the user
             message.setVisibility(View.INVISIBLE); // hide the message button in this case
             TextView thanksMessage = view.findViewById(R.id.thanksForSharing);
             thanksMessage.setVisibility(View.VISIBLE);
-
         }
     }
 
