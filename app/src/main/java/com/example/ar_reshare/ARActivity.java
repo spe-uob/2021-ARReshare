@@ -44,6 +44,7 @@ import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
+import com.google.ar.core.InstantPlacementPoint;
 import com.google.ar.core.LightEstimate;
 import com.google.ar.core.Plane;
 import com.google.ar.core.PointCloud;
@@ -51,7 +52,6 @@ import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.example.ar_reshare.helpers.*;
 import com.google.ar.core.Trackable;
-import com.google.ar.core.TrackingFailureReason;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.CameraNotAvailableException;
 import com.google.ar.core.exceptions.NotYetAvailableException;
@@ -66,7 +66,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -76,7 +75,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class ARActivity extends Fragment implements SampleRender.Renderer{
 
@@ -131,7 +129,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     // Virtual object (ARCore pawn)
     private Mesh virtualObjectMesh;
+
     private Shader virtualObjectShader;
+    private Texture virtualObjectTexture;
 
     // Environmental HDR
     private Texture dfgTexture;
@@ -175,9 +175,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private double[] compassReadingsArray = new double[MAX_COMPASS_READING_QUEUE_SIZE];
     private int compassReadingSize = 0;
     private int compassReadingIndex = 0;
-    private final int COMPASS_POLLING_RATE = 10; // Milliseconds
+    private final int COMPASS_POLLING_RATE = 2; // Milliseconds
     private boolean pauseCompass = false;
-    private final int COMPASS_MEDIAN_REFRESH_RATE = 10;
+    private final int COMPASS_MEDIAN_REFRESH_RATE = 30;
     private int compassMedianCountdown = COMPASS_MEDIAN_REFRESH_RATE;
 
     // Location related attributes:
@@ -588,14 +588,19 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
             virtualObjectMesh = Mesh.createFromAsset(render, "models/pawn.obj");
 
-            // Default Texture
-            Texture texture =
+            // Virtual object to render (ARCore pawn)
+            virtualObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/others_colours.png",
+                            "models/electronics_colours.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
-
+            virtualObjectAlbedoInstantPlacementTexture =
+                    Texture.createFromAsset(
+                            render,
+                            "models/electronics_colours.png",
+                            Texture.WrapMode.CLAMP_TO_EDGE,
+                            Texture.ColorFormat.SRGB);
 
             virtualObjectShader =
                     Shader.createFromAssets(
@@ -609,7 +614,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                                             Integer.toString(cubemapFilter.getNumberOfMipmapLevels()));
                                 }
                             })
-                            .setTexture("u_AlbedoTexture", texture)
+                            .setTexture("u_AlbedoTexture", virtualObjectTexture)
                             .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
                             .setTexture("u_DfgTexture", dfgTexture);
         } catch (IOException e) {
@@ -687,26 +692,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
         //trackingStateHelper.updateKeepScreenOnFlag(camera.getTrackingState());
 
-        // Show a message based on whether tracking has failed, if planes are detected, and if the user
-        // has placed any objects.
-//        String message = null;
-//        if (camera.getTrackingState() == TrackingState.PAUSED) {
-//            if (camera.getTrackingFailureReason() == TrackingFailureReason.NONE) {
-//                //message = SEARCHING_PLANE_MESSAGE;
-//            } else {
-//                //message = TrackingStateHelper.getTrackingFailureReasonString(camera);
-//            }
-//        } else if (hasTrackingPlane()) {
-//        } else {
-//            //message = SEARCHING_PLANE_MESSAGE;
-//        }
-//        if (message == null) {
-//            messageSnackbarHelper.hide(getActivity());
-//        } else {
-//            //messageSnackbarHelper.showMessage(this, message);
-//        }
-
-
         // MAIN FUNCTIONALITY
         // On each frame update:
 
@@ -718,7 +703,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         //angle = stabiliseCompassReading(angle);
         //System.out.println("median " + angle*(180/Math.PI) + " degrees to north clockwise");
         float[] pose = camera.getDisplayOrientedPose().getTranslation();
-        System.out.println("x=" + pose[0] + " z=" + pose[2]);
+        //System.out.println("x=" + pose[0] + " z=" + pose[2]);
 
         //detachAnchorIfMoved(angle);
 
@@ -736,7 +721,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                     spawnProduct(camera, pointingProducts.get(0), angle);
                 }
             }
-            //prepareProductBoxes(pointingProducts);
+            prepareProductBoxes(pointingProducts);
         } else {
             // Hide product boxes if currently not pointing at any product
             if (!productBoxHidden) {
@@ -799,29 +784,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             Anchor anchor = obj.getAnchor();
             Trackable trackable = obj.getTrackable();
 
-            // Check object's category
-            Texture texture = getCategoryTexture(obj.getProduct());
-
-            // Create the virtual shader
-            try {
-                virtualObjectShader =
-                        Shader.createFromAssets(
-                                render,
-                                "shaders/environmental_hdr.vert",
-                                "shaders/environmental_hdr.frag",
-                                /*defines=*/ new HashMap<String, String>() {
-                                    {
-                                        put(
-                                                "NUMBER_OF_MIPMAP_LEVELS",
-                                                Integer.toString(cubemapFilter.getNumberOfMipmapLevels()));
-                                    }
-                                })
-                                .setTexture("u_AlbedoTexture", texture)
-                                .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
-                                .setTexture("u_DfgTexture", dfgTexture);
-            } catch (IOException e) {}
-
-
             // Get the current pose of an Anchor in world space. The Anchor pose is updated
             // during calls to session.update() as ARCore refines its estimate of the world.
             anchor.getPose().toMatrix(modelMatrix, 0);
@@ -833,6 +795,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             // Update shader properties and draw
             virtualObjectShader.setMat4("u_ModelView", modelViewMatrix);
             virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+
+            virtualObjectShader.setTexture("u_AlbedoTexture", virtualObjectTexture);
 
             render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
         }
@@ -1255,6 +1219,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     // Takes a median of the last set of compass readings to filter out anomalies
     // Self-developed efficient median algorithm
     private double stabiliseCompassReading(double reading) {
+        if (true) return reading;
         if (compassReadingSize < MAX_COMPASS_READING_QUEUE_SIZE) {
             compassReadingSize += 1;
         }
