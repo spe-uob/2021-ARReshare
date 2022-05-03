@@ -116,10 +116,11 @@ public class ProfileActivity extends Fragment {
             bundle.putDouble("lat", product.getCoordinates().latitude);
             bundle.putDouble("lng",product.getCoordinates().longitude);
             bundle.putString("postcode",product.getPostcode());
+            bundle.putBoolean("isSaved", product.isSavedByUser());
             ProductPageActivity productFragment = new ProductPageActivity();
             productFragment.setArguments(bundle);
-            AppCompatActivity activity = (AppCompatActivity)v.getContext();
-            activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
+            productFragment.setIsFromFeed(false);
+            getActivity().getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
         };
     }
 
