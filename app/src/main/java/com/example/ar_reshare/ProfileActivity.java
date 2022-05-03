@@ -35,7 +35,6 @@ public class ProfileActivity extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_profile, container, false);
 
-
         Bundle bundle = this.getArguments();
 
         //Intent i = getActivity().getIntent();
@@ -65,7 +64,7 @@ public class ProfileActivity extends Fragment {
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().onBackPressed();
+                getActivity().getSupportFragmentManager().popBackStack();
                 getActivity().overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             }
         });
@@ -151,10 +150,12 @@ public class ProfileActivity extends Fragment {
                         @Override
                         public void run() {
 
-                            if (ListingSearchResult.size() <= 1){
+                            if (ListingSearchResult.size() < 1){
                                 ImageButton shared1 = getActivity().findViewById(R.id.shared1);
-                                shared1.setVisibility(View.GONE);
+                                shared1.setVisibility(View.INVISIBLE);
+                            } else {
                                 TextView sharedtips = (TextView) getActivity().findViewById(R.id.sharedtips);
+                                sharedtips.setVisibility(View.INVISIBLE);
                             }
 
                             if(ListingSearchResult.size() >= 1) {
@@ -166,22 +167,25 @@ public class ProfileActivity extends Fragment {
                                 productImage1.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        Intent intent = new Intent(getActivity(), ProductPageActivity.class);
-                                        intent.putExtra("product", currentProduct1);
-                                        intent.putExtra("contributorID", currentProduct1.getContributorID());
-                                        intent.putExtra("productID", currentProduct1.getId());
-                                        intent.putExtra("lat", currentProduct1.getCoordinates().latitude);
-                                        intent.putExtra("lat", currentProduct1.getCoordinates().longitude);
-                                        intent.putExtra("categoryID", currentProduct1.getCategoryID());
-                                        intent.putExtra("postcode", currentProduct1.getPostcode());
-                                        startActivity(intent);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putInt("contributorID", currentProduct1.getContributorID());
+                                        bundle.putString("productName", currentProduct1.getName());
+                                        bundle.putString("productDescription",currentProduct1.getDescription());
+                                        bundle.putInt("productID", currentProduct1.getId());
+                                        bundle.putDouble("lat", currentProduct1.getCoordinates().latitude);
+                                        bundle.putDouble("lng", currentProduct1.getCoordinates().longitude);
+                                        bundle.putString("postcode", currentProduct1.getPostcode());
+                                        ProductPageActivity productFragment = new ProductPageActivity();
+                                        productFragment.setArguments(bundle);
+                                        AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                                        activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
                                     }
                                 });
                             }
 
-                            if (ListingSearchResult.size() <= 2){
+                            if (ListingSearchResult.size() < 2){
                                 ImageButton shared2 = getActivity().findViewById(R.id.shared2);
-                                shared2.setVisibility(View.GONE);
+                                shared2.setVisibility(View.INVISIBLE);
                             }
 
                             if(ListingSearchResult.size() >= 2) {
@@ -194,22 +198,25 @@ public class ProfileActivity extends Fragment {
                                 productImage2.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        Intent intent = new Intent(getActivity(), ProductPageActivity.class);
-                                        intent.putExtra("product", currentProduct2);
-                                        intent.putExtra("contributorID", currentProduct2.getContributorID());
-                                        intent.putExtra("productID", currentProduct2.getId());
-                                        intent.putExtra("lat", currentProduct2.getCoordinates().latitude);
-                                        intent.putExtra("lat", currentProduct2.getCoordinates().longitude);
-                                        intent.putExtra("categoryID", currentProduct2.getCategoryID());
-                                        intent.putExtra("postcode", currentProduct2.getPostcode());
-                                        startActivity(intent);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putInt("contributorID", currentProduct2.getContributorID());
+                                        bundle.putString("productName", currentProduct2.getName());
+                                        bundle.putString("productDescription",currentProduct2.getDescription());
+                                        bundle.putInt("productID", currentProduct2.getId());
+                                        bundle.putDouble("lat",  currentProduct2.getCoordinates().latitude);
+                                        bundle.putDouble("lng", currentProduct2.getCoordinates().longitude);
+                                        bundle.putString("postcode", currentProduct2.getPostcode());
+                                        ProductPageActivity productFragment = new ProductPageActivity();
+                                        productFragment.setArguments(bundle);
+                                        AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                                        activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
                                     }
                                 });
                             }
 
-                            if (ListingSearchResult.size() <= 3){
+                            if (ListingSearchResult.size() < 3){
                                 ImageButton shared3 = getActivity().findViewById(R.id.shared3);
-                                shared3.setVisibility(View.GONE);
+                                shared3.setVisibility(View.INVISIBLE);
                             }
 
                             if(ListingSearchResult.size() >= 3) {
@@ -221,15 +228,18 @@ public class ProfileActivity extends Fragment {
                                 productImage3.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        Intent intent = new Intent(getActivity(), ProductPageActivity.class);
-                                        intent.putExtra("product", currentProduct3);
-                                        intent.putExtra("contributorID", currentProduct3.getContributorID());
-                                        intent.putExtra("productID", currentProduct3.getId());
-                                        intent.putExtra("lat", currentProduct3.getCoordinates().latitude);
-                                        intent.putExtra("lat", currentProduct3.getCoordinates().longitude);
-                                        intent.putExtra("categoryID", currentProduct3.getCategoryID());
-                                        intent.putExtra("postcode", currentProduct3.getPostcode());
-                                        startActivity(intent);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putInt("contributorID", currentProduct3.getContributorID());
+                                        bundle.putString("productName", currentProduct3.getName());
+                                        bundle.putString("productDescription",currentProduct3.getDescription());
+                                        bundle.putInt("productID", currentProduct3.getId());
+                                        bundle.putDouble("lat",  currentProduct3.getCoordinates().latitude);
+                                        bundle.putDouble("lng", currentProduct3.getCoordinates().longitude);
+                                        bundle.putString("postcode", currentProduct3.getPostcode());
+                                        ProductPageActivity productFragment = new ProductPageActivity();
+                                        productFragment.setArguments(bundle);
+                                        AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                                        activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
                                     }
                                 });
                             }
@@ -250,10 +260,12 @@ public class ProfileActivity extends Fragment {
             public void onBackendSearchResult(boolean success, List<Product> searchResults) {
                 getActivity().runOnUiThread(() -> {
 
-                    if(searchResults.size() <= 1){
+                    if(searchResults.size() < 1){
                         ImageButton shared1 = (ImageButton) getActivity().findViewById(R.id.shared1);
                         shared1.setVisibility(View.GONE);
-                        TextView sharedtips = (TextView) getActivity().findViewById(R.id.sharedtips);
+                    } else {
+                        TextView savedtips = (TextView) getActivity().findViewById(R.id.savedtips);
+                        savedtips.setVisibility(View.INVISIBLE);
                     }
 
                     if(searchResults.size() >= 1){
@@ -261,9 +273,9 @@ public class ProfileActivity extends Fragment {
                         sharedProductShow(shared1, searchResults.get(0));
                     }
 
-                    if(searchResults.size() <= 2){
+                    if(searchResults.size() < 2){
                         ImageButton shared2 = (ImageButton) getActivity().findViewById(R.id.shared2);
-                        shared2.setVisibility(View.GONE);
+                        shared2.setVisibility(View.INVISIBLE);
                     }
 
                     if (searchResults.size() >= 2){
@@ -271,9 +283,9 @@ public class ProfileActivity extends Fragment {
                         sharedProductShow(shared2, searchResults.get(1));
                     }
 
-                    if(searchResults.size() <= 3){
+                    if(searchResults.size() < 3){
                         ImageButton shared3 = (ImageButton) getActivity().findViewById(R.id.shared3);
-                        shared3.setVisibility(View.GONE);
+                        shared3.setVisibility(View.INVISIBLE);
                     }
 
                     if (searchResults.size() >= 3){
@@ -293,15 +305,18 @@ public class ProfileActivity extends Fragment {
         shared.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), ProductPageActivity.class);
-                intent.putExtra("product", product);
-                intent.putExtra("contributorID", product.getContributorID());
-                intent.putExtra("productID", product.getId());
-                intent.putExtra("lat", product.getCoordinates().latitude);
-                intent.putExtra("lat", product.getCoordinates().longitude);
-                intent.putExtra("categoryID", product.getCategoryID());
-                intent.putExtra("postcode", product.getPostcode());
-                startActivity(intent);
+                Bundle bundle = new Bundle();
+                bundle.putInt("contributorID", product.getContributorID());
+                bundle.putString("productName", product.getName());
+                bundle.putString("productDescription", product.getDescription());
+                bundle.putInt("productID", product.getId());
+                bundle.putDouble("lat",  product.getCoordinates().latitude);
+                bundle.putDouble("lng", product.getCoordinates().longitude);
+                bundle.putString("postcode", product.getPostcode());
+                ProductPageActivity productFragment = new ProductPageActivity();
+                productFragment.setArguments(bundle);
+                AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
             }
         });
     }
@@ -316,9 +331,12 @@ public class ProfileActivity extends Fragment {
                         @Override
                         public void run() {
 
-                            if (savedListingSearchResult.size() <= 1) {
+                            if (savedListingSearchResult.size() < 1) {
                                 ImageButton savedImage1 = getActivity().findViewById(R.id.saved1);
-                                savedImage1.setVisibility(View.GONE);
+                                savedImage1.setVisibility(View.INVISIBLE);
+                            } else {
+                                TextView savedtips = (TextView) getActivity().findViewById(R.id.savedtips);
+                                savedtips.setVisibility(View.INVISIBLE);
                             }
 
                             if (savedListingSearchResult.size() >= 1) {
@@ -330,22 +348,25 @@ public class ProfileActivity extends Fragment {
                                 productImage1.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        Intent intent = new Intent(getActivity(), ProductPageActivity.class);
-                                        intent.putExtra("product", savedProduct1);
-                                        intent.putExtra("contributorID", savedProduct1.getContributorID());
-                                        intent.putExtra("productID", savedProduct1.getId());
-                                        intent.putExtra("lat", savedProduct1.getCoordinates().latitude);
-                                        intent.putExtra("lat", savedProduct1.getCoordinates().longitude);
-                                        intent.putExtra("categoryID", savedProduct1.getCategoryID());
-                                        intent.putExtra("postcode", savedProduct1.getPostcode());
-                                        startActivity(intent);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putInt("contributorID", savedProduct1.getContributorID());
+                                        bundle.putString("productName", savedProduct1.getName());
+                                        bundle.putString("productDescription",savedProduct1.getDescription());
+                                        bundle.putInt("productID", savedProduct1.getId());
+                                        bundle.putDouble("lat", savedProduct1.getCoordinates().latitude);
+                                        bundle.putDouble("lng", savedProduct1.getCoordinates().longitude);
+                                        bundle.putString("postcode", savedProduct1.getPostcode());
+                                        ProductPageActivity productFragment = new ProductPageActivity();
+                                        productFragment.setArguments(bundle);
+                                        AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                                        activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
                                     }
                                 });
                             }
 
-                            if (savedListingSearchResult.size() <= 2) {
+                            if (savedListingSearchResult.size() < 2) {
                                 ImageButton savedImage2 = getActivity().findViewById(R.id.saved2);
-                                savedImage2.setVisibility(View.GONE);
+                                savedImage2.setVisibility(View.INVISIBLE);
                             }
 
                             if (savedListingSearchResult.size() >= 2) {
@@ -357,22 +378,25 @@ public class ProfileActivity extends Fragment {
                                 productImage2.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        Intent intent = new Intent(getActivity(), ProductPageActivity.class);
-                                        intent.putExtra("product", savedProduct2);
-                                        intent.putExtra("contributorID", savedProduct2.getContributorID());
-                                        intent.putExtra("productID", savedProduct2.getId());
-                                        intent.putExtra("lat", savedProduct2.getCoordinates().latitude);
-                                        intent.putExtra("lat", savedProduct2.getCoordinates().longitude);
-                                        intent.putExtra("categoryID", savedProduct2.getCategoryID());
-                                        intent.putExtra("postcode", savedProduct2.getPostcode());
-                                        startActivity(intent);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putInt("contributorID", savedProduct2.getContributorID());
+                                        bundle.putString("productName", savedProduct2.getName());
+                                        bundle.putString("productDescription",savedProduct2.getDescription());
+                                        bundle.putInt("productID", savedProduct2.getId());
+                                        bundle.putDouble("lat", savedProduct2.getCoordinates().latitude);
+                                        bundle.putDouble("lng", savedProduct2.getCoordinates().longitude);
+                                        bundle.putString("postcode", savedProduct2.getPostcode());
+                                        ProductPageActivity productFragment = new ProductPageActivity();
+                                        productFragment.setArguments(bundle);
+                                        AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                                        activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
                                     }
                                 });
                             }
 
-                            if (savedListingSearchResult.size() <= 3) {
+                            if (savedListingSearchResult.size() < 3) {
                                 ImageButton savedImage3 = getActivity().findViewById(R.id.saved3);
-                                savedImage3.setVisibility(View.GONE);
+                                savedImage3.setVisibility(View.INVISIBLE);
                             }
 
                             if (savedListingSearchResult.size() >= 3) {
@@ -384,15 +408,18 @@ public class ProfileActivity extends Fragment {
                                 productImage3.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        Intent intent = new Intent(getActivity(), ProductPageActivity.class);
-                                        intent.putExtra("product", savedProduct3);
-                                        intent.putExtra("contributorID", savedProduct3.getContributorID());
-                                        intent.putExtra("productID", savedProduct3.getId());
-                                        intent.putExtra("lat", savedProduct3.getCoordinates().latitude);
-                                        intent.putExtra("lat", savedProduct3.getCoordinates().longitude);
-                                        intent.putExtra("categoryID", savedProduct3.getCategoryID());
-                                        intent.putExtra("postcode", savedProduct3.getPostcode());
-                                        startActivity(intent);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putInt("contributorID", savedProduct3.getContributorID());
+                                        bundle.putString("productName", savedProduct3.getName());
+                                        bundle.putString("productDescription",savedProduct3.getDescription());
+                                        bundle.putInt("productID", savedProduct3.getId());
+                                        bundle.putDouble("lat", savedProduct3.getCoordinates().latitude);
+                                        bundle.putDouble("lng", savedProduct3.getCoordinates().longitude);
+                                        bundle.putString("postcode", savedProduct3.getPostcode());
+                                        ProductPageActivity productFragment = new ProductPageActivity();
+                                        productFragment.setArguments(bundle);
+                                        AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                                        activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
                                     }
                                 });
                             }
