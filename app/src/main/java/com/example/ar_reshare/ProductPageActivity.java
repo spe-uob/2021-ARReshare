@@ -358,8 +358,14 @@ public class ProductPageActivity extends Fragment implements BackendController.B
                             System.out.println(message);
                             if (success) {
                                 System.out.println("createSavedListing callback success");
+                                Toast toast = Toast.makeText(
+                                        getActivity().getApplicationContext(), "Successfully saved listing", Toast.LENGTH_SHORT);
+                                toast.show();
                             } else {
                                 System.out.println("createSavedListing callback failed");
+                                Toast toast = Toast.makeText(
+                                        getActivity().getApplicationContext(), "Failed to save listing", Toast.LENGTH_SHORT);
+                                toast.show();
                             }
                         });
                     } catch (JSONException e) {
@@ -368,7 +374,7 @@ public class ProductPageActivity extends Fragment implements BackendController.B
                     bookmark.setImageResource(R.drawable.ic_baseline_bookmark_24);
                     bookmark.setTag(1);
                     if(isFromFeed){
-                        feedBookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
+                        feedBookmarkButton.setImageResource(R.drawable.filled_black_bookmark);
                         feedBookmarkButton.setTag(1);
                     }
 
@@ -378,8 +384,14 @@ public class ProductPageActivity extends Fragment implements BackendController.B
                             System.out.println(message);
                             if (success) {
                                 System.out.println("deleteSavedListing callback success");
+                                Toast toast = Toast.makeText(
+                                        getActivity().getApplicationContext(), "Successfully deleted listing", Toast.LENGTH_SHORT);
+                                toast.show();
                             } else {
                                 System.out.println("deleteSavedListing callback failed");
+                                Toast toast = Toast.makeText(
+                                        getActivity().getApplicationContext(), "Failed to delete listing", Toast.LENGTH_SHORT);
+                                toast.show();
                             }
                         });
                     } catch (JSONException e) {
@@ -388,7 +400,7 @@ public class ProductPageActivity extends Fragment implements BackendController.B
                     bookmark.setImageResource(R.drawable.ic_baseline_bookmark_border_24);
                     bookmark.setTag(0);
                     if(isFromFeed){
-                        feedBookmarkButton.setImageResource(R.drawable.white_bookmark);
+                        feedBookmarkButton.setImageResource(R.drawable.black_bookmark);
                         feedBookmarkButton.setTag(0);
                     }
                 }
