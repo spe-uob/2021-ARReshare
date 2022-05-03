@@ -175,7 +175,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private double[] compassReadingsArray = new double[MAX_COMPASS_READING_QUEUE_SIZE];
     private int compassReadingSize = 0;
     private int compassReadingIndex = 0;
-
     private final int COMPASS_POLLING_RATE = 10; // Milliseconds
     private boolean pauseCompass = false;
     private final int COMPASS_MEDIAN_REFRESH_RATE = 10;
@@ -721,7 +720,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         float[] pose = camera.getDisplayOrientedPose().getTranslation();
         //System.out.println("x=" + pose[0] + " z=" + pose[2]);
 
-        detachAnchorIfMoved(angle);
+        //detachAnchorIfMoved(angle);
 
         // 2. Check if user is pointing at a product
         List<Product> pointingProducts = checkIfPointingAtProduct(angle);
@@ -971,34 +970,50 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     // method to spawn a product in a virtual space
     private void spawnProduct(Camera camera, Product product, double angleToNorth) {
         System.out.println("    SPAWN PRODUCT CALLED    ");
-        if (true) {
-
+        float distance = 1f; // metres away
+        ProductObject displayedInAR = this.productObjectQueue.peek();
+        // Only spawn products, if none are displayed or the displayed one is different
+        if (this.productObjectQueue.size() == 0 || displayedInAR.getProduct() != product) {
             // Current position of the user
             Pose cameraPose = camera.getDisplayOrientedPose();
+//            Pose anchorPose = cameraPose
+//                    .compose(Pose.makeTranslation(0, 0, distance))
+//                    .extractTranslation();
+
             float[] coords = cameraPose.getTranslation();
 
             // Get new coordinates set distance in meters in front of the user
             // Using Trigonometry
-            double distance = 1.5; // metres away
             float deltaX = (float) (Math.sin(angleToNorth) * distance);
             float deltaZ = (float) (Math.cos(angleToNorth) * distance);
             float[] objectCoords = new float[]{coords[0] + deltaX, coords[1], coords[2] + deltaZ};
             Pose anchorPose = new Pose(objectCoords, new float[]{0, 0, 0, 0});
 
+            System.out.println("ANCHOR CAMERA POSE = " + cameraPose);
+            System.out.println("NEW ANCHOR POSE = " + anchorPose);
+
             System.out.println(" ANCHORS PRESENT " + session.getAllAnchors().size());
             System.out.println(" ANCHORS QUEUE SIZE " + this.productObjectQueue.size());
 
+            // If exceeded limit of tracked anchors, replace last one
             if (this.productObjectQueue.size() == MAX_ANCHORED_PRODUCTS) {
-                // If exceeded limit of tracked anchors, replace last one
                 ProductObject oldest = this.productObjectQueue.poll();
                 oldest.getAnchor().detach();
                 this.displayedProducts.remove(oldest.getProduct());
-
             }
-            Anchor newAnchor = session.createAnchor(anchorPose);
-            ProductObject newObject = new ProductObject(newAnchor, null, product);
-            this.productObjectQueue.add(newObject);
-            this.displayedProducts.add(product);
+
+            // Try to create an anchor catching any exceptions
+            try {
+                // An anchor can only be created if the state is tracked
+                if (camera.getTrackingState() == TrackingState.TRACKING) {
+                    Anchor newAnchor = session.createAnchor(anchorPose);
+                    ProductObject newObject = new ProductObject(newAnchor, null, product);
+                    this.productObjectQueue.add(newObject);
+                    this.displayedProducts.add(product);
+                }
+            } catch (Exception e) {
+                System.out.println("FAILED TO CREATE AN ACHOR");
+            }
         }
     }
 
