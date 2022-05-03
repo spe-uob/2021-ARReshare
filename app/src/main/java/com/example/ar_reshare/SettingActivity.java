@@ -75,9 +75,10 @@ public class SettingActivity extends AppCompatActivity {
         }}
 
 
-    public void changeEmail(String Email){
+    public void changeEmail(String Email, String password){
         Map<String, String> changes = new HashMap<>();
         changes.put("Email", Email);
+        changes.put("password", password);
         try {
             BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
                 @Override
@@ -256,12 +257,15 @@ public class SettingActivity extends AppCompatActivity {
                 dialog5.setView(view);
 
                 final EditText email = (EditText) view.findViewById(R.id.email);
+                final EditText pwdE = (EditText) view.findViewById(R.id.pwdEmail);
 
                 dialog5.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String a = email.getText().toString().trim();
-                        changeDOB(a);
+                        String b = pwdE.getText().toString().trim();
+
+                        changeEmail(a, b);
                         Toast.makeText(v.getContext(), "New Email Address:" + a, Toast.LENGTH_SHORT).show();
                     }
                 });
