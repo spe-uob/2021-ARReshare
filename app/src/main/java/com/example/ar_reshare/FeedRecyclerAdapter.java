@@ -1,6 +1,7 @@
 package com.example.ar_reshare;
 
 import android.app.Activity;
+import androidx.fragment.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -77,6 +78,8 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         holder.profileIcon.setOnClickListener(profileClickHandler);
         holder.contributor.setOnClickListener(profileClickHandler);
 
+
+
         // Handle clicks to go to the product page
         View.OnClickListener productOnClickListener = new View.OnClickListener() {
             @Override
@@ -97,10 +100,26 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                 activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
             }
         };
+
+
         holder.productImage.setOnClickListener(productOnClickListener);
         holder.productTitle.setOnClickListener(productOnClickListener);
         holder.productDescription.setOnClickListener(productOnClickListener);
 
+
+        View.OnClickListener profileOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle bundle = new Bundle();
+                bundle.putInt("userID",product.getContributorID());
+                ProfileActivity profileFragment = new ProfileActivity();
+                profileFragment.setArguments(bundle);
+                AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,profileFragment).addToBackStack(null).commit();
+            }
+        };
+
+        holder.profileIcon.setOnClickListener(profileOnClickListener);
         // Handle click to message the contributor
         ClickHandler messageClickHandler = new ClickHandler(product, MESSAGE_LINK);
         holder.messageButton.setOnClickListener(messageClickHandler);
@@ -278,9 +297,12 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
         // Sends information to the profile page
         public void profileClick(View v) {
-            Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-            intent.putExtra("userID", product.getContributorID());
-            v.getContext().startActivity(intent);
+            Fragment profileActivity = new Fragment();
+            Bundle bundle = new Bundle();
+            bundle.putInt("userID", product.getCategoryID());
+            profileActivity.setArguments(bundle);
+            AppCompatActivity appCompatActivity = (AppCompatActivity)v.getContext();
+            appCompatActivity.getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileActivity).commit();
         }
 
         // Sends information to the messaging page
