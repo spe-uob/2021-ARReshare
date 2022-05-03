@@ -161,6 +161,7 @@
             android:layout_height="wrap_content"
             android:text="    "
             android:textSize="70dp">
+            android:textSize="30dp">
         </TextView>
 
         <Button

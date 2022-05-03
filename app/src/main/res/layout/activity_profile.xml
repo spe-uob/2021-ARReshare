@@ -147,7 +147,6 @@
                 </ImageButton>
             </LinearLayout>
 
-
             <TextView
                 android:id="@+id/sharedtips"
                 android:layout_width="match_parent"
@@ -158,9 +157,6 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="25dp">
             </TextView>
-
-
-
 
             <LinearLayout
                 android:layout_width="match_parent"

@@ -64,7 +64,7 @@ public class ProfileActivity extends Fragment {
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().getSupportFragmentManager().popBackStack();
+                getActivity().onBackPressed();
                 getActivity().overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             }
         });
@@ -149,13 +149,10 @@ public class ProfileActivity extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-
-                            if (ListingSearchResult.size() < 1){
+                            if (ListingSearchResult.size() <= 1){
                                 ImageButton shared1 = getActivity().findViewById(R.id.shared1);
-                                shared1.setVisibility(View.INVISIBLE);
-                            } else {
+                                shared1.setVisibility(View.GONE);
                                 TextView sharedtips = (TextView) getActivity().findViewById(R.id.sharedtips);
-                                sharedtips.setVisibility(View.INVISIBLE);
                             }
 
                             if(ListingSearchResult.size() >= 1) {
@@ -178,11 +175,9 @@ public class ProfileActivity extends Fragment {
                                         ProductPageActivity productFragment = new ProductPageActivity();
                                         productFragment.setArguments(bundle);
                                         AppCompatActivity activity = (AppCompatActivity)v.getContext();
-                                        activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
-                                    }
+                                        activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit(); }
                                 });
                             }
-
                             if (ListingSearchResult.size() < 2){
                                 ImageButton shared2 = getActivity().findViewById(R.id.shared2);
                                 shared2.setVisibility(View.INVISIBLE);
@@ -213,7 +208,6 @@ public class ProfileActivity extends Fragment {
                                     }
                                 });
                             }
-
                             if (ListingSearchResult.size() < 3){
                                 ImageButton shared3 = getActivity().findViewById(R.id.shared3);
                                 shared3.setVisibility(View.INVISIBLE);
@@ -259,7 +253,6 @@ public class ProfileActivity extends Fragment {
             @Override
             public void onBackendSearchResult(boolean success, List<Product> searchResults) {
                 getActivity().runOnUiThread(() -> {
-
                     if(searchResults.size() < 1){
                         ImageButton shared1 = (ImageButton) getActivity().findViewById(R.id.shared1);
                         shared1.setVisibility(View.GONE);
@@ -297,7 +290,6 @@ public class ProfileActivity extends Fragment {
         });
     }
 
-
     private void sharedProductShow(ImageButton shared, Product product){
 
         shared.setImageBitmap(product.getMainPic());
@@ -330,7 +322,6 @@ public class ProfileActivity extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-
                             if (savedListingSearchResult.size() < 1) {
                                 ImageButton savedImage1 = getActivity().findViewById(R.id.saved1);
                                 savedImage1.setVisibility(View.INVISIBLE);
