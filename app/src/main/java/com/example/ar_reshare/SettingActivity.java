@@ -15,7 +15,99 @@ import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
+import org.json.JSONException;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class SettingActivity extends AppCompatActivity {
+
+    public void changePassword(String password, String newPassword){
+        Map<String, String> changes = new HashMap<>();
+        changes.put("password", password);
+        changes.put("newPassword", newPassword);
+        try {
+            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if(success){
+                        System.out.println("Your passward changed correctly");
+                    }else{
+                        System.out.println("Error");
+                    }
+                }
+            });
+        } catch (JSONException e){
+    }}
+
+    public void changeNickname(String name){
+        Map<String, String> changes = new HashMap<>();
+        changes.put("name", name);
+        try {
+            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if(success){
+                        System.out.println("Your nickname have changed");
+                    }else{
+                        System.out.println("Error");
+                    }
+                }
+            });
+        } catch (JSONException e){
+        }}
+
+    public void changeDOB(String dob){
+        Map<String, String> changes = new HashMap<>();
+        changes.put("dob", dob);
+        try {
+            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if(success){
+                        System.out.println("Your date of birth changed correctly");
+                    }else{
+                        System.out.println("Error");
+                    }
+                }
+            });
+        } catch (JSONException e){
+        }}
+
+
+    public void changeEmail(String Email){
+        Map<String, String> changes = new HashMap<>();
+        changes.put("Email", Email);
+        try {
+            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if(success){
+                        System.out.println("Your Email address changed correctly");
+                    }else{
+                        System.out.println("Error");
+                    }
+                }
+            });
+        } catch (JSONException e){
+        }}
+
+    public void changeHomeAddress(String Address){
+        Map<String, String> changes = new HashMap<>();
+        changes.put("Address", Address);
+        try {
+            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
+                @Override
+                public void onBackendResult(boolean success, String message) {
+                    if(success){
+                        System.out.println("Your home address changed correctly");
+                    }else{
+                        System.out.println("Error");
+                    }
+                }
+            });
+        } catch (JSONException e){
+        }}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +158,8 @@ public class SettingActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         String a = firstName.getText().toString().trim();
                         String b = lastName.getText().toString().trim();
-
+                        String c = a + " " + b;
+                        changeNickname(c);
                         Toast.makeText(v.getContext(), "New name:" + a +"_"+ b, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -102,6 +195,8 @@ public class SettingActivity extends AppCompatActivity {
                         String b = month.getText().toString().trim();
                         String c = day.getText().toString().trim();
 
+                        String d = a + "-"+  b + "-" + c;
+                        changeDOB(d);
                         Toast.makeText(v.getContext(), "New Birthday:" + a +"_"+ b + "_" + c, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -126,13 +221,16 @@ public class SettingActivity extends AppCompatActivity {
                 View view = LayoutInflater.from(v.getContext()).inflate(R.layout.pwd_dialog, null);
                 dialog4.setView(view);
 
-                final EditText pwd = (EditText) view.findViewById(R.id.pwd);
+                final EditText oldpwd = (EditText) view.findViewById(R.id.oldpwd);
+                final EditText newpwd = (EditText) view.findViewById(R.id.newpwd);
 
                 dialog4.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String a = pwd.getText().toString().trim();
+                        String a = oldpwd.getText().toString().trim();
+                        String b = newpwd.getText().toString().trim();
 
+                        changePassword(a, b);
                         Toast.makeText(v.getContext(), "Your password has been changed", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -163,7 +261,7 @@ public class SettingActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String a = email.getText().toString().trim();
-
+                        changeDOB(a);
                         Toast.makeText(v.getContext(), "New Email Address:" + a, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -194,7 +292,7 @@ public class SettingActivity extends AppCompatActivity {
                    @Override
                    public void onClick(DialogInterface dialog, int which) {
                        String a = postcode.getText().toString().trim();
-
+                       changeHomeAddress(a);
                        Toast.makeText(v.getContext(), "New Postcode:" + a, Toast.LENGTH_SHORT).show();
                    }
                });
@@ -217,7 +315,9 @@ public class SettingActivity extends AppCompatActivity {
                 dialog7.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        Intent intent = new Intent(SettingActivity.this, LoginSignupActivity.class);
+                        AuthenticationService.removeAccounts(getApplicationContext());
+                        startActivity((intent));
                     }
                 });
                 dialog7.setNegativeButton("Cancel", null);

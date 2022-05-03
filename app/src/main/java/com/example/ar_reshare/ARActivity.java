@@ -600,11 +600,11 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         Texture texture = null;
         try {
             texture =
-            Texture.createFromAsset(
-                    render,
-                    textureLocation,
-                    Texture.WrapMode.CLAMP_TO_EDGE,
-                    Texture.ColorFormat.SRGB);
+                    Texture.createFromAsset(
+                            render,
+                            textureLocation,
+                            Texture.WrapMode.CLAMP_TO_EDGE,
+                            Texture.ColorFormat.SRGB);
         } catch (IOException e) {
             e.printStackTrace();
         }

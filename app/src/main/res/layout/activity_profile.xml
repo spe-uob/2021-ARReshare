@@ -148,16 +148,16 @@
             </LinearLayout>
 
 
-                <TextView
-                    android:id="@+id/sharedtips"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="You haven't shared anything"
-                    android:gravity="center_horizontal"
-                    android:textSize="20sp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="25dp">
-                </TextView>
+            <TextView
+                android:id="@+id/sharedtips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="You haven't shared anything"
+                android:gravity="center_horizontal"
+                android:textSize="20sp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="25dp">
+            </TextView>
 
 
 

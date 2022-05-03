@@ -48,8 +48,8 @@ public interface BackendService {
     @Headers("Content-Type: application/json")
     @GET("profile/view")
     Call<User> getProfileByID(@Query("maxResults") int maxResults,
-                                     @Query("startResults") int startResults,
-                                     @Query("userID") int userID);
+                              @Query("startResults") int startResults,
+                              @Query("userID") int userID);
 
     @Headers("Content-Type: application/json")
     @PUT("token/regeneration")

@@ -306,7 +306,7 @@ public class BackendController {
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        
+
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("listingID", listingID);
@@ -403,7 +403,7 @@ public class BackendController {
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        
+
 
         BackendService service = retrofit.create(BackendService.class);
         Call<Message.MessageResult> call = service.getConversationByID(JWT,10,0, conversationID);
@@ -992,4 +992,3 @@ public class BackendController {
         }
     }
 }
-
