@@ -13,6 +13,15 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="#00FFFFFF"
+            android:src="@drawable/ic_baseline_arrow_back_ios_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <ImageButton
             android:id="@+id/settingsButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -32,7 +41,7 @@
             app:layout_constraintTop_toBottomOf="@id/topBar">
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/profileIcon"
+                android:id="@+id/userProfileIcon"
                 android:layout_width="60dp"
                 android:layout_height="80dp"
                 android:layout_marginStart="10dp"
@@ -42,7 +51,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/contributorName"
+                android:id="@+id/userContributorName"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
@@ -55,7 +64,7 @@
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="@id/profileIcon"
+                app:layout_constraintStart_toEndOf="@id/userProfileIcon"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
@@ -68,7 +77,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/feed_text_border"
         android:padding="5dp"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="15dp"
         android:text="Shared"
         android:fontFamily="@font/montserrat"
         android:textAlignment="center"
@@ -87,7 +96,7 @@
         app:layout_constraintTop_toBottomOf="@id/sharedText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="25dp">
+        android:layout_marginTop="2dp">
 
         <ImageView
             android:id="@+id/shared1"
@@ -127,12 +136,28 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
+        android:id="@+id/sharedStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:text="products shared"
+        android:fontFamily="@font/montserrat"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sharedProducts"
+        android:layout_marginTop="2dp"/>
+
+    <TextView
         android:id="@+id/savedText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/feed_text_border"
         android:padding="5dp"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="15dp"
         android:text="Saved"
         android:fontFamily="@font/montserrat"
         android:textAlignment="center"
@@ -141,7 +166,7 @@
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/sharedProducts"/>
+        app:layout_constraintTop_toBottomOf="@id/sharedStatus"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/savedProducts"
@@ -151,7 +176,7 @@
         app:layout_constraintTop_toBottomOf="@id/savedText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="25dp">
+        android:layout_marginTop="2dp">
 
         <ImageView
             android:id="@+id/saved1"
@@ -190,6 +215,20 @@
             app:srcCompat="@drawable/ic_baseline_question_mark_24" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
+    <TextView
+        android:id="@+id/savedStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:text="products saved"
+        android:fontFamily="@font/montserrat"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="2dp"
+        app:layout_constraintTop_toBottomOf="@id/savedProducts"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
