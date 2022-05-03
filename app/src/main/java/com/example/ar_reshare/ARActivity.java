@@ -1226,8 +1226,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                         ProductPageActivity productFragment = new ProductPageActivity();
                         productFragment.setArguments(bundle);
                         productFragment.setIsFromFeed(false);
-                        AppCompatActivity activity = (AppCompatActivity)v.getContext();
-                        activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
+                        getActivity().getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
                     }
                 });
                 scrollView.addView(productBoxParent);
