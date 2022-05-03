@@ -718,7 +718,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         //angle = stabiliseCompassReading(angle);
         //System.out.println("median " + angle*(180/Math.PI) + " degrees to north clockwise");
         float[] pose = camera.getDisplayOrientedPose().getTranslation();
-        //System.out.println("x=" + pose[0] + " z=" + pose[2]);
+        System.out.println("x=" + pose[0] + " z=" + pose[2]);
 
         //detachAnchorIfMoved(angle);
 
@@ -733,7 +733,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             if (!this.displayedProducts.contains(closestProduct)) {
                 // Check if ARCore is tracking
                 if (camera.getTrackingState() == TrackingState.TRACKING) {
-                    spawnProduct(camera, pointingProducts.get(0), productAngles.get(pointingProducts.get(0)));
+                    spawnProduct(camera, pointingProducts.get(0), angle);
                 }
             }
             prepareProductBoxes(pointingProducts);
@@ -970,7 +970,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     // method to spawn a product in a virtual space
     private void spawnProduct(Camera camera, Product product, double angleToNorth) {
         System.out.println("    SPAWN PRODUCT CALLED    ");
-        float distance = 1f; // metres away
+        float distance = 1.5f; // metres away
         ProductObject displayedInAR = this.productObjectQueue.peek();
         // Only spawn products, if none are displayed or the displayed one is different
         if (this.productObjectQueue.size() == 0 || displayedInAR.getProduct() != product) {
@@ -991,6 +991,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
             System.out.println("ANCHOR CAMERA POSE = " + cameraPose);
             System.out.println("NEW ANCHOR POSE = " + anchorPose);
+            System.out.println("ANCHOR ANGLE = " + angleToNorth);
 
             System.out.println(" ANCHORS PRESENT " + session.getAllAnchors().size());
             System.out.println(" ANCHORS QUEUE SIZE " + this.productObjectQueue.size());
@@ -1010,6 +1011,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                     ProductObject newObject = new ProductObject(newAnchor, null, product);
                     this.productObjectQueue.add(newObject);
                     this.displayedProducts.add(product);
+                    System.out.println("ANCHOR PRODUCT SPAWNED = " + product.getName());
+                    System.out.println("ANCHOR PRODUCT CATEGORY = " + product.getCategoryID());
                 }
             } catch (Exception e) {
                 System.out.println("FAILED TO CREATE AN ACHOR");
