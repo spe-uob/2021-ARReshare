@@ -98,7 +98,7 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                 productFragment.setFeedBookmarkButton(holder.bookmarkButton);
                 productFragment.setIsFromFeed(true);
                 AppCompatActivity activity = (AppCompatActivity)v.getContext();
-                activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
+                activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack("product_page").commit();
             }
         };
 

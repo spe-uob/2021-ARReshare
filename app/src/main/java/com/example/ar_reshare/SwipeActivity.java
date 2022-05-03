@@ -20,6 +20,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.ar.core.ArCoreApk;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 public class SwipeActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener{
     BottomNavigationView bottomNavigationView;
 
@@ -38,6 +41,8 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
     private boolean moved = false;
     private static boolean isArSupported=false;
 
+    Deque<Integer> fragmentDeque = new ArrayDeque<>(5);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +54,7 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
         bottomNavigationView = findViewById(R.id.bottom_navigation_bar);
         //frameLayout = view.findViewById(R.id.frameLayout_wrapper);
         bottomNavigationView.setOnItemSelectedListener(this);
+        fragmentDeque.push(R.id.ar_menu_item);
         bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
         if (isArSupported) {
             getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ARActivity()).addToBackStack(null).commit();
@@ -74,10 +80,29 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
         // TODO: Add on request permission result check
     }
 
-
+    @Override
+    public void onBackPressed() {
+        int count = getSupportFragmentManager().getBackStackEntryCount();
+        //if coming from product page
+        if(getSupportFragmentManager().getBackStackEntryAt(count - 1).getName() == "product_page"){
+            getSupportFragmentManager().popBackStack();
+            setNavigationVisibility(true);
+            return;
+        }
+        fragmentDeque.pop();
+        if (!fragmentDeque.isEmpty()) {
+            bottomNavigationView.setSelectedItemId(fragmentDeque.peek());
+        } else{
+            finish();
+        }
+    }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        if(fragmentDeque.contains(item.getItemId())){
+            fragmentDeque.remove(item.getItemId());
+        }
+        fragmentDeque.push(item.getItemId());
         switch (item.getItemId()) {
             case R.id.map_menu_item:
                 getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new MapsActivity()).addToBackStack(null).commit();
