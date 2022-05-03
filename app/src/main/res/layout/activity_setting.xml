@@ -62,7 +62,7 @@
         </TextView>
 
         <Button
-            android:id="@+id/nickname"
+            android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Change Name"
@@ -160,15 +160,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="    "
-            android:textSize="30dp">
+            android:textSize="70dp">
         </TextView>
 
         <Button
             android:id="@+id/detele"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/button_back_red"
+            android:paddingStart="10dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="10dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="10dp"
             android:text="Delete Account"
-            android:background="#B70808">
+            android:textColor="@color/white">
 
         </Button>
     </LinearLayout>

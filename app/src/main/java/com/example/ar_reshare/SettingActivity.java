@@ -47,7 +47,7 @@ public class SettingActivity extends AppCompatActivity {
             }
         });
 
-        Button nicknameButton = (Button) findViewById(R.id.nickname);
+        Button nicknameButton = (Button) findViewById(R.id.name);
         nicknameButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
