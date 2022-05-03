@@ -27,9 +27,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ARReshare">
         <activity
-            android:name=".OldARActivity"
-            android:exported="false" />
-        <activity
             android:name=".SwipeActivity"
             android:exported="true"></activity>
         <activity

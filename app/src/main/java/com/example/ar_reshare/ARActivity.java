@@ -595,12 +595,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                             "models/electronics_colours.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
-            virtualObjectAlbedoInstantPlacementTexture =
-                    Texture.createFromAsset(
-                            render,
-                            "models/electronics_colours.png",
-                            Texture.WrapMode.CLAMP_TO_EDGE,
-                            Texture.ColorFormat.SRGB);
 
             virtualObjectShader =
                     Shader.createFromAssets(
@@ -940,16 +934,36 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         if (this.productObjectQueue.size() == 0 || displayedInAR.getProduct() != product) {
             // Current position of the user
             Pose cameraPose = camera.getDisplayOrientedPose();
-//            Pose anchorPose = cameraPose
-//                    .compose(Pose.makeTranslation(0, 0, distance))
-//                    .extractTranslation();
 
             float[] coords = cameraPose.getTranslation();
 
             // Get new coordinates set distance in meters in front of the user
             // Using Trigonometry
-            float deltaX = (float) (Math.sin(angleToNorth) * distance);
-            float deltaZ = (float) (Math.cos(angleToNorth) * distance);
+
+            angleToNorth = angleToNorth % Math.PI;
+
+            float oppositeDelta = (float) (Math.sin(angleToNorth) * distance);
+            float adjacentDelta = (float) (Math.cos(angleToNorth) * distance);
+
+            System.out.println("ANCHOR ANGLE" + angleToNorth);
+
+            float deltaX;
+            float deltaZ;
+
+            if (angleToNorth < Math.PI/2) {
+                deltaX = oppositeDelta;
+                deltaZ = - adjacentDelta;
+            } else if (angleToNorth >= Math.PI/2 && angleToNorth < Math.PI) {
+                deltaX = adjacentDelta;
+                deltaZ = oppositeDelta;
+            } else if (angleToNorth >= Math.PI && angleToNorth < Math.PI*3/2) {
+                deltaX = - oppositeDelta;
+                deltaZ = adjacentDelta;
+            } else {
+                deltaX = - adjacentDelta;
+                deltaZ = - oppositeDelta;
+            }
+
             float[] objectCoords = new float[]{coords[0] + deltaX, coords[1], coords[2] + deltaZ};
             Pose anchorPose = new Pose(objectCoords, new float[]{0, 0, 0, 0});
 
