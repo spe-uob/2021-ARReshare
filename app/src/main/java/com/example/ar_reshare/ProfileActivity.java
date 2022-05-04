@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.MessageFormat;
+import java.util.List;
 
 public class ProfileActivity extends Fragment {
 
@@ -100,7 +101,7 @@ public class ProfileActivity extends Fragment {
                     }
                     contributorName.setText(userProfile.getName());
                 });
-                searchAccountListings(view);
+                searchOtherProfileListings(view, userProfile);
             } else {
                 System.out.println("getProfileByID callback failed");
             }
@@ -123,6 +124,52 @@ public class ProfileActivity extends Fragment {
             productFragment.setIsFromFeed(false);
             getActivity().getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
         };
+    }
+
+    private void searchOtherProfileListings(View view, User userProfile) {
+        TextView sharedTitle = view.findViewById(R.id.sharedText);
+        View sharedProducts = view.findViewById(R.id.sharedProducts);
+        TextView sharedStatus = view.findViewById(R.id.sharedStatus);
+
+        ImageView shared1 = view.findViewById(R.id.shared1);
+        ImageView shared2 = view.findViewById(R.id.shared2);
+        ImageView shared3 = view.findViewById(R.id.shared3);
+
+        BackendController.initialiseProducts(userProfile.getListings(), new BackendController.BackendSearchResultCallback() {
+            @Override
+            public void onBackendSearchResult(boolean success, List<Product> searchResults) {
+                if (success) {
+                    getActivity().runOnUiThread(() -> {
+                        if (searchResults.isEmpty()) {
+                            sharedTitle.setVisibility(View.GONE);
+                            sharedProducts.setVisibility(View.GONE);
+                            sharedStatus.setText("No products shared.");
+                        } else if (searchResults.size() == 3) {
+                            shared1.setImageBitmap(searchResults.get(0).getMainPic());
+                            shared1.setOnClickListener(clickListener(searchResults.get(0), view));
+                            shared2.setImageBitmap(searchResults.get(1).getMainPic());
+                            shared2.setOnClickListener(clickListener(searchResults.get(1), view));
+                            shared3.setImageBitmap(searchResults.get(2).getMainPic());
+                            shared3.setOnClickListener(clickListener(searchResults.get(2), view));
+                        } else if (searchResults.size() == 2) {
+                            shared1.setImageBitmap(searchResults.get(0).getMainPic());
+                            shared1.setOnClickListener(clickListener(searchResults.get(0), view));
+                            shared2.setImageBitmap(searchResults.get(1).getMainPic());
+                            shared2.setOnClickListener(clickListener(searchResults.get(1), view));
+                            shared3.setVisibility(View.GONE);
+                        } else if (searchResults.size() == 1) {
+                            shared1.setImageBitmap(searchResults.get(0).getMainPic());
+                            shared1.setOnClickListener(clickListener(searchResults.get(0), view));
+                            shared2.setVisibility(View.GONE);
+                            shared3.setVisibility(View.GONE);
+                        }
+                        sharedStatus.setText(MessageFormat.format("{0} product(s) shared.", searchResults.size()));
+                    });
+                } else {
+                    System.out.println("searchAccountListings callback failed");
+                }
+            }
+        });
     }
 
     public void searchAccountListings(View view) {
