@@ -159,7 +159,7 @@ public class AddProduct extends AppCompatActivity implements addPhotoDialog.Noti
                         BackendController.addProduct(productName,productDescription,"UK","Bristol",productPostcode,category,condition, media, AddProduct.this);
                         Toast toast = Toast.makeText(getApplicationContext(), "Added Successfully!", Toast.LENGTH_LONG);
                         toast.show();
-                        startActivity(new Intent(AddProduct.this,ARActivity.class));
+                        onBackPressed();
                     } catch (Exception e) {
                         Toast toast = Toast.makeText(getApplicationContext(), "Failed to add products", Toast.LENGTH_LONG);
                         toast.show();

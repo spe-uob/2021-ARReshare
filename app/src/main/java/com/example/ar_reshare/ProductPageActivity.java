@@ -180,7 +180,7 @@ public class ProductPageActivity extends Fragment implements BackendController.B
                             }
                         });
                     }
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     System.out.println("CRASH");
                 }
             }
@@ -257,8 +257,10 @@ public class ProductPageActivity extends Fragment implements BackendController.B
                                         Toast.makeText(getActivity().getApplicationContext(),
                                                 "Product deleted successfully!",
                                                 Toast.LENGTH_LONG).show();
-                                        // go back to the main page when finished
-                                        //startActivity(new Intent(ProductPageActivity.this, ARActivity.class));
+                                        // go back to the previous page
+                                        getActivity().getSupportFragmentManager().popBackStack();
+                                        SwipeActivity activity = (SwipeActivity) getActivity();
+                                        activity.setNavigationVisibility(true);
                                     }
                                 }
                             });
