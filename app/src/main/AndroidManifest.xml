@@ -33,9 +33,6 @@
             android:name=".SettingActivity"
             android:exported="true" >
         </activity>
-<!--        <activity-->
-<!--            android:name=".ARActivity"-->
-<!--            android:exported="true" />-->
         <activity android:name=".AddProduct" >
         </activity>
         <activity
@@ -50,12 +47,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- <activity -->
-        <!-- android:name=".ChatListActivity" -->
-        <!-- android:exported="true" /> -->
-        <!-- <activity -->
-        <!-- android:name=".ProfileActivity" -->
-        <!-- android:exported="true" /> -->
+        </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
