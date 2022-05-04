@@ -93,7 +93,10 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
                 }
                 return true;
             case R.id.profile_menu_item:
-                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ProfileActivity()).addToBackStack(null).commit();
+                Bundle bundle = new Bundle();
+                ProfileActivity profileFragment = new ProfileActivity();
+                profileFragment.setArguments(bundle);
+                getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileFragment).addToBackStack(null).commit();
                 return true;
             case R.id.message_menu_item:
                 getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ChatListActivity()).addToBackStack(null).commit();
@@ -164,7 +167,10 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
                             bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
                             break;
                         case R.id.message_menu_item:
-                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ProfileActivity()).addToBackStack(null).commit();
+                            Bundle bundle = new Bundle();
+                            ProfileActivity profileFragment = new ProfileActivity();
+                            profileFragment.setArguments(bundle);
+                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileFragment).addToBackStack(null).commit();
                             bottomNavigationView.setSelectedItemId(R.id.profile_menu_item);
                             break;
                     }
@@ -183,7 +189,10 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
                             }                            bottomNavigationView.setSelectedItemId(R.id.ar_menu_item);
                             break;
                         case R.id.ar_menu_item:
-                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new ProfileActivity()).addToBackStack(null).commit();
+                            Bundle bundle = new Bundle();
+                            ProfileActivity profileFragment = new ProfileActivity();
+                            profileFragment.setArguments(bundle);
+                            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileFragment).addToBackStack(null).commit();
                             bottomNavigationView.setSelectedItemId(R.id.profile_menu_item);
                             break;
                         case R.id.profile_menu_item:
