@@ -11,4 +11,15 @@
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"/>
 
+    <EditText
+        android:id="@+id/pwdEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Please enter your password"
+        android:layout_below="@id/email"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"/>
+
+
+
 </RelativeLayout>
