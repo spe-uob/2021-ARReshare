@@ -78,7 +78,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class ARActivity extends Fragment implements SampleRender.Renderer{
+public class ARActivity extends Fragment implements SampleRender.Renderer {
 
     // See the definition of updateSphericalHarmonicsCoefficients for an explanation of these
     // constants.
@@ -99,7 +99,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     private static final int CUBEMAP_RESOLUTION = 16;
     private static final int CUBEMAP_NUMBER_OF_IMPORTANCE_SAMPLES = 32;
-    private static final int MAX_ANCHORED_PRODUCTS = 1;
+    private static final int MAX_ANCHORED_PRODUCTS = 5;
 
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
@@ -179,7 +179,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private int compassReadingIndex = 0;
     private final int COMPASS_POLLING_RATE = 2; // Milliseconds
     private boolean pauseCompass = false;
-    private final int COMPASS_MEDIAN_REFRESH_RATE = 30;
+    private final int COMPASS_MEDIAN_REFRESH_RATE = 10;
     private int compassMedianCountdown = COMPASS_MEDIAN_REFRESH_RATE;
 
     // Location related attributes:
@@ -528,7 +528,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     @Override
     public void onSurfaceCreated(SampleRender render) {
-        if (!hideInstructions) getActivity().runOnUiThread(() -> showInstructions());
+        //if (!hideInstructions) getActivity().runOnUiThread(() -> showInstructions());
         takeCompassReadings();
 
         // Prepare the rendering objects. This involves reading shaders and 3D model files, so may throw
@@ -714,7 +714,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             if (!this.displayedProducts.contains(closestProduct)) {
                 // Check if ARCore is tracking
                 if (camera.getTrackingState() == TrackingState.TRACKING) {
-                    spawnProduct(camera, pointingProducts.get(0), angle);
+                    spawnProduct(camera, closestProduct, productAngles.get(closestProduct));
                 }
             }
             prepareProductBoxes(pointingProducts);
@@ -931,9 +931,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private void spawnProduct(Camera camera, Product product, double angleToNorth) {
         System.out.println("    SPAWN PRODUCT CALLED    ");
         float distance = 1f; // metres away
-        ProductObject displayedInAR = this.productObjectQueue.peek();
         // Only spawn products, if none are displayed or the displayed one is different
-        if (this.productObjectQueue.size() == 0 || displayedInAR.getProduct() != product) {
+        if (!this.displayedProducts.contains(product)) {
             // Current position of the user
             Pose cameraPose = camera.getDisplayOrientedPose();
 
@@ -949,22 +948,22 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
             System.out.println("ANCHOR ANGLE" + angleToNorth);
 
-            float deltaX;
-            float deltaZ;
+            float deltaX = oppositeDelta;
+            float deltaZ = adjacentDelta;
 
-            if (angleToNorth < Math.PI/2) {
-                deltaX = oppositeDelta;
-                deltaZ = - adjacentDelta;
-            } else if (angleToNorth >= Math.PI/2 && angleToNorth < Math.PI) {
-                deltaX = adjacentDelta;
-                deltaZ = oppositeDelta;
-            } else if (angleToNorth >= Math.PI && angleToNorth < Math.PI*3/2) {
-                deltaX = - oppositeDelta;
-                deltaZ = adjacentDelta;
-            } else {
-                deltaX = - adjacentDelta;
-                deltaZ = - oppositeDelta;
-            }
+//            if (angleToNorth < Math.PI/2) {
+//                deltaX = oppositeDelta;
+//                deltaZ = - adjacentDelta;
+//            } else if (angleToNorth >= Math.PI/2 && angleToNorth < Math.PI) {
+//                deltaX = adjacentDelta;
+//                deltaZ = oppositeDelta;
+//            } else if (angleToNorth >= Math.PI && angleToNorth < Math.PI*3/2) {
+//                deltaX = - oppositeDelta;
+//                deltaZ = adjacentDelta;
+//            } else {
+//                deltaX = - adjacentDelta;
+//                deltaZ = - oppositeDelta;
+//            }
 
             float[] objectCoords = new float[]{coords[0] + deltaX, coords[1], coords[2] + deltaZ};
             Pose anchorPose = new Pose(objectCoords, new float[]{0, 0, 0, 0});
