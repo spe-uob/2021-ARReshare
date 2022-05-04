@@ -510,7 +510,7 @@ public class SignUpFragment extends Fragment {
     }
 
     private void proceed() {
-        Intent intent = new Intent(getContext(), ARActivity.class);
+        Intent intent = new Intent(getContext(), SwipeActivity.class);
         startActivity(intent);
     }
 

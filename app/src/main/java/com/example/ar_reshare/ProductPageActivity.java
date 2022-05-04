@@ -52,7 +52,7 @@ public class ProductPageActivity extends Fragment implements BackendController.B
     private ArrayList<Bitmap> picList = new ArrayList<>();
     private ProductPicsSliderAdapter adapter;
     private CountDownLatch latch;
-    private int TIMEOUT_IN_SECONDS = 5;
+    private int TIMEOUT_IN_SECONDS = 10;
     private View view;
     private ImageView feedBookmarkButton;
     private Boolean isFromFeed = false;
@@ -84,7 +84,6 @@ public class ProductPageActivity extends Fragment implements BackendController.B
         isSaved = getArguments().getBoolean("isSaved",false);
         latch = new CountDownLatch(2); // wait until it gets the product and the user information from the backend
         BackendController.getListingByID(productID,ProductPageActivity.this);
-        BackendController.getProfileByID(0,1,contributorID,ProductPageActivity.this);
 
         //display a static map to show product's location
         displayMapPic(lat,lng);
@@ -110,7 +109,10 @@ public class ProductPageActivity extends Fragment implements BackendController.B
         this.product = ListingResult;
         if(success){
             latch.countDown();
+            System.out.println("XX listing back success");
+            BackendController.getProfileByID(0,1, ListingResult.getContributorID(),ProductPageActivity.this);
         }
+        System.out.println("XX listing back failure");
     }
 
     @Override
@@ -118,7 +120,9 @@ public class ProductPageActivity extends Fragment implements BackendController.B
         this.userProfile = userProfile;
         if(success){
             latch.countDown();
+            System.out.println("XX profile back success");
         }
+        System.out.println("XX profile back failure");
     }
 
     private void displayInfo(){
@@ -176,7 +180,7 @@ public class ProductPageActivity extends Fragment implements BackendController.B
                             }
                         });
                     }
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     System.out.println("CRASH");
                 }
             }
@@ -253,8 +257,10 @@ public class ProductPageActivity extends Fragment implements BackendController.B
                                         Toast.makeText(getActivity().getApplicationContext(),
                                                 "Product deleted successfully!",
                                                 Toast.LENGTH_LONG).show();
-                                        // go back to the main page when finished
-                                        //startActivity(new Intent(ProductPageActivity.this, ARActivity.class));
+                                        // go back to the previous page
+                                        getActivity().getSupportFragmentManager().popBackStack();
+                                        SwipeActivity activity = (SwipeActivity) getActivity();
+                                        activity.setNavigationVisibility(true);
                                     }
                                 }
                             });
