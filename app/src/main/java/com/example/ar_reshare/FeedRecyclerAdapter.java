@@ -74,13 +74,6 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         // Set values to various resources depending on the product
         productValueHelper(holder, product);
 
-        // Handle clicks to go to the contributor's profile page
-        ClickHandler profileClickHandler = new ClickHandler(product, PROFILE_LINK);
-        holder.profileIcon.setOnClickListener(profileClickHandler);
-        holder.contributor.setOnClickListener(profileClickHandler);
-
-
-
         // Handle clicks to go to the product page
         View.OnClickListener productOnClickListener = new View.OnClickListener() {
             @Override
@@ -102,17 +95,15 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             }
         };
 
-
         holder.productImage.setOnClickListener(productOnClickListener);
         holder.productTitle.setOnClickListener(productOnClickListener);
         holder.productDescription.setOnClickListener(productOnClickListener);
-
 
         View.OnClickListener profileOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
-                bundle.putInt("userID",product.getContributorID());
+                bundle.putInt("contributorID",product.getContributorID());
                 ProfileActivity profileFragment = new ProfileActivity();
                 profileFragment.setArguments(bundle);
                 AppCompatActivity activity = (AppCompatActivity)v.getContext();
@@ -121,6 +112,8 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         };
 
         holder.profileIcon.setOnClickListener(profileOnClickListener);
+        holder.contributor.setOnClickListener(profileOnClickListener);
+
         // Handle click to message the contributor
         ClickHandler messageClickHandler = new ClickHandler(product, MESSAGE_LINK);
         holder.messageButton.setOnClickListener(messageClickHandler);
@@ -131,8 +124,6 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         // Bookmark button logic
         bookmarkToggleHelper(holder, product);
     }
-
-
 
     public void productValueHelper(ViewHolder holder, Product product) {
         BackendController.getProfileByID(0, 100,

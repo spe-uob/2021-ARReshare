@@ -84,6 +84,8 @@ public class ProfileActivity extends Fragment {
         savedTitle.setVisibility(View.GONE);
         View savedProducts = view.findViewById(R.id.savedProducts);
         savedProducts.setVisibility(View.GONE);
+        TextView savedStatus = view.findViewById(R.id.savedStatus);
+        savedStatus.setVisibility(View.GONE);
 
         ImageView profileIcon = view.findViewById(R.id.userProfileIcon);
         TextView contributorName = view.findViewById(R.id.userContributorName);
