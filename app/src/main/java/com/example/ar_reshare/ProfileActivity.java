@@ -48,8 +48,7 @@ public class ProfileActivity extends Fragment {
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().onBackPressed();
-                getActivity().overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                getActivity().getSupportFragmentManager().popBackStack();
             }
         });
 
