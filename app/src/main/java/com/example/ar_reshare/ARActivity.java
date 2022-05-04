@@ -3,14 +3,11 @@ package com.example.ar_reshare;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.media.Image;
@@ -20,11 +17,11 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -43,9 +40,7 @@ import com.example.ar_reshare.samplerender.arcore.BackgroundRenderer;
 import com.example.ar_reshare.samplerender.arcore.PlaneRenderer;
 import com.example.ar_reshare.samplerender.arcore.SpecularCubemapFilter;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.navigation.NavigationBarView;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
@@ -59,7 +54,6 @@ import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.example.ar_reshare.helpers.*;
 import com.google.ar.core.Trackable;
-import com.google.ar.core.TrackingFailureReason;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.CameraNotAvailableException;
 import com.google.ar.core.exceptions.NotYetAvailableException;
@@ -68,25 +62,23 @@ import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class ARActivity extends Fragment implements SampleRender.Renderer{
-
-    private static final String SEARCHING_PLANE_MESSAGE = "Searching for surfaces...";
-    private static final String USER_MOVED_MESSAGE = "You have left your origin. Please regenerate.";
 
     // See the definition of updateSphericalHarmonicsCoefficients for an explanation of these
     // constants.
@@ -107,6 +99,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     private static final int CUBEMAP_RESOLUTION = 16;
     private static final int CUBEMAP_NUMBER_OF_IMPORTANCE_SAMPLES = 32;
+    private static final int MAX_ANCHORED_PRODUCTS = 1;
 
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
@@ -117,7 +110,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private final SnackbarHelper messageSnackbarHelper = new SnackbarHelper();
     private DisplayRotationHelper displayRotationHelper;
     private final TrackingStateHelper trackingStateHelper = new TrackingStateHelper(getActivity());
-    private TapHelper tapHelper;
     private SampleRender render;
 
     private PlaneRenderer planeRenderer;
@@ -126,18 +118,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private boolean hasSetTextureNames = false;
 
     private final DepthSettings depthSettings = new DepthSettings();
-    private boolean[] depthSettingsMenuDialogCheckboxes = new boolean[2];
 
     private final InstantPlacementSettings instantPlacementSettings = new InstantPlacementSettings();
-    private boolean[] instantPlacementSettingsMenuDialogCheckboxes = new boolean[1];
-    // Assumed distance from the device camera to the surface on which user will try to place objects.
-    // This value affects the apparent scale of objects while the tracking method of the
-    // Instant Placement point is SCREENSPACE_WITH_APPROXIMATE_DISTANCE.
-    // Values in the [0.2, 2.0] meter range are a good choice for most AR experiences. Use lower
-    // values for AR experiences where users are expected to place objects on surfaces close to the
-    // camera. Use larger values for experiences where the user will likely be standing and trying to
-    // place an object on the ground or floor in front of them.
-    private static final float APPROXIMATE_DISTANCE_METERS = 2.0f;
 
     // Point Cloud
     private VertexBuffer pointCloudVertexBuffer;
@@ -150,25 +132,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     // Virtual object (ARCore pawn)
     private Mesh virtualObjectMesh;
 
-    private Mesh objectHat;
-    private Mesh objectPhone;
-    private Mesh objectBurger;
-    private Mesh objectCup;
-
     private Shader virtualObjectShader;
-    private Texture virtualObjectAlbedoTexture;
-    private Texture virtualObjectAlbedoInstantPlacementTexture;
-    private Texture virtualObjectPbrTexture;
-
-    private Texture burgerTexture;
-    private Texture hatTexture;
-    private Texture phoneTexture;
-    private Texture cupTexture;
-    private Shader burgerShader;
-    private Shader hatShader;
-    private Shader phoneShader;
-    private Shader cupShader;
-
+    private Texture virtualObjectTexture;
 
     // Environmental HDR
     private Texture dfgTexture;
@@ -188,22 +153,34 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     // The list of products fetched from the backend
     private List<Product> products;
     private CountDownLatch readyLatch;
-    private int TIMEOUT_IN_SECONDS = 3;
+    private int TIMEOUT_IN_SECONDS = 10;
 
     // The list of currently displayed Product Objects
-    private final List<ProductObject> productObjects = new ArrayList<>();
+    private final Queue<ProductObject> productObjectQueue = new LinkedList<>();
+    private static final double DELETE_ANCHOR_ANGLE_BOUNDARY = 15 * Math.PI/180; // degrees
 
     // The set of currently displayed products
     // This should be combined with productObjects in the future
     private final Set<Product> displayedProducts = new HashSet<>();
+    private final Set<Product> currentlyPointedProducts = new HashSet<>();
     private boolean productBoxHidden = true;
-    private Product productBoxProduct;
     private Map<Product, User> contributorMap = new HashMap<>();
 
     // Compass object
     private Compass compass;
     // Compass animation
     private double lastCompassButtonAngle = 0;
+    private double lastMedianAngle = 0;
+
+    // Used for stabilising compass readings
+    private final int MAX_COMPASS_READING_QUEUE_SIZE = 30;
+    private double[] compassReadingsArray = new double[MAX_COMPASS_READING_QUEUE_SIZE];
+    private int compassReadingSize = 0;
+    private int compassReadingIndex = 0;
+    private final int COMPASS_POLLING_RATE = 2; // Milliseconds
+    private boolean pauseCompass = false;
+    private final int COMPASS_MEDIAN_REFRESH_RATE = 30;
+    private int compassMedianCountdown = COMPASS_MEDIAN_REFRESH_RATE;
 
     // Location related attributes:
     // Built-in class which provider current location
@@ -215,7 +192,13 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     private Map<Product, Double> productAngles = new HashMap<>();
 
     // The acceptable limit of angle offset to product
-    private static final double ANGLE_LIMIT = 20 * Math.PI/180; // degrees converted to radians
+    private static final double ANGLE_LIMIT = 15 * Math.PI/180; // degrees converted to radians
+
+    // Instructions
+    private int instructionProgress = 0;
+    private final int INSTRUCTIONS_NUMBER = 5;
+    private static boolean instructionsShowing = false;
+    private static boolean hideInstructions = false;
 
     @Nullable
     @Override
@@ -252,8 +235,17 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             }
         });
 
+        // Define the onclick event for instructions button
+        ImageButton instructions_button = view.findViewById(R.id.instructions_button);
+        instructions_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showInstructions();
+            }
+        });
+
         // Start the compass
-        compass = new Compass(getActivity());
+        new Thread(() -> compass = new Compass(getActivity())).start();
 
         getDeviceLocation();
 
@@ -264,9 +256,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        System.out.println("  VIEW CREATED HAAHHAHA");
-        //showInstructions();
     }
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -325,7 +317,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             }
 
             if (message != null) {
-                messageSnackbarHelper.showError(getActivity(), message);
+                //messageSnackbarHelper.showError(this, message);
                 //Log.e(TAG, "Exception creating session", exception);
                 return;
             }
@@ -342,7 +334,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             // https://developers.google.com/ar/develop/java/recording-and-playback
             session.resume();
         } catch (CameraNotAvailableException e) {
-            messageSnackbarHelper.showError(getActivity(), "Camera not available. Try restarting the app.");
+            //messageSnackbarHelper.showError(this, "Camera not available. Try restarting the app.");
             session = null;
             return;
         }
@@ -354,8 +346,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
     @Override
     public void onStart() {
         super.onStart();
-
-        //showInstructions();
     }
 
     @Override
@@ -368,10 +358,13 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             displayRotationHelper.onPause();
             surfaceView.onPause();
             session.pause();
+            pauseCompass = true;
         }
     }
 
-//    @Override
+
+
+    //    @Override
 //    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
 //        super.onRequestPermissionsResult(requestCode, permissions, results);
 //        if (!CameraPermissionHelper.hasCameraPermission(getActivity())) {
@@ -398,44 +391,97 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 //        }
 //    }
 
-//    @Override
-//    public void onWindowFocusChanged(boolean hasFocus) {
-//        super.onWindowFocusChanged(hasFocus);
-//        FullScreenHelper.setFullScreenOnWindowFocusChanged(this, hasFocus);
-//    }
+    private void takeCompassReadings() {
+        new Thread(() -> {
+            while (!pauseCompass) {
+                double angle = compass.getAngleToNorth();
+                // Stabilise compass reading
+                angle = stabiliseCompassReading(angle);
+                lastMedianAngle = angle;
+                try {
+                    Thread.sleep(COMPASS_POLLING_RATE);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-//    @Override
-//    public void onAttachedToWindow() {
-//        ;
-//    }
+            }
+        }).start();
+    }
 
     private void showInstructions() {
+        if (instructionsShowing) return;
+
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
         View instructionsWindow = inflater.inflate(R.layout.instructions_popup, null);
         int width = LinearLayout.LayoutParams.WRAP_CONTENT;
         int height = LinearLayout.LayoutParams.WRAP_CONTENT;
 
         // Allows to tap outside the popup to dismiss it
-        boolean focusable = true;
+        boolean focusable = false;
 
         final PopupWindow popupWindow = new PopupWindow(instructionsWindow, width, height, focusable);
 
-        popupWindow.showAtLocation(instructionsWindow, Gravity.CENTER, 0, -100);
+        popupWindow.showAtLocation(instructionsWindow, Gravity.CENTER, 0, 0);
+        instructionsShowing = true;
 
-        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                popupWindow.dismiss();
-            }
-        });
-
-        Button button = instructionsWindow.findViewById(R.id.instructionsConfirm);
-        button.setOnClickListener(new View.OnClickListener() {
+        Button button1 = instructionsWindow.findViewById(R.id.instructionsCancel);
+        button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 popupWindow.dismiss();
+                instructionsShowing = false;
             }
         });
+
+        Button button2 = instructionsWindow.findViewById(R.id.instructionsConfirm);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleInstructionProgress(instructionsWindow, popupWindow);
+            }
+        });
+    }
+
+    private void handleInstructionProgress(View instructionsWindow, PopupWindow popupWindow) {
+        TextView messageText = instructionsWindow.findViewById(R.id.beaverMessage);
+        Button button = instructionsWindow.findViewById(R.id.instructionsConfirm);
+        Button cancelButton = instructionsWindow.findViewById(R.id.instructionsCancel);
+        LinearLayout hideSetting = instructionsWindow.findViewById(R.id.hideInstructions);
+        CheckBox hideCheckBox = instructionsWindow.findViewById(R.id.hideCheckBox);
+        String message = "";
+        switch (instructionProgress) {
+            case 0:
+                message = "Great! First thing to know is that you are in the AR View. Here you can look around you to find local products currently being shared.";
+                button.setText("Cool!");
+                cancelButton.setText("Exit");
+                break;
+            case 1:
+                message = "Start by taking a step, forwards and backwards, and rotating your phone slowly 360 degrees to scan the floor. You will see the floor surface being detected on the screen.";
+                button.setText("Done!");
+                break;
+            case 2:
+                message = "Now, notice there is a big compass at the bottom of your screen which rotates as you move. Press it to start seeing products.";
+                break;
+            case 3:
+                message = "Now, rotate yourself slowly, and notice how products will start appearing in the section above. Press on a product to see more information.";
+                button.setText("I can see them!");
+                break;
+            case 4:
+                message = "If you ever forget, these instructions, just click on the information icon, in the bottom right, and I will be back!";
+                button.setText("Thanks!");
+                hideSetting.setVisibility(View.VISIBLE);
+                hideInstructions = hideCheckBox.isChecked();
+                hideCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> hideInstructions = isChecked);
+                break;
+            default:
+                hideSetting.setVisibility(View.INVISIBLE);
+                popupWindow.dismiss();
+                instructionsShowing = false;
+        }
+        if (instructionProgress < INSTRUCTIONS_NUMBER) instructionProgress += 1;
+        else instructionProgress = 0;
+        messageText.setText(message);
     }
 
     private void getLatestProducts() {
@@ -445,7 +491,6 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                 if (success) {
                     products = searchResults;
                     readyLatch.countDown();
-                    System.out.println(readyLatch.getCount());
                 }
             }
         });
@@ -483,6 +528,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     @Override
     public void onSurfaceCreated(SampleRender render) {
+        if (!hideInstructions) getActivity().runOnUiThread(() -> showInstructions());
+        takeCompassReadings();
+
         // Prepare the rendering objects. This involves reading shaders and 3D model files, so may throw
         // an IOException.
         try {
@@ -540,81 +588,16 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                     new Mesh(
                             render, Mesh.PrimitiveMode.POINTS, /*indexBuffer=*/ null, pointCloudVertexBuffers);
 
-            // Virtual object to render (ARCore pawn)
-//            virtualObjectAlbedoTexture =
-//                    Texture.createFromAsset(
-//                            render,
-//                            "models/pink.png",
-//                            Texture.WrapMode.CLAMP_TO_EDGE,
-//                            Texture.ColorFormat.SRGB);
-            virtualObjectAlbedoInstantPlacementTexture =
-                    Texture.createFromAsset(
-                            render,
-                            "models/grey.png",
-                            Texture.WrapMode.CLAMP_TO_EDGE,
-                            Texture.ColorFormat.SRGB);
-            virtualObjectPbrTexture =
-                    Texture.createFromAsset(
-                            render,
-                            "models/grey.png",
-                            Texture.WrapMode.CLAMP_TO_EDGE,
-                            Texture.ColorFormat.LINEAR);
-
             virtualObjectMesh = Mesh.createFromAsset(render, "models/pawn.obj");
-            objectHat = Mesh.createFromAsset(render, "models/hat.obj");
-            hatShader = setObjectShader();
-            hatTexture = setObjectTexture("models/purple.png");
-            objectPhone = Mesh.createFromAsset(render, "models/phone.obj");
-            phoneShader = setObjectShader();
-            phoneTexture = setObjectTexture("models/grey.png");
-            objectBurger = Mesh.createFromAsset(render, "models/burger.obj");
-            burgerShader = setObjectShader();
-            burgerTexture = setObjectTexture("models/burger.png");
-            objectCup = Mesh.createFromAsset(render, "models/cup.obj");
-            cupShader = setObjectShader();
-            cupTexture = setObjectTexture("models/pink.png");
-//            virtualObjectShader =
-//                    Shader.createFromAssets(
-//                            render,
-//                            "shaders/environmental_hdr.vert",
-//                            "shaders/environmental_hdr.frag",
-//                            /*defines=*/ new HashMap<String, String>() {
-//                                {
-//                                    put(
-//                                            "NUMBER_OF_MIPMAP_LEVELS",
-//                                            Integer.toString(cubemapFilter.getNumberOfMipmapLevels()));
-//                                }
-//                            })
-//                            .setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture)
-//                            .setTexture("u_RoughnessMetallicAmbientOcclusionTexture", virtualObjectPbrTexture)
-//                            .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
-//                            .setTexture("u_DfgTexture", dfgTexture);
-            virtualObjectShader = hatShader; // default shader
-        } catch (IOException e) {
-            //Log.e(TAG, "Failed to read a required asset file", e);
-            messageSnackbarHelper.showError(getActivity(), "Failed to read a required asset file: " + e);
-        }
-    }
 
-    public Texture setObjectTexture(String textureLocation){
-        Texture texture = null;
-        try {
-            texture =
+            // Virtual object to render (ARCore pawn)
+            virtualObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            textureLocation,
+                            "models/electronics_colours.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return texture;
-    }
-
-    public Shader setObjectShader(){
-        Shader shader = null;
-        try {
-            shader =
+            virtualObjectShader =
                     Shader.createFromAssets(
                             render,
                             "shaders/environmental_hdr.vert",
@@ -626,14 +609,13 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                                             Integer.toString(cubemapFilter.getNumberOfMipmapLevels()));
                                 }
                             })
-                            .setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture)
-                            .setTexture("u_RoughnessMetallicAmbientOcclusionTexture", virtualObjectPbrTexture)
+                            .setTexture("u_AlbedoTexture", virtualObjectTexture)
                             .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
                             .setTexture("u_DfgTexture", dfgTexture);
         } catch (IOException e) {
-            e.printStackTrace();
+            //Log.e(TAG, "Failed to read a required asset file", e);
+            messageSnackbarHelper.showError(getActivity(), "Failed to read a required asset file: " + e);
         }
-        return shader;
     }
 
     @Override
@@ -671,7 +653,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             frame = session.update();
         } catch (CameraNotAvailableException e) {
             //Log.e(TAG, "Camera not available during onDrawFrame", e);
-            messageSnackbarHelper.showError(getActivity(), "Camera not available. Try restarting the app.");
+            //messageSnackbarHelper.showError(getActivity(), "Camera not available. Try restarting the app.");
             return;
         }
 
@@ -684,7 +666,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             backgroundRenderer.setUseOcclusion(render, depthSettings.useDepthForOcclusion());
         } catch (IOException e) {
             //Log.e(TAG, "Failed to read a required asset file", e);
-            messageSnackbarHelper.showError(getActivity(), "Failed to read a required asset file: " + e);
+            //messageSnackbarHelper.showError(getActivity(), "Failed to read a required asset file: " + e);
             return;
         }
         // BackgroundRenderer.updateDisplayGeometry must be called every frame to update the coordinates
@@ -702,68 +684,48 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             }
         }
 
-        // MAIN FUNCTIONALITY
-        // On each frame update:
-        // TODO 0. Check user has not moved -> Reset objects if needed
-
-        // 1. Get user's angle to the North (Compass)
-        double angle = compass.getAngleToNorth();
-
-        // 2. Check if user is pointing at a product
-        Optional<Product> pointingAt = checkIfPointingAtProduct(angle);
-
-        // 3. Spawn a product in front of the user if yes
-        if (pointingAt.isPresent()) {
-            // If product is not already being displayed, spawn it
-            if (!this.displayedProducts.contains(pointingAt.get())) {
-                spawnProduct(camera, pointingAt.get(), angle);
-                // When ProductObject has been created, remove this product from the Set
-                this.displayedProducts.add(pointingAt.get());
-                prepareProductBox(pointingAt.get());
-                rotateCompass(angle);
-            }
-            // Else if the product is displayed, but the product box not, display it
-            else if (productBoxHidden && this.displayedProducts.contains(pointingAt.get())) {
-                prepareProductBox(pointingAt.get());
-                rotateCompass(angle);
-            }
-            // Else if the product box is displayed, but is showing other product's information, update it
-            else if (productBoxProduct != pointingAt.get() && this.displayedProducts.contains(pointingAt.get())) {
-                prepareProductBox(pointingAt.get());
-                rotateCompass(angle);
-            }
-        } else {
-            // Hide product box if currently not pointing at any product
-            if (!productBoxHidden) {
-                hideProductBox();
-                rotateCompass(angle);
-            }
-
-        }
-
         // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
         //trackingStateHelper.updateKeepScreenOnFlag(camera.getTrackingState());
 
-        // Show a message based on whether tracking has failed, if planes are detected, and if the user
-        // has placed any objects.
-        String message = null;
-        if (camera.getTrackingState() == TrackingState.PAUSED) {
-            if (camera.getTrackingFailureReason() == TrackingFailureReason.NONE) {
-                //message = SEARCHING_PLANE_MESSAGE;
-            } else {
-                //message = TrackingStateHelper.getTrackingFailureReasonString(camera);
+        // MAIN FUNCTIONALITY
+        // On each frame update:
+
+        // 1. Get user's angle to the North (Compass)
+
+        // Get the latest stable compass reading
+        double angle = lastMedianAngle;
+        rotateCompass(angle);
+
+        //angle = stabiliseCompassReading(angle);
+        //System.out.println("median " + angle*(180/Math.PI) + " degrees to north clockwise");
+        //float[] pose = camera.getDisplayOrientedPose().getTranslation();
+        //System.out.println("x=" + pose[0] + " z=" + pose[2]);
+
+        //detachAnchorIfMoved(angle);
+
+        // 2. Check if user is pointing at a product
+        List<Product> pointingProducts = checkIfPointingAtProduct(angle);
+
+        // 3. Spawn a product in front of the user if yes
+        if (!pointingProducts.isEmpty()) {
+            // If product is not already being displayed, spawn it
+            // Note: The product which is closest to the angle will be spawned, hence index zero
+            Product closestProduct = pointingProducts.get(0);
+            if (!this.displayedProducts.contains(closestProduct)) {
+                // Check if ARCore is tracking
+                if (camera.getTrackingState() == TrackingState.TRACKING) {
+                    spawnProduct(camera, pointingProducts.get(0), angle);
+                }
             }
-        } else if (hasTrackingPlane()) {
+            prepareProductBoxes(pointingProducts);
         } else {
-            //message = SEARCHING_PLANE_MESSAGE;
-        }
-        if (message == null) {
-            messageSnackbarHelper.hide(getActivity());
-        } else {
-            messageSnackbarHelper.showMessage(getActivity(), message);
+            // Hide product boxes if currently not pointing at any product
+            if (!productBoxHidden) {
+                resetScrollView(null);
+            }
+
         }
 
-        // -- Draw background
 
         if (frame.getTimestamp() != 0) {
             // Suppress rendering if the camera did not produce the first frame yet. This is to avoid
@@ -814,30 +776,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         // Iterates through existing anchors and draws them on each frame
         // TODO: Sometimes ConcurrentModificationException is raised when the regenerate button
         //  is pressed and (?) the frame is being drawn, detect the issue and resolve it
-        for (ProductObject obj : this.productObjects)  {
+        for (ProductObject obj : this.productObjectQueue)  {
             Anchor anchor = obj.getAnchor();
             Trackable trackable = obj.getTrackable();
-
-            // Check object's category
-            // TODO: Change temporary hardcoded category
-            Category objCategory = Category.OTHER;
-            if (objCategory.equals(Category.CLOTHING)){
-                virtualObjectMesh = objectHat;
-                virtualObjectShader = hatShader;
-                virtualObjectAlbedoTexture = hatTexture;
-            }else if(objCategory.equals(Category.OTHER)){
-                virtualObjectMesh = objectCup;
-                virtualObjectShader = cupShader;
-                virtualObjectAlbedoTexture = cupTexture;
-            }else if(objCategory.equals(Category.ELECTRONICS)){
-                virtualObjectMesh = objectPhone;
-                virtualObjectShader = phoneShader;
-                virtualObjectAlbedoTexture = phoneTexture;
-            } else {
-                virtualObjectMesh = objectBurger;
-                virtualObjectShader = burgerShader;
-                virtualObjectAlbedoTexture = burgerTexture;
-            }
 
             // Get the current pose of an Anchor in world space. The Anchor pose is updated
             // during calls to session.update() as ARCore refines its estimate of the world.
@@ -851,20 +792,51 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             virtualObjectShader.setMat4("u_ModelView", modelViewMatrix);
             virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
 
-            if (trackable instanceof InstantPlacementPoint
-                    && ((InstantPlacementPoint) trackable).getTrackingMethod()
-                    == InstantPlacementPoint.TrackingMethod.SCREENSPACE_WITH_APPROXIMATE_DISTANCE) {
-                virtualObjectShader.setTexture(
-                        "u_AlbedoTexture", virtualObjectAlbedoInstantPlacementTexture);
-            } else {
-                virtualObjectShader.setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture);
-            }
+            virtualObjectShader.setTexture("u_AlbedoTexture", virtualObjectTexture);
 
             render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
         }
 
         // Compose the virtual scene with the background.
         backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
+    }
+
+
+    private Texture getCategoryTexture(Product product) {
+        Category category = Category.getCategoryById(product.getCategoryID());
+        String categoryTextureFile = "";
+        switch (category) {
+            case CLOTHING:
+                categoryTextureFile = "models/clothing_colours.png";
+                break;
+            case ACCESSORIES:
+                categoryTextureFile = "models/accessory_colours.png";
+                break;
+            case BOOKS:
+                categoryTextureFile = "models/books_colours.png";
+                break;
+            case ELECTRONICS:
+                categoryTextureFile = "models/electronics_colours.png";
+                break;
+            case HOUSEHOLD:
+                categoryTextureFile = "models/household_colours.png";
+                break;
+            default:
+                categoryTextureFile = "models/others_colours.png";
+                break;
+        }
+        Texture texture = null;
+        try {
+             texture =
+                    Texture.createFromAsset(
+                            render,
+                            categoryTextureFile,
+                            Texture.WrapMode.CLAMP_TO_EDGE,
+                            Texture.ColorFormat.SRGB);
+        } catch (IOException e) {
+            System.out.println("EXCEPTION WHEN CREATING TEXTURE " + e);
+        }
+        return texture;
     }
 
     /** Checks if we detected at least one plane. */
@@ -952,36 +924,96 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         session.configure(config);
     }
 
+    // TODO: Spawn products again
     // If it is concluded that a user is currently pointing at a product, and a product should
     // be spawned, pass the camera, the relevant product and the current angle to north to this
     // method to spawn a product in a virtual space
     private void spawnProduct(Camera camera, Product product, double angleToNorth) {
-        if (true) {
-            // If the angle (in radians) is negative convert to positive
-            if (angleToNorth < 0) {
-                angleToNorth = (angleToNorth * -1) + Math.PI;
-            }
-
+        System.out.println("    SPAWN PRODUCT CALLED    ");
+        float distance = 1f; // metres away
+        ProductObject displayedInAR = this.productObjectQueue.peek();
+        // Only spawn products, if none are displayed or the displayed one is different
+        if (this.productObjectQueue.size() == 0 || displayedInAR.getProduct() != product) {
             // Current position of the user
             Pose cameraPose = camera.getDisplayOrientedPose();
+
             float[] coords = cameraPose.getTranslation();
 
-            // Get new coordinates two meters in front of the user
+            // Get new coordinates set distance in meters in front of the user
             // Using Trigonometry
-            double distance = 2; // 2 metres away
-            float deltaX = (float) (Math.sin(angleToNorth) * distance);
-            float deltaZ = (float) (Math.cos(angleToNorth) * distance);
+
+            double modifiedAngleToNorth = angleToNorth % Math.PI/2;
+
+            float oppositeDelta = (float) (Math.sin(modifiedAngleToNorth) * distance);
+            float adjacentDelta = (float) (Math.cos(modifiedAngleToNorth) * distance);
+
+            System.out.println("ANCHOR ANGLE" + angleToNorth);
+
+            float deltaX;
+            float deltaZ;
+
+            if (angleToNorth < Math.PI/2) {
+                deltaX = oppositeDelta;
+                deltaZ = - adjacentDelta;
+            } else if (angleToNorth >= Math.PI/2 && angleToNorth < Math.PI) {
+                deltaX = adjacentDelta;
+                deltaZ = oppositeDelta;
+            } else if (angleToNorth >= Math.PI && angleToNorth < Math.PI*3/2) {
+                deltaX = - oppositeDelta;
+                deltaZ = adjacentDelta;
+            } else {
+                deltaX = - adjacentDelta;
+                deltaZ = - oppositeDelta;
+            }
+
             float[] objectCoords = new float[]{coords[0] + deltaX, coords[1], coords[2] + deltaZ};
             Pose anchorPose = new Pose(objectCoords, new float[]{0, 0, 0, 0});
 
-            // Create an anchor and a ProductObject associated with it
-            Anchor newAnchor = session.createAnchor(anchorPose);
-            ProductObject newObject = new ProductObject(newAnchor, null, product);
-            this.productObjects.add(newObject);
+            System.out.println("ANCHOR CAMERA POSE = " + cameraPose);
+            System.out.println("NEW ANCHOR POSE = " + anchorPose);
+            System.out.println("ANCHOR ANGLE = " + angleToNorth);
+
+            System.out.println(" ANCHORS PRESENT " + session.getAllAnchors().size());
+            System.out.println(" ANCHORS TRACKABLES PRESENT " + session.getAllTrackables(Plane.class).size());
+            System.out.println(" ANCHORS QUEUE SIZE " + this.productObjectQueue.size());
+
+            // If exceeded limit of tracked anchors, replace last one
+            if (this.productObjectQueue.size() == MAX_ANCHORED_PRODUCTS) {
+                ProductObject oldest = this.productObjectQueue.poll();
+                oldest.getAnchor().detach();
+                this.displayedProducts.remove(oldest.getProduct());
+            }
+
+            // Try to create an anchor catching any exceptions
+            try {
+                // An anchor can only be created if the state is tracked
+                if (camera.getTrackingState() == TrackingState.TRACKING) {
+                    Anchor newAnchor = session.createAnchor(anchorPose);
+                    ProductObject newObject = new ProductObject(newAnchor, null, product);
+                    this.productObjectQueue.add(newObject);
+                    this.displayedProducts.add(product);
+                    System.out.println("ANCHOR PRODUCT SPAWNED = " + product.getName());
+                    System.out.println("ANCHOR PRODUCT CATEGORY = " + product.getCategoryID());
+                }
+            } catch (Exception e) {
+                System.out.println("FAILED TO CREATE AN ACHOR");
+            }
         }
     }
 
-
+    // If user rotates by the boundary value, detach the anchor
+    private void detachAnchorIfMoved(double angle) {
+        if (this.productObjectQueue.size() > 0) {
+            ProductObject oldest = this.productObjectQueue.peek();
+            double requiredAngle = this.productAngles.get(oldest.getProduct());
+            if (Math.abs(requiredAngle - angle) > DELETE_ANCHOR_ANGLE_BOUNDARY) {
+                System.out.println("DETACH ANCHOR");
+                oldest.getAnchor().detach();
+                this.displayedProducts.remove(oldest.getProduct());
+                this.productObjectQueue.clear();
+            }
+        }
+    }
 
     // Get the most recent location of the device
     private void getDeviceLocation() {
@@ -1016,75 +1048,147 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
             productLocation.setLongitude(product.getCoordinates().longitude);
             double requiredAngle = lastKnownLocation.bearingTo(productLocation);
             requiredAngle = requiredAngle * Math.PI/180;
+            if (requiredAngle < 0) requiredAngle = 2*Math.PI + requiredAngle;
+            //System.out.println("required angle = " + requiredAngle);
             productAngles.put(product, requiredAngle);
         }
     }
 
     // Reset anchors in the AR space
     private void resetProductObjects() {
-        for (ProductObject productObject : productObjects) {
+        for (ProductObject productObject : productObjectQueue) {
             productObject.getAnchor().detach();
         }
         displayedProducts.removeAll(productAngles.keySet());
         contributorMap.clear();
-        int n = productObjects.size();
-        for (int i = 0; i < n; i++) {
-            productObjects.remove(0);
-        }
+        productObjectQueue.clear();
+        resetScrollView(null);
+    }
 
+    private void resetScrollView(CountDownLatch latch) {
+        getActivity().runOnUiThread(() -> {
+            currentlyPointedProducts.clear();
+            LinearLayout scrollView = getActivity().findViewById(R.id.ARScrollLayout);
+            scrollView.removeAllViewsInLayout();
+            TextView textView = getActivity().findViewById(R.id.productsFoundText);
+            textView.setText("No products found");
+            if (latch != null) latch.countDown();
+        });
     }
 
     // Returns a product if the user is currently pointing at it
-    private Optional<Product> checkIfPointingAtProduct(double userAngle) {
-        Map.Entry<Product, Double> closestPair = null;
+    private List<Product> checkIfPointingAtProduct(double userAngle) {
+        // A map of products being pointed at and the angle difference
+        //Map<Product, Double> pointingAt = new HashMap<>();
+        List<Product> testList = new ArrayList<>();
         for (Map.Entry<Product, Double> productAnglePair : productAngles.entrySet()) {
             double angleDiff = Math.abs(userAngle - productAnglePair.getValue());
+
             if (angleDiff <= ANGLE_LIMIT) {
-                if (closestPair == null) closestPair = productAnglePair;
-                else {
-                    // If two products are close to each other, choose the closest angle
-                    double originalDiff = Math.abs(userAngle - closestPair.getValue());
-                    if (originalDiff > angleDiff) closestPair = productAnglePair;
-                }
+                //pointingAt.put(productAnglePair.getKey(), angleDiff);
+                testList.add(productAnglePair.getKey());
             }
         }
-        Optional<Product> target;
-        if (closestPair != null ) {
-            target = Optional.of(closestPair.getKey());
-        }
-        else {
-            target = Optional.empty();
-        }
-        return target;
+
+//        List<Product> closestProducts = pointingAt.entrySet()
+//                .stream()
+//                .sorted(Comparator.comparingDouble(pair -> pair.getValue()))
+//                .limit(3)
+//                .map(pair -> pair.getKey())
+//                .collect(Collectors.toList());
+
+        //return closestProducts;
+        return testList;
     }
 
     // Sends a request to the backend to get download the contributor of the product
-    private void prepareProductBox(Product product) {
+    private void prepareProductBox(Product product, CountDownLatch latch) {
         // This optimisation means that the user will be downloaded only once
         // The assumption made is that the contributor of a product will never change
         if (this.contributorMap.containsKey(product)) {
-            renderProductBox(product, this.contributorMap.get(product));
+            latch.countDown();
         } else {
             BackendController.getProfileByID(0, 1, product.getContributorID(), new BackendController.BackendProfileResultCallback() {
                 @Override
                 public void onBackendProfileResult(boolean success, User userProfile) {
-                    System.out.println("NEW USER");
                     contributorMap.put(product, userProfile);
-                    renderProductBox(product, userProfile);
+                    latch.countDown();
                 }
             });
         }
     }
 
+    private List<Product> setDifference(List<Product> products) {
+        List<Product> toAdd = new ArrayList<>();
+        Set<Product> toRemove = new HashSet<>(this.currentlyPointedProducts);
+        for (Product product : products) {
+            if (!this.currentlyPointedProducts.contains(product)) {
+                toAdd.add(product);
+            } else {
+                toRemove.remove(product);
+            }
+        }
+        return toAdd;
+    }
+
+
+    private void prepareProductBoxes(List<Product> products) {
+        LinearLayout scrollView = getActivity().findViewById(R.id.ARScrollLayout);
+        final List<Product> allProducts = products;
+
+        // If all products are already displayed skip
+        if (this.currentlyPointedProducts.containsAll(products) &&
+                this.currentlyPointedProducts.size() == products.size()) return;
+        else {
+            // If more items need to be added but no items need to be removed
+            if (products.containsAll(this.currentlyPointedProducts)) {
+                products = setDifference(products);
+            } else {
+                // Request reset of products and wait until complete
+                CountDownLatch latch = new CountDownLatch(1);
+                resetScrollView(latch);
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {}
+            }
+        }
+        List<Product> finalProducts = products;
+
+        new Thread(() -> {
+            CountDownLatch latch = new CountDownLatch(finalProducts.size());
+            for (Product product : finalProducts) {
+                prepareProductBox(product, latch);
+            }
+            try {
+                latch.await();
+
+                // Reset the viewed products and proceed to show new products
+                for (Product product : finalProducts) {
+                    if (this.currentlyPointedProducts.contains(product)) continue;
+                    renderProductBox(product, contributorMap.get(product), scrollView);
+                    this.currentlyPointedProducts.add(product);
+                }
+
+                getActivity().runOnUiThread(() -> {
+                    TextView textView = getActivity().findViewById(R.id.productsFoundText);
+                    textView.setText(this.currentlyPointedProducts.size() + " product(s) found");
+                });
+            } catch (InterruptedException e) {}
+        }).start();
+    }
+
     // Given a product, render and display a product box
-    private void renderProductBox(Product product, User user) {
+    private void renderProductBox(Product product, User user, LinearLayout scrollView) {
         // runOnUiThread must be called because Android requires changes to UI to be done only by
         // the original thread that created the view hierarchy
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 // Make Product Box Visible
-                View productBox = getActivity().findViewById(R.id.productBoxAR);
+                LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
+                View productBoxParent = inflater.inflate(R.layout.ar_product_box, scrollView, false);
+
+                View productBox = productBoxParent.findViewById(R.id.productBoxAR);
                 productBox.setVisibility(View.VISIBLE);
 
                 // Set parameters depending on product
@@ -1123,146 +1227,74 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                         ProductPageActivity productFragment = new ProductPageActivity();
                         productFragment.setArguments(bundle);
                         productFragment.setIsFromFeed(false);
-                        AppCompatActivity activity = (AppCompatActivity)v.getContext();
-                        activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
+                        getActivity().getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
                     }
                 });
+                scrollView.addView(productBoxParent);
+                System.out.println(" Added to list");
             }
         });
         productBoxHidden = false;
     }
 
-    // Hide the product box if not pointing at any product
-    private void hideProductBox() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                View productBox = getActivity().findViewById(R.id.productBoxAR);
-                productBox.setVisibility(View.INVISIBLE);
-            }
-        });
-        productBoxHidden = true;
+    // Takes a median of the last set of compass readings to filter out anomalies
+    // Self-developed efficient median algorithm
+    private double stabiliseCompassReading(double reading) {
+        if (true) return reading;
+        if (compassReadingSize < MAX_COMPASS_READING_QUEUE_SIZE) {
+            compassReadingSize += 1;
+        }
+
+        // Insert new reading
+        compassReadingsArray[compassReadingIndex] = reading;
+
+        double median = lastMedianAngle;
+        if (compassMedianCountdown <= 0) {
+            // Find the middle index of the array
+            int mid = Math.floorDiv(compassReadingSize, 2);
+            int skipCount; // Number of elements to skip
+            if (mid > 0) skipCount = mid-1;
+            else skipCount = 0;
+
+            median = Arrays.stream(compassReadingsArray).sorted().skip(skipCount).findFirst().getAsDouble();
+
+            compassMedianCountdown = COMPASS_MEDIAN_REFRESH_RATE;
+        } else {
+            compassMedianCountdown -= 1;
+        }
+
+        // Reset index to zero when end of array has been reached
+        if (compassReadingIndex == MAX_COMPASS_READING_QUEUE_SIZE-1) {
+            compassReadingIndex = 0;
+        } else {
+            compassReadingIndex += 1;
+        }
+
+        return median;
     }
 
-    // Rotates compass to the specified angle to the north
+    // Rotates compass to the specified angle to the northß
     private void rotateCompass(double angle) {
-        // Convert angle to positive degrees
-        if (angle < 0) angle = angle + Math.PI;
+        // Convert angle from radians to degrees
         float angleDeg = (float) (angle * 180/Math.PI);
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                View compassButton = getActivity().findViewById(R.id.regenerate_button);
-                ObjectAnimator.ofFloat(compassButton, "rotation", (float) lastCompassButtonAngle, angleDeg).start();
-                lastCompassButtonAngle = angleDeg;
-            }
+
+        // The compass must rotate in the opposite direction to the direction of actual rotation
+        angleDeg = 360 - angleDeg;
+
+        // Prevent jumping compass animation
+        if (angleDeg > 340 && lastCompassButtonAngle < 20) {
+            angleDeg = - (360 - angleDeg);
+        }
+
+        float finalAngleDeg = angleDeg;
+
+        getActivity().runOnUiThread(() -> {
+            View compassButton = getActivity().findViewById(R.id.regenerate_button);
+            ObjectAnimator.ofFloat(compassButton, "rotation", (float) lastCompassButtonAngle, finalAngleDeg).start();
+            lastCompassButtonAngle = finalAngleDeg;
         });
     }
 
-//    // TODO: Consider creating an abstract class SwipingActivity
-//    // Logic for handling swiping gestures between activities
-//    @Override
-//    public boolean onTouchEvent(MotionEvent touchEvent){
-//        TextView swipingClue = getActivity().findViewById(R.id.swipingClue);
-//        switch(touchEvent.getAction()){
-//            case MotionEvent.ACTION_DOWN:
-//                touchedDown = true;
-//                x1 = touchEvent.getX();
-//                y1 = touchEvent.getY();
-//                break;
-//            case MotionEvent.ACTION_UP:
-//                x2 = touchEvent.getX();
-//                y2 = touchEvent.getY();
-//                touchedDown = false;
-//                if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
-//                    Intent i = new Intent(getActivity(), FeedActivity.class);
-//                    startActivity(i);
-//                    getActivity().overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-//                } else if((Math.abs(x1) > Math.abs(x2)+ TOUCH_OFFSET)) {
-//                    Intent i = new Intent(getActivity(), ProfileActivity.class);
-//                    startActivity(i);
-//                    getActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-//                } else if ((y1 - y2 > TOUCH_OFFSET) || (Math.abs(x2-x1) < TAP_OFFSET && Math.abs(y2-y1) < TAP_OFFSET && !moved)) {
-//                    Intent i = new Intent(getActivity(), MapsActivity.class);
-//                    startActivity(i);
-//                    getActivity().overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top);
-//                }
-//                swipingClue.setVisibility(View.INVISIBLE);
-//                moved = false;
-//                break;
-//            case MotionEvent.ACTION_MOVE:
-//                x2 = touchEvent.getX();
-//                y2 = touchEvent.getY();
-//                if (touchedDown) {
-//                    if (Math.abs(x2 - x1) > TAP_OFFSET || Math.abs(y2 - y1) > TAP_OFFSET) {
-//                        moved = true;
-//                    }
-//                    if (Math.abs(x1)+ TOUCH_OFFSET < Math.abs(x2)) {
-//                        swipingClue.setText("Feed >>>");
-//                        float diff = ((x2 - x1) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
-//                        swipingClue.setPadding(Math.round(diff*TOUCH_OFFSET), 0, 0, 0);
-//                        if (diff > 1) diff = 1.0f;
-//                        else if (diff < 0.5) diff = 0.25f;
-//                        swipingClue.setAlpha(diff);
-//                        swipingClue.setVisibility(View.VISIBLE);
-//                    } else if((Math.abs(x1) > Math.abs(x2)+ TOUCH_OFFSET)) {
-//                        swipingClue.setText("<<< Profile");
-//                        float diff = ((x1 - x2) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
-//                        swipingClue.setPadding(0, 0, Math.round(diff*TOUCH_OFFSET), 0);
-//                        if (diff > 1) diff = 1.0f;
-//                        else if (diff < 0.5) diff = 0.25f;
-//                        swipingClue.setAlpha(diff);
-//                        swipingClue.setVisibility(View.VISIBLE);
-//                    } else if (y1 - y2 > TOUCH_OFFSET) {
-//                        swipingClue.setText("^ Map ^");
-//                        swipingClue.setVisibility(View.VISIBLE);
-//                        float diff = ((y1 - y2) - TOUCH_OFFSET)/(2.5f*TOUCH_OFFSET);
-//                        swipingClue.setPadding(0, 0, 0, Math.round(diff*TOUCH_OFFSET));
-//                        if (diff > 1) diff = 1.0f;
-//                        else if (diff < 0.5) diff = 0.25f;
-//                        swipingClue.setAlpha(diff);
-//                        swipingClue.setVisibility(View.VISIBLE);
-//                    } else {
-//                        swipingClue.setVisibility(View.INVISIBLE);
-//                    }
-//                } else {
-//                    swipingClue.setVisibility(View.INVISIBLE);
-//                    swipingClue.setText("");
-//                }
-//                break;
-//        }
-//        return false;
-//    }
-
-//    MapsActivity mapsActivity = new MapsActivity();
-//    FeedActivity feedActivity = new FeedActivity();
-//    ARActivity arActivity = this;
-//    ProfileActivity profileActivity = new ProfileActivity();
-//    ChatListActivity chatListActivity = new ChatListActivity();
-//
-//
-//    @Override
-//    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-//        Intent intent;
-//        switch (item.getItemId()) {
-//            case R.id.map_menu_item:
-//                intent = new Intent(ARActivity.this, MapsActivity.class);
-//                startActivity(intent);
-//                //getSupportFragmentManager().beginTransaction().replace(R.id.container, mapsActivity).commit();
-//                return true;
-//
-//            case R.id.feed_menu_item:
-//                intent = new Intent(ARActivity.this, FeedActivity.class);
-//                startActivity(intent);
-//                //getSupportFragmentManager().beginTransaction().replace(R.id.container, secondFragment).commit();
-//                return true;
-//
-//            case R.id.ar_menu_item:
-//                //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
-//                return true;
-//        }
-//        return false;
-//    }
 }
 
 // A class to represent the objects in AR showing the direction to products
