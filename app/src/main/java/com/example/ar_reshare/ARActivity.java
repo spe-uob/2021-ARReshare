@@ -1067,12 +1067,14 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
 
     private void resetScrollView(CountDownLatch latch) {
         getActivity().runOnUiThread(() -> {
-            currentlyPointedProducts.clear();
-            LinearLayout scrollView = getActivity().findViewById(R.id.ARScrollLayout);
-            scrollView.removeAllViewsInLayout();
-            TextView textView = getActivity().findViewById(R.id.productsFoundText);
-            textView.setText("No products found");
-            if (latch != null) latch.countDown();
+            try {
+                currentlyPointedProducts.clear();
+                LinearLayout scrollView = getActivity().findViewById(R.id.ARScrollLayout);
+                scrollView.removeAllViewsInLayout();
+                TextView textView = getActivity().findViewById(R.id.productsFoundText);
+                textView.setText("No products found");
+                if (latch != null) latch.countDown();
+            } catch (Exception e) {}
         });
     }
 
@@ -1170,8 +1172,11 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
                 }
 
                 getActivity().runOnUiThread(() -> {
-                    TextView textView = getActivity().findViewById(R.id.productsFoundText);
-                    textView.setText(this.currentlyPointedProducts.size() + " product(s) found");
+                    try {
+                        TextView textView = getActivity().findViewById(R.id.productsFoundText);
+                        textView.setText(this.currentlyPointedProducts.size() + " product(s) found");
+                    } catch (Exception e) {}
+
                 });
             } catch (InterruptedException e) {}
         }).start();
@@ -1184,54 +1189,56 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                // Make Product Box Visible
-                LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
-                View productBoxParent = inflater.inflate(R.layout.ar_product_box, scrollView, false);
+                try {
+                    // Make Product Box Visible
+                    LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
+                    View productBoxParent = inflater.inflate(R.layout.ar_product_box, scrollView, false);
 
-                View productBox = productBoxParent.findViewById(R.id.productBoxAR);
-                productBox.setVisibility(View.VISIBLE);
+                    View productBox = productBoxParent.findViewById(R.id.productBoxAR);
+                    productBox.setVisibility(View.VISIBLE);
 
-                // Set parameters depending on product
-                TextView title = (TextView) productBox.findViewById(R.id.title);
-                title.setText(product.getName());
-                TextView contributor = (TextView) productBox.findViewById(R.id.contributor);
-                if (user != null) contributor.setText(user.getName());
-                else contributor.setText("AR-Reshare user");
-                ImageView photo = (ImageView) productBox.findViewById(R.id.productimage);
-                Bitmap productPhoto = product.getMainPic();
-                if (productPhoto != null) photo.setImageBitmap(product.getMainPic());
-                else photo.setImageResource(R.drawable.example_cup);
+                    // Set parameters depending on product
+                    TextView title = (TextView) productBox.findViewById(R.id.title);
+                    title.setText(product.getName());
+                    TextView contributor = (TextView) productBox.findViewById(R.id.contributor);
+                    if (user != null) contributor.setText(user.getName());
+                    else contributor.setText("AR-Reshare user");
+                    ImageView photo = (ImageView) productBox.findViewById(R.id.productimage);
+                    Bitmap productPhoto = product.getMainPic();
+                    if (productPhoto != null) photo.setImageBitmap(product.getMainPic());
+                    else photo.setImageResource(R.drawable.example_cup);
 
-                // TODO: Add checking for null product location
-                // Find and display distance to product
-                Location productLocation = new Location("ManualProvider");
-                productLocation.setLatitude(product.getCoordinates().latitude);
-                productLocation.setLongitude(product.getCoordinates().longitude);
-                float dist = lastKnownLocation.distanceTo(productLocation);
-                TextView distanceAway = (TextView) productBox.findViewById(R.id.distanceAway);
-                distanceAway.setText(Math.round(dist) + " metres away");
+                    // TODO: Add checking for null product location
+                    // Find and display distance to product
+                    Location productLocation = new Location("ManualProvider");
+                    productLocation.setLatitude(product.getCoordinates().latitude);
+                    productLocation.setLongitude(product.getCoordinates().longitude);
+                    float dist = lastKnownLocation.distanceTo(productLocation);
+                    TextView distanceAway = (TextView) productBox.findViewById(R.id.distanceAway);
+                    distanceAway.setText(Math.round(dist) + " metres away");
 
-                // Link the Product Box to the Product Page
-                productBox.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Bundle bundle = new Bundle();
-                        bundle.putInt("contributorID",product.getContributorID());
-                        bundle.putString("productName",product.getName());
-                        bundle.putString("productDescription",product.getDescription());
-                        bundle.putInt("productID",product.getId());
-                        bundle.putDouble("lat", product.getCoordinates().latitude);
-                        bundle.putDouble("lng",product.getCoordinates().longitude);
-                        bundle.putString("postcode",product.getPostcode());
-                        bundle.putBoolean("isSaved", product.isSavedByUser());
-                        ProductPageActivity productFragment = new ProductPageActivity();
-                        productFragment.setArguments(bundle);
-                        productFragment.setIsFromFeed(false);
-                        getActivity().getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
-                    }
-                });
-                scrollView.addView(productBoxParent);
-                System.out.println(" Added to list");
+                    // Link the Product Box to the Product Page
+                    productBox.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("contributorID",product.getContributorID());
+                            bundle.putString("productName",product.getName());
+                            bundle.putString("productDescription",product.getDescription());
+                            bundle.putInt("productID",product.getId());
+                            bundle.putDouble("lat", product.getCoordinates().latitude);
+                            bundle.putDouble("lng",product.getCoordinates().longitude);
+                            bundle.putString("postcode",product.getPostcode());
+                            bundle.putBoolean("isSaved", product.isSavedByUser());
+                            ProductPageActivity productFragment = new ProductPageActivity();
+                            productFragment.setArguments(bundle);
+                            productFragment.setIsFromFeed(false);
+                            getActivity().getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack(null).commit();
+                        }
+                    });
+                    scrollView.addView(productBoxParent);
+                    System.out.println(" Added to list");
+                } catch (Exception e) {}
             }
         });
         productBoxHidden = false;
@@ -1289,9 +1296,11 @@ public class ARActivity extends Fragment implements SampleRender.Renderer{
         float finalAngleDeg = angleDeg;
 
         getActivity().runOnUiThread(() -> {
-            View compassButton = getActivity().findViewById(R.id.regenerate_button);
-            ObjectAnimator.ofFloat(compassButton, "rotation", (float) lastCompassButtonAngle, finalAngleDeg).start();
-            lastCompassButtonAngle = finalAngleDeg;
+            try {
+                View compassButton = getActivity().findViewById(R.id.regenerate_button);
+                ObjectAnimator.ofFloat(compassButton, "rotation", (float) lastCompassButtonAngle, finalAngleDeg).start();
+                lastCompassButtonAngle = finalAngleDeg;
+            } catch (Exception e) {}
         });
     }
 
