@@ -179,7 +179,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
     private int compassReadingIndex = 0;
     private final int COMPASS_POLLING_RATE = 2; // Milliseconds
     private boolean pauseCompass = false;
-    private final int COMPASS_MEDIAN_REFRESH_RATE = 10;
+    private final int COMPASS_MEDIAN_REFRESH_RATE = 5;
     private int compassMedianCountdown = COMPASS_MEDIAN_REFRESH_RATE;
 
     // Location related attributes:
@@ -341,6 +341,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
 
         surfaceView.onResume();
         displayRotationHelper.onResume();
+        pauseCompass = false;
+        takeCompassReadings();
     }
 
     @Override
@@ -489,9 +491,27 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
             @Override
             public void onBackendSearchResult(boolean success, List<Product> searchResults) {
                 if (success) {
-                    products = searchResults;
-                    readyLatch.countDown();
+                    CountDownLatch profilesLatch = new CountDownLatch(searchResults.size());
+                    searchResults.forEach(product -> getProductContributor(product, profilesLatch));
+                    try {
+                        boolean profileSucess = profilesLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+                        if (profileSucess) {
+                            products = searchResults;
+                            readyLatch.countDown();
+                        }
+                    } catch (InterruptedException e) {}
                 }
+            }
+        });
+    }
+
+    // Downloads the profile of the contributor of the product and proceeds to show it on the map
+    private void getProductContributor(Product product, CountDownLatch latch) {
+        BackendController.getProfileByID(0, 1, product.getContributorID(), new BackendController.BackendProfileResultCallback() {
+            @Override
+            public void onBackendProfileResult(boolean success, User userProfile) {
+                product.setContributor(userProfile);
+                latch.countDown();
             }
         });
     }
@@ -1156,17 +1176,16 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
         List<Product> finalProducts = products;
 
         new Thread(() -> {
-            CountDownLatch latch = new CountDownLatch(finalProducts.size());
-            for (Product product : finalProducts) {
-                prepareProductBox(product, latch);
-            }
+            //CountDownLatch latch = new CountDownLatch(finalProducts.size());
+//            for (Product product : finalProducts) {
+//                prepareProductBox(product, latch);
+//            }
             try {
-                latch.await();
-
+//                latch.await();
                 // Reset the viewed products and proceed to show new products
                 for (Product product : finalProducts) {
                     if (this.currentlyPointedProducts.contains(product)) continue;
-                    renderProductBox(product, contributorMap.get(product), scrollView);
+                    renderProductBox(product, product.getContributor(), scrollView);
                     this.currentlyPointedProducts.add(product);
                 }
 
@@ -1177,7 +1196,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
                     } catch (Exception e) {}
 
                 });
-            } catch (InterruptedException e) {}
+            } catch (Exception e) {}
         }).start();
     }
 
