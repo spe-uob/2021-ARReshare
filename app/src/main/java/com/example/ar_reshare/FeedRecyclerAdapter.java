@@ -310,12 +310,12 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
         // Sends information to the profile page
         public void profileClick(View v) {
-            Fragment profileActivity = new Fragment();
             Bundle bundle = new Bundle();
             bundle.putInt("contributorID", product.getContributorID());
+            ProfileActivity profileActivity = new ProfileActivity();
             profileActivity.setArguments(bundle);
             AppCompatActivity appCompatActivity = (AppCompatActivity)v.getContext();
-            appCompatActivity.getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, profileActivity).commit();
+            appCompatActivity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,profileActivity).addToBackStack(null).commit();
         }
 
         // Sends information to the messaging page

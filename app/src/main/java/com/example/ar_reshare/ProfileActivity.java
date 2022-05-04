@@ -24,7 +24,7 @@ public class ProfileActivity extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_profile, container, false);
-        contributorID = BackendController.loggedInUserID;
+        contributorID = getArguments().getInt("contributorID", BackendController.loggedInUserID);
 
         System.out.println("The current userID is :" + contributorID);
         if (contributorID == BackendController.loggedInUserID) {
