@@ -173,13 +173,13 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
     private double lastMedianAngle = 0;
 
     // Used for stabilising compass readings
-    private final int MAX_COMPASS_READING_QUEUE_SIZE = 30;
+    private final int MAX_COMPASS_READING_QUEUE_SIZE = 100;
     private double[] compassReadingsArray = new double[MAX_COMPASS_READING_QUEUE_SIZE];
     private int compassReadingSize = 0;
     private int compassReadingIndex = 0;
     private final int COMPASS_POLLING_RATE = 2; // Milliseconds
     private boolean pauseCompass = false;
-    private final int COMPASS_MEDIAN_REFRESH_RATE = 5;
+    private final int COMPASS_MEDIAN_REFRESH_RATE = 1;
     private int compassMedianCountdown = COMPASS_MEDIAN_REFRESH_RATE;
 
     // Location related attributes:
