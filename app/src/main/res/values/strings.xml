@@ -19,7 +19,7 @@
     <string name="signupProfileGalleryText">Choose From Gallery!</string>
     <string name="signupProfileCancelText">No Thanks, Skip For Now</string>
 
-<!-- used for addProduct page dropdown   -->
+    <!-- used for addProduct page dropdown   -->
     <string-array name="categories">
         <item>Other</item>
         <item>Clothing</item>
