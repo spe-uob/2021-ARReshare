@@ -108,7 +108,7 @@ public class ProfileActivity extends Fragment {
         });
     }
 
-    public View.OnClickListener clickListener(Product product, View view) {
+    public View.OnClickListener clickListener(Product product, View view, boolean isSaved) {
         return v -> {
             Bundle bundle = new Bundle();
             bundle.putInt("contributorID",product.getContributorID());
@@ -118,7 +118,7 @@ public class ProfileActivity extends Fragment {
             bundle.putDouble("lat", product.getCoordinates().latitude);
             bundle.putDouble("lng",product.getCoordinates().longitude);
             bundle.putString("postcode",product.getPostcode());
-            bundle.putBoolean("isSaved", product.isSavedByUser());
+            bundle.putBoolean("isSaved", isSaved);
             ProductPageActivity productFragment = new ProductPageActivity();
             productFragment.setArguments(bundle);
             productFragment.setIsFromFeed(false);
@@ -146,20 +146,20 @@ public class ProfileActivity extends Fragment {
                             sharedStatus.setText("No products shared.");
                         } else if (searchResults.size() == 3) {
                             shared1.setImageBitmap(searchResults.get(0).getMainPic());
-                            shared1.setOnClickListener(clickListener(searchResults.get(0), view));
+                            shared1.setOnClickListener(clickListener(searchResults.get(0), view, false));
                             shared2.setImageBitmap(searchResults.get(1).getMainPic());
-                            shared2.setOnClickListener(clickListener(searchResults.get(1), view));
+                            shared2.setOnClickListener(clickListener(searchResults.get(1), view, false));
                             shared3.setImageBitmap(searchResults.get(2).getMainPic());
-                            shared3.setOnClickListener(clickListener(searchResults.get(2), view));
+                            shared3.setOnClickListener(clickListener(searchResults.get(2), view, false));
                         } else if (searchResults.size() == 2) {
                             shared1.setImageBitmap(searchResults.get(0).getMainPic());
-                            shared1.setOnClickListener(clickListener(searchResults.get(0), view));
+                            shared1.setOnClickListener(clickListener(searchResults.get(0), view, false));
                             shared2.setImageBitmap(searchResults.get(1).getMainPic());
-                            shared2.setOnClickListener(clickListener(searchResults.get(1), view));
+                            shared2.setOnClickListener(clickListener(searchResults.get(1), view, false));
                             shared3.setVisibility(View.GONE);
                         } else if (searchResults.size() == 1) {
                             shared1.setImageBitmap(searchResults.get(0).getMainPic());
-                            shared1.setOnClickListener(clickListener(searchResults.get(0), view));
+                            shared1.setOnClickListener(clickListener(searchResults.get(0), view, false));
                             shared2.setVisibility(View.GONE);
                             shared3.setVisibility(View.GONE);
                         }
@@ -190,20 +190,20 @@ public class ProfileActivity extends Fragment {
                         sharedStatus.setText("No products shared.");
                     } else if (ListingSearchResult.size() == 3) {
                         shared1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
-                        shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view));
+                        shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, false));
                         shared2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
-                        shared2.setOnClickListener(clickListener(ListingSearchResult.get(1), view));
+                        shared2.setOnClickListener(clickListener(ListingSearchResult.get(1), view, false));
                         shared3.setImageBitmap(ListingSearchResult.get(2).getMainPic());
-                        shared3.setOnClickListener(clickListener(ListingSearchResult.get(2), view));
+                        shared3.setOnClickListener(clickListener(ListingSearchResult.get(2), view, false));
                     } else if (ListingSearchResult.size() == 2) {
                         shared1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
-                        shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view));
+                        shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, false));
                         shared2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
-                        shared2.setOnClickListener(clickListener(ListingSearchResult.get(1), view));
+                        shared2.setOnClickListener(clickListener(ListingSearchResult.get(1), view, false));
                         shared3.setVisibility(View.GONE);
                     } else if (ListingSearchResult.size() == 1) {
                         shared1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
-                        shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view));
+                        shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, false));
                         shared2.setVisibility(View.GONE);
                         shared3.setVisibility(View.GONE);
                     }
@@ -233,20 +233,20 @@ public class ProfileActivity extends Fragment {
                         savedStatus.setText("No products saved.");
                     } else if (ListingSearchResult.size() == 3) {
                         saved1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
-                        saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view));
+                        saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, true));
                         saved2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
-                        saved2.setOnClickListener(clickListener(ListingSearchResult.get(1), view));
+                        saved2.setOnClickListener(clickListener(ListingSearchResult.get(1), view, true));
                         saved3.setImageBitmap(ListingSearchResult.get(2).getMainPic());
-                        saved3.setOnClickListener(clickListener(ListingSearchResult.get(2), view));
+                        saved3.setOnClickListener(clickListener(ListingSearchResult.get(2), view, true));
                     } else if (ListingSearchResult.size() == 2) {
                         saved1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
-                        saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view));
+                        saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, true));
                         saved2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
-                        saved2.setOnClickListener(clickListener(ListingSearchResult.get(1), view));
+                        saved2.setOnClickListener(clickListener(ListingSearchResult.get(1), view, true));
                         saved3.setVisibility(View.GONE);
                     } else if (ListingSearchResult.size() == 1) {
                         saved1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
-                        saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view));
+                        saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, true));
                         saved2.setVisibility(View.GONE);
                         saved3.setVisibility(View.GONE);
                     }
