@@ -134,14 +134,6 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
             profileImage.setImageBitmap(message.getProfileIcon());
 
-            profileImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-                    intent.putExtra("userId", message.getSenderID());
-                    v.getContext().startActivity(intent);
-                }
-            });
 
             // Insert the profile image from the URL into the ImageView.
             //profileImage.setImageResource(message.getSender().getProfileIcon());
