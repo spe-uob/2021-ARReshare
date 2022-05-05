@@ -144,12 +144,12 @@ public class MapsActivity extends Fragment implements
 
     private void waitOnConditions() {
         // Create a new thread to wait for the conditions
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    boolean success = readyLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-                    if (success) {
+        new Thread(() -> {
+            try {
+                boolean success = readyLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+                if (success) {
+                    // When using runOnUiThread, catch exceptions which may occur if fragment is changed
+                    try {
                         // Any UI changes must be run on the UI Thread
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -157,7 +157,9 @@ public class MapsActivity extends Fragment implements
                                 populateMap(mMap);
                             }
                         });
-                    } else {
+                    } catch (Exception e) {}
+                } else {
+                    try {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -166,10 +168,10 @@ public class MapsActivity extends Fragment implements
                                         Toast.LENGTH_LONG).show();
                             }
                         });
-                    }
-                } catch (InterruptedException e) {
-                    System.out.println("CRASH");
+                    } catch (Exception e) {}
                 }
+            } catch (InterruptedException e) {
+                System.out.println("CRASH");
             }
         }).start();
     }
@@ -492,7 +494,10 @@ public class MapsActivity extends Fragment implements
             @Override
             public void onBackendProfileResult(boolean success, User userProfile) {
                 product.setContributor(userProfile);
-                getActivity().runOnUiThread(() -> addMarker(product));
+                // When using runOnUiThread, catch exceptions which may occur if fragment is changed
+                try {
+                    getActivity().runOnUiThread(() -> addMarker(product));
+                } catch (Exception e) {}
             }
         });
     }

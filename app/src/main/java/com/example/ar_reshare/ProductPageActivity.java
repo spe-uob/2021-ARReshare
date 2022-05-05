@@ -160,6 +160,7 @@ public class ProductPageActivity extends Fragment implements BackendController.B
         new Thread(new Runnable() {
             @Override
             public void run() {
+                // When using runOnUiThread, catch exceptions which may occur if fragment is changed
                 try {
                     boolean success = latch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
                     if (success) {

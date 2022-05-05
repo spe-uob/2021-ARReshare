@@ -106,13 +106,16 @@ public class FeedActivity extends Fragment {
         BackendController.searchListings(0, 100, (success, searchResults) -> {
             if (success) {
                 currentProductList.addAll(searchResults);
-                getActivity().runOnUiThread(new Runnable() {
-                    @SuppressLint("NotifyDataSetChanged")
-                    @Override
-                    public void run() {
-                        feedRecyclerAdapter.notifyDataSetChanged();
-                    }
-                });
+                // When using runOnUiThread, catch exceptions which may occur if fragment is changed
+                try {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @SuppressLint("NotifyDataSetChanged")
+                        @Override
+                        public void run() {
+                            feedRecyclerAdapter.notifyDataSetChanged();
+                        }
+                    });
+                } catch (Exception e) {}
             }
             else {
                 System.out.println("searchListings callback failed");
@@ -170,15 +173,21 @@ public class FeedActivity extends Fragment {
             try {
                 boolean success = readyLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
                 if (success) {
-                    // Any UI changes must be run on the UI Thread
-                    getActivity().runOnUiThread(() -> {
-                        getDeviceLocation();
-                    });
+                    // When using runOnUiThread, catch exceptions which may occur if fragment is changed
+                    try {
+                        // Any UI changes must be run on the UI Thread
+                        getActivity().runOnUiThread(() -> {
+                            getDeviceLocation();
+                        });
+                    } catch (Exception e) {}
                 } else {
-                    getActivity().runOnUiThread(() -> Toast.makeText(getActivity().getApplicationContext(),
-                            "Failed to fetch your location or the products from the server. " +
-                                    "Please ensure you have access to an internet connection.",
-                            Toast.LENGTH_LONG).show());
+                    // When using runOnUiThread, catch exceptions which may occur if fragment is changed
+                    try {
+                        getActivity().runOnUiThread(() -> Toast.makeText(getActivity().getApplicationContext(),
+                                "Failed to fetch your location or the products from the server. " +
+                                        "Please ensure you have access to an internet connection.",
+                                Toast.LENGTH_LONG).show());
+                    } catch (Exception e) {}
                 }
             } catch (InterruptedException e) {
                 System.out.println("CRASH");
@@ -219,7 +228,10 @@ public class FeedActivity extends Fragment {
         BackendController.searchListings(0, 100, (success, searchResults) -> {
             if (success) {
                 allProducts = searchResults;
-                getActivity().runOnUiThread(() -> constructNewPage(allProducts));
+                // When using runOnUiThread, catch exceptions which may occur if fragment is changed
+                try {
+                    getActivity().runOnUiThread(() -> constructNewPage(allProducts));
+                } catch (Exception e) {}
             }
             else {
                 System.out.println("searchListings filter callback failed");

@@ -560,7 +560,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }
+                } catch (Exception e) {}
             }
         }).start();
     }
