@@ -303,7 +303,7 @@ public class FeedActivity extends Fragment {
 
         List<Category> categories = Category.getCategories();
         for (Category category : categories) {
-            Chip categoryChip = new Chip(getActivity());
+            Chip categoryChip = (Chip) getLayoutInflater().inflate(R.layout.single_filter_chip, filterCategories, false);
             categoryChip.setTag(category);
             categoryChip.setCheckable(true);
             if (categoriesSelected.contains(category)) {
