@@ -68,6 +68,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -134,6 +135,22 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
 
     private Shader virtualObjectShader;
     private Texture virtualObjectTexture;
+
+    private Shader clothingShader;
+    private Texture clothingTexture;
+    private Shader accessoriesShader;
+    private Texture accessoriesTexture;
+    private Shader electronicShader;
+    private Texture electronicsTexture;
+    private Shader booksShader;
+    private Texture booksTexture;
+    private Shader householdShader;
+    private Texture householdTexture;
+    private Shader otherShader;
+    private Texture otherTexture;
+
+    private Map<Category, Texture> categoryTextures;
+    private Map<Category, Shader> categoryShaders;
 
     // Environmental HDR
     private Texture dfgTexture;
@@ -634,10 +651,56 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
                             .setTexture("u_AlbedoTexture", virtualObjectTexture)
                             .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
                             .setTexture("u_DfgTexture", dfgTexture);
+
+            createVirtualObjects();
         } catch (IOException e) {
             //Log.e(TAG, "Failed to read a required asset file", e);
             messageSnackbarHelper.showError(getActivity(), "Failed to read a required asset file: " + e);
         }
+    }
+
+    // Creates virtual objects for each category
+    private void createVirtualObjects() {
+        categoryShaders = new EnumMap<Category, Shader>(Category.class);
+        categoryTextures = new EnumMap<Category, Texture>(Category.class);
+
+        try {
+            HashMap<Category, String> categorySourceFiles = new HashMap<>();
+            categorySourceFiles.put(Category.CLOTHING, "models/clothing_colours.png");
+            categorySourceFiles.put(Category.ACCESSORIES, "models/accessory_colours.png");
+            categorySourceFiles.put(Category.ELECTRONICS, "models/electronics_colours.png");
+            categorySourceFiles.put(Category.BOOKS, "models/books_colours.png");
+            categorySourceFiles.put(Category.HOUSEHOLD, "models/household_colours.png");
+            categorySourceFiles.put(Category.OTHER, "models/others_colours.png");
+
+            for (Map.Entry<Category, String> pair : categorySourceFiles.entrySet()) {
+                Texture texture  =
+                        Texture.createFromAsset(
+                                render,
+                                pair.getValue(),
+                                Texture.WrapMode.CLAMP_TO_EDGE,
+                                Texture.ColorFormat.SRGB);
+                Shader shader =
+                        Shader.createFromAssets(
+                                render,
+                                "shaders/environmental_hdr.vert",
+                                "shaders/environmental_hdr.frag",
+                                /*defines=*/ new HashMap<String, String>() {
+                                    {
+                                        put(
+                                                "NUMBER_OF_MIPMAP_LEVELS",
+                                                Integer.toString(cubemapFilter.getNumberOfMipmapLevels()));
+                                    }
+                                })
+                                .setTexture("u_AlbedoTexture", texture)
+                                .setTexture("u_Cubemap", cubemapFilter.getFilteredCubemapTexture())
+                                .setTexture("u_DfgTexture", dfgTexture);
+
+                System.out.println("KEY CATEGORY" + pair.getKey());
+                categoryShaders.put(pair.getKey(), shader);
+                categoryTextures.put(pair.getKey(), texture);
+            }
+        } catch (IOException e) {}
     }
 
     @Override
@@ -803,6 +866,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
             Anchor anchor = obj.getAnchor();
             Trackable trackable = obj.getTrackable();
 
+            Texture objectTexture = getCategoryTexture(obj.getProduct());
+            Shader objectShader = getCategoryShader(obj.getProduct());
+
             // Get the current pose of an Anchor in world space. The Anchor pose is updated
             // during calls to session.update() as ARCore refines its estimate of the world.
             anchor.getPose().toMatrix(modelMatrix, 0);
@@ -812,12 +878,12 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
             Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
             // Update shader properties and draw
-            virtualObjectShader.setMat4("u_ModelView", modelViewMatrix);
-            virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+            objectShader.setMat4("u_ModelView", modelViewMatrix);
+            objectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
 
-            virtualObjectShader.setTexture("u_AlbedoTexture", virtualObjectTexture);
+            objectShader.setTexture("u_AlbedoTexture", objectTexture);
 
-            render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
+            render.draw(virtualObjectMesh, objectShader, virtualSceneFramebuffer);
         }
 
         // Compose the virtual scene with the background.
@@ -827,39 +893,13 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
 
     private Texture getCategoryTexture(Product product) {
         Category category = Category.getCategoryById(product.getCategoryID());
-        String categoryTextureFile = "";
-        switch (category) {
-            case CLOTHING:
-                categoryTextureFile = "models/clothing_colours.png";
-                break;
-            case ACCESSORIES:
-                categoryTextureFile = "models/accessory_colours.png";
-                break;
-            case BOOKS:
-                categoryTextureFile = "models/books_colours.png";
-                break;
-            case ELECTRONICS:
-                categoryTextureFile = "models/electronics_colours.png";
-                break;
-            case HOUSEHOLD:
-                categoryTextureFile = "models/household_colours.png";
-                break;
-            default:
-                categoryTextureFile = "models/others_colours.png";
-                break;
-        }
-        Texture texture = null;
-        try {
-             texture =
-                    Texture.createFromAsset(
-                            render,
-                            categoryTextureFile,
-                            Texture.WrapMode.CLAMP_TO_EDGE,
-                            Texture.ColorFormat.SRGB);
-        } catch (IOException e) {
-            System.out.println("EXCEPTION WHEN CREATING TEXTURE " + e);
-        }
-        return texture;
+        System.out.println("Category " + category);
+        return categoryTextures.get(category);
+    }
+
+    private Shader getCategoryShader(Product product) {
+        Category category = Category.getCategoryById(product.getCategoryID());
+        return categoryShaders.get(category);
     }
 
     /** Checks if we detected at least one plane. */
