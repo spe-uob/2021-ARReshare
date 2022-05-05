@@ -154,6 +154,19 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
             if (chat.getLastMessage() == null) {
                 chatBody.setText(" ");
                 chatTime.setText(" ");
+            }else if (chat.getLastMessage().getMessage().length() >= 15) {
+                String[] words = chat.getLastMessage().getMessage().split(" ");
+                String displayMsg = "";
+                for (String s : words) {
+                    if (displayMsg.length() + s.length() < 15) {
+                        displayMsg.concat(s);
+                    }else {
+                        break;
+                    }
+                }
+                chatBody.setText(displayMsg + "...");
+                String[] dates = MessagingActivity.convertDate(chat.getLastMessage().getCreatedTime());
+                chatTime.setText(dates[3]);
             }else {
                 chatBody.setText(chat.getLastMessage().getMessage());
                 String[] dates = MessagingActivity.convertDate(chat.getLastMessage().getCreatedTime());
