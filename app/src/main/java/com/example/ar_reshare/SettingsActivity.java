@@ -3,22 +3,32 @@ package com.example.ar_reshare;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import org.json.JSONException;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class SettingsActivity extends AppCompatActivity {
+
+    private static final long MINIMUM_AGE_REQUIRED = 18;
 
     public void changePassword(String password, String newPassword){
         Map<String, String> changes = new HashMap<>();
@@ -36,6 +46,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             });
         } catch (JSONException e){
+            Toast.makeText(getApplicationContext(), "Failed to change password", Toast.LENGTH_SHORT).show();
     }}
 
     public void changeName(String name){
@@ -53,25 +64,9 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             });
         } catch (JSONException e){
-        }}
-
-    public void changeDOB(String dob){
-        Map<String, String> changes = new HashMap<>();
-        changes.put("dob", dob);
-        try {
-            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
-                @Override
-                public void onBackendResult(boolean success, String message) {
-                    if(success){
-                        Toast.makeText(getApplicationContext(), "Your date of birth has been changed successfully", Toast.LENGTH_SHORT).show();
-                    }else{
-                        Toast.makeText(getApplicationContext(), "Failed to change date of birth", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-        } catch (JSONException e){
-        }}
-
+            Toast.makeText(getApplicationContext(), "Failed to change name", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     public void changeEmail(String email, String password){
         Map<String, String> changes = new HashMap<>();
@@ -89,6 +84,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             });
         } catch (JSONException e){
+            Toast.makeText(getApplicationContext(), "Failed to change email", Toast.LENGTH_SHORT).show();
         }}
 
 
@@ -175,35 +171,11 @@ public class SettingsActivity extends AppCompatActivity {
         birthdayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder dialog3 = new AlertDialog.Builder(v.getContext());
-                dialog3.setIcon(R.drawable.settings_birthday);
-                dialog3.setTitle("Please insert your new date of birth");
-
-                View view = LayoutInflater.from(v.getContext()).inflate(R.layout.birthday_dialog, null);
-                dialog3.setView(view);
-
-                final EditText year = (EditText) view.findViewById(R.id.Year);
-                final EditText month = (EditText) view.findViewById(R.id.Month);
-                final EditText day = (EditText) view.findViewById(R.id.Day);
-
-                dialog3.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String a = year.getText().toString().trim();
-                        String b = month.getText().toString().trim();
-                        String c = day.getText().toString().trim();
-
-                        String d = a + "-"+  b + "-" + c;
-                        changeDOB(d);
-                    }
-                });
-                dialog3.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                });
-                dialog3.show();
+                DatePickerDialog.OnDateSetListener dateListener = new dateChangedListener();
+                Calendar now = Calendar.getInstance();
+                new DatePickerDialog(SettingsActivity.this, dateListener, now
+                        .get(Calendar.YEAR), now.get(Calendar.MONTH),
+                        now.get(Calendar.DAY_OF_MONTH)).show();
             }
         });
 
@@ -312,5 +284,49 @@ public class SettingsActivity extends AppCompatActivity {
                 dialog8.show();
             }
         });
+    }
+
+    private void changeDateField(Date date) {
+        boolean verified = verifyDob(date);
+        if (verified) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Map<String, String> changes = new HashMap<>();
+            changes.put("dob", dateFormat.format(date));
+            try {
+                BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
+                    @Override
+                    public void onBackendResult(boolean success, String message) {
+                        if (success) {
+                            Toast.makeText(getApplicationContext(), "Your date of birth has been changed successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Failed to change date of birth", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            } catch (JSONException e) {
+                Toast.makeText(getApplicationContext(), "Failed to change date of birth", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // Verifies if the user meets the minimum age to register
+    private boolean verifyDob(Date dob) {
+        Date now = Calendar.getInstance().getTime();
+        long years = TimeUnit.DAYS.convert(now.getTime() - dob.getTime(), TimeUnit.MILLISECONDS);
+        if (years >= MINIMUM_AGE_REQUIRED) {
+            return true;
+        } else {
+            Toast dateWarning = Toast.makeText(getApplicationContext(), "You must be at least 18 year old to use this app", Toast.LENGTH_LONG);
+            dateWarning.show();
+            return false;
+        }
+    }
+
+    private class dateChangedListener implements DatePickerDialog.OnDateSetListener {
+        @Override
+        public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+            Date chosenDate = new GregorianCalendar(year, month, dayOfMonth).getTime();
+            changeDateField(chosenDate);
+        }
     }
 }
