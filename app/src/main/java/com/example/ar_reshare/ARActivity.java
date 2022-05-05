@@ -153,7 +153,7 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
     // The list of products fetched from the backend
     private List<Product> products;
     private CountDownLatch readyLatch;
-    private int TIMEOUT_IN_SECONDS = 10;
+    private int TIMEOUT_IN_SECONDS = 25;
 
     // The list of currently displayed Product Objects
     private final Queue<ProductObject> productObjectQueue = new LinkedList<>();
@@ -193,6 +193,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
 
     // The acceptable limit of angle offset to product
     private static final double ANGLE_LIMIT = 15 * Math.PI/180; // degrees converted to radians
+    // The set distance from the device to spawn AR objects
+    private static final float DISTANCE_TO_SPAWN_OBJECTS = 1f; // in metres
 
     // Instructions
     private int instructionProgress = 0;
@@ -734,7 +736,8 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
             if (!this.displayedProducts.contains(closestProduct)) {
                 // Check if ARCore is tracking
                 if (camera.getTrackingState() == TrackingState.TRACKING) {
-                    spawnProduct(camera, closestProduct, productAngles.get(closestProduct));
+                    System.out.println("ANCHOR TRUE ANGLE = " + angle);
+                    spawnProduct(camera, closestProduct);
                 }
             }
             prepareProductBoxes(pointingProducts);
@@ -948,53 +951,9 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
     // If it is concluded that a user is currently pointing at a product, and a product should
     // be spawned, pass the camera, the relevant product and the current angle to north to this
     // method to spawn a product in a virtual space
-    private void spawnProduct(Camera camera, Product product, double angleToNorth) {
-        System.out.println("    SPAWN PRODUCT CALLED    ");
-        float distance = 1f; // metres away
-        // Only spawn products, if none are displayed or the displayed one is different
+    private void spawnProduct(Camera camera, Product product) {
+        // Only spawn a product AR object, if it already is not displayed
         if (!this.displayedProducts.contains(product)) {
-            // Current position of the user
-            Pose cameraPose = camera.getDisplayOrientedPose();
-
-            float[] coords = cameraPose.getTranslation();
-
-            // Get new coordinates set distance in meters in front of the user
-            // Using Trigonometry
-
-            double modifiedAngleToNorth = angleToNorth % Math.PI/2;
-
-            float oppositeDelta = (float) (Math.sin(modifiedAngleToNorth) * distance);
-            float adjacentDelta = (float) (Math.cos(modifiedAngleToNorth) * distance);
-
-            System.out.println("ANCHOR ANGLE" + angleToNorth);
-
-            float deltaX = oppositeDelta;
-            float deltaZ = adjacentDelta;
-
-//            if (angleToNorth < Math.PI/2) {
-//                deltaX = oppositeDelta;
-//                deltaZ = - adjacentDelta;
-//            } else if (angleToNorth >= Math.PI/2 && angleToNorth < Math.PI) {
-//                deltaX = adjacentDelta;
-//                deltaZ = oppositeDelta;
-//            } else if (angleToNorth >= Math.PI && angleToNorth < Math.PI*3/2) {
-//                deltaX = - oppositeDelta;
-//                deltaZ = adjacentDelta;
-//            } else {
-//                deltaX = - adjacentDelta;
-//                deltaZ = - oppositeDelta;
-//            }
-
-            float[] objectCoords = new float[]{coords[0] + deltaX, coords[1], coords[2] + deltaZ};
-            Pose anchorPose = new Pose(objectCoords, new float[]{0, 0, 0, 0});
-
-            System.out.println("ANCHOR CAMERA POSE = " + cameraPose);
-            System.out.println("NEW ANCHOR POSE = " + anchorPose);
-            System.out.println("ANCHOR ANGLE = " + angleToNorth);
-
-            System.out.println(" ANCHORS PRESENT " + session.getAllAnchors().size());
-            System.out.println(" ANCHORS TRACKABLES PRESENT " + session.getAllTrackables(Plane.class).size());
-            System.out.println(" ANCHORS QUEUE SIZE " + this.productObjectQueue.size());
 
             // If exceeded limit of tracked anchors, replace last one
             if (this.productObjectQueue.size() == MAX_ANCHORED_PRODUCTS) {
@@ -1002,6 +961,17 @@ public class ARActivity extends Fragment implements SampleRender.Renderer {
                 oldest.getAnchor().detach();
                 this.displayedProducts.remove(oldest.getProduct());
             }
+
+            // Get the new pose, set distance away in front of the camera
+            Pose anchorPose = camera.getPose().
+                    compose(Pose.makeTranslation(0, 0, -DISTANCE_TO_SPAWN_OBJECTS))
+                    .extractTranslation();
+
+            // Reset the y-coordinate to zero, to ensure all objects are at the same height
+            float[] coords = anchorPose.getTranslation();
+            coords[1] = 0f;
+
+            anchorPose = new Pose(coords, new float[]{0, 0, 0, 0});
 
             // Try to create an anchor catching any exceptions
             try {
