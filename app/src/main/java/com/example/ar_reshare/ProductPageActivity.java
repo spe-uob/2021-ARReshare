@@ -338,6 +338,10 @@ public class ProductPageActivity extends Fragment implements BackendController.B
 
     public void bookmarkButton(){
         ImageView bookmark = view.findViewById(R.id.bookmark);
+        if(BackendController.getLoggedInUserID() == product.getContributorID()){
+            bookmark.setVisibility(View.INVISIBLE);
+            return;
+        }
         if(isFromFeed){
             bookmark.setTag(feedBookmarkButton.getTag());
             if(bookmark.getTag().equals(0)){
