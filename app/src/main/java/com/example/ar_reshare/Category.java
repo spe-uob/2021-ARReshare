@@ -1,6 +1,5 @@
 package com.example.ar_reshare;
 import android.graphics.Color;
-
 import java.util.Arrays;
 import java.util.List;
 
