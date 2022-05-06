@@ -134,24 +134,6 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
             profileImage.setImageBitmap(message.getProfileIcon());
 
-
-            // Insert the profile image from the URL into the ImageView.
-            //profileImage.setImageResource(message.getSender().getProfileIcon());
-            profileImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Bundle bundle = new Bundle();
-                    if (messageResult.getContributorID() == loggedInUserID) {
-                        bundle.putInt("contributorID", loggedInUserID);
-                    }else {
-                        bundle.putInt("contributorID", messageResult.getContributorID());
-                    }
-                    ProfileActivity profileActivity = new ProfileActivity();
-                    profileActivity.setArguments(bundle);
-                    AppCompatActivity appCompatActivity = (AppCompatActivity)v.getContext();
-                    appCompatActivity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,profileActivity).addToBackStack(null).commit();
-                }
-            });
         }
     }
 
