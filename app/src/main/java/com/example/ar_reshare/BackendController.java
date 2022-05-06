@@ -80,14 +80,6 @@ public class BackendController {
         void onBackendProfileResult(boolean success, User userProfile);
     }
 
-    public interface BackendSearchListingsResultCallback {
-        void onBackendSearchListingsResult(boolean success, List<Product> ListingSearchResult);
-    }
-
-    public interface BackendSearchSavedListingsResultCallback {
-        void onBackendSearchSavedListingsResult(boolean success, List<Product> savedListingSearchResult);
-    }
-
     public static int getLoggedInUserID() {
         return loggedInUserID;
     }
@@ -197,6 +189,46 @@ public class BackendController {
                         callback.onBackendResult(false, "This email address is already registered to another account");
                     } else {
                         callback.onBackendResult(false, "Failed to register new user");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to register new user");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public static void closeAccount(String password, BackendCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
+
+        JSONObject json = new JSONObject();
+        try {
+            json.put("password", password);
+        } catch (Exception e) { }
+
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.closeAccount(JWT, body);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "Account has been successfully deleted");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The password provided is incorrect");
+                    } else {
+                        callback.onBackendResult(false, "Failed to delete account");
                     }
                 }
 
