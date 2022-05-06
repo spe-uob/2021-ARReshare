@@ -15,6 +15,12 @@ public class PostcodeHelper {
     // Possible Status Codes
     private static final int SUCCESS = 200;
     private static final int INCORRECT_FORMAT = 400;
+    private static final int POSTCODE_NOT_FOUND = 404;
+
+    // Default values if postcode not found
+    private static final String DEFAULT_POSTCODE = "BS81UB";
+    private static final String DEFAULT_CITY = "Bristol, City of";
+    private static final String DEFAULT_COUNTRY = "England";
 
     private static final String POSTCODE_API_URL = "https://postcodes.io/";
 
@@ -50,6 +56,12 @@ public class PostcodeHelper {
                 if (response.code() == SUCCESS) {
                     PostcodeDetails postcodeDetails = response.body().getResult();
                     callback.onPostcodeResult(true, postcodeDetails);
+                } else if (response.code() == POSTCODE_NOT_FOUND) {
+                    PostcodeDetails defaultPostcode = new PostcodeDetails();
+                    defaultPostcode.setPostcode(DEFAULT_POSTCODE);
+                    defaultPostcode.setCity(DEFAULT_CITY);
+                    defaultPostcode.setCountry(DEFAULT_COUNTRY);
+                    callback.onPostcodeResult(true, defaultPostcode);
                 } else {
                     callback.onPostcodeResult(false, null);
                 }
