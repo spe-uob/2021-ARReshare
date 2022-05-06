@@ -1,26 +1,34 @@
 package com.example.ar_reshare;
 
-import androidx.annotation.MainThread;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import org.json.JSONException;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-public class SettingActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity {
+
+    private static final long MINIMUM_AGE_REQUIRED = 18;
 
     public void changePassword(String password, String newPassword){
         Map<String, String> changes = new HashMap<>();
@@ -31,16 +39,17 @@ public class SettingActivity extends AppCompatActivity {
                 @Override
                 public void onBackendResult(boolean success, String message) {
                     if(success){
-                        System.out.println("Your passward changed correctly");
+                        Toast.makeText(getApplicationContext(), "Your password has been changed successfully", Toast.LENGTH_SHORT).show();
                     }else{
-                        System.out.println("Error");
+                        Toast.makeText(getApplicationContext(), "Failed to change password", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
         } catch (JSONException e){
+            Toast.makeText(getApplicationContext(), "Failed to change password", Toast.LENGTH_SHORT).show();
     }}
 
-    public void changeNickname(String name){
+    public void changeName(String name){
         Map<String, String> changes = new HashMap<>();
         changes.put("name", name);
         try {
@@ -48,67 +57,52 @@ public class SettingActivity extends AppCompatActivity {
                 @Override
                 public void onBackendResult(boolean success, String message) {
                     if(success){
-                        System.out.println("Your nickname have changed");
+                        Toast.makeText(getApplicationContext(), "Your name has been changed successfully", Toast.LENGTH_SHORT).show();
                     }else{
-                        System.out.println("Error");
+                        Toast.makeText(getApplicationContext(), "Failed to change name", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
         } catch (JSONException e){
-        }}
+            Toast.makeText(getApplicationContext(), "Failed to change name", Toast.LENGTH_SHORT).show();
+        }
+    }
 
-    public void changeDOB(String dob){
+    public void changeEmail(String email, String password){
         Map<String, String> changes = new HashMap<>();
-        changes.put("dob", dob);
-        try {
-            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
-                @Override
-                public void onBackendResult(boolean success, String message) {
-                    if(success){
-                        System.out.println("Your date of birth changed correctly");
-                    }else{
-                        System.out.println("Error");
-                    }
-                }
-            });
-        } catch (JSONException e){
-        }}
-
-
-    public void changeEmail(String Email, String password){
-        Map<String, String> changes = new HashMap<>();
-        changes.put("Email", Email);
+        changes.put("email", email);
         changes.put("password", password);
         try {
             BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
                 @Override
                 public void onBackendResult(boolean success, String message) {
                     if(success){
-                        System.out.println("Your Email address changed correctly");
+                        Toast.makeText(getApplicationContext(), "Your email has been changed successfully", Toast.LENGTH_SHORT).show();
                     }else{
-                        System.out.println("Error");
+                        Toast.makeText(getApplicationContext(), "Failed to change email", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
         } catch (JSONException e){
+            Toast.makeText(getApplicationContext(), "Failed to change email", Toast.LENGTH_SHORT).show();
         }}
 
-    public void changeHomeAddress(String Address){
-        Map<String, String> changes = new HashMap<>();
-        changes.put("Address", Address);
-        try {
-            BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
-                @Override
-                public void onBackendResult(boolean success, String message) {
-                    if(success){
-                        System.out.println("Your home address changed correctly");
-                    }else{
-                        System.out.println("Error");
-                    }
+
+    public void deleteAccount(String password){
+        BackendController.closeAccount(password, new BackendController.BackendCallback() {
+            @Override
+            public void onBackendResult(boolean success, String message) {
+                if (success) {
+                    Toast.makeText(getApplicationContext(), "Account successfully deleted", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(SettingsActivity.this, LoginSignupActivity.class);
+                    AuthenticationService.removeAccounts(getApplicationContext());
+                    startActivity((intent));
+                } else {
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
                 }
-            });
-        } catch (JSONException e){
-        }}
+            }
+        });
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,8 +134,8 @@ public class SettingActivity extends AppCompatActivity {
             }
         });
 
-        Button nicknameButton = (Button) findViewById(R.id.name);
-        nicknameButton.setOnClickListener(new View.OnClickListener() {
+        Button nameButton = (Button) findViewById(R.id.name);
+        nameButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder dialog2 = new AlertDialog.Builder(v.getContext());
@@ -160,8 +154,7 @@ public class SettingActivity extends AppCompatActivity {
                         String a = firstName.getText().toString().trim();
                         String b = lastName.getText().toString().trim();
                         String c = a + " " + b;
-                        changeNickname(c);
-                        Toast.makeText(v.getContext(), "New name:" + a +"_"+ b, Toast.LENGTH_SHORT).show();
+                        changeName(c);
                     }
                 });
                 dialog2.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -178,36 +171,11 @@ public class SettingActivity extends AppCompatActivity {
         birthdayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder dialog3 = new AlertDialog.Builder(v.getContext());
-                dialog3.setIcon(R.drawable.settings_birthday);
-                dialog3.setTitle("Please insert your new birthday");
-
-                View view = LayoutInflater.from(v.getContext()).inflate(R.layout.birthday_dialog, null);
-                dialog3.setView(view);
-
-                final EditText year = (EditText) view.findViewById(R.id.Year);
-                final EditText month = (EditText) view.findViewById(R.id.Month);
-                final EditText day = (EditText) view.findViewById(R.id.Day);
-
-                dialog3.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String a = year.getText().toString().trim();
-                        String b = month.getText().toString().trim();
-                        String c = day.getText().toString().trim();
-
-                        String d = a + "-"+  b + "-" + c;
-                        changeDOB(d);
-                        Toast.makeText(v.getContext(), "New Birthday:" + a +"_"+ b + "_" + c, Toast.LENGTH_SHORT).show();
-                    }
-                });
-                dialog3.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                });
-                dialog3.show();
+                DatePickerDialog.OnDateSetListener dateListener = new dateChangedListener();
+                Calendar now = Calendar.getInstance();
+                new DatePickerDialog(SettingsActivity.this, dateListener, now
+                        .get(Calendar.YEAR), now.get(Calendar.MONTH),
+                        now.get(Calendar.DAY_OF_MONTH)).show();
             }
         });
 
@@ -217,7 +185,7 @@ public class SettingActivity extends AppCompatActivity {
             public void onClick(View v) {
                 AlertDialog.Builder dialog4 = new AlertDialog.Builder(v.getContext());
                 dialog4.setIcon(R.drawable.setting_pwd);
-                dialog4.setTitle("Please insert your new Password");
+                dialog4.setTitle("Please insert your new password");
 
                 View view = LayoutInflater.from(v.getContext()).inflate(R.layout.pwd_dialog, null);
                 dialog4.setView(view);
@@ -232,7 +200,6 @@ public class SettingActivity extends AppCompatActivity {
                         String b = newpwd.getText().toString().trim();
 
                         changePassword(a, b);
-                        Toast.makeText(v.getContext(), "Your password has been changed", Toast.LENGTH_SHORT).show();
                     }
                 });
                 dialog4.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -266,7 +233,6 @@ public class SettingActivity extends AppCompatActivity {
                         String b = pwdE.getText().toString().trim();
 
                         changeEmail(a, b);
-                        Toast.makeText(v.getContext(), "New Email Address:" + a, Toast.LENGTH_SHORT).show();
                     }
                 });
                 dialog5.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -279,47 +245,16 @@ public class SettingActivity extends AppCompatActivity {
             }
         });
 
-       Button homeaddressButton = (Button) findViewById(R.id.homeaddress);
-       homeaddressButton.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
-                AlertDialog.Builder dialog6 = new AlertDialog.Builder(v.getContext());
-                dialog6.setIcon(R.drawable.setting_home);
-                dialog6.setTitle("Please insert your new Postcode");
-
-                View view = LayoutInflater.from(v.getContext()).inflate(R.layout.homeaddress_dialog, null);
-                dialog6.setView(view);
-
-               final EditText postcode = (EditText) view.findViewById(R.id.setting_Postcode);
-
-               dialog6.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                   @Override
-                   public void onClick(DialogInterface dialog, int which) {
-                       String a = postcode.getText().toString().trim();
-                       changeHomeAddress(a);
-                       Toast.makeText(v.getContext(), "New Postcode:" + a, Toast.LENGTH_SHORT).show();
-                   }
-               });
-               dialog6.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                   @Override
-                   public void onClick(DialogInterface dialog, int which) {
-
-                   }
-               });
-                dialog6.show();
-           }
-       });
-
         Button logoutButton = (Button) findViewById(R.id.logout);
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder dialog7 = new AlertDialog.Builder(v.getContext());
-                dialog7.setTitle("Warning").setMessage("Are you sure you want to Log out");
+                dialog7.setTitle("Warning").setMessage("Are you sure you want to log out?");
                 dialog7.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(SettingActivity.this, LoginSignupActivity.class);
+                        Intent intent = new Intent(SettingsActivity.this, LoginSignupActivity.class);
                         AuthenticationService.removeAccounts(getApplicationContext());
                         startActivity((intent));
                     }
@@ -334,16 +269,70 @@ public class SettingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder dialog8 = new AlertDialog.Builder(v.getContext());
-                dialog8.setTitle("Warning").setMessage("Are you sure you want to Delete your Account");
+                dialog8.setTitle("Warning").setMessage("Are you sure you want to delete your account?");
+                View view = LayoutInflater.from(v.getContext()).inflate(R.layout.delete_account_dialog, null);
+                dialog8.setView(view);
+
+                final EditText password = (EditText) view.findViewById(R.id.delete_account_password);
                 dialog8.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        deleteAccount(password.getText().toString());
                     }
                 });
                 dialog8.setNegativeButton("Cancel", null);
                 dialog8.show();
             }
         });
+    }
+
+    private void changeDateField(Date date) {
+        boolean verified = verifyDob(date);
+        if (verified) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Map<String, String> changes = new HashMap<>();
+            changes.put("dob", dateFormat.format(date));
+            try {
+                BackendController.modifyAccount(getApplicationContext(), changes, new BackendController.BackendCallback() {
+                    @Override
+                    public void onBackendResult(boolean success, String message) {
+                        if (success) {
+                            Toast.makeText(getApplicationContext(), "Your date of birth has been changed successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Failed to change date of birth", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            } catch (JSONException e) {
+                Toast.makeText(getApplicationContext(), "Failed to change date of birth", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // Verifies if the user meets the minimum age to register
+    private boolean verifyDob(Date dob) {
+        Date now = Calendar.getInstance().getTime();
+        long years = TimeUnit.DAYS.convert(now.getTime() - dob.getTime(), TimeUnit.MILLISECONDS);
+        if (years >= MINIMUM_AGE_REQUIRED) {
+            return true;
+        } else {
+            Toast dateWarning = Toast.makeText(getApplicationContext(), "You must be at least 18 year old to use this app", Toast.LENGTH_LONG);
+            dateWarning.show();
+            return false;
+        }
+    }
+
+    private class dateChangedListener implements DatePickerDialog.OnDateSetListener {
+        @Override
+        public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+            Date chosenDate = new GregorianCalendar(year, month, dayOfMonth).getTime();
+            changeDateField(chosenDate);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 }

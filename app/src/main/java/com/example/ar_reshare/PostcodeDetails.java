@@ -45,6 +45,8 @@ public class PostcodeDetails {
         return longitude;
     }
 
+    public void setLongitude(Float longitude) { this.longitude = longitude; }
+
     public String getPostcode() {
         return postcode;
     }
