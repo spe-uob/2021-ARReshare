@@ -56,8 +56,12 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
         View view;
         view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.message_chat_layout, parent, false);
-        return new MultiChatsAdapter.ChatHolder(view);
 
+        if (mChatList.size() == 0) {
+            view.findViewById(R.id.empty_chat_msg).setVisibility(View.VISIBLE);
+        }
+
+        return new MultiChatsAdapter.ChatHolder(view);
     }
 
     // Passes the message object to a ViewHolder so that the contents can be bound to UI.
@@ -65,6 +69,7 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         Chat chat = mChatList.get(position);
         Integer index = mChatList.get(position).getConversationID();
+
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
