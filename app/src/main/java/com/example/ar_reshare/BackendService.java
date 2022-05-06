@@ -27,16 +27,33 @@ public interface BackendService {
     Call<ResponseBody> modifyAccount(@Header("Authorization") String token, @Body RequestBody data);
 
     @Headers("Content-Type: application/json")
+    @PATCH("account/close")
+    Call<ResponseBody> closeAccount(@Header("Authorization") String token, @Body RequestBody data);
+
+    @Headers("Content-Type: application/json")
     @GET("listings/search")
     Call<Product.SearchResults> searchListings(@Header("Authorization") String token,
                                                @Query("maxResults") int maxResults,
                                                @Query("startResults") int startResults);
 
     @Headers("Content-Type: application/json")
+    @GET("account/listings/search")
+    Call<Product.SearchResults> searchAccountListings(@Header("Authorization") String token,
+                                                      @Query("maxResults") int maxResults,
+                                                      @Query("startResults") int startResults);
+
+    @Headers("Content-Type: application/json")
+    @GET("account/saved-listings/search")
+    Call<Product.SearchResults> searchSavedListings(  @Header("Authorization") String token,
+                                                      @Query("maxResults") int maxResults,
+                                                      @Query("startResults") int startResults);
+
+
+    @Headers("Content-Type: application/json")
     @GET("profile/view")
     Call<User> getProfileByID(@Query("maxResults") int maxResults,
-                                     @Query("startResults") int startResults,
-                                     @Query("userID") int userID);
+                              @Query("startResults") int startResults,
+                              @Query("userID") int userID);
 
     @Headers("Content-Type: application/json")
     @PUT("token/regeneration")

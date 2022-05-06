@@ -2,14 +2,17 @@ package com.example.ar_reshare;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -27,6 +30,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     private List<Message> mMessageList;
     private Message.MessageResult messageResult;
     int loggedInUserID;
+    SimpleDateFormat simpleDateFormat= new SimpleDateFormat("HH:mm");
 
     public MessageListAdapter(Context context, List<Message> messageList) {
         mContext = context;
@@ -66,9 +70,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
                     .inflate(R.layout.messages_receive_layout, parent, false);
             return new ReceivedMessageHolder(view);
         }
-
         return null;
-
     }
 
     // Passes the message object to a ViewHolder so that the contents can be bound to UI.
@@ -97,8 +99,8 @@ public class MessageListAdapter extends RecyclerView.Adapter {
         void bind(Message message) {
             System.out.println("binding");
             messageText.setText(message.getMessage());
-            String[] dates = MessagingActivity.convertDate(message.getCreatedTime());
-            timeText.setText(dates[3]);
+            //String[] dates = MessagingActivity.convertDate(message.getCreatedTime());\
+            timeText.setText(simpleDateFormat.format(new Date()));
         }
     }
 
@@ -132,15 +134,6 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
             profileImage.setImageBitmap(message.getProfileIcon());
 
-            // Insert the profile image from the URL into the ImageView.
-            //profileImage.setImageResource(message.getSender().getProfileIcon());
-            profileImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-                    mContext.startActivity(intent);
-                }
-            });
         }
     }
 
@@ -150,5 +143,3 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     }
 
 }
-
-

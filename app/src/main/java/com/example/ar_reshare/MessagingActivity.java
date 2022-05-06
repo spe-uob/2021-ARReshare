@@ -4,20 +4,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import org.json.JSONException;
 
@@ -26,13 +23,8 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MessagingActivity extends AppCompatActivity{
 
@@ -44,7 +36,7 @@ public class MessagingActivity extends AppCompatActivity{
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
     Context mContext;
     Integer conversationId;
-    Integer currentUserId;
+    Integer receiverId;
     Integer listingId;
     Integer contributorId;
     Product product;
@@ -62,14 +54,19 @@ public class MessagingActivity extends AppCompatActivity{
         Intent i = getIntent();
         listingId = i.getIntExtra("listingId", -1);
         conversationId = i.getIntExtra("conversationId", -1);
-        currentUserId = i.getIntExtra("currentUserId", -1);
+        receiverId = i.getIntExtra("currentUserId", -1);
         contributorId = i.getIntExtra("contributorId", -1);
 
         chatTextView = (EditText)findViewById(R.id.text_chatbox);
         recyclerView = findViewById(R.id.reyclerview_message_list);
 
-        if (conversationId != -1 && currentUserId != -1){
-            getProfileById(conversationId, contributorId);
+
+        if (conversationId != -1 && receiverId != -1){
+            if (BackendController.getLoggedInUserID() == contributorId) {
+                getProfileById(conversationId, receiverId);
+            }else {
+                getProfileById(conversationId, contributorId);
+            }
         }
 
         setLayOutChangeListener();
@@ -81,7 +78,7 @@ public class MessagingActivity extends AppCompatActivity{
                 sendButton = (ImageButton) findViewById(R.id.button_send);
                 chatTextView = findViewById(R.id.text_chatbox);
                 String text = chatTextView.getText().toString();
-                Message message1 = new Message(currentUserId,text,simpleDateFormat.format(new Date())," ");
+                Message message1 = new Message(receiverId,text,simpleDateFormat.format(new Date())," ");
                 mMessageList.add(message1);
                 chatTextView.setText("");
                 sendConversationMessage(conversationId,text,null);
@@ -150,24 +147,24 @@ public class MessagingActivity extends AppCompatActivity{
                 if (success) {
                     System.out.println("get conversations successful");
                     System.out.println(message);
-                    messageListAdapter.setMessageResult(messageResult, loggedInUserID);
-                    mMessageList.clear();
-                    int resSize = messageResult.getMessages().size();
-                    int mSize = mMessageList.size();
-                    if (resSize > mSize){
-                        int offset = resSize-mSize;
-                        List<Message> messages = new ArrayList<>();
-                        for (int i = resSize - 1;i>=(resSize-offset);i--){
-                            messageResult.getMessages().get(i).setProfileIcon(image);
-                            mMessageList.add(messageResult.getMessages().get(i));
-                            messageListAdapter.notifyDataSetChanged();
-                        }
-                    }
-                    recyclerView.setAdapter(messageListAdapter);
                 }else {
                     System.out.println(message);
                     System.out.println("fail to get conversations");
                 }
+                messageListAdapter.setMessageResult(messageResult, loggedInUserID);
+                mMessageList.clear();
+                int resSize = messageResult.getMessages().size();
+                int mSize = mMessageList.size();
+                if (resSize > mSize){
+                    int offset = resSize-mSize;
+                    List<Message> messages = new ArrayList<>();
+                    for (int i = resSize - 1;i>=(resSize-offset);i--){
+                        messageResult.getMessages().get(i).setProfileIcon(image);
+                        mMessageList.add(messageResult.getMessages().get(i));
+                        messageListAdapter.notifyDataSetChanged();
+                    }
+                }
+                recyclerView.setAdapter(messageListAdapter);
             }
         });
     }
@@ -193,7 +190,19 @@ public class MessagingActivity extends AppCompatActivity{
                     handler.post(refresh);
                 }else {
                     System.out.println("fail to get message profile icon image");
+                    getConversationByID(conversationId, BitmapFactory.decodeResource(null, R.mipmap.ic_launcher_round));
+                    refresh = new Runnable() {
+                        public void run() {
+                            // Do something
+                            System.out.println("refresh");
+                            getConversationByID(conversationId, BitmapFactory.decodeResource(null, R.mipmap.ic_launcher_round));
+                            messageListAdapter.notifyDataSetChanged();
+                            handler.postDelayed(refresh,500);
+                        }
+                    };
+                    handler.post(refresh);
                 }
+
             }
         });
     }
@@ -221,7 +230,7 @@ public class MessagingActivity extends AppCompatActivity{
     }
 
 
-//    convert to date as follows
+    //    convert to date as follows
 //    dates[0] day name(Mon, Tue, etc)
 //    dates[1] Month name
 //    dates[2] day number
@@ -243,4 +252,3 @@ public class MessagingActivity extends AppCompatActivity{
 
 
 }
-

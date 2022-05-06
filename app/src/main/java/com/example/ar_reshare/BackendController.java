@@ -46,7 +46,7 @@ public class BackendController {
 
     private static final String URL = "https://ar-reshare.herokuapp.com/";
     private static String JWT; // Used for authentication
-    private static int loggedInUserID;
+    public static int loggedInUserID;
 
     private static boolean initialised = false;
     private static Context context;
@@ -203,6 +203,46 @@ public class BackendController {
         }
     }
 
+    public static void closeAccount(String password, BackendCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .build();
+
+        JSONObject json = new JSONObject();
+        try {
+            json.put("password", password);
+        } catch (Exception e) { }
+
+        String bodyString = json.toString();
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), bodyString);
+        BackendService service = retrofit.create(BackendService.class);
+        Call<ResponseBody> call = service.closeAccount(JWT, body);
+
+        try {
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        callback.onBackendResult(true, "Account has been successfully deleted");
+                    } else if (response.code() == INCORRECT_CREDENTIALS) {
+                        callback.onBackendResult(false, "The password provided is incorrect");
+                    } else {
+                        callback.onBackendResult(false, "Failed to delete account");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendResult(false, "Failed to register new user");
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
     public static void modifyAccount(Context context, Map<String, String> changes, BackendCallback callback) throws JSONException {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
@@ -298,7 +338,7 @@ public class BackendController {
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        
+
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("listingID", listingID);
@@ -368,7 +408,7 @@ public class BackendController {
                 public void onResponse(Call<Chat.ConversationsResult> call, Response<Chat.ConversationsResult> response) {
                     System.out.println(response.code());
                     Chat.ConversationsResult conversations = response.body();
-                    System.out.println("conversations : " + conversations.getChats().size());
+                    //System.out.println("conversations : " + conversations.getChats().size());
                     if (response.code() == SUCCESS) {
                         callback.onBackendResult(true, "Success", loggedInUserID, conversations);
                     } else if (response.code() == INCORRECT_FORMAT) {
@@ -395,7 +435,7 @@ public class BackendController {
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        
+
 
         BackendService service = retrofit.create(BackendService.class);
         Call<Message.MessageResult> call = service.getConversationByID(JWT,10,0, conversationID);
@@ -725,7 +765,7 @@ public class BackendController {
 
     // Helper method of searchListings()
     // Waits until all products have had their main photo downloaded and postcode converted into coordinates
-    private static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {
+    public static void initialiseProducts(List<Product> products, BackendSearchResultCallback callback) {
         final int NUMBER_OF_REQUESTS_PER_PRODUCT = 2;
 
         // Initialise the latch to wait for callbacks
@@ -917,6 +957,71 @@ public class BackendController {
         json.put("media",pics);
 
         return json.toString();
+    }
+
+    public static void searchAccountListings(int startResults, int maxResults, int categoryID,
+                                             BackendSearchResultCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product.SearchResults> call = service.searchAccountListings(JWT, maxResults, startResults);
+        try {
+            call.enqueue(new Callback<Product.SearchResults>() {
+                @Override
+                public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        initialiseProducts(response.body().getSearchedProducts(), callback);
+                    } else {
+                        callback.onBackendSearchResult(false, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendSearchResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println("Encountered error. " + e);
+            callback.onBackendSearchResult(false, null);
+        }
+    }
+
+    public static void searchSavedListings(int startResults, int maxResults,
+                                           BackendSearchResultCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        BackendService service = retrofit.create(BackendService.class);
+        Call<Product.SearchResults> call = service.searchSavedListings(JWT, maxResults, startResults);
+
+        try {
+            call.enqueue(new Callback<Product.SearchResults>() {
+                @Override
+                public void onResponse(Call<Product.SearchResults> call, Response<Product.SearchResults> response) {
+                    System.out.println(response.code());
+                    if (response.code() == SUCCESS) {
+                        initialiseProducts(response.body().getSearchedProducts(), callback);
+                    } else {
+                        callback.onBackendSearchResult(false, null);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Product.SearchResults> call, Throwable t) {
+                    System.out.println("Failure");
+                    callback.onBackendSearchResult(false, null);
+                }
+            });
+        } catch (Exception e) {
+            System.out.println("Encountered error. " + e);
+            callback.onBackendSearchResult(false, null);
+        }
     }
 }
 

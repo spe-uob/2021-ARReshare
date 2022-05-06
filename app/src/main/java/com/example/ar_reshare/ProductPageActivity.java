@@ -1,8 +1,10 @@
 package com.example.ar_reshare;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
@@ -16,9 +18,11 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -37,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ProductPageActivity extends AppCompatActivity implements BackendController.BackendGetListingResultCallback,
+public class ProductPageActivity extends Fragment implements BackendController.BackendGetListingResultCallback,
         BackendController.BackendProfileResultCallback{
 
     private ImageView[] dots;
@@ -48,43 +52,53 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
     private ArrayList<Bitmap> picList = new ArrayList<>();
     private ProductPicsSliderAdapter adapter;
     private CountDownLatch latch;
-    private int TIMEOUT_IN_SECONDS = 5;
+    private int TIMEOUT_IN_SECONDS = 10;
+    private View view;
+    private ImageView feedBookmarkButton;
+    private Boolean isFromFeed = false;
+    private Boolean isSaved;
 
+    public void setFeedBookmarkButton(ImageView feedBookmarkButton) {
+        this.feedBookmarkButton = feedBookmarkButton;
+    }
+
+    public void setIsFromFeed(Boolean isFromFeed){
+        this.isFromFeed = isFromFeed;
+    }
+
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_product_page);
-        // getting the stuff we need from previous page
-        Intent i = getIntent();
-        Product product = i.getParcelableExtra("product");
-        Integer productID = i.getIntExtra("productID",1);
-        Integer contributorID = i.getIntExtra("contributorID",1);
-        Double lat = i.getDoubleExtra("lat",0);
-        Double lng = i.getDoubleExtra("lng",0);
-        postcode = i.getStringExtra("postcode");
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.activity_product_page, container, false);
+        //hide the bottom navigation bar
+        SwipeActivity activity = (SwipeActivity) getActivity();
+        activity.setNavigationVisibility(false);
+        // getting all the stuff we need from previous page
+        Integer productID = getArguments().getInt("productID", 1);
+        String productName = getArguments().getString("productName");
+        String productDescription = getArguments().getString("productDescription");
+        Integer contributorID = getArguments().getInt("contributorID", 1);
+        Double lat = getArguments().getDouble("lat",0);
+        Double lng = getArguments().getDouble("lng",0);
+        postcode = getArguments().getString("postcode");
+        isSaved = getArguments().getBoolean("isSaved",false);
         latch = new CountDownLatch(2); // wait until it gets the product and the user information from the backend
         BackendController.getListingByID(productID,ProductPageActivity.this);
-        BackendController.getProfileByID(0,1,contributorID,ProductPageActivity.this);
 
         //display a static map to show product's location
         displayMapPic(lat,lng);
 
         //display product name
-        displayProductName(product);
-        navProductName(product);
+        displayProductName(productName);
+        navProductName(productName);
         //display product description
-        displayProductDescription(product);
-
-        //add a bookmark button
-        bookmarkButton();
+        displayProductDescription(productDescription);
 
         //top left return arrow
         returnListener();
 
-        //links to messaging page
-//      messageButton(product,contributor,user, profilePicId);
-
         waitOnConditions();
+        return view;
     }
 
     @Override
@@ -92,7 +106,10 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         this.product = ListingResult;
         if(success){
             latch.countDown();
+            System.out.println("XX listing back success");
+            BackendController.getProfileByID(0,1, ListingResult.getContributorID(),ProductPageActivity.this);
         }
+        System.out.println("XX listing back failure");
     }
 
     @Override
@@ -100,12 +117,19 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         this.userProfile = userProfile;
         if(success){
             latch.countDown();
+            System.out.println("XX profile back success");
         }
+        System.out.println("XX profile back failure");
     }
 
     private void displayInfo(){
+        //links to messaging page
+        messageButton();
         //edit button
         showEditIfUser();
+
+        //add a bookmark button
+        bookmarkButton();
 
         displayProductCondition(product);
         displayProductCategory(product);
@@ -116,11 +140,11 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         // display product added time or modified time
         if(product.getModificationDate() == null){
             System.out.println(product.getModificationDate());
-            TextView addedTime = findViewById(R.id.time);
+            TextView addedTime = view.findViewById(R.id.time);
             String[] time = MessagingActivity.convertDate(product.getCreationDate());
             addedTime.setText(time[3] + " " + time[2] + "-" + time[1] + " " +time[5] +"  added ");
         } else {
-            TextView modifiedTime = findViewById(R.id.time);
+            TextView modifiedTime = view.findViewById(R.id.time);
             String[] time = MessagingActivity.convertDate(product.getModificationDate());
             modifiedTime.setText(time[3] + " " + time[2] + "-" + time[1] + " " +time[5] + "  modified ");
         }
@@ -136,27 +160,28 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
         new Thread(new Runnable() {
             @Override
             public void run() {
+                // When using runOnUiThread, catch exceptions which may occur if fragment is changed
                 try {
                     boolean success = latch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
                     if (success) {
                         // Any UI changes must be run on the UI Thread
-                        runOnUiThread(new Runnable() {
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 displayInfo();
                             }
                         });
                     } else {
-                        runOnUiThread(new Runnable() {
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(getApplicationContext(),
+                                Toast.makeText(getActivity().getApplicationContext(),
                                         "Failed to fetch the product. Please ensure you have access to an internet connection.",
                                         Toast.LENGTH_LONG).show();
                             }
                         });
                     }
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     System.out.println("CRASH");
                 }
             }
@@ -167,17 +192,17 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
     private Uri getImageUri(Context inContext, Bitmap inImage) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "IMG_" + System.currentTimeMillis(), null);
         return Uri.parse(path);
     }
 
     //TODO: only show these buttons if user's own product
     private void showEditIfUser(){
-        ImageView edit = findViewById(R.id.edit);
+        ImageView edit = view.findViewById(R.id.edit);
         edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PopupMenu popupMenu = new PopupMenu(getApplicationContext(),v);
+                PopupMenu popupMenu = new PopupMenu(getActivity().getApplicationContext(),v);
                 MenuInflater inflater = popupMenu.getMenuInflater();
                 inflater.inflate(R.menu.product_setting, popupMenu.getMenu());
                 MenuItem delete = popupMenu.getMenu().getItem(1);
@@ -193,9 +218,9 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
                                 int picCount = product.getPictures().size();
                                 imageUriList = new String[picCount];
                                 for (int i = 0; i < picCount; i++) {
-                                    imageUriList[i] = getImageUri(getApplicationContext(),product.getPictures().get(i)).toString();
+                                    imageUriList[i] = getImageUri(getActivity().getApplicationContext(),product.getPictures().get(i)).toString();
                                 }
-                                Intent intent = new Intent(ProductPageActivity.this, ModifyProduct.class);
+                                Intent intent = new Intent(getActivity(), ModifyProduct.class);
                                 intent.putExtra("productID", product.getId());
                                 intent.putExtra("productName", product.getName());
                                 intent.putExtra("productDescription", product.getDescription());
@@ -220,7 +245,7 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
     }
 
     private void confirmToDelete(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setMessage("Do you want to delete this product?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
@@ -230,11 +255,13 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
                                 @Override
                                 public void onBackendResult(boolean success, String message) {
                                     if(success){
-                                        Toast.makeText(getApplicationContext(),
+                                        Toast.makeText(getActivity().getApplicationContext(),
                                                 "Product deleted successfully!",
                                                 Toast.LENGTH_LONG).show();
-                                        // go back to the main page when finished
-                                        startActivity(new Intent(ProductPageActivity.this, ARActivity.class));
+                                        // go back to the previous page
+                                        getActivity().getSupportFragmentManager().popBackStack();
+                                        SwipeActivity activity = (SwipeActivity) getActivity();
+                                        activity.setNavigationVisibility(true);
                                     }
                                 }
                             });
@@ -255,39 +282,41 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
     }
 
     private void displayProductCondition(Product product){
-        TextView conditionView = findViewById(R.id.condition);
+        TextView conditionView = view.findViewById(R.id.condition);
         // Capitalise the first letter
         String condition = product.getCondition().substring(0,1).toUpperCase() + product.getCondition().substring(1);
         conditionView.setText("Condition: " + condition);
     }
 
     private void displayProductCategory(Product product){
-        ImageView category_pic = findViewById(R.id.category_pic);
+        ImageView category_pic = view.findViewById(R.id.category_pic);
         Integer categoryIcon = Category.getCategoryById(product.getCategoryID()).getCategoryIcon();
         category_pic.setImageResource(categoryIcon);
     }
 
     // navbar at the top to display the product name
-    private void navProductName(Product product){
-        TextView nav_name = findViewById(R.id.nav_name);
-        nav_name.setText(product.getName());
+    private void navProductName(String productName){
+        TextView nav_name = view.findViewById(R.id.nav_name);
+        nav_name.setText(productName);
     }
 
     // implement a top left return arrow that returns to previous page when clicked
     private void returnListener(){
 
-        ImageView returnArrow = findViewById(R.id.returnArrow);
+        ImageView returnArrow = view.findViewById(R.id.returnArrow);
         returnArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                getActivity().getSupportFragmentManager().popBackStack();
+                SwipeActivity activity = (SwipeActivity) getActivity();
+                activity.setNavigationVisibility(true);
             }
         });
     }
 
     public void displayProductContributor(){
-        TextView contributorName = findViewById(R.id.contributorName);
-        CircleImageView contributorIcon = findViewById(R.id.circle);
+        TextView contributorName = view.findViewById(R.id.contributorName);
+        CircleImageView contributorIcon = view.findViewById(R.id.circle);
         contributorName.setText(userProfile.getName());
         if (userProfile.getProfilePic() == null) {
             contributorIcon.setImageResource(R.mipmap.ic_launcher_round);
@@ -297,59 +326,137 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
     }
 
 
-    public void displayProductName(Product product){
-        TextView productName = findViewById(R.id.productName);
-        productName.setText(product.getName());
+    public void displayProductName(String productName){
+        TextView productNameText = view.findViewById(R.id.productName);
+        productNameText.setText(productName);
     }
 
-    public void displayProductDescription(Product product){
-        TextView description = findViewById(R.id.description);
-        description.setText(product.getDescription());
+    public void displayProductDescription(String productDescription){
+        TextView descriptionText = view.findViewById(R.id.description);
+        descriptionText.setText(productDescription);
     }
 
     public void bookmarkButton(){
-        ImageView bookmark = (ImageView) findViewById(R.id.bookmark);
-        bookmark.setTag(0);
+        ImageView bookmark = view.findViewById(R.id.bookmark);
+        if(BackendController.getLoggedInUserID() == product.getContributorID()){
+            bookmark.setVisibility(View.INVISIBLE);
+            return;
+        }
+        if(isFromFeed){
+            bookmark.setTag(feedBookmarkButton.getTag());
+            if(bookmark.getTag().equals(0)){
+                bookmark.setImageResource(R.drawable.ic_baseline_bookmark_border_24);
+
+            }else{
+                bookmark.setImageResource(R.drawable.ic_baseline_bookmark_24);
+            }
+        }else{
+            if(isSaved){
+                bookmark.setTag(1);
+                bookmark.setImageResource(R.drawable.ic_baseline_bookmark_24);
+            }else{
+                bookmark.setTag(0);
+                bookmark.setImageResource(R.drawable.ic_baseline_bookmark_border_24);
+            }
+        }
+
         bookmark.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 if(bookmark.getTag().equals(0)){
+                    try {
+                        BackendController.createSavedListing(product.getId(), (success, message) -> {
+                            System.out.println(message);
+                            if (success) {
+                                System.out.println("createSavedListing callback success");
+                                Toast toast = Toast.makeText(
+                                        getActivity().getApplicationContext(), "Successfully saved listing", Toast.LENGTH_SHORT);
+                                toast.show();
+                            } else {
+                                System.out.println("createSavedListing callback failed");
+                                Toast toast = Toast.makeText(
+                                        getActivity().getApplicationContext(), "Failed to save listing", Toast.LENGTH_SHORT);
+                                toast.show();
+                            }
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     bookmark.setImageResource(R.drawable.ic_baseline_bookmark_24);
                     bookmark.setTag(1);
+                    if(isFromFeed){
+                        feedBookmarkButton.setImageResource(R.drawable.filled_black_bookmark);
+                        feedBookmarkButton.setTag(1);
+                    }
+
                 }else{
+                    try {
+                        BackendController.deleteSavedListing(product.getId(), (success, message) -> {
+                            System.out.println(message);
+                            if (success) {
+                                System.out.println("deleteSavedListing callback success");
+                                Toast toast = Toast.makeText(
+                                        getActivity().getApplicationContext(), "Successfully deleted listing", Toast.LENGTH_SHORT);
+                                toast.show();
+                            } else {
+                                System.out.println("deleteSavedListing callback failed");
+                                Toast toast = Toast.makeText(
+                                        getActivity().getApplicationContext(), "Failed to delete listing", Toast.LENGTH_SHORT);
+                                toast.show();
+                            }
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     bookmark.setImageResource(R.drawable.ic_baseline_bookmark_border_24);
                     bookmark.setTag(0);
+                    if(isFromFeed){
+                        feedBookmarkButton.setImageResource(R.drawable.black_bookmark);
+                        feedBookmarkButton.setTag(0);
+                    }
                 }
 
             }
         });
     }
 
-    public void messageButton(Product product, User contributor, User user,Integer profilePicId){
+    public void messageButton(){
 
-        Button message = findViewById(R.id.messageButton);
+        Button message = view.findViewById(R.id.messageButton);
 
         message.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ProductPageActivity.this ,MessagingActivity.class);
-                intent.putExtra("product", product);
-                intent.putExtra("contributor", contributor);
-                intent.putExtra("user",user);
-                intent.putExtra("profilePicId", profilePicId);
-                startActivity(intent);
+                Intent intent = new Intent(v.getContext(), MessagingActivity.class);
+                try {
+                    BackendController.createConversation(product.getId(), (success, message) -> {
+                        if (success) {
+                            System.out.println("conversation created");
+                            Integer conversationId = Integer.valueOf(message);
+                            intent.putExtra("conversationId", conversationId);
+                            intent.putExtra("listingId", product.getId());
+                            intent.putExtra("currentUserId", BackendController.getLoggedInUserID());
+                            intent.putExtra("contributorId", product.getContributorID());
+                            v.getContext().startActivity(intent);
+                        } else {
+                            System.out.println(message);
+                            System.out.println("conversation creation failed");
+                        }
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
-        if(user.getName().equals(contributor.getName())){ // check if the product's contributor is the user
+        if(product.getContributorID() == BackendController.getLoggedInUserID()){ // check if the product's contributor is the user
             message.setVisibility(View.INVISIBLE); // hide the message button in this case
-            TextView thanksMessage = findViewById(R.id.thanksForSharing);
+            TextView thanksMessage = view.findViewById(R.id.thanksForSharing);
             thanksMessage.setVisibility(View.VISIBLE);
-
         }
     }
 
     private void displayProductPics(ArrayList<Bitmap> picList){
-        ViewPager2 viewPager = findViewById(R.id.viewPager);
+        ViewPager2 viewPager = view.findViewById(R.id.viewPager);
         adapter = new ProductPicsSliderAdapter(picList);
         int dotsCount = picList.size();
         displayPictureDots(dotsCount);
@@ -358,29 +465,29 @@ public class ProductPageActivity extends AppCompatActivity implements BackendCon
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 for(int i = 0; i < dotsCount; i++){
-                    dots[i].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.non_active_dot));
+                    dots[i].setImageDrawable(ContextCompat.getDrawable(getActivity().getApplicationContext(), R.drawable.non_active_dot));
                 }
-                dots[position].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.active_dot));
+                dots[position].setImageDrawable(ContextCompat.getDrawable(getActivity().getApplicationContext(),R.drawable.active_dot));
             }
 
         });
     }
 
     private void displayPictureDots(int dotsCount){
-        LinearLayout sliderDotsPanel = (LinearLayout) findViewById(R.id.SliderDots);
+        LinearLayout sliderDotsPanel = view.findViewById(R.id.SliderDots);
         dots = new ImageView[dotsCount];
         for(int i = 0; i < dotsCount; i++){
-            dots[i] = new ImageView(this);
-            dots[i].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.non_active_dot));
+            dots[i] = new ImageView(getContext());
+            dots[i].setImageDrawable(ContextCompat.getDrawable(getActivity().getApplicationContext(), R.drawable.non_active_dot));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
             params.setMargins(8,0,8,0);
             sliderDotsPanel.addView(dots[i], params);
         }
-        dots[0].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.active_dot));
+        dots[0].setImageDrawable(ContextCompat.getDrawable(getActivity().getApplicationContext(),R.drawable.active_dot));
     }
 
     private void displayMapPic(double lat, double lng){
-        ImageView mapView = findViewById(R.id.map);
+        ImageView mapView = view.findViewById(R.id.map);
         String url = "https://maps.googleapis.com/maps/api/staticmap?center="+ lat + ","+ lng +
                 "&zoom=15&size=400x400&markers=color:red|"+ lat + ","+ lng + "&key=" + getString(R.string.STATIC_MAP_KEY);
         Glide.with(this).load(url).into(mapView);

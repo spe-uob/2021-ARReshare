@@ -1,237 +1,230 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="@color/black"
-        android:orientation="horizontal">
+        android:layout_height="50dp"
+        android:background="#E5EFC1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/back"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="10dp"
-            android:background="@color/black"
-            android:src="@drawable/gobackarrow">
-        </ImageButton>
+            android:id="@+id/backButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="#00FFFFFF"
+            android:src="@drawable/ic_baseline_arrow_back_ios_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-        <TextView
+        <ImageButton
+            android:id="@+id/settingsButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="#00FFFFFF"
+            android:layout_marginStart="290dp"
+            android:src="@drawable/filter_icon"
+            app:layout_constraintStart_toEndOf="@id/backButton"
+
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/pageTop"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Profile"
-            android:textAlignment="textEnd"
-            android:textColor="@color/white"
-            android:textSize="40sp"></TextView>
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/topBar">
 
-    </LinearLayout>
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/userProfileIcon"
+                android:layout_width="60dp"
+                android:layout_height="80dp"
+                android:layout_marginStart="10dp"
+                android:contentDescription="@string/profile_icon"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/userContributorName"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/border"
+                android:padding="5dp"
+                android:text="Contributor Name"
+                android:fontFamily="@font/montserrat"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/userProfileIcon"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginBottom="5dp"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp">
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-                            <ImageView
-                                android:id="@+id/avatar"
-                                android:layout_width="120dp"
-                                android:layout_height="120dp"
-                                android:layout_gravity="center_vertical"
-                                android:background="@drawable/image_circle"
-                                android:scaleType="centerCrop">
-                            </ImageView>
-                    </LinearLayout>
+    <TextView
+        android:id="@+id/sharedText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/border"
+        android:padding="5dp"
+        android:layout_marginTop="15dp"
+        android:text="Shared"
+        android:fontFamily="@font/montserrat"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/pageTop"/>
 
-                    <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical">
-                            <TextView
-                                android:id="@+id/username"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:textSize="20sp"
-                                android:textColor="@color/black"
-                                android:gravity="center">
-                            </TextView>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/sharedProducts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#363231"
+        app:layout_constraintTop_toBottomOf="@id/sharedText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="2dp">
 
-                            <TextView
-                                android:id="@+id/description"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:textColor="@color/black"
-                                android:gravity="center">
-                            </TextView>
-                        </LinearLayout>
-            </LinearLayout>
+        <ImageView
+            android:id="@+id/shared1"
+            android:background="@drawable/custom_border"
+            android:layout_width="136dp"
+            android:layout_height="150dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/shared2"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.625"
-                        android:orientation="vertical">
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="40dp"
-                            android:orientation="horizontal">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Shared Products"
-                            android:textColor="@color/black"
-                            android:textSize="20sp"
-                            android:layout_marginStart="5dp"
-                            android:gravity="center">
-                        </TextView>
+        <ImageView
+            android:id="@+id/shared2"
+            android:background="@drawable/custom_border"
+            android:layout_width="136dp"
+            android:layout_height="150dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/shared3"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/shared1"
+            app:layout_constraintTop_toTopOf="parent" />
 
-                            <Button
-                                android:id="@+id/profileadd"
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:text="+ADD PRODUCT"
-                                android:layout_marginStart="80dp"
-                                android:textSize="12sp">
+        <ImageView
+            android:id="@+id/shared3"
+            android:background="@drawable/custom_border"
+            android:layout_width="136dp"
+            android:layout_height="150dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/shared2"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-                            </Button>
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical">
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginRight="5dp"
-                                android:layout_marginTop="5dp"
-                                android:layout_marginBottom="5dp">
+    <TextView
+        android:id="@+id/sharedStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:text="products shared"
+        android:fontFamily="@font/montserrat"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sharedProducts"
+        android:layout_marginTop="2dp"/>
 
-                                <ImageButton
-                                    android:id="@+id/shared1"
-                                    android:layout_width="40dp"
-                                    android:layout_height="120dp"
-                                    android:layout_weight="1"
-                                    android:background="@color/white"
-                                    android:scaleType="centerCrop">
-                                </ImageButton>
+    <TextView
+        android:id="@+id/savedText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/border"
+        android:padding="5dp"
+        android:layout_marginTop="15dp"
+        android:text="Saved"
+        android:fontFamily="@font/montserrat"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sharedStatus"/>
 
-                                <ImageButton
-                                    android:id="@+id/shared2"
-                                    android:layout_width="40dp"
-                                    android:layout_height="120dp"
-                                    android:layout_marginLeft="5dp"
-                                    android:layout_marginRight="5dp"
-                                    android:layout_weight="1"
-                                    android:background="#C0C0C0"
-                                    android:scaleType="centerCrop">
-                                </ImageButton>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/savedProducts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#363231"
+        app:layout_constraintTop_toBottomOf="@id/savedText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="2dp">
 
-                                <ImageButton
-                                    android:id="@+id/shared3"
-                                    android:layout_width="40dp"
-                                    android:layout_height="120dp"
-                                    android:layout_weight="1"
-                                    android:scaleType="centerCrop"
-                                    android:background="#C0C0C0">
-                                </ImageButton>
-                            </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="Saved Products"
-                                    android:textColor="@color/black"
-                                    android:textSize="20sp"
-                                    android:layout_marginStart="5dp">
-                                </TextView>
-                            </LinearLayout>
+        <ImageView
+            android:id="@+id/saved1"
+            android:background="@drawable/custom_border"
+            android:layout_width="136dp"
+            android:layout_height="150dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/saved2"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginRight="5dp"
-                                android:layout_marginTop="5dp"
-                                android:layout_marginBottom="5dp">
+        <ImageView
+            android:id="@+id/saved2"
+            android:background="@drawable/custom_border"
+            android:layout_width="136dp"
+            android:layout_height="150dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/saved3"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/saved1"
+            app:layout_constraintTop_toTopOf="parent" />
 
-                                <ImageButton
-                                    android:id="@+id/saved1"
-                                    android:layout_width="40dp"
-                                    android:layout_height="120dp"
-                                    android:layout_weight="1"
-                                    android:background="#C0C0C0"
-                                    android:scaleType="centerCrop">
-                                </ImageButton>
+        <ImageView
+            android:id="@+id/saved3"
+            android:background="@drawable/custom_border"
+            android:layout_width="136dp"
+            android:layout_height="150dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/saved2"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-                                <ImageButton
-                                    android:id="@+id/saved2"
-                                    android:layout_width="40dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="1"
-                                    android:layout_marginLeft="5dp"
-                                    android:layout_marginRight="5dp"
-                                    android:background="#C0C0C0"
-                                    android:scaleType="centerCrop">
-                                </ImageButton>
+    <TextView
+        android:id="@+id/savedStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:text="products saved"
+        android:fontFamily="@font/montserrat"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="2dp"
+        app:layout_constraintTop_toBottomOf="@id/savedProducts"/>
 
-                                <ImageButton
-                                    android:id="@+id/saved3"
-                                    android:layout_width="40dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="1"
-                                    android:background="#C0C0C0"
-                                    android:scaleType="centerCrop">
-                                </ImageButton>
-                            </LinearLayout>
-                        </LinearLayout>
-
-                        </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:background="@color/black">
-                        <Button
-                            android:id="@+id/btS"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Settings"
-                            android:textColor="@color/white"
-                            android:background="@color/black"
-                            android:layout_weight="1">
-                        </Button>
-
-                        <Button
-                            android:id="@+id/btM"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1.5"
-                            android:background="@color/black"
-                            android:text="Messages"
-                            android:textColor="@color/white">
-                        </Button>
-
-            </LinearLayout>
-        </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

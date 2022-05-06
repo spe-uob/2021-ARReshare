@@ -1,16 +1,20 @@
 package com.example.ar_reshare;
 
 import android.app.Activity;
+import androidx.fragment.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONException;
@@ -39,6 +43,8 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
     private Context context;
 
     public FeedRecyclerAdapter(List<Product> productList){
+        System.out.println("ADAPTER CREATED");
+        System.out.println("SIZE OF THE LIST" + productList.size());
         this.productList = productList;
         intToCat.put(1, Category.OTHER);
         intToCat.put(2, Category.CLOTHING);
@@ -68,16 +74,45 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         // Set values to various resources depending on the product
         productValueHelper(holder, product);
 
-        // Handle clicks to go to the contributor's profile page
-        ClickHandler profileClickHandler = new ClickHandler(product, PROFILE_LINK);
-        holder.profileIcon.setOnClickListener(profileClickHandler);
-        holder.contributor.setOnClickListener(profileClickHandler);
-
         // Handle clicks to go to the product page
-        ClickHandler productClickHandler = new ClickHandler(product, PRODUCT_LINK);
-        holder.productImage.setOnClickListener(productClickHandler);
-        holder.productTitle.setOnClickListener(productClickHandler);
-        holder.productDescription.setOnClickListener(productClickHandler);
+        View.OnClickListener productOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle bundle = new Bundle();
+                bundle.putInt("contributorID",product.getContributorID());
+                bundle.putString("productName",product.getName());
+                bundle.putString("productDescription",product.getDescription());
+                bundle.putInt("productID",product.getId());
+                bundle.putDouble("lat", product.getCoordinates().latitude);
+                bundle.putDouble("lng",product.getCoordinates().longitude);
+                bundle.putString("postcode",product.getPostcode());
+                ProductPageActivity productFragment = new ProductPageActivity();
+                productFragment.setArguments(bundle);
+                productFragment.setFeedBookmarkButton(holder.bookmarkButton);
+                productFragment.setIsFromFeed(true);
+                AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,productFragment).addToBackStack("product_page").commit();
+            }
+        };
+
+        holder.productImage.setOnClickListener(productOnClickListener);
+        holder.productTitle.setOnClickListener(productOnClickListener);
+        holder.productDescription.setOnClickListener(productOnClickListener);
+
+        View.OnClickListener profileOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle bundle = new Bundle();
+                bundle.putInt("contributorID",product.getContributorID());
+                ProfileActivity profileFragment = new ProfileActivity();
+                profileFragment.setArguments(bundle);
+                AppCompatActivity activity = (AppCompatActivity)v.getContext();
+                activity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,profileFragment).addToBackStack(null).commit();
+            }
+        };
+
+        holder.profileIcon.setOnClickListener(profileOnClickListener);
+        holder.contributor.setOnClickListener(profileOnClickListener);
 
         // Handle click to message the contributor
         ClickHandler messageClickHandler = new ClickHandler(product, MESSAGE_LINK);
@@ -151,10 +186,10 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
         if (product.isSavedByUser()) {
             System.out.println("This product has been saved by the user");
             holder.bookmarkButton.setTag(1);
-            holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
+            holder.bookmarkButton.setImageResource(R.drawable.filled_black_bookmark);
         } else {
             holder.bookmarkButton.setTag(0);
-            holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
+            holder.bookmarkButton.setImageResource(R.drawable.black_bookmark);
         }
         holder.bookmarkButton.setOnClickListener(v -> {
             System.out.println("The tag is " + holder.bookmarkButton.getTag());
@@ -164,10 +199,16 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                         System.out.println(message);
                         if (success) {
                             System.out.println("createSavedListing callback success");
+                            Toast toast = Toast.makeText(
+                                    context, "Successfully saved listing", Toast.LENGTH_SHORT);
+                            toast.show();
                         } else {
                             System.out.println("createSavedListing callback failed");
+                            Toast toast = Toast.makeText(
+                                    context, "Failed to save listing", Toast.LENGTH_SHORT);
+                            toast.show();
                         }
-                        holder.bookmarkButton.setImageResource(R.drawable.filled_white_bookmark);
+                        holder.bookmarkButton.setImageResource(R.drawable.filled_black_bookmark);
                         holder.bookmarkButton.setTag(1);
                     });
                 } catch (JSONException e) {
@@ -179,10 +220,16 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
                         System.out.println(message);
                         if (success) {
                             System.out.println("deleteSavedListing callback success");
+                            Toast toast = Toast.makeText(
+                                    context, "Successfully deleted listing", Toast.LENGTH_SHORT);
+                            toast.show();
                         } else {
                             System.out.println("deleteSavedListing callback failed");
+                            Toast toast = Toast.makeText(
+                                    context, "Failed to delete listing", Toast.LENGTH_SHORT);
+                            toast.show();
                         }
-                        holder.bookmarkButton.setImageResource(R.drawable.white_bookmark);
+                        holder.bookmarkButton.setImageResource(R.drawable.black_bookmark);
                         holder.bookmarkButton.setTag(0);
                     });
                 } catch (JSONException e) {
@@ -243,9 +290,6 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
             if (type == PROFILE_LINK) {
                 profileClick(v);
             }
-            if (type == PRODUCT_LINK) {
-                productClick(v);
-            }
             if (type == MESSAGE_LINK) {
                 try {
                     messageClick(v);
@@ -257,22 +301,12 @@ public class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapte
 
         // Sends information to the profile page
         public void profileClick(View v) {
-            Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-            intent.putExtra("userID", product.getContributorID());
-            v.getContext().startActivity(intent);
-        }
-
-        // Sends information to the product page
-        public void productClick(View v) {
-            Intent intent = new Intent(v.getContext(), ProductPageActivity.class);
-            intent.putExtra("product", product);
-            intent.putExtra("contributorID", product.getContributorID());
-            intent.putExtra("productID",product.getId());
-            intent.putExtra("lat", product.getCoordinates().latitude);
-            intent.putExtra("lng",product.getCoordinates().longitude);
-            intent.putExtra("categoryID",product.getCategoryID());
-            intent.putExtra("postcode",product.getPostcode());
-            v.getContext().startActivity(intent);
+            Bundle bundle = new Bundle();
+            bundle.putInt("contributorID", product.getContributorID());
+            ProfileActivity profileActivity = new ProfileActivity();
+            profileActivity.setArguments(bundle);
+            AppCompatActivity appCompatActivity = (AppCompatActivity)v.getContext();
+            appCompatActivity.getSupportFragmentManager().beginTransaction().add(R.id.frameLayout_wrapper,profileActivity).addToBackStack(null).commit();
         }
 
         // Sends information to the messaging page
