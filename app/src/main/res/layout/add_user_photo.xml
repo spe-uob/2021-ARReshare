@@ -6,33 +6,38 @@
     android:gravity="center">
 
     <LinearLayout
+        android:id="@+id/profile_pic_layout"
         android:layout_width="330dp"
         android:layout_height="500dp"
-        android:orientation="vertical"
-        android:background="@color/white">
+        android:background="@color/white"
+        android:orientation="vertical">
 
         <TextView
+            android:id="@+id/Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add a Profile Picture?"
             android:layout_gravity="top"
+            android:paddingStart="20dp"
             android:paddingTop="20dp"
             android:paddingBottom="20dp"
-            android:textSize="20dp"/>
+            android:text="Add a Profile Picture?"
+            android:textSize="20dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Having a profile picture makes your profile look more authentic and it means that more people are likely reach out to you!"
             android:layout_gravity="top"
-            android:textSize="14dp"/>
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:text="Having a profile picture makes your profile look more authentic and it means that more people are likely reach out to you!"
+            android:textSize="14dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:layout_margin="20dp"
-            android:paddingTop="20dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingTop="20dp">
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/signupProfilePicture"
@@ -49,10 +54,10 @@
                     android:id="@+id/signupPictureName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14dp"
-                    android:text="Name"
                     android:layout_marginLeft="50dp"
-                    android:layout_marginTop="30dp"/>
+                    android:layout_marginTop="30dp"
+                    android:text="Name"
+                    android:textSize="14dp" />
 
             </LinearLayout>
 
@@ -61,36 +66,37 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="You can always add or change your profile picture later in settings."
             android:layout_gravity="top"
             android:layout_marginTop="10dp"
-            android:textSize="14dp"/>
+            android:paddingStart="10dp"
+            android:text="You can always add or change your profile picture later in settings."
+            android:textSize="14dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_marginTop="50dp">
+            android:layout_marginTop="50dp"
+            android:gravity="center">
 
             <Button
                 android:id="@+id/signupPictureGallery"
                 android:layout_width="120dp"
                 android:layout_height="40dp"
-                android:textSize="14dp"
-                android:text="@string/signupProfileGalleryText"
+                android:layout_margin="10dp"
                 android:background="#4C62DC"
+                android:text="@string/signupProfileGalleryText"
                 android:textColor="#FFFFFF"
-                android:layout_margin="10dp"/>
+                android:textSize="14dp" />
 
             <Button
                 android:id="@+id/signupPictureCamera"
                 android:layout_width="120dp"
                 android:layout_height="40dp"
-                android:textSize="14dp"
-                android:text="@string/signupProfileCameraText"
+                android:layout_margin="10dp"
                 android:background="#4C62DC"
+                android:text="@string/signupProfileCameraText"
                 android:textColor="#FFFFFF"
-                android:layout_margin="10dp"/>
+                android:textSize="14dp" />
 
         </LinearLayout>
 
@@ -98,11 +104,11 @@
             android:id="@+id/signupPictureCancel"
             android:layout_width="260dp"
             android:layout_height="40dp"
-            android:textSize="14dp"
-            android:text="@string/signupProfileCancelText"
-            android:background="@color/white"
             android:layout_gravity="center"
-            android:layout_margin="10dp"/>
+            android:layout_margin="10dp"
+            android:background="@color/white"
+            android:text="@string/signupProfileCancelText"
+            android:textSize="14dp" />
 
 
     </LinearLayout>
