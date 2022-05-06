@@ -13,8 +13,9 @@ The app allows a contributor to list an item they would like to share for free a
 
 <br>
 
+![AR Reshare Clip 1](docs/gifs/ar-reshare.gif)
 ![AR Reshare Clip 2](docs/gifs/feed-product.gif)
-![AR Reshare Clip 2](docs/gifs/augmented-reality.gif)
+![AR Reshare Clip 3](docs/gifs/augmented-reality.gif)
 ![AR Reshare Clip 3](docs/gifs/messaging.gif)
 
 <br>
