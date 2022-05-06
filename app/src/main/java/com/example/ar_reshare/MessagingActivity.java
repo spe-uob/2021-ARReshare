@@ -4,10 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -15,10 +13,8 @@ import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import org.json.JSONException;
 
@@ -27,13 +23,8 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MessagingActivity extends AppCompatActivity{
 
@@ -45,7 +36,7 @@ public class MessagingActivity extends AppCompatActivity{
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm");
     Context mContext;
     Integer conversationId;
-    Integer currentUserId;
+    Integer receiverId;
     Integer listingId;
     Integer contributorId;
     Product product;
@@ -63,17 +54,18 @@ public class MessagingActivity extends AppCompatActivity{
         Intent i = getIntent();
         listingId = i.getIntExtra("listingId", -1);
         conversationId = i.getIntExtra("conversationId", -1);
-        currentUserId = i.getIntExtra("currentUserId", -1);
+        receiverId = i.getIntExtra("currentUserId", -1);
         contributorId = i.getIntExtra("contributorId", -1);
 
         chatTextView = (EditText)findViewById(R.id.text_chatbox);
         recyclerView = findViewById(R.id.reyclerview_message_list);
 
-        if (conversationId != -1 && currentUserId != -1){
-            if (currentUserId == contributorId) {
-                getProfileById(conversationId, contributorId);
+
+        if (conversationId != -1 && receiverId != -1){
+            if (BackendController.getLoggedInUserID() == contributorId) {
+                getProfileById(conversationId, receiverId);
             }else {
-                getProfileById(conversationId, currentUserId);
+                getProfileById(conversationId, contributorId);
             }
         }
 
@@ -86,7 +78,7 @@ public class MessagingActivity extends AppCompatActivity{
                 sendButton = (ImageButton) findViewById(R.id.button_send);
                 chatTextView = findViewById(R.id.text_chatbox);
                 String text = chatTextView.getText().toString();
-                Message message1 = new Message(currentUserId,text,simpleDateFormat.format(new Date())," ");
+                Message message1 = new Message(receiverId,text,simpleDateFormat.format(new Date())," ");
                 mMessageList.add(message1);
                 chatTextView.setText("");
                 sendConversationMessage(conversationId,text,null);
