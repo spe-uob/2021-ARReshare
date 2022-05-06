@@ -21,6 +21,8 @@ public class PostcodeHelper {
     private static final String DEFAULT_POSTCODE = "BS81UB";
     private static final String DEFAULT_CITY = "Bristol, City of";
     private static final String DEFAULT_COUNTRY = "England";
+    private static final float DEFAULT_LATITUDE = 51.4559f;
+    private static final float DEFAULT_LONGTIUDE = -2.603f;
 
     private static final String POSTCODE_API_URL = "https://postcodes.io/";
 
@@ -57,11 +59,7 @@ public class PostcodeHelper {
                     PostcodeDetails postcodeDetails = response.body().getResult();
                     callback.onPostcodeResult(true, postcodeDetails);
                 } else if (response.code() == POSTCODE_NOT_FOUND) {
-                    PostcodeDetails defaultPostcode = new PostcodeDetails();
-                    defaultPostcode.setPostcode(DEFAULT_POSTCODE);
-                    defaultPostcode.setCity(DEFAULT_CITY);
-                    defaultPostcode.setCountry(DEFAULT_COUNTRY);
-                    callback.onPostcodeResult(true, defaultPostcode);
+                    callback.onPostcodeResult(true, defaultPostcode());
                 } else {
                     callback.onPostcodeResult(false, null);
                 }
@@ -102,6 +100,16 @@ public class PostcodeHelper {
                 callback.onPostcodeResult(false, null);
             }
         });
+    }
+
+    private static PostcodeDetails defaultPostcode() {
+        PostcodeDetails defaultPostcode = new PostcodeDetails();
+        defaultPostcode.setPostcode(DEFAULT_POSTCODE);
+        defaultPostcode.setCity(DEFAULT_CITY);
+        defaultPostcode.setCountry(DEFAULT_COUNTRY);
+        defaultPostcode.setLatitude(DEFAULT_LATITUDE);
+        defaultPostcode.setLongitude(DEFAULT_LONGTIUDE);
+        return defaultPostcode;
     }
 
 }
