@@ -70,10 +70,10 @@ public class MessagingActivity extends AppCompatActivity{
         recyclerView = findViewById(R.id.reyclerview_message_list);
 
         if (conversationId != -1 && currentUserId != -1){
-            if (BackendController.getLoggedInUserID() == contributorId) {
-                getProfileById(conversationId, BackendController.getLoggedInUserID());
-            }else {
+            if (currentUserId == contributorId) {
                 getProfileById(conversationId, contributorId);
+            }else {
+                getProfileById(conversationId, currentUserId);
             }
         }
 
