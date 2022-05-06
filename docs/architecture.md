@@ -19,7 +19,7 @@ Our User Interface is a mix of fragments and activities. This is because the dif
 
 As our Backend was written up by *Durham University*, we had to integrate it with our frontend. 
 
-Our Backend connections were made through Retrofit. We have the BackendService interface that defines all the methods required. We then implement these methods in the BackendController, as outlined by our [API specification](https://ar-reshare.herokuapp.com/#/). The BackendController also contains global variables such as the error constants, the JWT token of the logged in user and their id. We also have a DataURI Helper that converts the URI of the picture(s) uploaded by the user to dataURI which is required by the backend. 
+Our Backend connections were made through Retrofit. We have the BackendService interface that defines all the methods required. We then implement these methods in the BackendController, as outlined by our [API specification](https://ar-reshare.herokuapp.com/#/). The BackendController also contains global variables such as the error constants, the JWT token of the logged in user and their id. We also have a DataURI Helper that converts the URI of the picture(s) uploaded by the user to dataURI which is required by the Backend. 
 
 Other function helpers include the PostcodeHelper which looks up coordinates and returns a postcode, and the DownloadImageHelper which downloads a picture stored in the cloud by the Backend, to the local device. 
 
