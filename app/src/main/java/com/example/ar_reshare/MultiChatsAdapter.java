@@ -145,10 +145,10 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
         void bind(Chat chat) {
             if (loggedInUserID == chat.getContributorID()) {
                 chatTitle.setText(chat.getReceiverName());
-                productInfo.setText("My " + chat.getProductName());
+                productInfo.setText("My " + chat.getProductName() + "->");
             }else {
                 chatTitle.setText(chat.getContributorName());
-                productInfo.setText(chat.getProductName());
+                productInfo.setText("<-" + chat.getProductName());
             }
             if (chat.getLastMessage() == null) {
                 chatBody.setText(" ");
