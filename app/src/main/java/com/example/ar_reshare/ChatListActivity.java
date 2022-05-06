@@ -38,7 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-public class ChatListActivity extends Fragment implements NavigationBarView.OnItemSelectedListener {
+public class ChatListActivity extends Fragment {
 
     MultiChatsAdapter chatListAdapter;
     RecyclerView recyclerView;
@@ -183,11 +183,15 @@ public class ChatListActivity extends Fragment implements NavigationBarView.OnIt
                 if (success) {
                     System.out.println("get conversations successful");
                     chatListAdapter.setCurrentUser(loggedInUserID);
-                    for (Chat chat : conversationsResult.getChats()) {
-                        if (loggedInUserID == chat.getContributorID()) {
-                            getProfileIcon(chat.getReceiverID(), chat);
-                        }else {
-                            getProfileIcon(chat.getContributorID(), chat);
+                    if (conversationsResult.getChats().size() == 0) {
+                        getActivity().findViewById(R.id.empty_chat_msg).setVisibility(View.VISIBLE);
+                    }else {
+                        for (Chat chat : conversationsResult.getChats()) {
+                            if (loggedInUserID == chat.getContributorID()) {
+                                getProfileIcon(chat.getReceiverID(), chat);
+                            }else {
+                                getProfileIcon(chat.getContributorID(), chat);
+                            }
                         }
                     }
                 }else {
@@ -272,29 +276,4 @@ public class ChatListActivity extends Fragment implements NavigationBarView.OnIt
         });
     }
 
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Intent intent;
-        switch (item.getItemId()) {
-            case R.id.map_menu_item:
-
-                System.out.println("in map");
-                intent = new Intent(getActivity(), MapsActivity.class);
-                startActivity(intent);
-                //getSupportFragmentManager().beginTransaction().replace(R.id.container, mapsActivity).commit();
-                return true;
-
-            case R.id.feed_menu_item:
-                intent = new Intent(getActivity(), FeedActivity.class);
-                startActivity(intent);
-                //getSupportFragmentManager().beginTransaction().replace(R.id.container, secondFragment).commit();
-                return true;
-
-            case R.id.ar_menu_item:
-                //getSupportFragmentManager().beginTransaction().replace(R.id.container, thirdFragment).commit();
-                return true;
-        }
-        return false;
-    }
 }

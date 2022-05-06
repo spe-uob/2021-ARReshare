@@ -34,26 +34,19 @@
 
                 <TextView
                     android:id="@+id/chat_title"
-                    android:layout_width="310dp"
+                    android:layout_width="160dp"
                     android:layout_height="39dp"
                     android:paddingLeft="20dp"
                     android:paddingTop="10dp"
                     android:text="chat_title"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/chat_body"
-                    android:layout_width="300dp"
-                    android:layout_height="38dp"
-                    android:layout_marginStart="0dp"
-                    android:paddingLeft="20dp"
-                    android:text="chat_body" />
 
             </LinearLayout>
 
             <TextView
                 android:id="@+id/chat_product"
-                android:layout_width="160dp"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:autoSizeTextType="uniform"
                 android:paddingRight="10dp"
@@ -63,6 +56,14 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/chat_body"
+            android:layout_width="300dp"
+            android:layout_height="38dp"
+            android:layout_marginStart="0dp"
+            android:paddingLeft="20dp"
+            android:text="chat_body" />
 
         <TextView
             android:id="@+id/chat_time"

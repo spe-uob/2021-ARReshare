@@ -57,10 +57,6 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
         view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.message_chat_layout, parent, false);
 
-        if (mChatList.size() == 0) {
-            view.findViewById(R.id.empty_chat_msg).setVisibility(View.VISIBLE);
-        }
-
         return new MultiChatsAdapter.ChatHolder(view);
     }
 
@@ -69,7 +65,6 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         Chat chat = mChatList.get(position);
         Integer index = mChatList.get(position).getConversationID();
-
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,7 +128,6 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
     }
 
 
-
     private class ChatHolder extends RecyclerView.ViewHolder {
         TextView chatTitle, chatBody, chatTime, productInfo;
         ImageView icon;
@@ -159,27 +153,29 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
             if (chat.getLastMessage() == null) {
                 chatBody.setText(" ");
                 chatTime.setText(" ");
-            }else if (chat.getLastMessage().getMessage().length() >= 15) {
-                String[] words = chat.getLastMessage().getMessage().split(" ");
-                String displayMsg = "";
-                for (String s : words) {
-                    if (displayMsg.length() + s.length() < 15) {
-                        displayMsg.concat(s);
-                    }else {
-                        break;
-                    }
-                }
-                chatBody.setText(displayMsg + "...");
-                String[] dates = MessagingActivity.convertDate(chat.getLastMessage().getCreatedTime());
-                chatTime.setText(dates[3]);
             }else {
-                chatBody.setText(chat.getLastMessage().getMessage());
+                chatBody.setText(getMinWords(chat.getLastMessage().getMessage(), 45));
                 String[] dates = MessagingActivity.convertDate(chat.getLastMessage().getCreatedTime());
                 chatTime.setText(dates[3]);
             }
             productInfo.setText(chat.getProductName());
             icon.setImageBitmap(chat.getProfileIcon());
         }
+    }
+
+    public static String getMinWords(String input, int limit) {
+        int wordsLimit = limit - 4;
+        String[] words = input.split(" ");
+        String displayMsg = "";
+        for (String s : words) {
+            if (displayMsg.length() + s.length() <= wordsLimit) {
+                displayMsg = displayMsg + " " + s;
+            }else {
+                break;
+            }
+        }
+        System.out.println("display string is " + displayMsg);
+        return displayMsg + " ...";
     }
 
     public void setCurrentUser(int loggedInUserID){
