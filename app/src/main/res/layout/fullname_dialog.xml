@@ -7,7 +7,7 @@
         android:id="@+id/Firstname"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Firstname"
+        android:hint="First name"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"/>
 
@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/Firstname"
-        android:hint="Lastname"
+        android:hint="Last name"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"/>
 

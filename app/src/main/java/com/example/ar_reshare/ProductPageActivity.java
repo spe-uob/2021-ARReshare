@@ -94,9 +94,6 @@ public class ProductPageActivity extends Fragment implements BackendController.B
         //display product description
         displayProductDescription(productDescription);
 
-        //add a bookmark button
-        bookmarkButton();
-
         //top left return arrow
         returnListener();
 
@@ -131,6 +128,9 @@ public class ProductPageActivity extends Fragment implements BackendController.B
         //edit button
         showEditIfUser();
 
+        //add a bookmark button
+        bookmarkButton();
+
         displayProductCondition(product);
         displayProductCategory(product);
 
@@ -160,6 +160,7 @@ public class ProductPageActivity extends Fragment implements BackendController.B
         new Thread(new Runnable() {
             @Override
             public void run() {
+                // When using runOnUiThread, catch exceptions which may occur if fragment is changed
                 try {
                     boolean success = latch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
                     if (success) {
@@ -337,6 +338,10 @@ public class ProductPageActivity extends Fragment implements BackendController.B
 
     public void bookmarkButton(){
         ImageView bookmark = view.findViewById(R.id.bookmark);
+        if(BackendController.getLoggedInUserID() == product.getContributorID()){
+            bookmark.setVisibility(View.INVISIBLE);
+            return;
+        }
         if(isFromFeed){
             bookmark.setTag(feedBookmarkButton.getTag());
             if(bookmark.getTag().equals(0)){

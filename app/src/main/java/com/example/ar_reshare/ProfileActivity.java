@@ -2,7 +2,6 @@ package com.example.ar_reshare;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import android.content.Intent;
@@ -40,7 +39,7 @@ public class ProfileActivity extends Fragment {
         settingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), SettingActivity.class);
+                Intent intent = new Intent(getActivity(), SettingsActivity.class);
                 startActivity(intent);
             }
         });
@@ -139,32 +138,35 @@ public class ProfileActivity extends Fragment {
             @Override
             public void onBackendSearchResult(boolean success, List<Product> searchResults) {
                 if (success) {
-                    getActivity().runOnUiThread(() -> {
-                        if (searchResults.isEmpty()) {
-                            sharedTitle.setVisibility(View.GONE);
-                            sharedProducts.setVisibility(View.GONE);
-                            sharedStatus.setText("No products shared.");
-                        } else if (searchResults.size() == 3) {
-                            shared1.setImageBitmap(searchResults.get(0).getMainPic());
-                            shared1.setOnClickListener(clickListener(searchResults.get(0), view, false));
-                            shared2.setImageBitmap(searchResults.get(1).getMainPic());
-                            shared2.setOnClickListener(clickListener(searchResults.get(1), view, false));
-                            shared3.setImageBitmap(searchResults.get(2).getMainPic());
-                            shared3.setOnClickListener(clickListener(searchResults.get(2), view, false));
-                        } else if (searchResults.size() == 2) {
-                            shared1.setImageBitmap(searchResults.get(0).getMainPic());
-                            shared1.setOnClickListener(clickListener(searchResults.get(0), view, false));
-                            shared2.setImageBitmap(searchResults.get(1).getMainPic());
-                            shared2.setOnClickListener(clickListener(searchResults.get(1), view, false));
-                            shared3.setVisibility(View.GONE);
-                        } else if (searchResults.size() == 1) {
-                            shared1.setImageBitmap(searchResults.get(0).getMainPic());
-                            shared1.setOnClickListener(clickListener(searchResults.get(0), view, false));
-                            shared2.setVisibility(View.GONE);
-                            shared3.setVisibility(View.GONE);
-                        }
-                        sharedStatus.setText(MessageFormat.format("{0} product(s) shared.", searchResults.size()));
-                    });
+                    // When using runOnUiThread, catch exceptions which may occur if fragment is changed
+                    try {
+                        getActivity().runOnUiThread(() -> {
+                            if (searchResults.isEmpty()) {
+                                sharedTitle.setVisibility(View.GONE);
+                                sharedProducts.setVisibility(View.GONE);
+                                sharedStatus.setText("No products shared.");
+                            } else if (searchResults.size() == 3) {
+                                shared1.setImageBitmap(searchResults.get(0).getMainPic());
+                                shared1.setOnClickListener(clickListener(searchResults.get(0), view, false));
+                                shared2.setImageBitmap(searchResults.get(1).getMainPic());
+                                shared2.setOnClickListener(clickListener(searchResults.get(1), view, false));
+                                shared3.setImageBitmap(searchResults.get(2).getMainPic());
+                                shared3.setOnClickListener(clickListener(searchResults.get(2), view, false));
+                            } else if (searchResults.size() == 2) {
+                                shared1.setImageBitmap(searchResults.get(0).getMainPic());
+                                shared1.setOnClickListener(clickListener(searchResults.get(0), view, false));
+                                shared2.setImageBitmap(searchResults.get(1).getMainPic());
+                                shared2.setOnClickListener(clickListener(searchResults.get(1), view, false));
+                                shared3.setVisibility(View.GONE);
+                            } else if (searchResults.size() == 1) {
+                                shared1.setImageBitmap(searchResults.get(0).getMainPic());
+                                shared1.setOnClickListener(clickListener(searchResults.get(0), view, false));
+                                shared2.setVisibility(View.GONE);
+                                shared3.setVisibility(View.GONE);
+                            }
+                            sharedStatus.setText(MessageFormat.format("{0} product(s) shared.", searchResults.size()));
+                        });
+                    } catch (Exception e) {}
                 } else {
                     System.out.println("searchAccountListings callback failed");
                 }
@@ -183,32 +185,35 @@ public class ProfileActivity extends Fragment {
 
         BackendController.searchAccountListings(0, 3, contributorID, (success, ListingSearchResult) -> {
             if (success) {
-                getActivity().runOnUiThread(() -> {
-                    if (ListingSearchResult.isEmpty()) {
-                        sharedTitle.setVisibility(View.GONE);
-                        sharedProducts.setVisibility(View.GONE);
-                        sharedStatus.setText("No products shared.");
-                    } else if (ListingSearchResult.size() == 3) {
-                        shared1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
-                        shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, false));
-                        shared2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
-                        shared2.setOnClickListener(clickListener(ListingSearchResult.get(1), view, false));
-                        shared3.setImageBitmap(ListingSearchResult.get(2).getMainPic());
-                        shared3.setOnClickListener(clickListener(ListingSearchResult.get(2), view, false));
-                    } else if (ListingSearchResult.size() == 2) {
-                        shared1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
-                        shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, false));
-                        shared2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
-                        shared2.setOnClickListener(clickListener(ListingSearchResult.get(1), view, false));
-                        shared3.setVisibility(View.GONE);
-                    } else if (ListingSearchResult.size() == 1) {
-                        shared1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
-                        shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, false));
-                        shared2.setVisibility(View.GONE);
-                        shared3.setVisibility(View.GONE);
-                    }
-                    sharedStatus.setText(MessageFormat.format("{0} product(s) shared.", ListingSearchResult.size()));
-                });
+                try {
+                    // When using runOnUiThread, catch exceptions which may occur if fragment is changed
+                    getActivity().runOnUiThread(() -> {
+                        if (ListingSearchResult.isEmpty()) {
+                            sharedTitle.setVisibility(View.GONE);
+                            sharedProducts.setVisibility(View.GONE);
+                            sharedStatus.setText("No products shared.");
+                        } else if (ListingSearchResult.size() == 3) {
+                            shared1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
+                            shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, false));
+                            shared2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
+                            shared2.setOnClickListener(clickListener(ListingSearchResult.get(1), view, false));
+                            shared3.setImageBitmap(ListingSearchResult.get(2).getMainPic());
+                            shared3.setOnClickListener(clickListener(ListingSearchResult.get(2), view, false));
+                        } else if (ListingSearchResult.size() == 2) {
+                            shared1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
+                            shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, false));
+                            shared2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
+                            shared2.setOnClickListener(clickListener(ListingSearchResult.get(1), view, false));
+                            shared3.setVisibility(View.GONE);
+                        } else if (ListingSearchResult.size() == 1) {
+                            shared1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
+                            shared1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, false));
+                            shared2.setVisibility(View.GONE);
+                            shared3.setVisibility(View.GONE);
+                        }
+                        sharedStatus.setText(MessageFormat.format("{0} product(s) shared.", ListingSearchResult.size()));
+                    });
+                } catch (Exception e) {}
             } else {
                 System.out.println("searchAccountListings callback failed");
             }
@@ -226,32 +231,35 @@ public class ProfileActivity extends Fragment {
 
         BackendController.searchSavedListings(0, 3, (success, ListingSearchResult) -> {
             if (success) {
-                getActivity().runOnUiThread(() -> {
-                    if (ListingSearchResult.isEmpty()) {
-                        savedTitle.setVisibility(View.GONE);
-                        savedProducts.setVisibility(View.GONE);
-                        savedStatus.setText("No products saved.");
-                    } else if (ListingSearchResult.size() == 3) {
-                        saved1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
-                        saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, true));
-                        saved2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
-                        saved2.setOnClickListener(clickListener(ListingSearchResult.get(1), view, true));
-                        saved3.setImageBitmap(ListingSearchResult.get(2).getMainPic());
-                        saved3.setOnClickListener(clickListener(ListingSearchResult.get(2), view, true));
-                    } else if (ListingSearchResult.size() == 2) {
-                        saved1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
-                        saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, true));
-                        saved2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
-                        saved2.setOnClickListener(clickListener(ListingSearchResult.get(1), view, true));
-                        saved3.setVisibility(View.GONE);
-                    } else if (ListingSearchResult.size() == 1) {
-                        saved1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
-                        saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, true));
-                        saved2.setVisibility(View.GONE);
-                        saved3.setVisibility(View.GONE);
-                    }
-                    savedStatus.setText(MessageFormat.format("{0} product(s) saved.", ListingSearchResult.size()));
-                });
+                // When using runOnUiThread, catch exceptions which may occur if fragment is changed
+                try {
+                    getActivity().runOnUiThread(() -> {
+                        if (ListingSearchResult.isEmpty()) {
+                            savedTitle.setVisibility(View.GONE);
+                            savedProducts.setVisibility(View.GONE);
+                            savedStatus.setText("No products saved.");
+                        } else if (ListingSearchResult.size() == 3) {
+                            saved1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
+                            saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, true));
+                            saved2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
+                            saved2.setOnClickListener(clickListener(ListingSearchResult.get(1), view, true));
+                            saved3.setImageBitmap(ListingSearchResult.get(2).getMainPic());
+                            saved3.setOnClickListener(clickListener(ListingSearchResult.get(2), view, true));
+                        } else if (ListingSearchResult.size() == 2) {
+                            saved1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
+                            saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, true));
+                            saved2.setImageBitmap(ListingSearchResult.get(1).getMainPic());
+                            saved2.setOnClickListener(clickListener(ListingSearchResult.get(1), view, true));
+                            saved3.setVisibility(View.GONE);
+                        } else if (ListingSearchResult.size() == 1) {
+                            saved1.setImageBitmap(ListingSearchResult.get(0).getMainPic());
+                            saved1.setOnClickListener(clickListener(ListingSearchResult.get(0), view, true));
+                            saved2.setVisibility(View.GONE);
+                            saved3.setVisibility(View.GONE);
+                        }
+                        savedStatus.setText(MessageFormat.format("{0} product(s) saved.", ListingSearchResult.size()));
+                    });
+                } catch (Exception e) {}
             } else {
                 System.out.println("searchSavedListings callback failed");
             }

@@ -60,6 +60,7 @@ public class MessagingActivity extends AppCompatActivity{
         chatTextView = (EditText)findViewById(R.id.text_chatbox);
         recyclerView = findViewById(R.id.reyclerview_message_list);
 
+
         if (conversationId != -1 && receiverId != -1){
             if (BackendController.getLoggedInUserID() == contributorId) {
                 getProfileById(conversationId, receiverId);
