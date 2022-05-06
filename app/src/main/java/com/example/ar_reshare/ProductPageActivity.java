@@ -94,9 +94,6 @@ public class ProductPageActivity extends Fragment implements BackendController.B
         //display product description
         displayProductDescription(productDescription);
 
-        //add a bookmark button
-        bookmarkButton();
-
         //top left return arrow
         returnListener();
 
@@ -130,6 +127,9 @@ public class ProductPageActivity extends Fragment implements BackendController.B
         messageButton();
         //edit button
         showEditIfUser();
+
+        //add a bookmark button
+        bookmarkButton();
 
         displayProductCondition(product);
         displayProductCategory(product);
