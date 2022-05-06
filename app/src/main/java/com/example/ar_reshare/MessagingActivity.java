@@ -70,7 +70,11 @@ public class MessagingActivity extends AppCompatActivity{
         recyclerView = findViewById(R.id.reyclerview_message_list);
 
         if (conversationId != -1 && currentUserId != -1){
-            getProfileById(conversationId, contributorId);
+            if (currentUserId == contributorId) {
+                getProfileById(conversationId, contributorId);
+            }else {
+                getProfileById(conversationId, currentUserId);
+            }
         }
 
         setLayOutChangeListener();

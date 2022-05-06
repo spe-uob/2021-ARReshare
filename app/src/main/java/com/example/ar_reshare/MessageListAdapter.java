@@ -2,12 +2,14 @@ package com.example.ar_reshare;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.SimpleDateFormat;
@@ -68,9 +70,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
                     .inflate(R.layout.messages_receive_layout, parent, false);
             return new ReceivedMessageHolder(view);
         }
-
         return null;
-
     }
 
     // Passes the message object to a ViewHolder so that the contents can be bound to UI.
@@ -134,24 +134,6 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
             profileImage.setImageBitmap(message.getProfileIcon());
 
-            profileImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-                    intent.putExtra("userId", message.getSenderID());
-                    v.getContext().startActivity(intent);
-                }
-            });
-
-            // Insert the profile image from the URL into the ImageView.
-            //profileImage.setImageResource(message.getSender().getProfileIcon());
-            profileImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-                    mContext.startActivity(intent);
-                }
-            });
         }
     }
 

@@ -56,8 +56,8 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
         View view;
         view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.message_chat_layout, parent, false);
-        return new MultiChatsAdapter.ChatHolder(view);
 
+        return new MultiChatsAdapter.ChatHolder(view);
     }
 
     // Passes the message object to a ViewHolder so that the contents can be bound to UI.
@@ -128,7 +128,6 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
     }
 
 
-
     private class ChatHolder extends RecyclerView.ViewHolder {
         TextView chatTitle, chatBody, chatTime, productInfo;
         ImageView icon;
@@ -146,22 +145,36 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
         void bind(Chat chat) {
             if (loggedInUserID == chat.getContributorID()) {
                 chatTitle.setText(chat.getReceiverName());
-                productInfo.setText("My " + chat.getProductName());
+                productInfo.setText("My " + chat.getProductName() + "->");
             }else {
                 chatTitle.setText(chat.getContributorName());
-                productInfo.setText(chat.getProductName());
+                productInfo.setText("<-" + chat.getProductName());
             }
             if (chat.getLastMessage() == null) {
                 chatBody.setText(" ");
                 chatTime.setText(" ");
             }else {
-                chatBody.setText(chat.getLastMessage().getMessage());
+                chatBody.setText(getMinWords(chat.getLastMessage().getMessage(), 45));
                 String[] dates = MessagingActivity.convertDate(chat.getLastMessage().getCreatedTime());
                 chatTime.setText(dates[3]);
             }
-            productInfo.setText(chat.getProductName());
             icon.setImageBitmap(chat.getProfileIcon());
         }
+    }
+
+    public static String getMinWords(String input, int limit) {
+        int wordsLimit = limit - 4;
+        String[] words = input.split(" ");
+        String displayMsg = "";
+        for (String s : words) {
+            if (displayMsg.length() + s.length() <= wordsLimit) {
+                displayMsg = displayMsg + " " + s;
+            }else {
+                break;
+            }
+        }
+        System.out.println("display string is " + displayMsg);
+        return displayMsg + " ...";
     }
 
     public void setCurrentUser(int loggedInUserID){

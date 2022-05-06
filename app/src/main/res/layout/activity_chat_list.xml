@@ -11,13 +11,27 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#EDE9E9"
-        android:scrollbarAlwaysDrawHorizontalTrack="false"
-        tools:layout_editor_absoluteX="16dp"
-        android:paddingBottom="50dp"
         android:clickable="true"
         android:focusableInTouchMode="true"
-        >
+        android:paddingBottom="50dp"
+        android:scrollbarAlwaysDrawHorizontalTrack="false"
+        tools:layout_editor_absoluteX="16dp">
 
     </androidx.recyclerview.widget.RecyclerView>
+
+    <TextView
+        android:id="@+id/empty_chat_msg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="150dp"
+        android:layout_marginTop="200dp"
+        android:gravity="center"
+        android:text="You have no chats"
+        android:textColor="#8C8787"
+        android:visibility="invisible"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </TextView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
