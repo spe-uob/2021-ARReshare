@@ -154,7 +154,11 @@ public class MultiChatsAdapter extends RecyclerView.Adapter {
                 chatBody.setText(" ");
                 chatTime.setText(" ");
             }else {
-                chatBody.setText(getMinWords(chat.getLastMessage().getMessage(), 45));
+                if (chat.getLastMessage().getMessage().length() < 44) {
+                    chatBody.setText(chat.getLastMessage().getMessage());
+                }else {
+                    chatBody.setText(getMinWords(chat.getLastMessage().getMessage(), 45));
+                }
                 String[] dates = MessagingActivity.convertDate(chat.getLastMessage().getCreatedTime());
                 chatTime.setText(dates[3]);
             }
