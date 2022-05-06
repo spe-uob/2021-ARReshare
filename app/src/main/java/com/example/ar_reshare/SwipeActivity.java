@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.ar_reshare.helpers.CameraPermissionHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -62,10 +63,10 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
             getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout_wrapper, new FallbackActivity()).addToBackStack(null).commit();
         }
 
-        // Request location permissions if needed and get latest location
-        getLocationPermission();
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        checkCameraPermissions();
+    }
 
+    private void checkCameraPermissions() {
         // ARCore requires camera permissions to operate. If we did not yet obtain runtime
         // permission on Android M and above, now is a good time to ask the user for it.
         if (!CameraPermissionHelper.hasCameraPermission(this)) {
@@ -73,11 +74,46 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
             CameraPermissionHelper.requestCameraPermission(this);
             return;
         } else {
+            checkLocationPermission();
             System.out.println("HAVE CAMERA");
             cameraPermissionGranted = true;
         }
+    }
 
-        // TODO: Add on request permission result check
+    private void checkLocationPermission() {
+        // Request location permissions if needed and get latest location
+        getLocationPermission();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(requestCode, permissions, results);
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            // If request is cancelled, the grantResults array will be empty
+            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+                // Location permission has been granted
+                locationPermissionGranted = true;
+                System.out.println("Location has been granted");
+            } else {
+                Toast.makeText(this, "Location permission is needed to run this application", Toast.LENGTH_LONG)
+                        .show();
+                finish();
+            }
+            return;
+        }
+        else if (!CameraPermissionHelper.hasCameraPermission(this)) {
+            Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
+                    .show();
+            if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
+                // Permission denied with checking "Do not ask again".
+                CameraPermissionHelper.launchPermissionSettings(this);
+            }
+            finish();
+        } else {
+            checkLocationPermission();
+        }
+
     }
 
     @Override
@@ -148,7 +184,6 @@ public class SwipeActivity extends AppCompatActivity implements NavigationBarVie
             // Location permission has already been granted previously
             locationPermissionGranted = true;
         } else if (shouldShowRequestPermissionRationale("FINE_LOCATION")) {
-            // TODO: Explain to the user why the location permission is needed
         } else {
             // If the location permission has not been granted already,
             // open a window requesting this permission
